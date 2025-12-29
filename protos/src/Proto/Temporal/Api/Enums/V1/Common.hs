@@ -15,7 +15,8 @@ module Proto.Temporal.Api.Enums.V1.Common (
         NexusOperationCancellationState'UnrecognizedValue,
         PendingNexusOperationState(..), PendingNexusOperationState(),
         PendingNexusOperationState'UnrecognizedValue, Severity(..),
-        Severity(), Severity'UnrecognizedValue,
+        Severity(), Severity'UnrecognizedValue, WorkerStatus(..),
+        WorkerStatus(), WorkerStatus'UnrecognizedValue,
         WorkflowRuleActionScope(..), WorkflowRuleActionScope(),
         WorkflowRuleActionScope'UnrecognizedValue
     ) where
@@ -718,6 +719,88 @@ instance Prelude.Enum Severity where
 instance Data.ProtoLens.FieldDefault Severity where
   fieldDefault = SEVERITY_UNSPECIFIED
 instance Control.DeepSeq.NFData Severity where
+  rnf x__ = Prelude.seq x__ ()
+newtype WorkerStatus'UnrecognizedValue
+  = WorkerStatus'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data WorkerStatus
+  = WORKER_STATUS_UNSPECIFIED |
+    WORKER_STATUS_RUNNING |
+    WORKER_STATUS_SHUTTING_DOWN |
+    WORKER_STATUS_SHUTDOWN |
+    WorkerStatus'Unrecognized !WorkerStatus'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum WorkerStatus where
+  maybeToEnum 0 = Prelude.Just WORKER_STATUS_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just WORKER_STATUS_RUNNING
+  maybeToEnum 2 = Prelude.Just WORKER_STATUS_SHUTTING_DOWN
+  maybeToEnum 3 = Prelude.Just WORKER_STATUS_SHUTDOWN
+  maybeToEnum k
+    = Prelude.Just
+        (WorkerStatus'Unrecognized
+           (WorkerStatus'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum WORKER_STATUS_UNSPECIFIED = "WORKER_STATUS_UNSPECIFIED"
+  showEnum WORKER_STATUS_RUNNING = "WORKER_STATUS_RUNNING"
+  showEnum WORKER_STATUS_SHUTTING_DOWN
+    = "WORKER_STATUS_SHUTTING_DOWN"
+  showEnum WORKER_STATUS_SHUTDOWN = "WORKER_STATUS_SHUTDOWN"
+  showEnum
+    (WorkerStatus'Unrecognized (WorkerStatus'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "WORKER_STATUS_UNSPECIFIED"
+    = Prelude.Just WORKER_STATUS_UNSPECIFIED
+    | (Prelude.==) k "WORKER_STATUS_RUNNING"
+    = Prelude.Just WORKER_STATUS_RUNNING
+    | (Prelude.==) k "WORKER_STATUS_SHUTTING_DOWN"
+    = Prelude.Just WORKER_STATUS_SHUTTING_DOWN
+    | (Prelude.==) k "WORKER_STATUS_SHUTDOWN"
+    = Prelude.Just WORKER_STATUS_SHUTDOWN
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded WorkerStatus where
+  minBound = WORKER_STATUS_UNSPECIFIED
+  maxBound = WORKER_STATUS_SHUTDOWN
+instance Prelude.Enum WorkerStatus where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum WorkerStatus: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum WORKER_STATUS_UNSPECIFIED = 0
+  fromEnum WORKER_STATUS_RUNNING = 1
+  fromEnum WORKER_STATUS_SHUTTING_DOWN = 2
+  fromEnum WORKER_STATUS_SHUTDOWN = 3
+  fromEnum
+    (WorkerStatus'Unrecognized (WorkerStatus'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ WORKER_STATUS_SHUTDOWN
+    = Prelude.error
+        "WorkerStatus.succ: bad argument WORKER_STATUS_SHUTDOWN. This value would be out of bounds."
+  succ WORKER_STATUS_UNSPECIFIED = WORKER_STATUS_RUNNING
+  succ WORKER_STATUS_RUNNING = WORKER_STATUS_SHUTTING_DOWN
+  succ WORKER_STATUS_SHUTTING_DOWN = WORKER_STATUS_SHUTDOWN
+  succ (WorkerStatus'Unrecognized _)
+    = Prelude.error
+        "WorkerStatus.succ: bad argument: unrecognized value"
+  pred WORKER_STATUS_UNSPECIFIED
+    = Prelude.error
+        "WorkerStatus.pred: bad argument WORKER_STATUS_UNSPECIFIED. This value would be out of bounds."
+  pred WORKER_STATUS_RUNNING = WORKER_STATUS_UNSPECIFIED
+  pred WORKER_STATUS_SHUTTING_DOWN = WORKER_STATUS_RUNNING
+  pred WORKER_STATUS_SHUTDOWN = WORKER_STATUS_SHUTTING_DOWN
+  pred (WorkerStatus'Unrecognized _)
+    = Prelude.error
+        "WorkerStatus.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault WorkerStatus where
+  fieldDefault = WORKER_STATUS_UNSPECIFIED
+instance Control.DeepSeq.NFData WorkerStatus where
   rnf x__ = Prelude.seq x__ ()
 newtype WorkflowRuleActionScope'UnrecognizedValue
   = WorkflowRuleActionScope'UnrecognizedValue Data.Int.Int32

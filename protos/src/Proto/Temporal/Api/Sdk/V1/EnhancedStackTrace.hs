@@ -1222,224 +1222,203 @@ packedFileDescriptor
     \\n\
     \StackTrace\DC2I\n\
     \\tlocations\CAN\SOH \ETX(\v2+.temporal.api.sdk.v1.StackTraceFileLocationR\tlocationsB\133\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\ETBEnhancedStackTraceProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\248\RS\n\
-    \\ACK\DC2\EOT\SYN\NUL_\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2024 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SYNio.temporal.api.sdk.v1B\ETBEnhancedStackTraceProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\142\SYN\n\
+    \\ACK\DC2\EOT\NUL\NULI\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\FS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL4\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\FS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL4\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL4\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL/\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL/\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL/\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL/\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL8\n\
+    \\SOH\b\DC2\ETX\a\NUL8\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL8\n\
+    \\STX\b\b\DC2\ETX\a\NUL8\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL1\n\
+    \\SOH\b\DC2\ETX\b\NUL1\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL1\n\
+    \\STX\b-\DC2\ETX\b\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL2\n\
+    \\SOH\b\DC2\ETX\t\NUL2\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL2\n\
+    \\STX\b%\DC2\ETX\t\NUL2\n\
     \\\\n\
-    \\STX\EOT\NUL\DC2\EOT\"\NUL+\SOH\SUBP Internal structure used to create worker stack traces with references to code.\n\
+    \\STX\EOT\NUL\DC2\EOT\f\NUL\NAK\SOH\SUBP Internal structure used to create worker stack traces with references to code.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\"\b\SUB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\f\b\SUB\n\
     \W\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX$\EOT\RS\SUBJ Information pertaining to the SDK that the trace has been captured from.\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SO\EOT\RS\SUBJ Information pertaining to the SDK that the trace has been captured from.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX$\EOT\NAK\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\SO\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX$\SYN\EM\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SO\SYN\EM\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX$\FS\GS\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SO\FS\GS\n\
     \5\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\EOT1\SUB( Mapping of file path to file contents.\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC1\EOT1\SUB( Mapping of file path to file contents.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX'\EOT$\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC1\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'%,\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC1%,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'/0\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC1/0\n\
     \-\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX*\EOT#\SUB  Collection of stacks captured.\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC4\EOT#\SUB  Collection of stacks captured.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\EOT\DC2\ETX*\EOT\f\n\
+    \\ENQ\EOT\NUL\STX\STX\EOT\DC2\ETX\DC4\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX*\r\ETB\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\DC4\r\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX*\CAN\RS\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC4\CAN\RS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX*!\"\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC4!\"\n\
     \\209\SOH\n\
-    \\STX\EOT\SOH\DC2\EOT0\NUL6\SOH\SUB\196\SOH Information pertaining to the SDK that the trace has been captured from.\n\
+    \\STX\EOT\SOH\DC2\EOT\SUB\NUL \SOH\SUB\196\SOH Information pertaining to the SDK that the trace has been captured from.\n\
     \ (-- api-linter: core::0123::resource-annotation=disabled\n\
     \     aip.dev/not-precedent: Naming SDK version is optional. --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX0\b\EM\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SUB\b\EM\n\
     \\RS\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX2\EOT\DC4\SUB\DC1 Name of the SDK\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\FS\EOT\DC4\SUB\DC1 Name of the SDK\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX2\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\FS\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX2\v\SI\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\FS\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX2\DC2\DC3\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\FS\DC2\DC3\n\
     \(\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX5\EOT\ETB\SUB\ESC Version string of the SDK\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\US\EOT\ETB\SUB\ESC Version string of the SDK\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX5\EOT\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\US\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX5\v\DC2\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\US\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX5\NAK\SYN\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\US\NAK\SYN\n\
     \\DEL\n\
-    \\STX\EOT\STX\DC2\EOT9\NULB\SOH\SUBs \"Slice\" of a file starting at line_offset -- a line offset and code fragment corresponding to the worker's stack.\n\
+    \\STX\EOT\STX\DC2\EOT#\NUL,\SOH\SUBs \"Slice\" of a file starting at line_offset -- a line offset and code fragment corresponding to the worker's stack.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX9\b\ESC\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX#\b\ESC\n\
     \\175\STX\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX>\EOT\ESC\SUB\161\STX Only used (possibly) to trim the file without breaking syntax highlighting. This is not optional, unlike\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX(\EOT\ESC\SUB\161\STX Only used (possibly) to trim the file without breaking syntax highlighting. This is not optional, unlike\n\
     \ the `line` property of a `StackTraceFileLocation`.\n\
     \ (-- api-linter: core::0141::forbidden-types=disabled\n\
     \     aip.dev/not-precedent: These really shouldn't have negative values. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX>\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX(\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX>\v\SYN\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX(\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX>\EM\SUB\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX(\EM\SUB\n\
     \O\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXA\EOT\ETB\SUBB Slice of a file with the respective OS-specific line terminator.\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX+\EOT\ETB\SUBB Slice of a file with the respective OS-specific line terminator.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETXA\EOT\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX+\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXA\v\DC2\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX+\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXA\NAK\SYN\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX+\NAK\SYN\n\
     \\192\SOH\n\
-    \\STX\EOT\ETX\DC2\EOTF\NULY\SOH\SUB\179\SOH More specific location details of a file: its path, precise line and column numbers if applicable, and function name if available.\n\
+    \\STX\EOT\ETX\DC2\EOT0\NULC\SOH\SUB\179\SOH More specific location details of a file: its path, precise line and column numbers if applicable, and function name if available.\n\
     \ In essence, a pointer to a location in a file\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXF\b\RS\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX0\b\RS\n\
     \\138\SOH\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXI\EOT\EM\SUB} Path to source file (absolute or relative).\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX3\EOT\EM\SUB} Path to source file (absolute or relative).\n\
     \ If the paths are relative, ensure that they are all relative to the same root.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXI\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXI\v\DC4\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX3\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXI\ETB\CAN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX3\ETB\CAN\n\
     \\142\SOH\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXM\EOT\DC3\SUB\128\SOH Optional; If possible, SDK should send this -- this is required for displaying the code location.\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETX7\EOT\DC3\SUB\128\SOH Optional; If possible, SDK should send this -- this is required for displaying the code location.\n\
     \ If not provided, set to -1.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXM\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX7\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXM\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX7\n\
     \\SO\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXM\DC1\DC2\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX7\DC1\DC2\n\
     \X\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETXQ\EOT\NAK\SUBK Optional; if possible, SDK should send this.\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETX;\EOT\NAK\SUBK Optional; if possible, SDK should send this.\n\
     \ If not provided, set to -1.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETXQ\EOT\t\n\
+    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETX;\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXQ\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX;\n\
     \\DLE\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXQ\DC3\DC4\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX;\DC3\DC4\n\
     \m\n\
-    \\EOT\EOT\ETX\STX\ETX\DC2\ETXU\EOT\GS\SUB` Function name this line belongs to, if applicable.\n\
+    \\EOT\EOT\ETX\STX\ETX\DC2\ETX?\EOT\GS\SUB` Function name this line belongs to, if applicable.\n\
     \ Used for falling back to stack trace view.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETXU\EOT\n\
+    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETX?\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETXU\v\CAN\n\
+    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETX?\v\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETXU\ESC\FS\n\
+    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETX?\ESC\FS\n\
     \d\n\
-    \\EOT\EOT\ETX\STX\EOT\DC2\ETXX\EOT\ESC\SUBW Flag to communicate whether a location should be hidden by default in the stack view.\n\
+    \\EOT\EOT\ETX\STX\EOT\DC2\ETXB\EOT\ESC\SUBW Flag to communicate whether a location should be hidden by default in the stack view.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ENQ\DC2\ETXX\EOT\b\n\
+    \\ENQ\EOT\ETX\STX\EOT\ENQ\DC2\ETXB\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETXX\t\SYN\n\
+    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETXB\t\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETXX\EM\SUB\n\
+    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETXB\EM\SUB\n\
     \F\n\
-    \\STX\EOT\EOT\DC2\EOT\\\NUL_\SOH\SUB: Collection of FileLocation messages from a single stack.\n\
+    \\STX\EOT\EOT\DC2\EOTF\NULI\SOH\SUB: Collection of FileLocation messages from a single stack.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX\\\b\DC2\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXF\b\DC2\n\
     \a\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX^\EOT2\SUBT Collection of `FileLocation`s, each for a stack frame that comprise a stack trace.\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXH\EOT2\SUBT Collection of `FileLocation`s, each for a stack frame that comprise a stack trace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\ETX^\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\ETXH\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX^\r#\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXH\r#\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX^$-\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXH$-\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX^01b\ACKproto3"
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXH01b\ACKproto3"

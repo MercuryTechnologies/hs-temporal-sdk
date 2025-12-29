@@ -4722,602 +4722,589 @@ packedFileDescriptor
     \\SUBListNexusEndpointsResponse\DC2&\n\
     \\SInext_page_token\CAN\SOH \SOH(\fR\rnextPageToken\DC2=\n\
     \\tendpoints\CAN\STX \ETX(\v2\US.temporal.api.nexus.v1.EndpointR\tendpointsB\190\SOH\n\
-    \\"io.temporal.api.operatorservice.v1B\DC4RequestResponseProtoP\SOHZ5go.temporal.io/api/operatorservice/v1;operatorservice\170\STX!Temporalio.Api.OperatorService.V1\234\STX$Temporalio::Api::OperatorService::V1J\202\&4\n\
-    \\a\DC2\ENQ\SYN\NUL\192\SOH\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\"io.temporal.api.operatorservice.v1B\DC4RequestResponseProtoP\SOHZ5go.temporal.io/api/operatorservice/v1;operatorservice\170\STX!Temporalio.Api.OperatorService.V1\234\STX$Temporalio::Api::OperatorService::V1J\188+\n\
+    \\a\DC2\ENQ\NUL\NUL\170\SOH\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL(\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NULL\n\
+    \\SOH\STX\DC2\ETX\STX\NUL(\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NULL\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NULL\n\
+    \\STX\b\v\DC2\ETX\EOT\NULL\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL;\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL;\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL;\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL;\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL5\n\
+    \\SOH\b\DC2\ETX\a\NUL5\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL5\n\
+    \\STX\b\b\DC2\ETX\a\NUL5\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL=\n\
+    \\SOH\b\DC2\ETX\b\NUL=\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL=\n\
+    \\STX\b-\DC2\ETX\b\NUL=\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL>\n\
+    \\SOH\b\DC2\ETX\t\NUL>\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL>\n\
+    \\STX\b%\DC2\ETX\t\NUL>\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL,\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL,\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL-\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL-\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL(\n\
+    \\STX\ETX\STX\DC2\ETX\r\NUL(\n\
     \&\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL+\SOH2\SUB (-- Search Attribute --)\n\
+    \\STX\EOT\NUL\DC2\EOT\DC1\NUL\NAK\SOH2\SUB (-- Search Attribute --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\"\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\"\n\
     \N\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX)\EOTN\SUBA Mapping between search attribute name and its IndexedValueType.\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC3\EOTN\SUBA Mapping between search attribute name and its IndexedValueType.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX)\EOT7\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC3\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX)8I\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC38I\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX)LM\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC3LM\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX*\EOT\EM\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC4\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX*\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\DC4\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX*\v\DC4\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC4\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX*\ETB\CAN\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC4\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT-\NUL.\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\ETB\NUL\CAN\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX-\b#\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\ETB\b#\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT0\NUL4\SOH\n\
+    \\STX\EOT\STX\DC2\EOT\SUB\NUL\RS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX0\b%\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\SUB\b%\n\
     \0\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX2\EOT*\SUB# Search attribute names to delete.\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\FS\EOT*\SUB# Search attribute names to delete.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETX2\EOT\f\n\
+    \\ENQ\EOT\STX\STX\NUL\EOT\DC2\ETX\FS\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX2\r\DC3\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\FS\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX2\DC4%\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\FS\DC4%\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX2()\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\FS()\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX3\EOT\EM\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX\GS\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX3\EOT\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX\GS\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX3\v\DC4\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\GS\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX3\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\GS\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT6\NUL7\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT \NUL!\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX6\b&\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX \b&\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT9\NUL;\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT#\NUL%\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX9\b#\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX#\b#\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX:\EOT\EM\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX$\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX:\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX$\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX:\v\DC4\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX$\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX:\ETB\CAN\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX$\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT=\NULD\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT'\NUL.\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX=\b$\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX'\b$\n\
     \f\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX?\EOTN\SUBY Mapping between custom (user-registered) search attribute name to its IndexedValueType.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX)\EOTN\SUBY Mapping between custom (user-registered) search attribute name to its IndexedValueType.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX?\EOT7\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX)\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX?8I\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX)8I\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX?LM\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX)LM\n\
     \a\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXA\EOTN\SUBT Mapping between system (predefined) search attribute name to its IndexedValueType.\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX+\EOTN\SUBT Mapping between system (predefined) search attribute name to its IndexedValueType.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXA\EOT7\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETX+\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXA8I\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX+8I\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXALM\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX+LM\n\
     \U\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXC\EOT+\SUBH Mapping from the attribute name to the visibility storage native type.\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETX-\EOT+\SUBH Mapping from the attribute name to the visibility storage native type.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXC\EOT\ETB\n\
+    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETX-\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXC\CAN&\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETX-\CAN&\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXC)*\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETX-)*\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTF\NULM\SOH\n\
+    \\STX\EOT\ACK\DC2\EOT0\NUL7\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXF\b\RS\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETX0\b\RS\n\
     \]\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXH\EOT\EM\SUBP Only one of namespace or namespace_id must be specified to identify namespace.\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETX2\EOT\EM\SUBP Only one of namespace or namespace_id must be specified to identify namespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXH\EOT\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX2\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXH\v\DC4\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX2\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXH\ETB\CAN\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX2\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXI\EOT\FS\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETX3\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXI\EOT\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETX3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXI\v\ETB\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX3\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXI\SUB\ESC\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX3\SUB\ESC\n\
     \\194\SOH\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXL\EOT8\SUB\180\SOH If provided, the deletion of namespace info will be delayed for the given duration (0 means no delay).\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETX6\EOT8\SUB\180\SOH If provided, the deletion of namespace info will be delayed for the given duration (0 means no delay).\n\
     \ If not provided, the default delay configured in the cluster will be used.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXL\EOT\FS\n\
+    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETX6\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXL\GS3\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETX6\GS3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXL67\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETX667\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTO\NULR\SOH\n\
+    \\STX\EOT\a\DC2\EOT9\NUL<\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXO\b\US\n\
+    \\ETX\EOT\a\SOH\DC2\ETX9\b\US\n\
     \S\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXQ\EOT!\SUBF Temporary namespace name that is used during reclaim resources step.\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX;\EOT!\SUBF Temporary namespace name that is used during reclaim resources step.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXQ\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX;\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXQ\v\FS\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX;\v\FS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXQ\US \n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX;\US \n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTT\NUL\\\SOH\n\
+    \\STX\EOT\b\DC2\EOT>\NULF\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXT\b'\n\
+    \\ETX\EOT\b\SOH\DC2\ETX>\b'\n\
     \o\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXV\EOT \SUBb Frontend Address is a cross cluster accessible address for gRPC traffic. This field is required.\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETX@\EOT \SUBb Frontend Address is a cross cluster accessible address for gRPC traffic. This field is required.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXV\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETX@\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXV\v\ESC\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX@\v\ESC\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXV\RS\US\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX@\RS\US\n\
     \E\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXX\EOT.\SUB8 Flag to enable / disable the cross cluster connection.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXB\EOT.\SUB8 Flag to enable / disable the cross cluster connection.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXX\EOT\b\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXB\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXX\t)\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXB\t)\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXX,-\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXB,-\n\
     \\189\SOH\n\
-    \\EOT\EOT\b\STX\STX\DC2\ETX[\EOT%\SUB\175\SOH Frontend HTTP Address is a cross cluster accessible address for HTTP traffic. This field is optional. If not provided\n\
+    \\EOT\EOT\b\STX\STX\DC2\ETXE\EOT%\SUB\175\SOH Frontend HTTP Address is a cross cluster accessible address for HTTP traffic. This field is optional. If not provided\n\
     \  on update, the existing HTTP address will be removed.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETX[\EOT\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETXE\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETX[\v \n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETXE\v \n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETX[#$\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETXE#$\n\
     \\n\
     \\n\
-    \\STX\EOT\t\DC2\EOT^\NUL_\SOH\n\
+    \\STX\EOT\t\DC2\EOTH\NULI\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETX^\b(\n\
+    \\ETX\EOT\t\SOH\DC2\ETXH\b(\n\
     \\n\
     \\n\
     \\STX\EOT\n\
-    \\DC2\EOTa\NULd\SOH\n\
+    \\DC2\EOTK\NULN\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETXa\b\"\n\
+    \\SOH\DC2\ETXK\b\"\n\
     \1\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETXc\EOT\FS\SUB$ Remote cluster name to be removed.\n\
+    \\STX\NUL\DC2\ETXM\EOT\FS\SUB$ Remote cluster name to be removed.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETXc\EOT\n\
+    \\STX\NUL\ENQ\DC2\ETXM\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETXc\v\ETB\n\
+    \\STX\NUL\SOH\DC2\ETXM\v\ETB\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETXc\SUB\ESC\n\
+    \\STX\NUL\ETX\DC2\ETXM\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\v\DC2\EOTf\NULg\SOH\n\
+    \\STX\EOT\v\DC2\EOTP\NULQ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETXf\b#\n\
+    \\ETX\EOT\v\SOH\DC2\ETXP\b#\n\
     \\n\
     \\n\
-    \\STX\EOT\f\DC2\EOTi\NULl\SOH\n\
+    \\STX\EOT\f\DC2\EOTS\NULV\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\f\SOH\DC2\ETXi\b\ESC\n\
+    \\ETX\EOT\f\SOH\DC2\ETXS\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETXj\EOT\CAN\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETXT\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXj\EOT\t\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXT\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXj\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXT\n\
     \\DC3\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXj\SYN\ETB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXT\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\f\STX\SOH\DC2\ETXk\EOT\RS\n\
+    \\EOT\EOT\f\STX\SOH\DC2\ETXU\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXk\EOT\t\n\
+    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETXU\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXk\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXU\n\
     \\EM\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXk\FS\GS\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXU\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOTn\NULr\SOH\n\
+    \\STX\EOT\r\DC2\EOTX\NUL\\\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETXn\b\FS\n\
+    \\ETX\EOT\r\SOH\DC2\ETXX\b\FS\n\
     \.\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETXp\EOT*\SUB! List of all cluster information\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXZ\EOT*\SUB! List of all cluster information\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\EOT\DC2\ETXp\EOT\f\n\
+    \\ENQ\EOT\r\STX\NUL\EOT\DC2\ETXZ\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXp\r\FS\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXZ\r\FS\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXp\GS%\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXZ\GS%\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXp()\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXZ()\n\
     \\v\n\
-    \\EOT\EOT\r\STX\SOH\DC2\ETXq\EOT\RS\n\
+    \\EOT\EOT\r\STX\SOH\DC2\ETX[\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXq\EOT\t\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETX[\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXq\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETX[\n\
     \\EM\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXq\FS\GS\n\
-    \\v\n\
-    \\STX\EOT\SO\DC2\ENQt\NUL\131\SOH\SOH\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETX[\FS\GS\n\
     \\n\
     \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETXt\b\ETB\n\
+    \\STX\EOT\SO\DC2\EOT^\NULm\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SO\SOH\DC2\ETX^\b\ETB\n\
     \(\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\ETXv\EOT\FS\SUB\ESC Name of the cluster name.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\ETX`\EOT\FS\SUB\ESC Name of the cluster name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETXv\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETX`\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXv\v\ETB\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETX`\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXv\SUB\ESC\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETX`\SUB\ESC\n\
     \!\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\ETXx\EOT\SUB\SUB\DC4 Id of the cluster.\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\ETXb\EOT\SUB\SUB\DC4 Id of the cluster.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ENQ\DC2\ETXx\EOT\n\
+    \\ENQ\EOT\SO\STX\SOH\ENQ\DC2\ETXb\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXx\v\NAK\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXb\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXx\CAN\EM\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXb\CAN\EM\n\
     \\FS\n\
-    \\EOT\EOT\SO\STX\STX\DC2\ETXz\EOT\ETB\SUB\SI gRPC address.\n\
+    \\EOT\EOT\SO\STX\STX\DC2\ETXd\EOT\ETB\SUB\SI gRPC address.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\ETXz\EOT\n\
+    \\ENQ\EOT\SO\STX\STX\ENQ\DC2\ETXd\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\SOH\DC2\ETXz\v\DC2\n\
+    \\ENQ\EOT\SO\STX\STX\SOH\DC2\ETXd\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\STX\ETX\DC2\ETXz\NAK\SYN\n\
+    \\ENQ\EOT\SO\STX\STX\ETX\DC2\ETXd\NAK\SYN\n\
     \+\n\
-    \\EOT\EOT\SO\STX\ETX\DC2\ETX|\EOT\FS\SUB\RS HTTP address, if one exists.\n\
+    \\EOT\EOT\SO\STX\ETX\DC2\ETXf\EOT\FS\SUB\RS HTTP address, if one exists.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\ETX|\EOT\n\
+    \\ENQ\EOT\SO\STX\ETX\ENQ\DC2\ETXf\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\ETX|\v\ETB\n\
+    \\ENQ\EOT\SO\STX\ETX\SOH\DC2\ETXf\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\ETX|\SUB\ESC\n\
+    \\ENQ\EOT\SO\STX\ETX\ETX\DC2\ETXf\SUB\ESC\n\
     \G\n\
-    \\EOT\EOT\SO\STX\EOT\DC2\ETX~\EOT'\SUB: A unique failover version across all connected clusters.\n\
+    \\EOT\EOT\SO\STX\EOT\DC2\ETXh\EOT'\SUB: A unique failover version across all connected clusters.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\ENQ\DC2\ETX~\EOT\t\n\
+    \\ENQ\EOT\SO\STX\EOT\ENQ\DC2\ETXh\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\ETX~\n\
+    \\ENQ\EOT\SO\STX\EOT\SOH\DC2\ETXh\n\
     \\"\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\ETX~%&\n\
-    \-\n\
-    \\EOT\EOT\SO\STX\ENQ\DC2\EOT\128\SOH\EOT\"\SUB\US History service shard number.\n\
+    \\ENQ\EOT\SO\STX\EOT\ETX\DC2\ETXh%&\n\
+    \,\n\
+    \\EOT\EOT\SO\STX\ENQ\DC2\ETXj\EOT\"\SUB\US History service shard number.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\ENQ\DC2\EOT\128\SOH\EOT\t\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\EOT\128\SOH\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ENQ\ENQ\DC2\ETXj\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ENQ\SOH\DC2\ETXj\n\
     \\GS\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\EOT\128\SOH !\n\
-    \=\n\
-    \\EOT\EOT\SO\STX\ACK\DC2\EOT\130\SOH\EOT#\SUB/ A flag to indicate if a connection is active.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ACK\ENQ\DC2\EOT\130\SOH\EOT\b\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ACK\SOH\DC2\EOT\130\SOH\t\RS\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\ACK\ETX\DC2\EOT\130\SOH!\"\n\
     \\f\n\
-    \\STX\EOT\SI\DC2\ACK\133\SOH\NUL\136\SOH\SOH\n\
+    \\ENQ\EOT\SO\STX\ENQ\ETX\DC2\ETXj !\n\
+    \<\n\
+    \\EOT\EOT\SO\STX\ACK\DC2\ETXl\EOT#\SUB/ A flag to indicate if a connection is active.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ACK\ENQ\DC2\ETXl\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ACK\SOH\DC2\ETXl\t\RS\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\ACK\ETX\DC2\ETXl!\"\n\
+    \\n\
+    \\n\
+    \\STX\EOT\SI\DC2\EOTo\NULr\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SI\SOH\DC2\ETXo\b\US\n\
+    \3\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\ETXq\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETXq\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXq\v\r\n\
+    \\f\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXq\DLE\DC1\n\
+    \\n\
+    \\n\
+    \\STX\EOT\DLE\DC2\EOTt\NULv\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\DLE\SOH\DC2\ETXt\b \n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\133\SOH\b\US\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\ETXu\EOT0\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\ETXu\EOT\"\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\ETXu#+\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\ETXu./\n\
+    \\n\
+    \\n\
+    \\STX\EOT\DC1\DC2\EOTx\NUL{\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\DC1\SOH\DC2\ETXx\b\"\n\
+    \-\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\ETXz\EOT0\SUB  Endpoint definition to create.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\ETXz\EOT&\n\
+    \\f\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\ETXz'+\n\
+    \\f\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\ETXz./\n\
+    \\v\n\
+    \\STX\EOT\DC2\DC2\ENQ}\NUL\128\SOH\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\DC2\SOH\DC2\ETX}\b#\n\
+    \\\\n\
+    \\EOT\EOT\DC2\STX\NUL\DC2\ETX\DEL\EOT0\SUBO Data post acceptance. Can be used to issue additional updates to this record.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\DC2\STX\NUL\ACK\DC2\ETX\DEL\EOT\"\n\
+    \\f\n\
+    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\ETX\DEL#+\n\
+    \\f\n\
+    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\ETX\DEL./\n\
+    \\f\n\
+    \\STX\EOT\DC3\DC2\ACK\130\SOH\NUL\137\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\DC3\SOH\DC2\EOT\130\SOH\b\"\n\
     \4\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\135\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
+    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\132\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\135\SOH\EOT\n\
+    \\ENQ\EOT\DC3\STX\NUL\ENQ\DC2\EOT\132\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\135\SOH\v\r\n\
+    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\132\SOH\v\r\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\135\SOH\DLE\DC1\n\
-    \\f\n\
-    \\STX\EOT\DLE\DC2\ACK\138\SOH\NUL\140\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\138\SOH\b \n\
-    \\f\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\139\SOH\EOT0\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\139\SOH\EOT\"\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\139\SOH#+\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\139\SOH./\n\
-    \\f\n\
-    \\STX\EOT\DC1\DC2\ACK\142\SOH\NUL\145\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\DC1\SOH\DC2\EOT\142\SOH\b\"\n\
-    \.\n\
-    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\144\SOH\EOT0\SUB  Endpoint definition to create.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\EOT\144\SOH\EOT&\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\144\SOH'+\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\144\SOH./\n\
-    \\f\n\
-    \\STX\EOT\DC2\DC2\ACK\147\SOH\NUL\150\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\DC2\SOH\DC2\EOT\147\SOH\b#\n\
-    \]\n\
-    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\149\SOH\EOT0\SUBO Data post acceptance. Can be used to issue additional updates to this record.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\ACK\DC2\EOT\149\SOH\EOT\"\n\
-    \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\149\SOH#+\n\
-    \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\149\SOH./\n\
-    \\f\n\
-    \\STX\EOT\DC3\DC2\ACK\152\SOH\NUL\159\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\DC3\SOH\DC2\EOT\152\SOH\b\"\n\
-    \4\n\
-    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\154\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DC3\STX\NUL\ENQ\DC2\EOT\154\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\154\SOH\v\r\n\
-    \\r\n\
-    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\154\SOH\DLE\DC1\n\
+    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\132\SOH\DLE\DC1\n\
     \K\n\
-    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\156\SOH\EOT\SYN\SUB= Data version for this endpoint. Must match current version.\n\
+    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\134\SOH\EOT\SYN\SUB= Data version for this endpoint. Must match current version.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\SOH\ENQ\DC2\EOT\156\SOH\EOT\t\n\
+    \\ENQ\EOT\DC3\STX\SOH\ENQ\DC2\EOT\134\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\156\SOH\n\
+    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\134\SOH\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\156\SOH\DC4\NAK\n\
+    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\134\SOH\DC4\NAK\n\
     \\f\n\
-    \\EOT\EOT\DC3\STX\STX\DC2\EOT\158\SOH\EOT0\n\
+    \\EOT\EOT\DC3\STX\STX\DC2\EOT\136\SOH\EOT0\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\STX\ACK\DC2\EOT\158\SOH\EOT&\n\
+    \\ENQ\EOT\DC3\STX\STX\ACK\DC2\EOT\136\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\STX\SOH\DC2\EOT\158\SOH'+\n\
+    \\ENQ\EOT\DC3\STX\STX\SOH\DC2\EOT\136\SOH'+\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\STX\ETX\DC2\EOT\158\SOH./\n\
+    \\ENQ\EOT\DC3\STX\STX\ETX\DC2\EOT\136\SOH./\n\
     \\f\n\
-    \\STX\EOT\DC4\DC2\ACK\161\SOH\NUL\164\SOH\SOH\n\
+    \\STX\EOT\DC4\DC2\ACK\139\SOH\NUL\142\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\DC4\SOH\DC2\EOT\161\SOH\b#\n\
+    \\ETX\EOT\DC4\SOH\DC2\EOT\139\SOH\b#\n\
     \]\n\
-    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\163\SOH\EOT0\SUBO Data post acceptance. Can be used to issue additional updates to this record.\n\
+    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\141\SOH\EOT0\SUBO Data post acceptance. Can be used to issue additional updates to this record.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\ACK\DC2\EOT\163\SOH\EOT\"\n\
+    \\ENQ\EOT\DC4\STX\NUL\ACK\DC2\EOT\141\SOH\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\163\SOH#+\n\
+    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\141\SOH#+\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\163\SOH./\n\
+    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\141\SOH./\n\
     \\f\n\
-    \\STX\EOT\NAK\DC2\ACK\166\SOH\NUL\171\SOH\SOH\n\
+    \\STX\EOT\NAK\DC2\ACK\144\SOH\NUL\149\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\NAK\SOH\DC2\EOT\166\SOH\b\"\n\
+    \\ETX\EOT\NAK\SOH\DC2\EOT\144\SOH\b\"\n\
     \4\n\
-    \\EOT\EOT\NAK\STX\NUL\DC2\EOT\168\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
+    \\EOT\EOT\NAK\STX\NUL\DC2\EOT\146\SOH\EOT\DC2\SUB& Server-generated unique endpoint ID.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\NAK\STX\NUL\ENQ\DC2\EOT\168\SOH\EOT\n\
+    \\ENQ\EOT\NAK\STX\NUL\ENQ\DC2\EOT\146\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\NAK\STX\NUL\SOH\DC2\EOT\168\SOH\v\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\SOH\DC2\EOT\146\SOH\v\r\n\
     \\r\n\
-    \\ENQ\EOT\NAK\STX\NUL\ETX\DC2\EOT\168\SOH\DLE\DC1\n\
+    \\ENQ\EOT\NAK\STX\NUL\ETX\DC2\EOT\146\SOH\DLE\DC1\n\
     \K\n\
-    \\EOT\EOT\NAK\STX\SOH\DC2\EOT\170\SOH\EOT\SYN\SUB= Data version for this endpoint. Must match current version.\n\
+    \\EOT\EOT\NAK\STX\SOH\DC2\EOT\148\SOH\EOT\SYN\SUB= Data version for this endpoint. Must match current version.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\NAK\STX\SOH\ENQ\DC2\EOT\170\SOH\EOT\t\n\
+    \\ENQ\EOT\NAK\STX\SOH\ENQ\DC2\EOT\148\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\NAK\STX\SOH\SOH\DC2\EOT\170\SOH\n\
+    \\ENQ\EOT\NAK\STX\SOH\SOH\DC2\EOT\148\SOH\n\
     \\DC1\n\
     \\r\n\
-    \\ENQ\EOT\NAK\STX\SOH\ETX\DC2\EOT\170\SOH\DC4\NAK\n\
+    \\ENQ\EOT\NAK\STX\SOH\ETX\DC2\EOT\148\SOH\DC4\NAK\n\
     \\f\n\
-    \\STX\EOT\SYN\DC2\ACK\173\SOH\NUL\174\SOH\SOH\n\
+    \\STX\EOT\SYN\DC2\ACK\151\SOH\NUL\152\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\SYN\SOH\DC2\EOT\173\SOH\b#\n\
+    \\ETX\EOT\SYN\SOH\DC2\EOT\151\SOH\b#\n\
     \\f\n\
-    \\STX\EOT\ETB\DC2\ACK\176\SOH\NUL\186\SOH\SOH\n\
+    \\STX\EOT\ETB\DC2\ACK\154\SOH\NUL\164\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\ETB\SOH\DC2\EOT\176\SOH\b!\n\
+    \\ETX\EOT\ETB\SOH\DC2\EOT\154\SOH\b!\n\
     \\f\n\
-    \\EOT\EOT\ETB\STX\NUL\DC2\EOT\177\SOH\EOT\CAN\n\
+    \\EOT\EOT\ETB\STX\NUL\DC2\EOT\155\SOH\EOT\CAN\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\NUL\ENQ\DC2\EOT\177\SOH\EOT\t\n\
+    \\ENQ\EOT\ETB\STX\NUL\ENQ\DC2\EOT\155\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\NUL\SOH\DC2\EOT\177\SOH\n\
+    \\ENQ\EOT\ETB\STX\NUL\SOH\DC2\EOT\155\SOH\n\
     \\DC3\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\NUL\ETX\DC2\EOT\177\SOH\SYN\ETB\n\
+    \\ENQ\EOT\ETB\STX\NUL\ETX\DC2\EOT\155\SOH\SYN\ETB\n\
     \\159\STX\n\
-    \\EOT\EOT\ETB\STX\SOH\DC2\EOT\181\SOH\EOT\RS\SUB\144\STX To get the next page, pass in `ListNexusEndpointsResponse.next_page_token` from the previous page's\n\
+    \\EOT\EOT\ETB\STX\SOH\DC2\EOT\159\SOH\EOT\RS\SUB\144\STX To get the next page, pass in `ListNexusEndpointsResponse.next_page_token` from the previous page's\n\
     \ response, the token will be empty if there's no other page.\n\
     \ Note: the last page may be empty if the total number of endpoints registered is a multiple of the page size.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\SOH\ENQ\DC2\EOT\181\SOH\EOT\t\n\
+    \\ENQ\EOT\ETB\STX\SOH\ENQ\DC2\EOT\159\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\SOH\SOH\DC2\EOT\181\SOH\n\
+    \\ENQ\EOT\ETB\STX\SOH\SOH\DC2\EOT\159\SOH\n\
     \\EM\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\SOH\ETX\DC2\EOT\181\SOH\FS\GS\n\
+    \\ENQ\EOT\ETB\STX\SOH\ETX\DC2\EOT\159\SOH\FS\GS\n\
     \\244\SOH\n\
-    \\EOT\EOT\ETB\STX\STX\DC2\EOT\185\SOH\EOT\DC4\SUB\229\SOH Name of the incoming endpoint to filter on - optional. Specifying this will result in zero or one results.\n\
+    \\EOT\EOT\ETB\STX\STX\DC2\EOT\163\SOH\EOT\DC4\SUB\229\SOH Name of the incoming endpoint to filter on - optional. Specifying this will result in zero or one results.\n\
     \ (-- api-linter: core::203::field-behavior-required=disabled\n\
     \     aip.dev/not-precedent: Not following linter rules. --)\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\STX\ENQ\DC2\EOT\185\SOH\EOT\n\
+    \\ENQ\EOT\ETB\STX\STX\ENQ\DC2\EOT\163\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\STX\SOH\DC2\EOT\185\SOH\v\SI\n\
+    \\ENQ\EOT\ETB\STX\STX\SOH\DC2\EOT\163\SOH\v\SI\n\
     \\r\n\
-    \\ENQ\EOT\ETB\STX\STX\ETX\DC2\EOT\185\SOH\DC2\DC3\n\
+    \\ENQ\EOT\ETB\STX\STX\ETX\DC2\EOT\163\SOH\DC2\DC3\n\
     \\f\n\
-    \\STX\EOT\CAN\DC2\ACK\188\SOH\NUL\192\SOH\SOH\n\
+    \\STX\EOT\CAN\DC2\ACK\166\SOH\NUL\170\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\CAN\SOH\DC2\EOT\188\SOH\b\"\n\
+    \\ETX\EOT\CAN\SOH\DC2\EOT\166\SOH\b\"\n\
     \0\n\
-    \\EOT\EOT\CAN\STX\NUL\DC2\EOT\190\SOH\EOT\RS\SUB\" Token for getting the next page.\n\
+    \\EOT\EOT\CAN\STX\NUL\DC2\EOT\168\SOH\EOT\RS\SUB\" Token for getting the next page.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\NUL\ENQ\DC2\EOT\190\SOH\EOT\t\n\
+    \\ENQ\EOT\CAN\STX\NUL\ENQ\DC2\EOT\168\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\NUL\SOH\DC2\EOT\190\SOH\n\
+    \\ENQ\EOT\CAN\STX\NUL\SOH\DC2\EOT\168\SOH\n\
     \\EM\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\NUL\ETX\DC2\EOT\190\SOH\FS\GS\n\
+    \\ENQ\EOT\CAN\STX\NUL\ETX\DC2\EOT\168\SOH\FS\GS\n\
     \\f\n\
-    \\EOT\EOT\CAN\STX\SOH\DC2\EOT\191\SOH\EOT:\n\
+    \\EOT\EOT\CAN\STX\SOH\DC2\EOT\169\SOH\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\SOH\EOT\DC2\EOT\191\SOH\EOT\f\n\
+    \\ENQ\EOT\CAN\STX\SOH\EOT\DC2\EOT\169\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\SOH\ACK\DC2\EOT\191\SOH\r+\n\
+    \\ENQ\EOT\CAN\STX\SOH\ACK\DC2\EOT\169\SOH\r+\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\SOH\SOH\DC2\EOT\191\SOH,5\n\
+    \\ENQ\EOT\CAN\STX\SOH\SOH\DC2\EOT\169\SOH,5\n\
     \\r\n\
-    \\ENQ\EOT\CAN\STX\SOH\ETX\DC2\EOT\191\SOH89b\ACKproto3"
+    \\ENQ\EOT\CAN\STX\SOH\ETX\DC2\EOT\169\SOH89b\ACKproto3"

@@ -2266,8 +2266,8 @@ instance Data.ProtoLens.Message ContinueAsNewWorkflowExecutionCommandAttributes 
       \\rcron_schedule\CAN\v \SOH(\tR\fcronSchedule\DC26\n\
       \\ACKheader\CAN\f \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC20\n\
       \\EOTmemo\CAN\r \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
-      \\DC1search_attributes\CAN\SO \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2(\n\
-      \\DLEinherit_build_id\CAN\SI \SOH(\bR\SOinheritBuildId"
+      \\DC1search_attributes\CAN\SO \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2,\n\
+      \\DLEinherit_build_id\CAN\SI \SOH(\bR\SOinheritBuildIdB\STX\CAN\SOH"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3968,8 +3968,8 @@ instance Data.ProtoLens.Message RequestCancelExternalWorkflowExecutionCommandAtt
       \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
       \\vworkflow_id\CAN\STX \SOH(\tR\n\
       \workflowId\DC2\NAK\n\
-      \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2\CAN\n\
-      \\acontrol\CAN\EOT \SOH(\tR\acontrol\DC2.\n\
+      \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2\FS\n\
+      \\acontrol\CAN\EOT \SOH(\tR\acontrolB\STX\CAN\SOH\DC2.\n\
       \\DC3child_workflow_only\CAN\ENQ \SOH(\bR\DC1childWorkflowOnly\DC2\SYN\n\
       \\ACKreason\CAN\ACK \SOH(\tR\ACKreason"
   packedFileDescriptor _ = packedFileDescriptor
@@ -5891,8 +5891,8 @@ instance Data.ProtoLens.Message SignalExternalWorkflowExecutionCommandAttributes
       \\texecution\CAN\STX \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\texecution\DC2\US\n\
       \\vsignal_name\CAN\ETX \SOH(\tR\n\
       \signalName\DC26\n\
-      \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2\CAN\n\
-      \\acontrol\CAN\ENQ \SOH(\tR\acontrol\DC2.\n\
+      \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2\FS\n\
+      \\acontrol\CAN\ENQ \SOH(\tR\acontrolB\STX\CAN\SOH\DC2.\n\
       \\DC3child_workflow_only\CAN\ACK \SOH(\bR\DC1childWorkflowOnly\DC26\n\
       \\ACKheader\CAN\a \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader"
   packedFileDescriptor _ = packedFileDescriptor
@@ -6547,8 +6547,8 @@ instance Data.ProtoLens.Message StartChildWorkflowExecutionCommandAttributes whe
       \\rcron_schedule\CAN\r \SOH(\tR\fcronSchedule\DC26\n\
       \\ACKheader\CAN\SO \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC20\n\
       \\EOTmemo\CAN\SI \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
-      \\DC1search_attributes\CAN\DLE \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2(\n\
-      \\DLEinherit_build_id\CAN\DC1 \SOH(\bR\SOinheritBuildId\DC2<\n\
+      \\DC1search_attributes\CAN\DLE \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2,\n\
+      \\DLEinherit_build_id\CAN\DC1 \SOH(\bR\SOinheritBuildIdB\STX\CAN\SOH\DC2<\n\
       \\bpriority\CAN\DC2 \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -7683,22 +7683,22 @@ packedFileDescriptor
     \\FSCancelTimerCommandAttributes\DC2\EM\n\
     \\btimer_id\CAN\SOH \SOH(\tR\atimerId\"f\n\
     \(CancelWorkflowExecutionCommandAttributes\DC2:\n\
-    \\adetails\CAN\SOH \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\"\241\SOH\n\
+    \\adetails\CAN\SOH \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\"\245\SOH\n\
     \7RequestCancelExternalWorkflowExecutionCommandAttributes\DC2\FS\n\
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
     \\vworkflow_id\CAN\STX \SOH(\tR\n\
     \workflowId\DC2\NAK\n\
-    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2\CAN\n\
-    \\acontrol\CAN\EOT \SOH(\tR\acontrol\DC2.\n\
+    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2\FS\n\
+    \\acontrol\CAN\EOT \SOH(\tR\acontrolB\STX\CAN\SOH\DC2.\n\
     \\DC3child_workflow_only\CAN\ENQ \SOH(\bR\DC1childWorkflowOnly\DC2\SYN\n\
-    \\ACKreason\CAN\ACK \SOH(\tR\ACKreason\"\244\STX\n\
+    \\ACKreason\CAN\ACK \SOH(\tR\ACKreason\"\248\STX\n\
     \0SignalExternalWorkflowExecutionCommandAttributes\DC2\FS\n\
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2G\n\
     \\texecution\CAN\STX \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\texecution\DC2\US\n\
     \\vsignal_name\CAN\ETX \SOH(\tR\n\
     \signalName\DC26\n\
-    \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2\CAN\n\
-    \\acontrol\CAN\ENQ \SOH(\tR\acontrol\DC2.\n\
+    \\ENQinput\CAN\EOT \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC2\FS\n\
+    \\acontrol\CAN\ENQ \SOH(\tR\acontrolB\STX\CAN\SOH\DC2.\n\
     \\DC3child_workflow_only\CAN\ACK \SOH(\bR\DC1childWorkflowOnly\DC26\n\
     \\ACKheader\CAN\a \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\"\136\SOH\n\
     \/UpsertWorkflowSearchAttributesCommandAttributes\DC2U\n\
@@ -7713,7 +7713,7 @@ packedFileDescriptor
     \\afailure\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\SUB\\\n\
     \\fDetailsEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC26\n\
-    \\ENQvalue\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQvalue:\STX8\SOH\"\159\b\n\
+    \\ENQvalue\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQvalue:\STX8\SOH\"\163\b\n\
     \/ContinueAsNewWorkflowExecutionCommandAttributes\DC2I\n\
     \\rworkflow_type\CAN\SOH \SOH(\v2$.temporal.api.common.v1.WorkflowTypeR\fworkflowType\DC2C\n\
     \\n\
@@ -7730,8 +7730,8 @@ packedFileDescriptor
     \\rcron_schedule\CAN\v \SOH(\tR\fcronSchedule\DC26\n\
     \\ACKheader\CAN\f \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC20\n\
     \\EOTmemo\CAN\r \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
-    \\DC1search_attributes\CAN\SO \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2(\n\
-    \\DLEinherit_build_id\CAN\SI \SOH(\bR\SOinheritBuildId\"\155\t\n\
+    \\DC1search_attributes\CAN\SO \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2,\n\
+    \\DLEinherit_build_id\CAN\SI \SOH(\bR\SOinheritBuildIdB\STX\CAN\SOH\"\159\t\n\
     \,StartChildWorkflowExecutionCommandAttributes\DC2\FS\n\
     \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
     \\vworkflow_id\CAN\STX \SOH(\tR\n\
@@ -7751,8 +7751,8 @@ packedFileDescriptor
     \\rcron_schedule\CAN\r \SOH(\tR\fcronSchedule\DC26\n\
     \\ACKheader\CAN\SO \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC20\n\
     \\EOTmemo\CAN\SI \SOH(\v2\FS.temporal.api.common.v1.MemoR\EOTmemo\DC2U\n\
-    \\DC1search_attributes\CAN\DLE \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2(\n\
-    \\DLEinherit_build_id\CAN\DC1 \SOH(\bR\SOinheritBuildId\DC2<\n\
+    \\DC1search_attributes\CAN\DLE \SOH(\v2(.temporal.api.common.v1.SearchAttributesR\DLEsearchAttributes\DC2,\n\
+    \\DLEinherit_build_id\CAN\DC1 \SOH(\bR\SOinheritBuildIdB\STX\CAN\SOH\DC2<\n\
     \\bpriority\CAN\DC2 \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\"A\n\
     \ ProtocolMessageCommandAttributes\DC2\GS\n\
     \\n\
@@ -7792,130 +7792,109 @@ packedFileDescriptor
     \1request_cancel_nexus_operation_command_attributes\CAN\DC3 \SOH(\v2E.temporal.api.command.v1.RequestCancelNexusOperationCommandAttributesH\NULR,requestCancelNexusOperationCommandAttributesB\f\n\
     \\n\
     \attributesB\142\SOH\n\
-    \\SUBio.temporal.api.command.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/command/v1;command\170\STX\EMTemporalio.Api.Command.V1\234\STX\FSTemporalio::Api::Command::V1J\254s\n\
-    \\a\DC2\ENQ\SYN\NUL\181\STX\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SUBio.temporal.api.command.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/command/v1;command\170\STX\EMTemporalio.Api.Command.V1\234\STX\FSTemporalio::Api::Command::V1J\201l\n\
+    \\a\DC2\ENQ\NUL\NUL\161\STX\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL \n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL<\n\
+    \\SOH\STX\DC2\ETX\STX\NUL \n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL<\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL<\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL<\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL3\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL3\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL3\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL5\n\
+    \\SOH\b\DC2\ETX\b\NUL5\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL5\n\
+    \\STX\b-\DC2\ETX\b\NUL5\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL6\n\
+    \\SOH\b\DC2\ETX\t\NUL6\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL6\n\
+    \\STX\b%\DC2\ETX\t\NUL6\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX#\NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX\r\NUL.\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX$\NUL2\n\
+    \\STX\ETX\STX\DC2\ETX\SO\NUL2\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX%\NUL.\n\
+    \\STX\ETX\ETX\DC2\ETX\SI\NUL.\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX&\NUL/\n\
+    \\STX\ETX\EOT\DC2\ETX\DLE\NUL/\n\
     \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX'\NUL1\n\
+    \\STX\ETX\ENQ\DC2\ETX\DC1\NUL1\n\
     \\t\n\
-    \\STX\ETX\ACK\DC2\ETX(\NUL1\n\
+    \\STX\ETX\ACK\DC2\ETX\DC2\NUL1\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT*\NULZ\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\DC4\NULD\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX*\b-\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC4\b-\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX+\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\NAK\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX+\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\NAK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX+\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\NAK\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX+\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\NAK\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX,\EOT:\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\SYN\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX,\EOT'\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\SYN\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX,(5\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\SYN(5\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX,89\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\SYN89\n\
     \j\n\
-    \\ETX\EOT\NUL\t\DC2\ETX.\EOT\SI\SUB^ This used to be a `namespace` field which allowed to schedule activity in another namespace.\n\
+    \\ETX\EOT\NUL\t\DC2\ETX\CAN\EOT\SI\SUB^ This used to be a `namespace` field which allowed to schedule activity in another namespace.\n\
     \\n\
     \\v\n\
-    \\EOT\EOT\NUL\t\NUL\DC2\ETX.\r\SO\n\
+    \\EOT\EOT\NUL\t\NUL\DC2\ETX\CAN\r\SO\n\
     \\f\n\
-    \\ENQ\EOT\NUL\t\NUL\SOH\DC2\ETX.\r\SO\n\
+    \\ENQ\EOT\NUL\t\NUL\SOH\DC2\ETX\CAN\r\SO\n\
     \\f\n\
-    \\ENQ\EOT\NUL\t\NUL\STX\DC2\ETX.\r\SO\n\
+    \\ENQ\EOT\NUL\t\NUL\STX\DC2\ETX\CAN\r\SO\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX/\EOT7\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\EM\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX/\EOT'\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\EM\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX/(2\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\EM(2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX/56\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\EM56\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX0\EOT-\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\SUB\EOT-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX0\EOT!\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\SUB\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX0\"(\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\SUB\"(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX0+,\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\SUB+,\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX1\EOT.\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX\ESC\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX1\EOT#\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX\ESC\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX1$)\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX\ESC$)\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX1,-\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX\ESC,-\n\
     \\231\ETX\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX9\EOT;\SUB\217\ETX Indicates how long the caller is willing to wait for activity completion. The \"schedule\" time\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX#\EOT;\SUB\217\ETX Indicates how long the caller is willing to wait for activity completion. The \"schedule\" time\n\
     \ is when the activity is initially scheduled, not when the most recent retry is scheduled.\n\
     \ Limits how long retries will be attempted. Either this or `start_to_close_timeout` must be\n\
     \ specified. When not specified, defaults to the workflow execution timeout.\n\
@@ -7924,13 +7903,13 @@ packedFileDescriptor
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ACK\DC2\ETX9\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ACK\DC2\ETX#\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX9\GS6\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX#\GS6\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX99:\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX#9:\n\
     \\175\ENQ\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETXD\EOT;\SUB\161\ENQ Limits the time an activity task can stay in a task queue before a worker picks it up. The\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETX.\EOT;\SUB\161\ENQ Limits the time an activity task can stay in a task queue before a worker picks it up. The\n\
     \ \"schedule\" time is when the most recent retry is scheduled. This timeout should usually not\n\
     \ be set: it's useful in specific scenarios like worker-specific task queues. This timeout is\n\
     \ always non retryable, as all a retry would achieve is to put it back into the same queue.\n\
@@ -7942,763 +7921,783 @@ packedFileDescriptor
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ACK\DC2\ETXD\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\ACK\ACK\DC2\ETX.\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETXD\GS6\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX.\GS6\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETXD9:\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX.9:\n\
     \\185\STX\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETXJ\EOT8\SUB\171\STX Maximum time an activity is allowed to execute after being picked up by a worker. This\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETX4\EOT8\SUB\171\STX Maximum time an activity is allowed to execute after being picked up by a worker. This\n\
     \ timeout is always retryable. Either this or `schedule_to_close_timeout` must be specified.\n\
     \\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ACK\DC2\ETXJ\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\a\ACK\DC2\ETX4\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETXJ\GS3\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX4\GS3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETXJ67\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX467\n\
     \K\n\
-    \\EOT\EOT\NUL\STX\b\DC2\ETXL\EOT4\SUB> Maximum permitted time between successful worker heartbeats.\n\
+    \\EOT\EOT\NUL\STX\b\DC2\ETX6\EOT4\SUB> Maximum permitted time between successful worker heartbeats.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETXL\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\b\ACK\DC2\ETX6\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETXL\GS.\n\
+    \\ENQ\EOT\NUL\STX\b\SOH\DC2\ETX6\GS.\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETXL13\n\
+    \\ENQ\EOT\NUL\STX\b\ETX\DC2\ETX613\n\
     \\136\STX\n\
-    \\EOT\EOT\NUL\STX\t\DC2\ETXP\EOT9\SUB\250\SOH Activities are provided by a default retry policy which is controlled through the service's\n\
+    \\EOT\EOT\NUL\STX\t\DC2\ETX:\EOT9\SUB\250\SOH Activities are provided by a default retry policy which is controlled through the service's\n\
     \ dynamic configuration. Retries will be attempted until `schedule_to_close_timeout` has\n\
     \ elapsed. To disable retries set retry_policy.maximum_attempts to 1.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\ACK\DC2\ETXP\EOT&\n\
+    \\ENQ\EOT\NUL\STX\t\ACK\DC2\ETX:\EOT&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\SOH\DC2\ETXP'3\n\
+    \\ENQ\EOT\NUL\STX\t\SOH\DC2\ETX:'3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\t\ETX\DC2\ETXP68\n\
+    \\ENQ\EOT\NUL\STX\t\ETX\DC2\ETX:68\n\
     \\189\SOH\n\
     \\EOT\EOT\NUL\STX\n\
-    \\DC2\ETXS\EOT&\SUB\175\SOH Request to start the activity directly bypassing matching service and worker polling\n\
+    \\DC2\ETX=\EOT&\SUB\175\SOH Request to start the activity directly bypassing matching service and worker polling\n\
     \ The slot for executing the activity should be reserved when setting this field to true.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\ENQ\DC2\ETXS\EOT\b\n\
+    \\ENQ\DC2\ETX=\EOT\b\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\SOH\DC2\ETXS\t \n\
+    \\SOH\DC2\ETX=\t \n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\n\
-    \\ETX\DC2\ETXS#%\n\
+    \\ETX\DC2\ETX=#%\n\
     \\193\SOH\n\
-    \\EOT\EOT\NUL\STX\v\DC2\ETXV\EOT$\SUB\179\SOH If this is set, the activity would be assigned to the Build ID of the workflow. Otherwise,\n\
+    \\EOT\EOT\NUL\STX\v\DC2\ETX@\EOT$\SUB\179\SOH If this is set, the activity would be assigned to the Build ID of the workflow. Otherwise,\n\
     \ Assignment rules of the activity's Task Queue will be used to determine the Build ID.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\ENQ\DC2\ETXV\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\v\ENQ\DC2\ETX@\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\SOH\DC2\ETXV\t\RS\n\
+    \\ENQ\EOT\NUL\STX\v\SOH\DC2\ETX@\t\RS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\v\ETX\DC2\ETXV!#\n\
+    \\ENQ\EOT\NUL\STX\v\ETX\DC2\ETX@!#\n\
     \\140\SOH\n\
-    \\EOT\EOT\NUL\STX\f\DC2\ETXY\EOT2\SUB\DEL Priority metadata. If this message is not present, or any fields are not\n\
+    \\EOT\EOT\NUL\STX\f\DC2\ETXC\EOT2\SUB\DEL Priority metadata. If this message is not present, or any fields are not\n\
     \ present, they inherit the values from the workflow.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\ACK\DC2\ETXY\EOT#\n\
+    \\ENQ\EOT\NUL\STX\f\ACK\DC2\ETXC\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\SOH\DC2\ETXY$,\n\
+    \\ENQ\EOT\NUL\STX\f\SOH\DC2\ETXC$,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\f\ETX\DC2\ETXY/1\n\
+    \\ENQ\EOT\NUL\STX\f\ETX\DC2\ETXC/1\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\\\NUL_\SOH\n\
+    \\STX\EOT\SOH\DC2\EOTF\NULI\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\\\b2\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETXF\b2\n\
     \W\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX^\EOT!\SUBJ The `ACTIVITY_TASK_SCHEDULED` event id for the activity being cancelled.\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETXH\EOT!\SUBJ The `ACTIVITY_TASK_SCHEDULED` event id for the activity being cancelled.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX^\EOT\t\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETXH\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX^\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETXH\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX^\US \n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETXH\US \n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOTa\NULj\SOH\n\
+    \\STX\EOT\STX\DC2\EOTK\NULT\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXa\b#\n\
+    \\ETX\EOT\STX\SOH\DC2\ETXK\b#\n\
     \w\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXd\EOT\CAN\SUBj An id for the timer, currently live timers must have different ids. Typically autogenerated\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXN\EOT\CAN\SUBj An id for the timer, currently live timers must have different ids. Typically autogenerated\n\
     \ by the SDK.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXd\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXN\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXd\v\DC3\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXN\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXd\SYN\ETB\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXN\SYN\ETB\n\
     \\199\SOH\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXi\EOT7\SUB\185\SOH How long until the timer fires, producing a `TIMER_FIRED` event.\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXS\EOT7\SUB\185\SOH How long until the timer fires, producing a `TIMER_FIRED` event.\n\
     \\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXi\EOT\FS\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXS\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXi\GS2\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXS\GS2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXi56\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXS56\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOTl\NULn\SOH\n\
+    \\STX\EOT\ETX\DC2\EOTV\NULX\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXl\b2\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXV\b2\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXm\EOT/\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXW\EOT/\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETXm\EOT#\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETXW\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXm$*\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXW$*\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXm-.\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXW-.\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTp\NULr\SOH\n\
+    \\STX\EOT\EOT\DC2\EOTZ\NUL\\\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXp\b.\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXZ\b.\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXq\EOT0\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX[\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXq\EOT#\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX[\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXq$+\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX[$+\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXq./\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX[./\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTt\NULw\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT^\NULa\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXt\b$\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX^\b$\n\
     \=\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXv\EOT\CAN\SUB0 The same timer id from the start timer command\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX`\EOT\CAN\SUB0 The same timer id from the start timer command\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXv\EOT\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX`\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXv\v\DC3\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX`\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXv\SYN\ETB\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX`\SYN\ETB\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTy\NUL{\SOH\n\
+    \\STX\EOT\ACK\DC2\EOTc\NULe\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXy\b0\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXc\b0\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXz\EOT0\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXd\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXz\EOT#\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXd\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXz$+\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXd$+\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXz./\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXd./\n\
+    \\n\
+    \\n\
+    \\STX\EOT\a\DC2\EOTg\NULs\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\a\SOH\DC2\ETXg\b?\n\
     \\v\n\
-    \\STX\EOT\a\DC2\ENQ}\NUL\137\SOH\SOH\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXh\EOT\EM\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXh\EOT\n\
     \\n\
-    \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX}\b?\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXh\v\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXh\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX~\EOT\EM\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETXi\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX~\EOT\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXi\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX~\v\DC4\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXi\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX~\ETB\CAN\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXi\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETX\DEL\EOT\ESC\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETXj\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETX\DEL\EOT\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\ETXj\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX\DEL\v\SYN\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXj\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX\DEL\EM\SUB\n\
-    \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\128\SOH\EOT\SYN\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ENQ\DC2\EOT\128\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\128\SOH\v\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\128\SOH\DC4\NAK\n\
-    \\ESC\n\
-    \\EOT\EOT\a\STX\ETX\DC2\EOT\130\SOH\EOT\ETB\SUB\r Deprecated.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\EOT\130\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\130\SOH\v\DC2\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\130\SOH\NAK\SYN\n\
-    \\239\SOH\n\
-    \\EOT\EOT\a\STX\EOT\DC2\EOT\134\SOH\EOT!\SUB\224\SOH Set this to true if the workflow being cancelled is a child of the workflow originating this\n\
-    \ command. The request will be rejected if it is set to true and the target workflow is *not*\n\
-    \ a child of the requesting workflow.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\EOT\134\SOH\EOT\b\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\134\SOH\t\FS\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\134\SOH\US \n\
-    \6\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\EOT\136\SOH\EOT\SYN\SUB( Reason for requesting the cancellation\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ENQ\DC2\EOT\136\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\136\SOH\v\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\136\SOH\DC4\NAK\n\
-    \\f\n\
-    \\STX\EOT\b\DC2\ACK\139\SOH\NUL\155\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\139\SOH\b8\n\
-    \\f\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\140\SOH\EOT\EM\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\140\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\140\SOH\v\DC4\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\140\SOH\ETB\CAN\n\
-    \\f\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\141\SOH\EOT;\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ACK\DC2\EOT\141\SOH\EOT,\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\141\SOH-6\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\141\SOH9:\n\
-    \W\n\
-    \\EOT\EOT\b\STX\STX\DC2\EOT\143\SOH\EOT\ESC\SUBI The workflow author-defined name of the signal to send to the workflow.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\EOT\143\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\143\SOH\v\SYN\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\143\SOH\EM\SUB\n\
-    \?\n\
-    \\EOT\EOT\b\STX\ETX\DC2\EOT\145\SOH\EOT.\SUB1 Serialized value(s) to provide with the signal.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ACK\DC2\EOT\145\SOH\EOT#\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\EOT\145\SOH$)\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\EOT\145\SOH,-\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXj\DC4\NAK\n\
     \\SUB\n\
-    \\EOT\EOT\b\STX\EOT\DC2\EOT\147\SOH\EOT\ETB\SUB\f Deprecated\n\
+    \\EOT\EOT\a\STX\ETX\DC2\ETXl\EOT+\SUB\r Deprecated.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\EOT\147\SOH\EOT\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETXl\EOT\n\
     \\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETXl\v\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETXl\NAK\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\b\DC2\ETXl\ETB*\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\EOT\SOH\DC2\EOT\147\SOH\v\DC2\n\
+    \\ACK\EOT\a\STX\ETX\b\ETX\DC2\ETXl\CAN)\n\
+    \\238\SOH\n\
+    \\EOT\EOT\a\STX\EOT\DC2\ETXp\EOT!\SUB\224\SOH Set this to true if the workflow being cancelled is a child of the workflow originating this\n\
+    \ command. The request will be rejected if it is set to true and the target workflow is *not*\n\
+    \ a child of the requesting workflow.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETXp\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETXp\t\FS\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETXp\US \n\
+    \5\n\
+    \\EOT\EOT\a\STX\ENQ\DC2\ETXr\EOT\SYN\SUB( Reason for requesting the cancellation\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ENQ\ENQ\DC2\ETXr\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETXr\v\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETXr\DC4\NAK\n\
+    \\v\n\
+    \\STX\EOT\b\DC2\ENQu\NUL\133\SOH\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\b\SOH\DC2\ETXu\b8\n\
+    \\v\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXv\EOT\EM\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXv\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXv\v\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXv\ETB\CAN\n\
+    \\v\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXw\EOT;\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\SOH\ACK\DC2\ETXw\EOT,\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXw-6\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXw9:\n\
+    \V\n\
+    \\EOT\EOT\b\STX\STX\DC2\ETXy\EOT\ESC\SUBI The workflow author-defined name of the signal to send to the workflow.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETXy\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETXy\v\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETXy\EM\SUB\n\
+    \>\n\
+    \\EOT\EOT\b\STX\ETX\DC2\ETX{\EOT.\SUB1 Serialized value(s) to provide with the signal.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\ETX\ACK\DC2\ETX{\EOT#\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETX{$)\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETX{,-\n\
+    \\EM\n\
+    \\EOT\EOT\b\STX\EOT\DC2\ETX}\EOT+\SUB\f Deprecated\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\ETX}\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\SOH\DC2\ETX}\v\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\ETX\DC2\ETX}\NAK\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\b\DC2\ETX}\ETB*\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\EOT\ETX\DC2\EOT\147\SOH\NAK\SYN\n\
+    \\ACK\EOT\b\STX\EOT\b\ETX\DC2\ETX}\CAN)\n\
     \\239\SOH\n\
-    \\EOT\EOT\b\STX\ENQ\DC2\EOT\151\SOH\EOT!\SUB\224\SOH Set this to true if the workflow being cancelled is a child of the workflow originating this\n\
+    \\EOT\EOT\b\STX\ENQ\DC2\EOT\129\SOH\EOT!\SUB\224\SOH Set this to true if the workflow being cancelled is a child of the workflow originating this\n\
     \ command. The request will be rejected if it is set to true and the target workflow is *not*\n\
     \ a child of the requesting workflow.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ENQ\ENQ\DC2\EOT\151\SOH\EOT\b\n\
+    \\ENQ\EOT\b\STX\ENQ\ENQ\DC2\EOT\129\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ENQ\SOH\DC2\EOT\151\SOH\t\FS\n\
+    \\ENQ\EOT\b\STX\ENQ\SOH\DC2\EOT\129\SOH\t\FS\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ENQ\ETX\DC2\EOT\151\SOH\US \n\
+    \\ENQ\EOT\b\STX\ENQ\ETX\DC2\EOT\129\SOH\US \n\
     \\138\SOH\n\
-    \\EOT\EOT\b\STX\ACK\DC2\EOT\154\SOH\EOT-\SUB| Headers that are passed by the workflow that is sending a signal to the external \n\
+    \\EOT\EOT\b\STX\ACK\DC2\EOT\132\SOH\EOT-\SUB| Headers that are passed by the workflow that is sending a signal to the external \n\
     \ workflow that is receiving this signal.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ACK\ACK\DC2\EOT\154\SOH\EOT!\n\
+    \\ENQ\EOT\b\STX\ACK\ACK\DC2\EOT\132\SOH\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ACK\SOH\DC2\EOT\154\SOH\"(\n\
+    \\ENQ\EOT\b\STX\ACK\SOH\DC2\EOT\132\SOH\"(\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\ACK\ETX\DC2\EOT\154\SOH+,\n\
+    \\ENQ\EOT\b\STX\ACK\ETX\DC2\EOT\132\SOH+,\n\
     \\f\n\
-    \\STX\EOT\t\DC2\ACK\157\SOH\NUL\159\SOH\SOH\n\
+    \\STX\EOT\t\DC2\ACK\135\SOH\NUL\137\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\157\SOH\b7\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\135\SOH\b7\n\
     \\f\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\158\SOH\EOTB\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\136\SOH\EOTB\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\158\SOH\EOT+\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\136\SOH\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\158\SOH,=\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\136\SOH,=\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\158\SOH@A\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\136\SOH@A\n\
     \\f\n\
     \\STX\EOT\n\
-    \\DC2\ACK\161\SOH\NUL\166\SOH\SOH\n\
+    \\DC2\ACK\139\SOH\NUL\144\SOH\SOH\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\161\SOH\b1\n\
+    \\SOH\DC2\EOT\139\SOH\b1\n\
     \\242\SOH\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\165\SOH\EOT2\SUB\227\SOH If set, update the workflow memo with the provided values. The values will be merged with\n\
+    \\STX\NUL\DC2\EOT\143\SOH\EOT2\SUB\227\SOH If set, update the workflow memo with the provided values. The values will be merged with\n\
     \ the existing memo. If the user wants to delete values, a default/empty Payload should be\n\
     \ used as the value for the key being deleted.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\165\SOH\EOT\US\n\
+    \\STX\NUL\ACK\DC2\EOT\143\SOH\EOT\US\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\165\SOH -\n\
+    \\STX\NUL\SOH\DC2\EOT\143\SOH -\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\165\SOH01\n\
+    \\STX\NUL\ETX\DC2\EOT\143\SOH01\n\
     \\f\n\
-    \\STX\EOT\v\DC2\ACK\168\SOH\NUL\173\SOH\SOH\n\
+    \\STX\EOT\v\DC2\ACK\146\SOH\NUL\151\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\168\SOH\b%\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\146\SOH\b%\n\
     \\f\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\169\SOH\EOT\ESC\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\147\SOH\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\169\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\147\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\169\SOH\v\SYN\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\147\SOH\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\169\SOH\EM\SUB\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\147\SOH\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\170\SOH\EOT=\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\148\SOH\EOT=\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\170\SOH\EOT0\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\148\SOH\EOT0\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\170\SOH18\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\148\SOH18\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\170\SOH;<\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\148\SOH;<\n\
     \\f\n\
-    \\EOT\EOT\v\STX\STX\DC2\EOT\171\SOH\EOT-\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\149\SOH\EOT-\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\171\SOH\EOT!\n\
+    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\149\SOH\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\171\SOH\"(\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\149\SOH\"(\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\171\SOH+,\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\149\SOH+,\n\
     \\f\n\
-    \\EOT\EOT\v\STX\ETX\DC2\EOT\172\SOH\EOT0\n\
+    \\EOT\EOT\v\STX\ETX\DC2\EOT\150\SOH\EOT0\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ACK\DC2\EOT\172\SOH\EOT#\n\
+    \\ENQ\EOT\v\STX\ETX\ACK\DC2\EOT\150\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\172\SOH$+\n\
+    \\ENQ\EOT\v\STX\ETX\SOH\DC2\EOT\150\SOH$+\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\172\SOH./\n\
+    \\ENQ\EOT\v\STX\ETX\ETX\DC2\EOT\150\SOH./\n\
     \\f\n\
-    \\STX\EOT\f\DC2\ACK\175\SOH\NUL\203\SOH\SOH\n\
+    \\STX\EOT\f\DC2\ACK\153\SOH\NUL\182\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\175\SOH\b7\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\153\SOH\b7\n\
     \\f\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\176\SOH\EOT:\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\154\SOH\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ACK\DC2\EOT\176\SOH\EOT'\n\
+    \\ENQ\EOT\f\STX\NUL\ACK\DC2\EOT\154\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\176\SOH(5\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\154\SOH(5\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\176\SOH89\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\154\SOH89\n\
     \\f\n\
-    \\EOT\EOT\f\STX\SOH\DC2\EOT\177\SOH\EOT7\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\155\SOH\EOT7\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\177\SOH\EOT'\n\
+    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\155\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\177\SOH(2\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\155\SOH(2\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\177\SOH56\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\155\SOH56\n\
     \\f\n\
-    \\EOT\EOT\f\STX\STX\DC2\EOT\178\SOH\EOT.\n\
+    \\EOT\EOT\f\STX\STX\DC2\EOT\156\SOH\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\ACK\DC2\EOT\178\SOH\EOT#\n\
+    \\ENQ\EOT\f\STX\STX\ACK\DC2\EOT\156\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\178\SOH$)\n\
+    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\156\SOH$)\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\178\SOH,-\n\
+    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\156\SOH,-\n\
     \1\n\
-    \\EOT\EOT\f\STX\ETX\DC2\EOT\181\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
+    \\EOT\EOT\f\STX\ETX\DC2\EOT\159\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\ACK\DC2\EOT\181\SOH\EOT\FS\n\
+    \\ENQ\EOT\f\STX\ETX\ACK\DC2\EOT\159\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\181\SOH\GS1\n\
+    \\ENQ\EOT\f\STX\ETX\SOH\DC2\EOT\159\SOH\GS1\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\181\SOH45\n\
+    \\ENQ\EOT\f\STX\ETX\ETX\DC2\EOT\159\SOH45\n\
     \2\n\
-    \\EOT\EOT\f\STX\EOT\DC2\EOT\183\SOH\EOT7\SUB$ Timeout of a single workflow task.\n\
+    \\EOT\EOT\f\STX\EOT\DC2\EOT\161\SOH\EOT7\SUB$ Timeout of a single workflow task.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\ACK\DC2\EOT\183\SOH\EOT\FS\n\
+    \\ENQ\EOT\f\STX\EOT\ACK\DC2\EOT\161\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\183\SOH\GS2\n\
+    \\ENQ\EOT\f\STX\EOT\SOH\DC2\EOT\161\SOH\GS2\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\183\SOH56\n\
+    \\ENQ\EOT\f\STX\EOT\ETX\DC2\EOT\161\SOH56\n\
     \n\n\
-    \\EOT\EOT\f\STX\ENQ\DC2\EOT\185\SOH\EOT8\SUB` How long the workflow start will be delayed - not really a \"backoff\" in the traditional sense.\n\
+    \\EOT\EOT\f\STX\ENQ\DC2\EOT\163\SOH\EOT8\SUB` How long the workflow start will be delayed - not really a \"backoff\" in the traditional sense.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\185\SOH\EOT\FS\n\
+    \\ENQ\EOT\f\STX\ENQ\ACK\DC2\EOT\163\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\185\SOH\GS3\n\
+    \\ENQ\EOT\f\STX\ENQ\SOH\DC2\EOT\163\SOH\GS3\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\185\SOH67\n\
+    \\ENQ\EOT\f\STX\ENQ\ETX\DC2\EOT\163\SOH67\n\
     \\f\n\
-    \\EOT\EOT\f\STX\ACK\DC2\EOT\186\SOH\EOT8\n\
+    \\EOT\EOT\f\STX\ACK\DC2\EOT\164\SOH\EOT8\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\186\SOH\EOT&\n\
+    \\ENQ\EOT\f\STX\ACK\ACK\DC2\EOT\164\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\186\SOH'3\n\
+    \\ENQ\EOT\f\STX\ACK\SOH\DC2\EOT\164\SOH'3\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\186\SOH67\n\
+    \\ENQ\EOT\f\STX\ACK\ETX\DC2\EOT\164\SOH67\n\
     \!\n\
-    \\EOT\EOT\f\STX\a\DC2\EOT\188\SOH\EOT?\SUB\DC3 Should be removed\n\
+    \\EOT\EOT\f\STX\a\DC2\EOT\166\SOH\EOT?\SUB\DC3 Should be removed\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\188\SOH\EOT0\n\
+    \\ENQ\EOT\f\STX\a\ACK\DC2\EOT\166\SOH\EOT0\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\188\SOH1:\n\
+    \\ENQ\EOT\f\STX\a\SOH\DC2\EOT\166\SOH1:\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\188\SOH=>\n\
+    \\ENQ\EOT\f\STX\a\ETX\DC2\EOT\166\SOH=>\n\
     \!\n\
-    \\EOT\EOT\f\STX\b\DC2\EOT\190\SOH\EOT0\SUB\DC3 Should be removed\n\
+    \\EOT\EOT\f\STX\b\DC2\EOT\168\SOH\EOT0\SUB\DC3 Should be removed\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\ACK\DC2\EOT\190\SOH\EOT#\n\
+    \\ENQ\EOT\f\STX\b\ACK\DC2\EOT\168\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\190\SOH$+\n\
+    \\ENQ\EOT\f\STX\b\SOH\DC2\EOT\168\SOH$+\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\190\SOH./\n\
+    \\ENQ\EOT\f\STX\b\ETX\DC2\EOT\168\SOH./\n\
     \!\n\
-    \\EOT\EOT\f\STX\t\DC2\EOT\192\SOH\EOT@\SUB\DC3 Should be removed\n\
+    \\EOT\EOT\f\STX\t\DC2\EOT\170\SOH\EOT@\SUB\DC3 Should be removed\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\t\ACK\DC2\EOT\192\SOH\EOT#\n\
+    \\ENQ\EOT\f\STX\t\ACK\DC2\EOT\170\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\t\SOH\DC2\EOT\192\SOH$:\n\
+    \\ENQ\EOT\f\STX\t\SOH\DC2\EOT\170\SOH$:\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\t\ETX\DC2\EOT\192\SOH=?\n\
+    \\ENQ\EOT\f\STX\t\ETX\DC2\EOT\170\SOH=?\n\
     \^\n\
     \\EOT\EOT\f\STX\n\
-    \\DC2\EOT\194\SOH\EOT\RS\SUBP Should be removed. Not necessarily unused but unclear and not exposed by SDKs.\n\
+    \\DC2\EOT\172\SOH\EOT\RS\SUBP Should be removed. Not necessarily unused but unclear and not exposed by SDKs.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\ENQ\DC2\EOT\194\SOH\EOT\n\
+    \\ENQ\DC2\EOT\172\SOH\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\SOH\DC2\EOT\194\SOH\v\CAN\n\
+    \\SOH\DC2\EOT\172\SOH\v\CAN\n\
     \\r\n\
     \\ENQ\EOT\f\STX\n\
-    \\ETX\DC2\EOT\194\SOH\ESC\GS\n\
+    \\ETX\DC2\EOT\172\SOH\ESC\GS\n\
     \\f\n\
-    \\EOT\EOT\f\STX\v\DC2\EOT\195\SOH\EOT.\n\
+    \\EOT\EOT\f\STX\v\DC2\EOT\173\SOH\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\v\ACK\DC2\EOT\195\SOH\EOT!\n\
+    \\ENQ\EOT\f\STX\v\ACK\DC2\EOT\173\SOH\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\v\SOH\DC2\EOT\195\SOH\"(\n\
+    \\ENQ\EOT\f\STX\v\SOH\DC2\EOT\173\SOH\"(\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\v\ETX\DC2\EOT\195\SOH+-\n\
+    \\ENQ\EOT\f\STX\v\ETX\DC2\EOT\173\SOH+-\n\
     \\f\n\
-    \\EOT\EOT\f\STX\f\DC2\EOT\196\SOH\EOT*\n\
+    \\EOT\EOT\f\STX\f\DC2\EOT\174\SOH\EOT*\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\f\ACK\DC2\EOT\196\SOH\EOT\US\n\
+    \\ENQ\EOT\f\STX\f\ACK\DC2\EOT\174\SOH\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\f\SOH\DC2\EOT\196\SOH $\n\
+    \\ENQ\EOT\f\STX\f\SOH\DC2\EOT\174\SOH $\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\f\ETX\DC2\EOT\196\SOH')\n\
+    \\ENQ\EOT\f\STX\f\ETX\DC2\EOT\174\SOH')\n\
     \\f\n\
-    \\EOT\EOT\f\STX\r\DC2\EOT\197\SOH\EOTC\n\
+    \\EOT\EOT\f\STX\r\DC2\EOT\175\SOH\EOTC\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\r\ACK\DC2\EOT\197\SOH\EOT+\n\
+    \\ENQ\EOT\f\STX\r\ACK\DC2\EOT\175\SOH\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\r\SOH\DC2\EOT\197\SOH,=\n\
+    \\ENQ\EOT\f\STX\r\SOH\DC2\EOT\175\SOH,=\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\r\ETX\DC2\EOT\197\SOH@B\n\
-    \\201\SOH\n\
-    \\EOT\EOT\f\STX\SO\DC2\EOT\200\SOH\EOT\US\SUB\186\SOH If this is set, the new execution inherits the Build ID of the current execution. Otherwise,\n\
+    \\ENQ\EOT\f\STX\r\ETX\DC2\EOT\175\SOH@B\n\
+    \\251\SOH\n\
+    \\EOT\EOT\f\STX\SO\DC2\EOT\179\SOH\EOT3\SUB\236\SOH If this is set, the new execution inherits the Build ID of the current execution. Otherwise,\n\
     \ the assignment rules will be used to independently assign a Build ID to the new execution.\n\
+    \ Deprecated. Only considered for versioning v0.2.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SO\ENQ\DC2\EOT\200\SOH\EOT\b\n\
+    \\ENQ\EOT\f\STX\SO\ENQ\DC2\EOT\179\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SO\SOH\DC2\EOT\200\SOH\t\EM\n\
+    \\ENQ\EOT\f\STX\SO\SOH\DC2\EOT\179\SOH\t\EM\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SO\ETX\DC2\EOT\200\SOH\FS\RS\n\
+    \\ENQ\EOT\f\STX\SO\ETX\DC2\EOT\179\SOH\FS\RS\n\
+    \\r\n\
+    \\ENQ\EOT\f\STX\SO\b\DC2\EOT\179\SOH\US2\n\
+    \\SO\n\
+    \\ACK\EOT\f\STX\SO\b\ETX\DC2\EOT\179\SOH 1\n\
     \\f\n\
-    \\STX\EOT\r\DC2\ACK\205\SOH\NUL\234\SOH\SOH\n\
+    \\STX\EOT\r\DC2\ACK\184\SOH\NUL\214\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\205\SOH\b4\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\184\SOH\b4\n\
     \\f\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\206\SOH\EOT\EM\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\185\SOH\EOT\EM\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\206\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\185\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\206\SOH\v\DC4\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\185\SOH\v\DC4\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\206\SOH\ETB\CAN\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\185\SOH\ETB\CAN\n\
     \\f\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\207\SOH\EOT\ESC\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\186\SOH\EOT\ESC\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\EOT\207\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\EOT\186\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\207\SOH\v\SYN\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\186\SOH\v\SYN\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\207\SOH\EM\SUB\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\186\SOH\EM\SUB\n\
     \\f\n\
-    \\EOT\EOT\r\STX\STX\DC2\EOT\208\SOH\EOT:\n\
+    \\EOT\EOT\r\STX\STX\DC2\EOT\187\SOH\EOT:\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\208\SOH\EOT'\n\
+    \\ENQ\EOT\r\STX\STX\ACK\DC2\EOT\187\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\208\SOH(5\n\
+    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\187\SOH(5\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\208\SOH89\n\
+    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\187\SOH89\n\
     \\f\n\
-    \\EOT\EOT\r\STX\ETX\DC2\EOT\209\SOH\EOT7\n\
+    \\EOT\EOT\r\STX\ETX\DC2\EOT\188\SOH\EOT7\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\209\SOH\EOT'\n\
+    \\ENQ\EOT\r\STX\ETX\ACK\DC2\EOT\188\SOH\EOT'\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\209\SOH(2\n\
+    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\188\SOH(2\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\209\SOH56\n\
+    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\188\SOH56\n\
     \\f\n\
-    \\EOT\EOT\r\STX\EOT\DC2\EOT\210\SOH\EOT.\n\
+    \\EOT\EOT\r\STX\EOT\DC2\EOT\189\SOH\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\210\SOH\EOT#\n\
+    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\189\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\210\SOH$)\n\
+    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\189\SOH$)\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\210\SOH,-\n\
+    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\189\SOH,-\n\
     \W\n\
-    \\EOT\EOT\r\STX\ENQ\DC2\EOT\212\SOH\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
+    \\EOT\EOT\r\STX\ENQ\DC2\EOT\191\SOH\EOT<\SUBI Total workflow execution timeout including retries and continue as new.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\ACK\DC2\EOT\212\SOH\EOT\FS\n\
+    \\ENQ\EOT\r\STX\ENQ\ACK\DC2\EOT\191\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\212\SOH\GS7\n\
+    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\191\SOH\GS7\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\212\SOH:;\n\
+    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\191\SOH:;\n\
     \1\n\
-    \\EOT\EOT\r\STX\ACK\DC2\EOT\214\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
+    \\EOT\EOT\r\STX\ACK\DC2\EOT\193\SOH\EOT6\SUB# Timeout of a single workflow run.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\ACK\DC2\EOT\214\SOH\EOT\FS\n\
+    \\ENQ\EOT\r\STX\ACK\ACK\DC2\EOT\193\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\SOH\DC2\EOT\214\SOH\GS1\n\
+    \\ENQ\EOT\r\STX\ACK\SOH\DC2\EOT\193\SOH\GS1\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\ACK\ETX\DC2\EOT\214\SOH45\n\
+    \\ENQ\EOT\r\STX\ACK\ETX\DC2\EOT\193\SOH45\n\
     \2\n\
-    \\EOT\EOT\r\STX\a\DC2\EOT\216\SOH\EOT7\SUB$ Timeout of a single workflow task.\n\
+    \\EOT\EOT\r\STX\a\DC2\EOT\195\SOH\EOT7\SUB$ Timeout of a single workflow task.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\a\ACK\DC2\EOT\216\SOH\EOT\FS\n\
+    \\ENQ\EOT\r\STX\a\ACK\DC2\EOT\195\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\a\SOH\DC2\EOT\216\SOH\GS2\n\
+    \\ENQ\EOT\r\STX\a\SOH\DC2\EOT\195\SOH\GS2\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\a\ETX\DC2\EOT\216\SOH56\n\
+    \\ENQ\EOT\r\STX\a\ETX\DC2\EOT\195\SOH56\n\
     \7\n\
-    \\EOT\EOT\r\STX\b\DC2\EOT\218\SOH\EOTD\SUB) Default: PARENT_CLOSE_POLICY_TERMINATE.\n\
+    \\EOT\EOT\r\STX\b\DC2\EOT\197\SOH\EOTD\SUB) Default: PARENT_CLOSE_POLICY_TERMINATE.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\b\ACK\DC2\EOT\218\SOH\EOT+\n\
+    \\ENQ\EOT\r\STX\b\ACK\DC2\EOT\197\SOH\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\b\SOH\DC2\EOT\218\SOH,?\n\
+    \\ENQ\EOT\r\STX\b\SOH\DC2\EOT\197\SOH,?\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\b\ETX\DC2\EOT\218\SOHBC\n\
+    \\ENQ\EOT\r\STX\b\ETX\DC2\EOT\197\SOHBC\n\
     \\f\n\
-    \\EOT\EOT\r\STX\t\DC2\EOT\219\SOH\EOT\CAN\n\
+    \\EOT\EOT\r\STX\t\DC2\EOT\198\SOH\EOT\CAN\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\t\ENQ\DC2\EOT\219\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\t\ENQ\DC2\EOT\198\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\t\SOH\DC2\EOT\219\SOH\v\DC2\n\
+    \\ENQ\EOT\r\STX\t\SOH\DC2\EOT\198\SOH\v\DC2\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\t\ETX\DC2\EOT\219\SOH\NAK\ETB\n\
+    \\ENQ\EOT\r\STX\t\ETX\DC2\EOT\198\SOH\NAK\ETB\n\
     \B\n\
     \\EOT\EOT\r\STX\n\
-    \\DC2\EOT\221\SOH\EOTN\SUB4 Default: WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE.\n\
+    \\DC2\EOT\200\SOH\EOTN\SUB4 Default: WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\r\STX\n\
-    \\ACK\DC2\EOT\221\SOH\EOT/\n\
+    \\ACK\DC2\EOT\200\SOH\EOT/\n\
     \\r\n\
     \\ENQ\EOT\r\STX\n\
-    \\SOH\DC2\EOT\221\SOH0H\n\
+    \\SOH\DC2\EOT\200\SOH0H\n\
     \\r\n\
     \\ENQ\EOT\r\STX\n\
-    \\ETX\DC2\EOT\221\SOHKM\n\
+    \\ETX\DC2\EOT\200\SOHKM\n\
     \\f\n\
-    \\EOT\EOT\r\STX\v\DC2\EOT\222\SOH\EOT9\n\
+    \\EOT\EOT\r\STX\v\DC2\EOT\201\SOH\EOT9\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\v\ACK\DC2\EOT\222\SOH\EOT&\n\
+    \\ENQ\EOT\r\STX\v\ACK\DC2\EOT\201\SOH\EOT&\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\v\SOH\DC2\EOT\222\SOH'3\n\
+    \\ENQ\EOT\r\STX\v\SOH\DC2\EOT\201\SOH'3\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\v\ETX\DC2\EOT\222\SOH68\n\
+    \\ENQ\EOT\r\STX\v\ETX\DC2\EOT\201\SOH68\n\
     \A\n\
-    \\EOT\EOT\r\STX\f\DC2\EOT\224\SOH\EOT\RS\SUB3 Establish a cron schedule for the child workflow.\n\
+    \\EOT\EOT\r\STX\f\DC2\EOT\203\SOH\EOT\RS\SUB3 Establish a cron schedule for the child workflow.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\f\ENQ\DC2\EOT\224\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\f\ENQ\DC2\EOT\203\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\f\SOH\DC2\EOT\224\SOH\v\CAN\n\
+    \\ENQ\EOT\r\STX\f\SOH\DC2\EOT\203\SOH\v\CAN\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\f\ETX\DC2\EOT\224\SOH\ESC\GS\n\
+    \\ENQ\EOT\r\STX\f\ETX\DC2\EOT\203\SOH\ESC\GS\n\
     \\f\n\
-    \\EOT\EOT\r\STX\r\DC2\EOT\225\SOH\EOT.\n\
+    \\EOT\EOT\r\STX\r\DC2\EOT\204\SOH\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\r\ACK\DC2\EOT\225\SOH\EOT!\n\
+    \\ENQ\EOT\r\STX\r\ACK\DC2\EOT\204\SOH\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\r\SOH\DC2\EOT\225\SOH\"(\n\
+    \\ENQ\EOT\r\STX\r\SOH\DC2\EOT\204\SOH\"(\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\r\ETX\DC2\EOT\225\SOH+-\n\
+    \\ENQ\EOT\r\STX\r\ETX\DC2\EOT\204\SOH+-\n\
     \\f\n\
-    \\EOT\EOT\r\STX\SO\DC2\EOT\226\SOH\EOT*\n\
+    \\EOT\EOT\r\STX\SO\DC2\EOT\205\SOH\EOT*\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SO\ACK\DC2\EOT\226\SOH\EOT\US\n\
+    \\ENQ\EOT\r\STX\SO\ACK\DC2\EOT\205\SOH\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SO\SOH\DC2\EOT\226\SOH $\n\
+    \\ENQ\EOT\r\STX\SO\SOH\DC2\EOT\205\SOH $\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SO\ETX\DC2\EOT\226\SOH')\n\
+    \\ENQ\EOT\r\STX\SO\ETX\DC2\EOT\205\SOH')\n\
     \\f\n\
-    \\EOT\EOT\r\STX\SI\DC2\EOT\227\SOH\EOTC\n\
+    \\EOT\EOT\r\STX\SI\DC2\EOT\206\SOH\EOTC\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SI\ACK\DC2\EOT\227\SOH\EOT+\n\
+    \\ENQ\EOT\r\STX\SI\ACK\DC2\EOT\206\SOH\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SI\SOH\DC2\EOT\227\SOH,=\n\
+    \\ENQ\EOT\r\STX\SI\SOH\DC2\EOT\206\SOH,=\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SI\ETX\DC2\EOT\227\SOH@B\n\
-    \\202\SOH\n\
-    \\EOT\EOT\r\STX\DLE\DC2\EOT\230\SOH\EOT\US\SUB\187\SOH If this is set, the child workflow inherits the Build ID of the parent. Otherwise, the assignment\n\
+    \\ENQ\EOT\r\STX\SI\ETX\DC2\EOT\206\SOH@B\n\
+    \\252\SOH\n\
+    \\EOT\EOT\r\STX\DLE\DC2\EOT\210\SOH\EOT3\SUB\237\SOH If this is set, the child workflow inherits the Build ID of the parent. Otherwise, the assignment\n\
     \ rules of the child's Task Queue will be used to independently assign a Build ID to it.\n\
+    \ Deprecated. Only considered for versioning v0.2.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\DLE\ENQ\DC2\EOT\230\SOH\EOT\b\n\
+    \\ENQ\EOT\r\STX\DLE\ENQ\DC2\EOT\210\SOH\EOT\b\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\DLE\SOH\DC2\EOT\230\SOH\t\EM\n\
+    \\ENQ\EOT\r\STX\DLE\SOH\DC2\EOT\210\SOH\t\EM\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\DLE\ETX\DC2\EOT\230\SOH\FS\RS\n\
+    \\ENQ\EOT\r\STX\DLE\ETX\DC2\EOT\210\SOH\FS\RS\n\
+    \\r\n\
+    \\ENQ\EOT\r\STX\DLE\b\DC2\EOT\210\SOH\US2\n\
+    \\SO\n\
+    \\ACK\EOT\r\STX\DLE\b\ETX\DC2\EOT\210\SOH 1\n\
     \\141\SOH\n\
-    \\EOT\EOT\r\STX\DC1\DC2\EOT\233\SOH\EOT2\SUB\DEL Priority metadata. If this message is not present, or any fields are not\n\
+    \\EOT\EOT\r\STX\DC1\DC2\EOT\213\SOH\EOT2\SUB\DEL Priority metadata. If this message is not present, or any fields are not\n\
     \ present, they inherit the values from the workflow.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\DC1\ACK\DC2\EOT\233\SOH\EOT#\n\
+    \\ENQ\EOT\r\STX\DC1\ACK\DC2\EOT\213\SOH\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\DC1\SOH\DC2\EOT\233\SOH$,\n\
+    \\ENQ\EOT\r\STX\DC1\SOH\DC2\EOT\213\SOH$,\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\DC1\ETX\DC2\EOT\233\SOH/1\n\
+    \\ENQ\EOT\r\STX\DC1\ETX\DC2\EOT\213\SOH/1\n\
     \\f\n\
-    \\STX\EOT\SO\DC2\ACK\236\SOH\NUL\239\SOH\SOH\n\
+    \\STX\EOT\SO\DC2\ACK\216\SOH\NUL\219\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\236\SOH\b(\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\216\SOH\b(\n\
     \Q\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\238\SOH\EOT\SUB\SUBC The message ID of the message to which this command is a pointer.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\218\SOH\EOT\SUB\SUBC The message ID of the message to which this command is a pointer.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\238\SOH\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\218\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\238\SOH\v\NAK\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\218\SOH\v\NAK\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\238\SOH\CAN\EM\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\218\SOH\CAN\EM\n\
     \\f\n\
-    \\STX\EOT\SI\DC2\ACK\241\SOH\NUL\138\STX\SOH\n\
+    \\STX\EOT\SI\DC2\ACK\221\SOH\NUL\246\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\241\SOH\b/\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\221\SOH\b/\n\
     \]\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\243\SOH\EOT\CAN\SUBO Endpoint name, must exist in the endpoint registry or this command will fail.\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\223\SOH\EOT\CAN\SUBO Endpoint name, must exist in the endpoint registry or this command will fail.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\243\SOH\EOT\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\223\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\243\SOH\v\DC3\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\223\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\243\SOH\SYN\ETB\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\223\SOH\SYN\ETB\n\
     \\GS\n\
-    \\EOT\EOT\SI\STX\SOH\DC2\EOT\245\SOH\EOT\ETB\SUB\SI Service name.\n\
+    \\EOT\EOT\SI\STX\SOH\DC2\EOT\225\SOH\EOT\ETB\SUB\SI Service name.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ENQ\DC2\EOT\245\SOH\EOT\n\
+    \\ENQ\EOT\SI\STX\SOH\ENQ\DC2\EOT\225\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\245\SOH\v\DC2\n\
+    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\225\SOH\v\DC2\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\245\SOH\NAK\SYN\n\
+    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\225\SOH\NAK\SYN\n\
     \\US\n\
-    \\EOT\EOT\SI\STX\STX\DC2\EOT\247\SOH\EOT\EM\SUB\DC1 Operation name.\n\
+    \\EOT\EOT\SI\STX\STX\DC2\EOT\227\SOH\EOT\EM\SUB\DC1 Operation name.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\ENQ\DC2\EOT\247\SOH\EOT\n\
+    \\ENQ\EOT\SI\STX\STX\ENQ\DC2\EOT\227\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\247\SOH\v\DC4\n\
+    \\ENQ\EOT\SI\STX\STX\SOH\DC2\EOT\227\SOH\v\DC4\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\247\SOH\ETB\CAN\n\
+    \\ENQ\EOT\SI\STX\STX\ETX\DC2\EOT\227\SOH\ETB\CAN\n\
     \\188\STX\n\
-    \\EOT\EOT\SI\STX\ETX\DC2\EOT\251\SOH\EOT-\SUB\173\STX Input for the operation. The server converts this into Nexus request content and the appropriate content headers\n\
+    \\EOT\EOT\SI\STX\ETX\DC2\EOT\231\SOH\EOT-\SUB\173\STX Input for the operation. The server converts this into Nexus request content and the appropriate content headers\n\
     \ internally when sending the StartOperation request. On the handler side, if it is also backed by Temporal, the\n\
     \ content is transformed back to the original Payload sent in this command.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\251\SOH\EOT\"\n\
+    \\ENQ\EOT\SI\STX\ETX\ACK\DC2\EOT\231\SOH\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\251\SOH#(\n\
+    \\ENQ\EOT\SI\STX\ETX\SOH\DC2\EOT\231\SOH#(\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\251\SOH+,\n\
+    \\ENQ\EOT\SI\STX\ETX\ETX\DC2\EOT\231\SOH+,\n\
     \\173\STX\n\
-    \\EOT\EOT\SI\STX\EOT\DC2\EOT\129\STX\EOT;\SUB\158\STX Schedule-to-close timeout for this operation.\n\
+    \\EOT\EOT\SI\STX\EOT\DC2\EOT\237\SOH\EOT;\SUB\158\STX Schedule-to-close timeout for this operation.\n\
     \ Indicates how long the caller is willing to wait for operation completion.\n\
     \ Calls are retried internally by the server.\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\EOT\ACK\DC2\EOT\129\STX\EOT\FS\n\
+    \\ENQ\EOT\SI\STX\EOT\ACK\DC2\EOT\237\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\EOT\SOH\DC2\EOT\129\STX\GS6\n\
+    \\ENQ\EOT\SI\STX\EOT\SOH\DC2\EOT\237\SOH\GS6\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\EOT\ETX\DC2\EOT\129\STX9:\n\
+    \\ENQ\EOT\SI\STX\EOT\ETX\DC2\EOT\237\SOH9:\n\
     \\200\ETX\n\
-    \\EOT\EOT\SI\STX\ENQ\DC2\EOT\137\STX\EOT)\SUB\185\ETX Header to attach to the Nexus request.\n\
+    \\EOT\EOT\SI\STX\ENQ\DC2\EOT\245\SOH\EOT)\SUB\185\ETX Header to attach to the Nexus request.\n\
     \ Users are responsible for encrypting sensitive data in this header as it is stored in workflow history and\n\
     \ transmitted to external services as-is.\n\
     \ This is useful for propagating tracing information.\n\
@@ -8706,40 +8705,40 @@ packedFileDescriptor
     \ transmitted to Nexus operations that may be external and are not traditional payloads.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ENQ\ACK\DC2\EOT\137\STX\EOT\ETB\n\
+    \\ENQ\EOT\SI\STX\ENQ\ACK\DC2\EOT\245\SOH\EOT\ETB\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ENQ\SOH\DC2\EOT\137\STX\CAN$\n\
+    \\ENQ\EOT\SI\STX\ENQ\SOH\DC2\EOT\245\SOH\CAN$\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\ENQ\ETX\DC2\EOT\137\STX'(\n\
+    \\ENQ\EOT\SI\STX\ENQ\ETX\DC2\EOT\245\SOH'(\n\
     \\f\n\
-    \\STX\EOT\DLE\DC2\ACK\140\STX\NUL\144\STX\SOH\n\
+    \\STX\EOT\DLE\DC2\ACK\248\SOH\NUL\252\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\140\STX\b4\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\248\SOH\b4\n\
     \\190\SOH\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\143\STX\EOT!\SUB\175\SOH The `NEXUS_OPERATION_SCHEDULED` event ID (a unique identifier) for the operation to be canceled.\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\251\SOH\EOT!\SUB\175\SOH The `NEXUS_OPERATION_SCHEDULED` event ID (a unique identifier) for the operation to be canceled.\n\
     \ The operation may ignore cancellation and end up with any completion state.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\143\STX\EOT\t\n\
+    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\251\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\143\STX\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\251\SOH\n\
     \\FS\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\143\STX\US \n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\251\SOH\US \n\
     \\f\n\
-    \\STX\EOT\DC1\DC2\ACK\146\STX\NUL\181\STX\SOH\n\
+    \\STX\EOT\DC1\DC2\ACK\254\SOH\NUL\161\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DC1\SOH\DC2\EOT\146\STX\b\SI\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\254\SOH\b\SI\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\147\STX\EOT7\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\255\SOH\EOT7\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\EOT\147\STX\EOT%\n\
+    \\ENQ\EOT\DC1\STX\NUL\ACK\DC2\EOT\255\SOH\EOT%\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\147\STX&2\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\255\SOH&2\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\147\STX56\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\255\SOH56\n\
     \\183\ENQ\n\
-    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\158\STX\EOT9\SUB\168\ENQ Metadata on the command. This is sometimes carried over to the history event if one is\n\
+    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\138\STX\EOT9\SUB\168\ENQ Metadata on the command. This is sometimes carried over to the history event if one is\n\
     \ created as a result of the command. Most commands won't have this information, and how this\n\
     \ information is used is dependent upon the interface that reads it.\n\
     \\n\
@@ -8751,155 +8750,155 @@ packedFileDescriptor
     \    started where the summary is used to identify the timer.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ACK\DC2\EOT\158\STX\EOT$\n\
+    \\ENQ\EOT\DC1\STX\SOH\ACK\DC2\EOT\138\STX\EOT$\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\158\STX%2\n\
+    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\138\STX%2\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\158\STX58\n\
+    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\138\STX58\n\
     \R\n\
-    \\EOT\EOT\DC1\b\NUL\DC2\ACK\160\STX\EOT\180\STX\ENQ\SUBB The command details. The type must match that in `command_type`.\n\
+    \\EOT\EOT\DC1\b\NUL\DC2\ACK\140\STX\EOT\160\STX\ENQ\SUBB The command details. The type must match that in `command_type`.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\b\NUL\SOH\DC2\EOT\160\STX\n\
+    \\ENQ\EOT\DC1\b\NUL\SOH\DC2\EOT\140\STX\n\
     \\DC4\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\STX\DC2\EOT\161\STX\b\\\n\
+    \\EOT\EOT\DC1\STX\STX\DC2\EOT\141\STX\b\\\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\STX\ACK\DC2\EOT\161\STX\b-\n\
+    \\ENQ\EOT\DC1\STX\STX\ACK\DC2\EOT\141\STX\b-\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\STX\SOH\DC2\EOT\161\STX.W\n\
+    \\ENQ\EOT\DC1\STX\STX\SOH\DC2\EOT\141\STX.W\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\STX\ETX\DC2\EOT\161\STXZ[\n\
+    \\ENQ\EOT\DC1\STX\STX\ETX\DC2\EOT\141\STXZ[\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\ETX\DC2\EOT\162\STX\bG\n\
+    \\EOT\EOT\DC1\STX\ETX\DC2\EOT\142\STX\bG\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\ACK\DC2\EOT\162\STX\b#\n\
+    \\ENQ\EOT\DC1\STX\ETX\ACK\DC2\EOT\142\STX\b#\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\SOH\DC2\EOT\162\STX$B\n\
+    \\ENQ\EOT\DC1\STX\ETX\SOH\DC2\EOT\142\STX$B\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ETX\ETX\DC2\EOT\162\STXEF\n\
+    \\ENQ\EOT\DC1\STX\ETX\ETX\DC2\EOT\142\STXEF\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\EOT\DC2\EOT\163\STX\bf\n\
+    \\EOT\EOT\DC1\STX\EOT\DC2\EOT\143\STX\bf\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\EOT\ACK\DC2\EOT\163\STX\b2\n\
+    \\ENQ\EOT\DC1\STX\EOT\ACK\DC2\EOT\143\STX\b2\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\EOT\SOH\DC2\EOT\163\STX3a\n\
+    \\ENQ\EOT\DC1\STX\EOT\SOH\DC2\EOT\143\STX3a\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\EOT\ETX\DC2\EOT\163\STXde\n\
+    \\ENQ\EOT\DC1\STX\EOT\ETX\DC2\EOT\143\STXde\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\ENQ\DC2\EOT\164\STX\b^\n\
+    \\EOT\EOT\DC1\STX\ENQ\DC2\EOT\144\STX\b^\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ENQ\ACK\DC2\EOT\164\STX\b.\n\
+    \\ENQ\EOT\DC1\STX\ENQ\ACK\DC2\EOT\144\STX\b.\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ENQ\SOH\DC2\EOT\164\STX/Y\n\
+    \\ENQ\EOT\DC1\STX\ENQ\SOH\DC2\EOT\144\STX/Y\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ENQ\ETX\DC2\EOT\164\STX\\]\n\
+    \\ENQ\EOT\DC1\STX\ENQ\ETX\DC2\EOT\144\STX\\]\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\ACK\DC2\EOT\165\STX\bg\n\
+    \\EOT\EOT\DC1\STX\ACK\DC2\EOT\145\STX\bg\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ACK\ACK\DC2\EOT\165\STX\b2\n\
+    \\ENQ\EOT\DC1\STX\ACK\ACK\DC2\EOT\145\STX\b2\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ACK\SOH\DC2\EOT\165\STX3b\n\
+    \\ENQ\EOT\DC1\STX\ACK\SOH\DC2\EOT\145\STX3b\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\ACK\ETX\DC2\EOT\165\STXef\n\
+    \\ENQ\EOT\DC1\STX\ACK\ETX\DC2\EOT\145\STXef\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\a\DC2\EOT\166\STX\bI\n\
+    \\EOT\EOT\DC1\STX\a\DC2\EOT\146\STX\bI\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\a\ACK\DC2\EOT\166\STX\b$\n\
+    \\ENQ\EOT\DC1\STX\a\ACK\DC2\EOT\146\STX\b$\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\a\SOH\DC2\EOT\166\STX%D\n\
+    \\ENQ\EOT\DC1\STX\a\SOH\DC2\EOT\146\STX%D\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\a\ETX\DC2\EOT\166\STXGH\n\
+    \\ENQ\EOT\DC1\STX\a\ETX\DC2\EOT\146\STXGH\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\b\DC2\EOT\167\STX\bb\n\
+    \\EOT\EOT\DC1\STX\b\DC2\EOT\147\STX\bb\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\b\ACK\DC2\EOT\167\STX\b0\n\
+    \\ENQ\EOT\DC1\STX\b\ACK\DC2\EOT\147\STX\b0\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\b\SOH\DC2\EOT\167\STX1]\n\
+    \\ENQ\EOT\DC1\STX\b\SOH\DC2\EOT\147\STX1]\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\b\ETX\DC2\EOT\167\STX`a\n\
+    \\ENQ\EOT\DC1\STX\b\ETX\DC2\EOT\147\STX`a\n\
     \\r\n\
-    \\EOT\EOT\DC1\STX\t\DC2\ENQ\168\STX\b\130\SOH\n\
+    \\EOT\EOT\DC1\STX\t\DC2\ENQ\148\STX\b\130\SOH\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\t\ACK\DC2\EOT\168\STX\b?\n\
+    \\ENQ\EOT\DC1\STX\t\ACK\DC2\EOT\148\STX\b?\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\t\SOH\DC2\EOT\168\STX@}\n\
+    \\ENQ\EOT\DC1\STX\t\SOH\DC2\EOT\148\STX@}\n\
     \\SI\n\
-    \\ENQ\EOT\DC1\STX\t\ETX\DC2\ACK\168\STX\128\SOH\129\SOH\n\
+    \\ENQ\EOT\DC1\STX\t\ETX\DC2\ACK\148\STX\128\SOH\129\SOH\n\
     \\f\n\
     \\EOT\EOT\DC1\STX\n\
-    \\DC2\EOT\169\STX\bL\n\
+    \\DC2\EOT\149\STX\bL\n\
     \\r\n\
     \\ENQ\EOT\DC1\STX\n\
-    \\ACK\DC2\EOT\169\STX\b%\n\
+    \\ACK\DC2\EOT\149\STX\b%\n\
     \\r\n\
     \\ENQ\EOT\DC1\STX\n\
-    \\SOH\DC2\EOT\169\STX&F\n\
+    \\SOH\DC2\EOT\149\STX&F\n\
     \\r\n\
     \\ENQ\EOT\DC1\STX\n\
-    \\ETX\DC2\EOT\169\STXIK\n\
+    \\ETX\DC2\EOT\149\STXIK\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\v\DC2\EOT\170\STX\bs\n\
+    \\EOT\EOT\DC1\STX\v\DC2\EOT\150\STX\bs\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\v\ACK\DC2\EOT\170\STX\b7\n\
+    \\ENQ\EOT\DC1\STX\v\ACK\DC2\EOT\150\STX\b7\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\v\SOH\DC2\EOT\170\STX8m\n\
+    \\ENQ\EOT\DC1\STX\v\SOH\DC2\EOT\150\STX8m\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\v\ETX\DC2\EOT\170\STXpr\n\
+    \\ENQ\EOT\DC1\STX\v\ETX\DC2\EOT\150\STXpr\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\f\DC2\EOT\171\STX\bl\n\
+    \\EOT\EOT\DC1\STX\f\DC2\EOT\151\STX\bl\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\f\ACK\DC2\EOT\171\STX\b4\n\
+    \\ENQ\EOT\DC1\STX\f\ACK\DC2\EOT\151\STX\b4\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\f\SOH\DC2\EOT\171\STX5f\n\
+    \\ENQ\EOT\DC1\STX\f\SOH\DC2\EOT\151\STX5f\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\f\ETX\DC2\EOT\171\STXik\n\
+    \\ENQ\EOT\DC1\STX\f\ETX\DC2\EOT\151\STXik\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\r\DC2\EOT\172\STX\bt\n\
+    \\EOT\EOT\DC1\STX\r\DC2\EOT\152\STX\bt\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\r\ACK\DC2\EOT\172\STX\b8\n\
+    \\ENQ\EOT\DC1\STX\r\ACK\DC2\EOT\152\STX\b8\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\r\SOH\DC2\EOT\172\STX9n\n\
+    \\ENQ\EOT\DC1\STX\r\SOH\DC2\EOT\152\STX9n\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\r\ETX\DC2\EOT\172\STXqs\n\
+    \\ENQ\EOT\DC1\STX\r\ETX\DC2\EOT\152\STXqs\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\SO\DC2\EOT\173\STX\br\n\
+    \\EOT\EOT\DC1\STX\SO\DC2\EOT\153\STX\br\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SO\ACK\DC2\EOT\173\STX\b7\n\
+    \\ENQ\EOT\DC1\STX\SO\ACK\DC2\EOT\153\STX\b7\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SO\SOH\DC2\EOT\173\STX8l\n\
+    \\ENQ\EOT\DC1\STX\SO\SOH\DC2\EOT\153\STX8l\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SO\ETX\DC2\EOT\173\STXoq\n\
+    \\ENQ\EOT\DC1\STX\SO\ETX\DC2\EOT\153\STXoq\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\SI\DC2\EOT\174\STX\bR\n\
+    \\EOT\EOT\DC1\STX\SI\DC2\EOT\154\STX\bR\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SI\ACK\DC2\EOT\174\STX\b(\n\
+    \\ENQ\EOT\DC1\STX\SI\ACK\DC2\EOT\154\STX\b(\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SI\SOH\DC2\EOT\174\STX)L\n\
+    \\ENQ\EOT\DC1\STX\SI\SOH\DC2\EOT\154\STX)L\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SI\ETX\DC2\EOT\174\STXOQ\n\
+    \\ENQ\EOT\DC1\STX\SI\ETX\DC2\EOT\154\STXOQ\n\
     \n\n\
-    \\EOT\EOT\DC1\STX\DLE\DC2\EOT\176\STX\be\SUB` 16 is available for use - it was used as part of a prototype that never made it into a release\n\
+    \\EOT\EOT\DC1\STX\DLE\DC2\EOT\156\STX\be\SUB` 16 is available for use - it was used as part of a prototype that never made it into a release\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DLE\ACK\DC2\EOT\176\STX\b1\n\
+    \\ENQ\EOT\DC1\STX\DLE\ACK\DC2\EOT\156\STX\b1\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DLE\SOH\DC2\EOT\176\STX2_\n\
+    \\ENQ\EOT\DC1\STX\DLE\SOH\DC2\EOT\156\STX2_\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DLE\ETX\DC2\EOT\176\STXbd\n\
+    \\ENQ\EOT\DC1\STX\DLE\ETX\DC2\EOT\156\STXbd\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\DC1\DC2\EOT\178\STX\ba\n\
+    \\EOT\EOT\DC1\STX\DC1\DC2\EOT\158\STX\ba\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DC1\ACK\DC2\EOT\178\STX\b/\n\
+    \\ENQ\EOT\DC1\STX\DC1\ACK\DC2\EOT\158\STX\b/\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DC1\SOH\DC2\EOT\178\STX0[\n\
+    \\ENQ\EOT\DC1\STX\DC1\SOH\DC2\EOT\158\STX0[\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DC1\ETX\DC2\EOT\178\STX^`\n\
+    \\ENQ\EOT\DC1\STX\DC1\ETX\DC2\EOT\158\STX^`\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\DC2\DC2\EOT\179\STX\bl\n\
+    \\EOT\EOT\DC1\STX\DC2\DC2\EOT\159\STX\bl\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DC2\ACK\DC2\EOT\179\STX\b4\n\
+    \\ENQ\EOT\DC1\STX\DC2\ACK\DC2\EOT\159\STX\b4\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DC2\SOH\DC2\EOT\179\STX5f\n\
+    \\ENQ\EOT\DC1\STX\DC2\SOH\DC2\EOT\159\STX5f\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\DC2\ETX\DC2\EOT\179\STXikb\ACKproto3"
+    \\ENQ\EOT\DC1\STX\DC2\ETX\DC2\EOT\159\STXikb\ACKproto3"

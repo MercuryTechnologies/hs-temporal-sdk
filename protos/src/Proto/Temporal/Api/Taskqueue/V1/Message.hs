@@ -3686,13 +3686,19 @@ instance Control.DeepSeq.NFData TaskQueueVersionSelection where
                       (_TaskQueueVersionSelection'allActive x__) ())))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.currentDeploymentVersion' @:: Lens' TaskQueueVersioningInfo Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'currentDeploymentVersion' @:: Lens' TaskQueueVersioningInfo (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion)@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.currentVersion' @:: Lens' TaskQueueVersioningInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampingDeploymentVersion' @:: Lens' TaskQueueVersioningInfo Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'rampingDeploymentVersion' @:: Lens' TaskQueueVersioningInfo (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion)@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampingVersion' @:: Lens' TaskQueueVersioningInfo Data.Text.Text@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rampingVersionPercentage' @:: Lens' TaskQueueVersioningInfo Prelude.Float@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.updateTime' @:: Lens' TaskQueueVersioningInfo Proto.Google.Protobuf.Timestamp.Timestamp@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'updateTime' @:: Lens' TaskQueueVersioningInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
 data TaskQueueVersioningInfo
-  = TaskQueueVersioningInfo'_constructor {_TaskQueueVersioningInfo'currentVersion :: !Data.Text.Text,
+  = TaskQueueVersioningInfo'_constructor {_TaskQueueVersioningInfo'currentDeploymentVersion :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion),
+                                          _TaskQueueVersioningInfo'currentVersion :: !Data.Text.Text,
+                                          _TaskQueueVersioningInfo'rampingDeploymentVersion :: !(Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion),
                                           _TaskQueueVersioningInfo'rampingVersion :: !Data.Text.Text,
                                           _TaskQueueVersioningInfo'rampingVersionPercentage :: !Prelude.Float,
                                           _TaskQueueVersioningInfo'updateTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
@@ -3704,12 +3710,44 @@ instance Prelude.Show TaskQueueVersioningInfo where
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "currentDeploymentVersion" Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'currentDeploymentVersion
+           (\ x__ y__
+              -> x__ {_TaskQueueVersioningInfo'currentDeploymentVersion = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "maybe'currentDeploymentVersion" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'currentDeploymentVersion
+           (\ x__ y__
+              -> x__ {_TaskQueueVersioningInfo'currentDeploymentVersion = y__}))
+        Prelude.id
 instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "currentVersion" Data.Text.Text where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _TaskQueueVersioningInfo'currentVersion
            (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'currentVersion = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "rampingDeploymentVersion" Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'rampingDeploymentVersion
+           (\ x__ y__
+              -> x__ {_TaskQueueVersioningInfo'rampingDeploymentVersion = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "maybe'rampingDeploymentVersion" (Prelude.Maybe Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueVersioningInfo'rampingDeploymentVersion
+           (\ x__ y__
+              -> x__ {_TaskQueueVersioningInfo'rampingDeploymentVersion = y__}))
         Prelude.id
 instance Data.ProtoLens.Field.HasField TaskQueueVersioningInfo "rampingVersion" Data.Text.Text where
   fieldOf _
@@ -3746,15 +3784,25 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
         "temporal.api.taskqueue.v1.TaskQueueVersioningInfo"
   packedMessageDescriptor _
     = "\n\
-      \\ETBTaskQueueVersioningInfo\DC2'\n\
-      \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersion\DC2'\n\
-      \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersion\DC2<\n\
+      \\ETBTaskQueueVersioningInfo\DC2q\n\
+      \\SUBcurrent_deployment_version\CAN\a \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANcurrentDeploymentVersion\DC2+\n\
+      \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersionB\STX\CAN\SOH\DC2q\n\
+      \\SUBramping_deployment_version\CAN\t \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANrampingDeploymentVersion\DC2+\n\
+      \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersionB\STX\CAN\SOH\DC2<\n\
       \\SUBramping_version_percentage\CAN\ETX \SOH(\STXR\CANrampingVersionPercentage\DC2;\n\
       \\vupdate_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\n\
       \updateTime"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
+        currentDeploymentVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "current_deployment_version"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'currentDeploymentVersion")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
         currentVersion__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "current_version"
@@ -3763,6 +3811,14 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"currentVersion")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
+        rampingDeploymentVersion__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "ramping_deployment_version"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Deployment.V1.Message.WorkerDeploymentVersion)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'rampingDeploymentVersion")) ::
               Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
         rampingVersion__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -3792,7 +3848,10 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
               Data.ProtoLens.FieldDescriptor TaskQueueVersioningInfo
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, currentVersion__field_descriptor),
+          [(Data.ProtoLens.Tag 7, 
+            currentDeploymentVersion__field_descriptor),
+           (Data.ProtoLens.Tag 1, currentVersion__field_descriptor),
+           (Data.ProtoLens.Tag 9, rampingDeploymentVersion__field_descriptor),
            (Data.ProtoLens.Tag 2, rampingVersion__field_descriptor),
            (Data.ProtoLens.Tag 3, rampingVersionPercentage__field_descriptor),
            (Data.ProtoLens.Tag 4, updateTime__field_descriptor)]
@@ -3802,7 +3861,9 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
         (\ x__ y__ -> x__ {_TaskQueueVersioningInfo'_unknownFields = y__})
   defMessage
     = TaskQueueVersioningInfo'_constructor
-        {_TaskQueueVersioningInfo'currentVersion = Data.ProtoLens.fieldDefault,
+        {_TaskQueueVersioningInfo'currentDeploymentVersion = Prelude.Nothing,
+         _TaskQueueVersioningInfo'currentVersion = Data.ProtoLens.fieldDefault,
+         _TaskQueueVersioningInfo'rampingDeploymentVersion = Prelude.Nothing,
          _TaskQueueVersioningInfo'rampingVersion = Data.ProtoLens.fieldDefault,
          _TaskQueueVersioningInfo'rampingVersionPercentage = Data.ProtoLens.fieldDefault,
          _TaskQueueVersioningInfo'updateTime = Prelude.Nothing,
@@ -3830,6 +3891,15 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
+                        58
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "current_deployment_version"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"currentDeploymentVersion") y x)
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -3839,6 +3909,15 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"currentVersion") y x)
+                        74
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "ramping_deployment_version"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"rampingDeploymentVersion") y x)
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -3877,34 +3956,32 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"currentVersion") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'currentDeploymentVersion") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
              ((Data.Monoid.<>)
                 (let
                    _v
                      = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"rampingVersion") _x
+                         (Data.ProtoLens.Field.field @"currentVersion") _x
                  in
                    if (Prelude.==) _v Data.ProtoLens.fieldDefault then
                        Data.Monoid.mempty
                    else
                        (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
                          ((Prelude..)
                             (\ bs
                                -> (Data.Monoid.<>)
@@ -3913,50 +3990,89 @@ instance Data.ProtoLens.Message TaskQueueVersioningInfo where
                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                             Data.Text.Encoding.encodeUtf8 _v))
                 ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"rampingVersionPercentage") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putFixed32
-                               Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+                   (case
+                        Lens.Family2.view
+                          (Data.ProtoLens.Field.field @"maybe'rampingDeploymentVersion") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
                    ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'updateTime") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"rampingVersion") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                               ((Prelude..)
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
+                      ((Data.Monoid.<>)
+                         (let
+                            _v
+                              = Lens.Family2.view
+                                  (Data.ProtoLens.Field.field @"rampingVersionPercentage") _x
+                          in
+                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                Data.Monoid.mempty
+                            else
+                                (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
+                                  ((Prelude..)
+                                     Data.ProtoLens.Encoding.Bytes.putFixed32
+                                     Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+                         ((Data.Monoid.<>)
+                            (case
+                                 Lens.Family2.view
+                                   (Data.ProtoLens.Field.field @"maybe'updateTime") _x
+                             of
+                               Prelude.Nothing -> Data.Monoid.mempty
+                               (Prelude.Just _v)
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                                      ((Prelude..)
+                                         (\ bs
+                                            -> (Data.Monoid.<>)
+                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                    (Prelude.fromIntegral
+                                                       (Data.ByteString.length bs)))
+                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                         Data.ProtoLens.encodeMessage _v))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
 instance Control.DeepSeq.NFData TaskQueueVersioningInfo where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_TaskQueueVersioningInfo'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_TaskQueueVersioningInfo'currentVersion x__)
+                (_TaskQueueVersioningInfo'currentDeploymentVersion x__)
                 (Control.DeepSeq.deepseq
-                   (_TaskQueueVersioningInfo'rampingVersion x__)
+                   (_TaskQueueVersioningInfo'currentVersion x__)
                    (Control.DeepSeq.deepseq
-                      (_TaskQueueVersioningInfo'rampingVersionPercentage x__)
+                      (_TaskQueueVersioningInfo'rampingDeploymentVersion x__)
                       (Control.DeepSeq.deepseq
-                         (_TaskQueueVersioningInfo'updateTime x__) ()))))
+                         (_TaskQueueVersioningInfo'rampingVersion x__)
+                         (Control.DeepSeq.deepseq
+                            (_TaskQueueVersioningInfo'rampingVersionPercentage x__)
+                            (Control.DeepSeq.deepseq
+                               (_TaskQueueVersioningInfo'updateTime x__) ()))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rule' @:: Lens' TimestampedBuildIdAssignmentRule BuildIdAssignmentRule@
@@ -4336,10 +4452,12 @@ packedFileDescriptor
     \\vnormal_name\CAN\ETX \SOH(\tR\n\
     \normalName\"b\n\
     \\DC1TaskQueueMetadata\DC2M\n\
-    \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"\230\SOH\n\
-    \\ETBTaskQueueVersioningInfo\DC2'\n\
-    \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersion\DC2'\n\
-    \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersion\DC2<\n\
+    \\DC4max_tasks_per_second\CAN\SOH \SOH(\v2\FS.google.protobuf.DoubleValueR\DC1maxTasksPerSecond\"\212\ETX\n\
+    \\ETBTaskQueueVersioningInfo\DC2q\n\
+    \\SUBcurrent_deployment_version\CAN\a \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANcurrentDeploymentVersion\DC2+\n\
+    \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersionB\STX\CAN\SOH\DC2q\n\
+    \\SUBramping_deployment_version\CAN\t \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANrampingDeploymentVersion\DC2+\n\
+    \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersionB\STX\CAN\SOH\DC2<\n\
     \\SUBramping_version_percentage\CAN\ETX \SOH(\STXR\CANrampingVersionPercentage\DC2;\n\
     \\vupdate_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\n\
     \updateTime\"y\n\
@@ -4414,234 +4532,234 @@ packedFileDescriptor
     \createTime\"Z\n\
     \\NAKPollerScalingDecision\DC2A\n\
     \\GSpoll_request_delta_suggestion\CAN\SOH \SOH(\ENQR\SUBpollRequestDeltaSuggestionB\152\SOH\n\
-    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\132\DEL\n\
-    \\a\DC2\ENQ\SYN\NUL\209\STX\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\143w\n\
+    \\a\DC2\ENQ\NUL\NUL\188\STX\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\"\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL@\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\"\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL@\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL@\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL@\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL5\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL5\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL5\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL5\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL7\n\
+    \\SOH\b\DC2\ETX\b\NUL7\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL7\n\
+    \\STX\b-\DC2\ETX\b\NUL7\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL8\n\
+    \\SOH\b\DC2\ETX\t\NUL8\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL8\n\
+    \\STX\b%\DC2\ETX\t\NUL8\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL)\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL)\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL(\n\
+    \\STX\ETX\STX\DC2\ETX\r\NUL(\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX%\NUL0\n\
+    \\STX\ETX\ETX\DC2\ETX\SI\NUL0\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX&\NUL.\n\
+    \\STX\ETX\EOT\DC2\ETX\DLE\NUL.\n\
     \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX'\NUL2\n\
+    \\STX\ETX\ENQ\DC2\ETX\DC1\NUL2\n\
     \E\n\
-    \\STX\EOT\NUL\DC2\EOT*\NUL1\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
+    \\STX\EOT\NUL\DC2\EOT\DC4\NUL\ESC\SOH\SUB9 See https://docs.temporal.io/docs/concepts/task-queues/\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX*\b\DC1\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC4\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX+\EOT\DC4\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\NAK\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX+\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\NAK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX+\v\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\NAK\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX+\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\NAK\DC2\DC3\n\
     \/\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX-\EOT1\SUB\" Default: TASK_QUEUE_KIND_NORMAL.\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\ETB\EOT1\SUB\" Default: TASK_QUEUE_KIND_NORMAL.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX-\EOT'\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\ETB\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX-(,\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\ETB(,\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX-/0\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\ETB/0\n\
     \\149\SOH\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX0\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\SUB\EOT\ESC\SUB\135\SOH Iff kind == TASK_QUEUE_KIND_STICKY, then this field contains the name of\n\
     \ the normal task queue that the sticky worker is running on.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX0\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\SUB\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX0\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\SUB\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX0\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\SUB\EM\SUB\n\
     \2\n\
-    \\STX\EOT\SOH\DC2\EOT4\NUL7\SOH\SUB& Only applies to activity task queues\n\
+    \\STX\EOT\SOH\DC2\EOT\RS\NUL!\SOH\SUB& Only applies to activity task queues\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX4\b\EM\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\RS\b\EM\n\
     \B\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX6\EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX \EOT9\SUB5 Allows throttling dispatch of tasks from this queue\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX6\EOT\US\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX \EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX6 4\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX  4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX678\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX 78\n\
     \m\n\
-    \\STX\EOT\STX\DC2\EOT:\NULS\SOH\SUBa Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
+    \\STX\EOT\STX\DC2\EOT$\NUL>\SOH\SUBa Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX:\b\US\n\
-    \\177\EOT\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXC\EOT\US\SUB\163\EOT Always present. Specifies which Deployment Version should receive new workflow\n\
-    \ executions and tasks of existing unversioned or AutoUpgrade workflows.\n\
-    \ Can be one of the following:\n\
-    \ - A Deployment Version identifier in the form \"<deployment_name>.<build_id>\".\n\
-    \ - Or, the \"__unversioned__\" special value, to represent all the unversioned workers (those\n\
-    \   with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
-    \ Note: Current Version is overridden by the Ramping Version for a portion of traffic when a ramp\n\
-    \ is set (see `ramping_version`.)\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX$\b\US\n\
+    \\200\ETX\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX*\EOTV\SUB\186\ETX Specifies which Deployment Version should receive new workflow executions and tasks of\n\
+    \ existing unversioned or AutoUpgrade workflows.\n\
+    \ Nil value represents all the unversioned workers (those with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
+    \ Note: Current Version is overridden by the Ramping Version for a portion of traffic when ramp percentage\n\
+    \ is non-zero (see `ramping_deployment_version` and `ramping_version_percentage`).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX*\EOT6\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX*7Q\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX*TU\n\
+    \<\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX,\EOT3\SUB/ Deprecated. Use `current_deployment_version`.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXC\v\SUB\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX,\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXC\GS\RS\n\
-    \\225\EOT\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXL\EOT\US\SUB\211\EOT When present, it means the traffic is being shifted from the Current Version to the Ramping\n\
-    \ Version.\n\
-    \ Must always be different from `current_version`. Can be one of the following:\n\
-    \ - A Deployment Version identifier in the form \"<deployment_name>.<build_id>\".\n\
-    \ - Or, the \"__unversioned__\" special value, to represent all the unversioned workers (those\n\
-    \   with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX,\v\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX,\GS\RS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\b\DC2\ETX,\US2\n\
+    \\r\n\
+    \\ACK\EOT\STX\STX\SOH\b\ETX\DC2\ETX, 1\n\
+    \\254\ETX\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX3\EOTV\SUB\240\ETX When ramp percentage is non-zero, that portion of traffic is shifted from the Current Version to the Ramping Version.\n\
+    \ Must always be different from `current_deployment_version` unless both are nil.\n\
+    \ Nil value represents all the unversioned workers (those with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
     \ Note that it is possible to ramp from one Version to another Version, or from unversioned\n\
     \ workers to a particular Version, or from a particular Version to unversioned workers.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETXL\EOT\n\
+    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETX3\EOT6\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX37Q\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX3TU\n\
+    \<\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETX5\EOT3\SUB/ Deprecated. Use `ramping_deployment_version`.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXL\v\SUB\n\
+    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX5\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXL\GS\RS\n\
-    \\153\STX\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXP\EOT)\SUB\139\STX Percentage of tasks that are routed to the Ramping Version instead of the Current Version.\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX5\v\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX5\GS\RS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\b\DC2\ETX5\US2\n\
+    \\r\n\
+    \\ACK\EOT\STX\STX\ETX\b\ETX\DC2\ETX5 1\n\
+    \\216\STX\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETX;\EOT)\SUB\202\STX Percentage of tasks that are routed to the Ramping Version instead of the Current Version.\n\
     \ Valid range: [0, 100]. A 100% value means the Ramping Version is receiving full traffic but\n\
     \ not yet \"promoted\" to be the Current Version, likely due to pending validations.\n\
+    \ A 0% value means the Ramping Version is receiving no traffic.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETXP\EOT\t\n\
+    \\ENQ\EOT\STX\STX\EOT\ENQ\DC2\ETX;\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXP\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX;\n\
     \$\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXP'(\n\
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX;'(\n\
     \K\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXR\EOT.\SUB> Last time versioning information of this Task Queue changed.\n\
+    \\EOT\EOT\STX\STX\ENQ\DC2\ETX=\EOT.\SUB> Last time versioning information of this Task Queue changed.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETXR\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\ENQ\ACK\DC2\ETX=\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXR\RS)\n\
+    \\ENQ\EOT\STX\STX\ENQ\SOH\DC2\ETX=\RS)\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXR,-\n\
+    \\ENQ\EOT\STX\STX\ENQ\ETX\DC2\ETX=,-\n\
     \G\n\
-    \\STX\EOT\ETX\DC2\EOTV\NUL^\SOH\SUB; Used for specifying versions the caller is interested in.\n\
+    \\STX\EOT\ETX\DC2\EOTA\NULI\SOH\SUB; Used for specifying versions the caller is interested in.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXV\b!\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXA\b!\n\
     \*\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXX\EOT\"\SUB\GS Include specific Build IDs.\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXC\EOT\"\SUB\GS Include specific Build IDs.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\EOT\DC2\ETXX\EOT\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\EOT\DC2\ETXC\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXX\r\DC3\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXC\r\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXX\DC4\GS\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXC\DC4\GS\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXX !\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXC !\n\
     \-\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXZ\EOT\EM\SUB  Include the unversioned queue.\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXE\EOT\EM\SUB  Include the unversioned queue.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXZ\EOT\b\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXE\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXZ\t\DC4\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXE\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXZ\ETB\CAN\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXE\ETB\CAN\n\
     \\196\SOH\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETX]\EOT\CAN\SUB\182\SOH Include all active versions. A version is considered active if, in the last few minutes,\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETXH\EOT\CAN\SUB\182\SOH Include all active versions. A version is considered active if, in the last few minutes,\n\
     \ it has had new tasks or polls, or it has been the subject of certain task queue API calls.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETX]\EOT\b\n\
+    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETXH\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX]\t\DC3\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXH\t\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX]\SYN\ETB\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXH\SYN\ETB\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT`\NULn\SOH\n\
+    \\STX\EOT\EOT\DC2\EOTK\NULY\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX`\b\FS\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXK\b\FS\n\
     \y\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXb\EOT1\SUBl Task Queue info per Task Type. Key is the numerical value of the temporal.api.enums.v1.TaskQueueType enum.\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXM\EOT1\SUBl Task Queue info per Task Type. Key is the numerical value of the temporal.api.enums.v1.TaskQueueType enum.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXb\EOT!\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXM\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXb\",\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXM\",\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXb/0\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXM/0\n\
     \\235\ENQ\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXm\EOTH\SUB\221\ENQ Task Reachability is eventually consistent; there may be a delay until it converges to the most\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXX\EOTH\SUB\221\ENQ Task Reachability is eventually consistent; there may be a delay until it converges to the most\n\
     \ accurate value but it is designed in a way to take the more conservative side until it converges.\n\
     \ For example REACHABLE is more conservative than CLOSED_WORKFLOWS_ONLY.\n\
     \\n\
@@ -4652,76 +4770,76 @@ packedFileDescriptor
     \ sure to query reachability for the parent/previous workflow's Task Queue as well.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETXm\EOT1\n\
+    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETXX\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXm2C\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXX2C\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXmFG\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXXFG\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTp\NULt\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT[\NUL_\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXp\b\EM\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX[\b\EM\n\
     \\DEL\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXr\EOT$\SUBr Unversioned workers (with `useVersioning=false`) are reported in unversioned result even if they set a Build ID.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX]\EOT$\SUBr Unversioned workers (with `useVersioning=false`) are reported in unversioned result even if they set a Build ID.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETXr\EOT\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETX]\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXr\r\ETB\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX]\r\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXr\CAN\US\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX]\CAN\US\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXr\"#\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX]\"#\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXs\EOT\GS\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX^\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXs\EOT\DC2\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETX^\EOT\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXs\DC3\CAN\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX^\DC3\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXs\ESC\FS\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX^\ESC\FS\n\
     \\179\STX\n\
-    \\STX\EOT\ACK\DC2\ENQz\NUL\167\SOH\SOH\SUB\165\STX TaskQueueStats contains statistics about task queue backlog and activity.\n\
+    \\STX\EOT\ACK\DC2\ENQe\NUL\146\SOH\SOH\SUB\165\STX TaskQueueStats contains statistics about task queue backlog and activity.\n\
     \\n\
     \ For workflow task queue type, this result is partial because tasks sent to sticky queues are not included. Read\n\
     \ comments above each metric to understand the impact of sticky queue exclusion on that metric accuracy.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXz\b\SYN\n\
-    \\162\ETX\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\129\SOH\EOT(\SUB\147\ETX The approximate number of tasks backlogged in this task queue. May count expired tasks but eventually\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXe\b\SYN\n\
+    \\161\ETX\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXl\EOT(\SUB\147\ETX The approximate number of tasks backlogged in this task queue. May count expired tasks but eventually\n\
     \ converges to the right value. Can be relied upon for scaling decisions.\n\
     \\n\
     \ Special note for workflow task queue type: this metric does not count sticky queue tasks. However, because\n\
     \ those tasks only remain valid for a few seconds, the inaccuracy becomes less significant as the backlog size\n\
     \ grows.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\EOT\129\SOH\EOT\t\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\129\SOH\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXl\EOT\t\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXl\n\
     \#\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\129\SOH&'\n\
-    \\152\ETX\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\EOT\136\SOH\EOT9\SUB\137\ETX Approximate age of the oldest task in the backlog based on the creation time of the task at the head of\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXl&'\n\
+    \\151\ETX\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXs\EOT9\SUB\137\ETX Approximate age of the oldest task in the backlog based on the creation time of the task at the head of\n\
     \ the queue. Can be relied upon for scaling decisions.\n\
     \\n\
     \ Special note for workflow task queue type: this metric does not count sticky queue tasks. However, because\n\
     \ those tasks only remain valid for a few seconds, they should not affect the result when backlog is older than\n\
     \ few seconds.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\EOT\136\SOH\EOT\FS\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\EOT\136\SOH\GS4\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\EOT\136\SOH78\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXs\EOT\FS\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXs\GS4\n\
+    \\f\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXs78\n\
     \\188\a\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\EOT\151\SOH\EOT\GS\SUB\173\a The approximate tasks per second added to the task queue, averaging the last 30 seconds. These includes tasks\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\EOT\130\SOH\EOT\GS\SUB\173\a The approximate tasks per second added to the task queue, averaging the last 30 seconds. These includes tasks\n\
     \ whether or not they were added to/dispatched from the backlog or they were dispatched immediately without going\n\
     \ to the backlog (sync-matched).\n\
     \\n\
@@ -4737,14 +4855,14 @@ packedFileDescriptor
     \   worker instance.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\EOT\151\SOH\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\EOT\130\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\EOT\151\SOH\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\EOT\130\SOH\n\
     \\CAN\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\151\SOH\ESC\FS\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\130\SOH\ESC\FS\n\
     \\200\a\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\EOT\166\SOH\EOT\"\SUB\185\a The approximate tasks per second dispatched from the task queue, averaging the last 30 seconds. These includes\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\EOT\145\SOH\EOT\"\SUB\185\a The approximate tasks per second dispatched from the task queue, averaging the last 30 seconds. These includes\n\
     \ tasks whether or not they were added to/dispatched from the backlog or they were dispatched immediately without\n\
     \ going to the backlog (sync-matched).\n\
     \\n\
@@ -4760,291 +4878,291 @@ packedFileDescriptor
     \   worker instance.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ETX\ENQ\DC2\EOT\166\SOH\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\ETX\ENQ\DC2\EOT\145\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\EOT\166\SOH\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\EOT\145\SOH\n\
     \\GS\n\
     \\r\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\EOT\166\SOH !\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\EOT\145\SOH !\n\
     \{\n\
-    \\STX\EOT\a\DC2\ACK\170\SOH\NUL\176\SOH\SOH\SUBm Deprecated. Use `InternalTaskQueueStatus`. This is kept until `DescribeTaskQueue` supports legacy behavior.\n\
+    \\STX\EOT\a\DC2\ACK\149\SOH\NUL\155\SOH\SOH\SUBm Deprecated. Use `InternalTaskQueueStatus`. This is kept until `DescribeTaskQueue` supports legacy behavior.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\170\SOH\b\ETB\n\
+    \\ETX\EOT\a\SOH\DC2\EOT\149\SOH\b\ETB\n\
     \\f\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\171\SOH\EOT!\n\
+    \\EOT\EOT\a\STX\NUL\DC2\EOT\150\SOH\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\171\SOH\EOT\t\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\150\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\171\SOH\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\150\SOH\n\
     \\FS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\171\SOH\US \n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\150\SOH\US \n\
     \\f\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\172\SOH\EOT\EM\n\
+    \\EOT\EOT\a\STX\SOH\DC2\EOT\151\SOH\EOT\EM\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\172\SOH\EOT\t\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\151\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\172\SOH\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\151\SOH\n\
     \\DC4\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\172\SOH\ETB\CAN\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\151\SOH\ETB\CAN\n\
     \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\173\SOH\EOT\CAN\n\
+    \\EOT\EOT\a\STX\STX\DC2\EOT\152\SOH\EOT\CAN\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ENQ\DC2\EOT\173\SOH\EOT\t\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\EOT\152\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\173\SOH\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\152\SOH\n\
     \\DC3\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\173\SOH\SYN\ETB\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\152\SOH\SYN\ETB\n\
     \\f\n\
-    \\EOT\EOT\a\STX\ETX\DC2\EOT\174\SOH\EOT\US\n\
+    \\EOT\EOT\a\STX\ETX\DC2\EOT\153\SOH\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\EOT\174\SOH\EOT\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\EOT\153\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\174\SOH\v\SUB\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\153\SOH\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\174\SOH\GS\RS\n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\153\SOH\GS\RS\n\
     \\f\n\
-    \\EOT\EOT\a\STX\EOT\DC2\EOT\175\SOH\EOT\"\n\
+    \\EOT\EOT\a\STX\EOT\DC2\EOT\154\SOH\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\175\SOH\EOT\SI\n\
+    \\ENQ\EOT\a\STX\EOT\ACK\DC2\EOT\154\SOH\EOT\SI\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\175\SOH\DLE\GS\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\154\SOH\DLE\GS\n\
     \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\175\SOH !\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\154\SOH !\n\
     \\f\n\
-    \\STX\EOT\b\DC2\ACK\178\SOH\NUL\181\SOH\SOH\n\
+    \\STX\EOT\b\DC2\ACK\157\SOH\NUL\160\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\178\SOH\b\DC3\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\157\SOH\b\DC3\n\
     \\f\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\179\SOH\EOT\ETB\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\158\SOH\EOT\ETB\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\179\SOH\EOT\t\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\158\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\179\SOH\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\158\SOH\n\
     \\DC2\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\179\SOH\NAK\SYN\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\158\SOH\NAK\SYN\n\
     \\f\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\180\SOH\EOT\NAK\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\159\SOH\EOT\NAK\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\180\SOH\EOT\t\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\159\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\180\SOH\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\159\SOH\n\
     \\DLE\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\180\SOH\DC3\DC4\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\159\SOH\DC3\DC4\n\
     \\f\n\
-    \\STX\EOT\t\DC2\ACK\183\SOH\NUL\186\SOH\SOH\n\
+    \\STX\EOT\t\DC2\ACK\162\SOH\NUL\165\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\183\SOH\b\"\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\162\SOH\b\"\n\
     \\f\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\184\SOH\EOT\DC3\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\163\SOH\EOT\DC3\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\184\SOH\EOT\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\163\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\184\SOH\v\SO\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\163\SOH\v\SO\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\184\SOH\DC1\DC2\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\163\SOH\DC1\DC2\n\
     \\f\n\
-    \\EOT\EOT\t\STX\SOH\DC2\EOT\185\SOH\EOT\US\n\
+    \\EOT\EOT\t\STX\SOH\DC2\EOT\164\SOH\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\EOT\185\SOH\EOT\n\
+    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\EOT\164\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\185\SOH\v\SUB\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\164\SOH\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\185\SOH\GS\RS\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\164\SOH\GS\RS\n\
     \\f\n\
     \\STX\EOT\n\
-    \\DC2\ACK\188\SOH\NUL\198\SOH\SOH\n\
+    \\DC2\ACK\167\SOH\NUL\177\SOH\SOH\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\188\SOH\b\DC2\n\
+    \\SOH\DC2\EOT\167\SOH\b\DC2\n\
     \\f\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\189\SOH\EOT3\n\
+    \\STX\NUL\DC2\EOT\168\SOH\EOT3\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\189\SOH\EOT\GS\n\
+    \\STX\NUL\ACK\DC2\EOT\168\SOH\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\189\SOH\RS.\n\
+    \\STX\NUL\SOH\DC2\EOT\168\SOH\RS.\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\189\SOH12\n\
+    \\STX\NUL\ETX\DC2\EOT\168\SOH12\n\
     \\f\n\
     \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\190\SOH\EOT\CAN\n\
+    \\STX\SOH\DC2\EOT\169\SOH\EOT\CAN\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ENQ\DC2\EOT\190\SOH\EOT\n\
+    \\STX\SOH\ENQ\DC2\EOT\169\SOH\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\190\SOH\v\DC3\n\
+    \\STX\SOH\SOH\DC2\EOT\169\SOH\v\DC3\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\190\SOH\SYN\ETB\n\
+    \\STX\SOH\ETX\DC2\EOT\169\SOH\SYN\ETB\n\
     \\f\n\
     \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\191\SOH\EOT\US\n\
+    \\STX\STX\DC2\EOT\170\SOH\EOT\US\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ENQ\DC2\EOT\191\SOH\EOT\n\
+    \\STX\STX\ENQ\DC2\EOT\170\SOH\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\191\SOH\v\SUB\n\
+    \\STX\STX\SOH\DC2\EOT\170\SOH\v\SUB\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\191\SOH\GS\RS\n\
+    \\STX\STX\ETX\DC2\EOT\170\SOH\GS\RS\n\
     \\169\SOH\n\
     \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\195\SOH\EOTi\SUB\154\SOH If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
+    \\STX\ETX\DC2\EOT\174\SOH\EOTi\SUB\154\SOH If a worker has opted into the worker versioning feature while polling, its capabilities will\n\
     \ appear here.\n\
     \ Deprecated. Replaced by deployment_options.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\ACK\DC2\EOT\195\SOH\EOT4\n\
+    \\STX\ETX\ACK\DC2\EOT\174\SOH\EOT4\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\195\SOH5P\n\
+    \\STX\ETX\SOH\DC2\EOT\174\SOH5P\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\195\SOHST\n\
+    \\STX\ETX\ETX\DC2\EOT\174\SOHST\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\b\DC2\EOT\195\SOHUh\n\
+    \\STX\ETX\b\DC2\EOT\174\SOHUh\n\
     \\SO\n\
     \\ACK\EOT\n\
-    \\STX\ETX\b\ETX\DC2\EOT\195\SOHVg\n\
+    \\STX\ETX\b\ETX\DC2\EOT\174\SOHVg\n\
     \B\n\
     \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\197\SOH\EOTN\SUB4 Worker deployment options that SDK sent to server.\n\
+    \\STX\EOT\DC2\EOT\176\SOH\EOTN\SUB4 Worker deployment options that SDK sent to server.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ACK\DC2\EOT\197\SOH\EOT6\n\
+    \\STX\EOT\ACK\DC2\EOT\176\SOH\EOT6\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\197\SOH7I\n\
+    \\STX\EOT\SOH\DC2\EOT\176\SOH7I\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\197\SOHLM\n\
+    \\STX\EOT\ETX\DC2\EOT\176\SOHLM\n\
     \\f\n\
-    \\STX\EOT\v\DC2\ACK\200\SOH\NUL\205\SOH\SOH\n\
+    \\STX\EOT\v\DC2\ACK\179\SOH\NUL\184\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\200\SOH\b!\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\179\SOH\b!\n\
     \\f\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\201\SOH\EOT$\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\180\SOH\EOT$\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\201\SOH\EOT\r\n\
+    \\ENQ\EOT\v\STX\NUL\ACK\DC2\EOT\180\SOH\EOT\r\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\201\SOH\SO\US\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\180\SOH\SO\US\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\201\SOH\"#\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\180\SOH\"#\n\
     \\132\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\204\SOH\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\183\SOH\EOT;\SUBv (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\204\SOH\EOT\FS\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\183\SOH\EOT\FS\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\204\SOH\GS6\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\183\SOH\GS6\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\204\SOH9:\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\183\SOH9:\n\
     \\212\SOH\n\
-    \\STX\EOT\f\DC2\ACK\209\SOH\NUL\212\SOH\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
+    \\STX\EOT\f\DC2\ACK\188\SOH\NUL\191\SOH\SOH\SUB\197\SOH Used by the worker versioning APIs, represents an unordered set of one or more versions which are\n\
     \ considered to be compatible with each other. Currently the versions are always worker build IDs.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\209\SOH\b\FS\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\188\SOH\b\FS\n\
     \{\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\211\SOH\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\190\SOH\EOT\"\SUBm All the compatible versions, unordered, except for the last element, which is considered the set \"default\".\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\EOT\DC2\EOT\211\SOH\EOT\f\n\
+    \\ENQ\EOT\f\STX\NUL\EOT\DC2\EOT\190\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\211\SOH\r\DC3\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\EOT\190\SOH\r\DC3\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\211\SOH\DC4\GS\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\190\SOH\DC4\GS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\211\SOH !\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\190\SOH !\n\
     \J\n\
-    \\STX\EOT\r\DC2\ACK\215\SOH\NUL\221\SOH\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
+    \\STX\EOT\r\DC2\ACK\194\SOH\NUL\200\SOH\SOH\SUB< Reachability of tasks for a worker on a single task queue.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\215\SOH\b\GS\n\
+    \\ETX\EOT\r\SOH\DC2\EOT\194\SOH\b\GS\n\
     \\f\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\216\SOH\EOT\SUB\n\
+    \\EOT\EOT\r\STX\NUL\DC2\EOT\195\SOH\EOT\SUB\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\216\SOH\EOT\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\EOT\195\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\216\SOH\v\NAK\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\195\SOH\v\NAK\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\216\SOH\CAN\EM\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\195\SOH\CAN\EM\n\
     \\233\SOH\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\220\SOH\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
+    \\EOT\EOT\r\STX\SOH\DC2\EOT\199\SOH\EOTE\SUB\218\SOH Task reachability for a worker in a single task queue.\n\
     \ See the TaskReachability docstring for information about each enum variant.\n\
     \ If reachability is empty, this worker is considered unreachable in this task queue.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\EOT\DC2\EOT\220\SOH\EOT\f\n\
+    \\ENQ\EOT\r\STX\SOH\EOT\DC2\EOT\199\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\220\SOH\r3\n\
+    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\199\SOH\r3\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\220\SOH4@\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\199\SOH4@\n\
     \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\220\SOHCD\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\199\SOHCD\n\
     \[\n\
-    \\STX\EOT\SO\DC2\ACK\224\SOH\NUL\229\SOH\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
+    \\STX\EOT\SO\DC2\ACK\203\SOH\NUL\208\SOH\SOH\SUBM Reachability of tasks for a worker by build id, in one or more task queues.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\224\SOH\b\ESC\n\
+    \\ETX\EOT\SO\SOH\DC2\EOT\203\SOH\b\ESC\n\
     \3\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\226\SOH\EOT\CAN\SUB% A build id or empty if unversioned.\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\EOT\205\SOH\EOT\CAN\SUB% A build id or empty if unversioned.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\226\SOH\EOT\n\
+    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\EOT\205\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\226\SOH\v\DC3\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\205\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\226\SOH\SYN\ETB\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\205\SOH\SYN\ETB\n\
     \,\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\EOT\228\SOH\EOT?\SUB\RS Reachability per task queue.\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\EOT\207\SOH\EOT?\SUB\RS Reachability per task queue.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\EOT\DC2\EOT\228\SOH\EOT\f\n\
+    \\ENQ\EOT\SO\STX\SOH\EOT\DC2\EOT\207\SOH\EOT\f\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\228\SOH\r\"\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\207\SOH\r\"\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\228\SOH#:\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\207\SOH#:\n\
     \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\228\SOH=>\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\207\SOH=>\n\
     \\f\n\
-    \\STX\EOT\SI\DC2\ACK\231\SOH\NUL\234\SOH\SOH\n\
+    \\STX\EOT\SI\DC2\ACK\210\SOH\NUL\213\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\231\SOH\b\CAN\n\
+    \\ETX\EOT\SI\SOH\DC2\EOT\210\SOH\b\CAN\n\
     \,\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\233\SOH\EOT\RS\SUB\RS Acceptable range is [0,100).\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\EOT\212\SOH\EOT\RS\SUB\RS Acceptable range is [0,100).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\233\SOH\EOT\t\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\EOT\212\SOH\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\233\SOH\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\212\SOH\n\
     \\EM\n\
     \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\233\SOH\FS\GS\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\212\SOH\FS\GS\n\
     \\190\SI\n\
-    \\STX\EOT\DLE\DC2\ACK\145\STX\NUL\158\STX\SOH\SUB\175\SI Assignment rules are applied to *new* Workflow and Activity executions at\n\
+    \\STX\EOT\DLE\DC2\ACK\252\SOH\NUL\137\STX\SOH\SUB\175\SI Assignment rules are applied to *new* Workflow and Activity executions at\n\
     \ schedule time to assign them to a Build ID.\n\
     \\n\
     \ Assignment rules will not be used in the following cases:\n\
@@ -5083,38 +5201,38 @@ packedFileDescriptor
     \ unversioned Worker.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\145\STX\b\GS\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\252\SOH\b\GS\n\
     \\f\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\146\STX\EOT\US\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\253\SOH\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\146\STX\EOT\n\
+    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\253\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\146\STX\v\SUB\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\253\SOH\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\146\STX\GS\RS\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\253\SOH\GS\RS\n\
     \\240\SOH\n\
-    \\EOT\EOT\DLE\b\NUL\DC2\ACK\152\STX\EOT\157\STX\ENQ\SUB\223\SOH If a ramp is provided, this rule will be applied only to a sample of\n\
+    \\EOT\EOT\DLE\b\NUL\DC2\ACK\131\STX\EOT\136\STX\ENQ\SUB\223\SOH If a ramp is provided, this rule will be applied only to a sample of\n\
     \ tasks according to the provided percentage.\n\
     \ This option can be used only on \"terminal\" Build IDs (the ones not used\n\
     \ as source in any redirect rules).\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\b\NUL\SOH\DC2\EOT\152\STX\n\
+    \\ENQ\EOT\DLE\b\NUL\SOH\DC2\EOT\131\STX\n\
     \\SO\n\
     \\167\SOH\n\
-    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\156\STX\b-\SUB\152\SOH This ramp is useful for gradual Blue/Green deployments (and similar)\n\
+    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\135\STX\b-\SUB\152\SOH This ramp is useful for gradual Blue/Green deployments (and similar)\n\
     \ where you want to send a certain portion of the traffic to the target\n\
     \ Build ID.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\156\STX\b\CAN\n\
+    \\ENQ\EOT\DLE\STX\SOH\ACK\DC2\EOT\135\STX\b\CAN\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\156\STX\EM(\n\
+    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\135\STX\EM(\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\156\STX+,\n\
+    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\135\STX+,\n\
     \\144\a\n\
-    \\STX\EOT\DC1\DC2\ACK\180\STX\NUL\187\STX\SOH\SUB\129\a These rules apply to tasks assigned to a particular Build ID\n\
+    \\STX\EOT\DC1\DC2\ACK\159\STX\NUL\166\STX\SOH\SUB\129\a These rules apply to tasks assigned to a particular Build ID\n\
     \ (`source_build_id`) to redirect them to another *compatible* Build ID\n\
     \ (`target_build_id`).\n\
     \\n\
@@ -5136,77 +5254,77 @@ packedFileDescriptor
     \ Redirect rules can be chained.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\DC1\SOH\DC2\EOT\180\STX\b%\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\159\STX\b%\n\
     \\f\n\
-    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\181\STX\EOT\US\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\160\STX\EOT\US\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\181\STX\EOT\n\
+    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\160\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\181\STX\v\SUB\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\160\STX\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\181\STX\GS\RS\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\160\STX\GS\RS\n\
     \\240\SOH\n\
-    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\186\STX\EOT\US\SUB\225\SOH Target Build ID must be compatible with the Source Build ID; that is it\n\
+    \\EOT\EOT\DC1\STX\SOH\DC2\EOT\165\STX\EOT\US\SUB\225\SOH Target Build ID must be compatible with the Source Build ID; that is it\n\
     \ must be able to process event histories made by the Source Build ID by\n\
     \ using [Patching](https://docs.temporal.io/workflows#patching) or other\n\
     \ means.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ENQ\DC2\EOT\186\STX\EOT\n\
+    \\ENQ\EOT\DC1\STX\SOH\ENQ\DC2\EOT\165\STX\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\186\STX\v\SUB\n\
+    \\ENQ\EOT\DC1\STX\SOH\SOH\DC2\EOT\165\STX\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\186\STX\GS\RS\n\
+    \\ENQ\EOT\DC1\STX\SOH\ETX\DC2\EOT\165\STX\GS\RS\n\
     \\f\n\
-    \\STX\EOT\DC2\DC2\ACK\189\STX\NUL\192\STX\SOH\n\
+    \\STX\EOT\DC2\DC2\ACK\168\STX\NUL\171\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DC2\SOH\DC2\EOT\189\STX\b(\n\
+    \\ETX\EOT\DC2\SOH\DC2\EOT\168\STX\b(\n\
     \\f\n\
-    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\190\STX\EOT#\n\
+    \\EOT\EOT\DC2\STX\NUL\DC2\EOT\169\STX\EOT#\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\ACK\DC2\EOT\190\STX\EOT\EM\n\
+    \\ENQ\EOT\DC2\STX\NUL\ACK\DC2\EOT\169\STX\EOT\EM\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\190\STX\SUB\RS\n\
+    \\ENQ\EOT\DC2\STX\NUL\SOH\DC2\EOT\169\STX\SUB\RS\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\190\STX!\"\n\
+    \\ENQ\EOT\DC2\STX\NUL\ETX\DC2\EOT\169\STX!\"\n\
     \\f\n\
-    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\191\STX\EOT.\n\
+    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\170\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\ACK\DC2\EOT\191\STX\EOT\GS\n\
+    \\ENQ\EOT\DC2\STX\SOH\ACK\DC2\EOT\170\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\191\STX\RS)\n\
+    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\170\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\191\STX,-\n\
+    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\170\STX,-\n\
     \\f\n\
-    \\STX\EOT\DC3\DC2\ACK\194\STX\NUL\197\STX\SOH\n\
+    \\STX\EOT\DC3\DC2\ACK\173\STX\NUL\176\STX\SOH\n\
     \\v\n\
-    \\ETX\EOT\DC3\SOH\DC2\EOT\194\STX\b0\n\
+    \\ETX\EOT\DC3\SOH\DC2\EOT\173\STX\b0\n\
     \\f\n\
-    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\195\STX\EOT+\n\
+    \\EOT\EOT\DC3\STX\NUL\DC2\EOT\174\STX\EOT+\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\NUL\ACK\DC2\EOT\195\STX\EOT!\n\
+    \\ENQ\EOT\DC3\STX\NUL\ACK\DC2\EOT\174\STX\EOT!\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\195\STX\"&\n\
+    \\ENQ\EOT\DC3\STX\NUL\SOH\DC2\EOT\174\STX\"&\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\195\STX)*\n\
+    \\ENQ\EOT\DC3\STX\NUL\ETX\DC2\EOT\174\STX)*\n\
     \\f\n\
-    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\196\STX\EOT.\n\
+    \\EOT\EOT\DC3\STX\SOH\DC2\EOT\175\STX\EOT.\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\SOH\ACK\DC2\EOT\196\STX\EOT\GS\n\
+    \\ENQ\EOT\DC3\STX\SOH\ACK\DC2\EOT\175\STX\EOT\GS\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\196\STX\RS)\n\
+    \\ENQ\EOT\DC3\STX\SOH\SOH\DC2\EOT\175\STX\RS)\n\
     \\r\n\
-    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\196\STX,-\n\
+    \\ENQ\EOT\DC3\STX\SOH\ETX\DC2\EOT\175\STX,-\n\
     \s\n\
-    \\STX\EOT\DC4\DC2\ACK\201\STX\NUL\209\STX\SOH\SUBe Attached to task responses to give hints to the SDK about how it may adjust its number of\n\
+    \\STX\EOT\DC4\DC2\ACK\180\STX\NUL\188\STX\SOH\SUBe Attached to task responses to give hints to the SDK about how it may adjust its number of\n\
     \ pollers.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\DC4\SOH\DC2\EOT\201\STX\b\GS\n\
+    \\ETX\EOT\DC4\SOH\DC2\EOT\180\STX\b\GS\n\
     \\220\STX\n\
-    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\208\STX\STX*\SUB\205\STX How many poll requests to suggest should be added or removed, if any. As of now, server only\n\
+    \\EOT\EOT\DC4\STX\NUL\DC2\EOT\187\STX\STX*\SUB\205\STX How many poll requests to suggest should be added or removed, if any. As of now, server only\n\
     \ scales up or down by 1. However, SDKs should allow for other values (while staying within\n\
     \ defined min/max).\n\
     \\n\
@@ -5214,8 +5332,8 @@ packedFileDescriptor
     \ all slots are already occupied.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\ENQ\DC2\EOT\208\STX\STX\a\n\
+    \\ENQ\EOT\DC4\STX\NUL\ENQ\DC2\EOT\187\STX\STX\a\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\208\STX\b%\n\
+    \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\187\STX\b%\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\208\STX()b\ACKproto3"
+    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\187\STX()b\ACKproto3"

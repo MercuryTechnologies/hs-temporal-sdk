@@ -718,162 +718,141 @@ packedFileDescriptor
     \\GSWorkflowInteractionDefinition\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2 \n\
     \\vdescription\CAN\STX \SOH(\tR\vdescriptionB\131\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\NAKWorkflowMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\206\ETB\n\
-    \\ACK\DC2\EOT\SYN\NULF\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SYNio.temporal.api.sdk.v1B\NAKWorkflowMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\228\SO\n\
+    \\ACK\DC2\EOT\NUL\NUL0\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\FS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL4\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\FS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL4\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL4\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL/\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL/\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL/\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL/\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL6\n\
+    \\SOH\b\DC2\ETX\a\NUL6\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL6\n\
+    \\STX\b\b\DC2\ETX\a\NUL6\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL1\n\
+    \\SOH\b\DC2\ETX\b\NUL1\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL1\n\
+    \\STX\b-\DC2\ETX\b\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL2\n\
+    \\SOH\b\DC2\ETX\t\NUL2\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL2\n\
+    \\STX\b%\DC2\ETX\t\NUL2\n\
     \c\n\
-    \\STX\EOT\NUL\DC2\EOT\"\NUL(\SOH\SUBW The name of the query to retrieve this information is `__temporal_workflow_metadata`.\n\
+    \\STX\EOT\NUL\DC2\EOT\f\NUL\DC2\SOH\SUBW The name of the query to retrieve this information is `__temporal_workflow_metadata`.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\"\b\CAN\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\f\b\CAN\n\
     \A\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX$\STX$\SUB4 Metadata provided at declaration or creation time.\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SO\STX$\SUB4 Metadata provided at declaration or creation time.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX$\STX\DC4\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\SO\STX\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX$\NAK\US\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SO\NAK\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX$\"#\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SO\"#\n\
     \\173\SOH\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\STX\GS\SUB\159\SOH Current long-form details of the workflow's state. This is used by user interfaces to show\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC1\STX\GS\SUB\159\SOH Current long-form details of the workflow's state. This is used by user interfaces to show\n\
     \ long-form text. This text may be formatted by the user interface.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX'\STX\b\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\DC1\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\t\CAN\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC1\t\CAN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'\ESC\FS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC1\ESC\FS\n\
     \?\n\
-    \\STX\EOT\SOH\DC2\EOT+\NUL8\SOH\SUB3 (-- api-linter: core::0203::optional=disabled --)\n\
+    \\STX\EOT\SOH\DC2\EOT\NAK\NUL\"\SOH\SUB3 (-- api-linter: core::0203::optional=disabled --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX+\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\NAK\b\SUB\n\
     \\135\SOH\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX.\STX\DC2\SUBz A name scoped by the task queue that maps to this workflow definition.\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\CAN\STX\DC2\SUBz A name scoped by the task queue that maps to this workflow definition.\n\
     \ If missing, this workflow is a dynamic workflow.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX.\STX\b\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\CAN\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX.\t\r\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\CAN\t\r\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX.\DLE\DC1\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\CAN\DLE\DC1\n\
     \1\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX1\STX?\SUB$ Query definitions, sorted by name.\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\ESC\STX?\SUB$ Query definitions, sorted by name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX1\STX\n\
+    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX\ESC\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX1\v(\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\ESC\v(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX1):\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\ESC):\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX1=>\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\ESC=>\n\
     \2\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX4\STX@\SUB% Signal definitions, sorted by name.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\RS\STX@\SUB% Signal definitions, sorted by name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\EOT\DC2\ETX4\STX\n\
+    \\ENQ\EOT\SOH\STX\STX\EOT\DC2\ETX\RS\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX4\v(\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\RS\v(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX4);\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\RS);\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX4>?\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\RS>?\n\
     \2\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX7\STX@\SUB% Update definitions, sorted by name.\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETX!\STX@\SUB% Update definitions, sorted by name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETX7\STX\n\
+    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETX!\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX7\v(\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX!\v(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX7);\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX!);\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX7>?\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX!>?\n\
     \\184\SOH\n\
-    \\STX\EOT\STX\DC2\EOT=\NULF\SOH\SUB\171\SOH (-- api-linter: core::0123::resource-annotation=disabled\n\
+    \\STX\EOT\STX\DC2\EOT'\NUL0\SOH\SUB\171\SOH (-- api-linter: core::0123::resource-annotation=disabled\n\
     \     aip.dev/not-precedent: The `name` field is optional. --)\n\
     \ (-- api-linter: core::0203::optional=disabled --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX=\b%\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX'\b%\n\
     \\222\SOH\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXA\STX\DC2\SUB\208\SOH An optional name for the handler. If missing, it represents\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX+\STX\DC2\SUB\208\SOH An optional name for the handler. If missing, it represents\n\
     \ a dynamic handler that processes any interactions not handled by others.\n\
     \ There is at most one dynamic handler per workflow and interaction kind.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXA\STX\b\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX+\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXA\t\r\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX+\t\r\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXA\DLE\DC1\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX+\DLE\DC1\n\
     \\207\SOH\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXE\STX\EM\SUB\193\SOH An optional interaction description provided by the application.\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX/\STX\EM\SUB\193\SOH An optional interaction description provided by the application.\n\
     \ By convention, external tools may interpret its first part,\n\
     \ i.e., ending with a line break, as a summary of the description.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETXE\STX\b\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX/\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXE\t\DC4\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX/\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXE\ETB\CANb\ACKproto3"
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX/\ETB\CANb\ACKproto3"

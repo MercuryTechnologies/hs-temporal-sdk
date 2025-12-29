@@ -2591,8 +2591,8 @@ instance Data.ProtoLens.Message NexusOperationFailureInfo where
       \\DC2scheduled_event_id\CAN\SOH \SOH(\ETXR\DLEscheduledEventId\DC2\SUB\n\
       \\bendpoint\CAN\STX \SOH(\tR\bendpoint\DC2\CAN\n\
       \\aservice\CAN\ETX \SOH(\tR\aservice\DC2\FS\n\
-      \\toperation\CAN\EOT \SOH(\tR\toperation\DC2!\n\
-      \\foperation_id\CAN\ENQ \SOH(\tR\voperationId\DC2'\n\
+      \\toperation\CAN\EOT \SOH(\tR\toperation\DC2%\n\
+      \\foperation_id\CAN\ENQ \SOH(\tR\voperationIdB\STX\CAN\SOH\DC2'\n\
       \\SIoperation_token\CAN\ACK \SOH(\tR\SOoperationToken"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -3385,13 +3385,13 @@ packedFileDescriptor
     \\DC2initiated_event_id\CAN\EOT \SOH(\ETXR\DLEinitiatedEventId\DC2(\n\
     \\DLEstarted_event_id\CAN\ENQ \SOH(\ETXR\SOstartedEventId\DC2B\n\
     \\vretry_state\CAN\ACK \SOH(\SO2!.temporal.api.enums.v1.RetryStateR\n\
-    \retryState\"\233\SOH\n\
+    \retryState\"\237\SOH\n\
     \\EMNexusOperationFailureInfo\DC2,\n\
     \\DC2scheduled_event_id\CAN\SOH \SOH(\ETXR\DLEscheduledEventId\DC2\SUB\n\
     \\bendpoint\CAN\STX \SOH(\tR\bendpoint\DC2\CAN\n\
     \\aservice\CAN\ETX \SOH(\tR\aservice\DC2\FS\n\
-    \\toperation\CAN\EOT \SOH(\tR\toperation\DC2!\n\
-    \\foperation_id\CAN\ENQ \SOH(\tR\voperationId\DC2'\n\
+    \\toperation\CAN\EOT \SOH(\tR\toperation\DC2%\n\
+    \\foperation_id\CAN\ENQ \SOH(\tR\voperationIdB\STX\CAN\SOH\DC2'\n\
     \\SIoperation_token\CAN\ACK \SOH(\tR\SOoperationToken\"\139\SOH\n\
     \\ETBNexusHandlerFailureInfo\DC2\DC2\n\
     \\EOTtype\CAN\SOH \SOH(\tR\EOTtype\DC2\\\n\
@@ -3417,449 +3417,432 @@ packedFileDescriptor
     \\SUBnexus_handler_failure_info\CAN\SO \SOH(\v20.temporal.api.failure.v1.NexusHandlerFailureInfoH\NULR\ETBnexusHandlerFailureInfoB\SO\n\
     \\ffailure_info\" \n\
     \\RSMultiOperationExecutionAbortedB\142\SOH\n\
-    \\SUBio.temporal.api.failure.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/failure/v1;failure\170\STX\EMTemporalio.Api.Failure.V1\234\STX\FSTemporalio::Api::Failure::V1J\199/\n\
-    \\a\DC2\ENQ\SYN\NUL\152\SOH)\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SUBio.temporal.api.failure.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/failure/v1;failure\170\STX\EMTemporalio.Api.Failure.V1\234\STX\FSTemporalio::Api::Failure::V1J\199&\n\
+    \\a\DC2\ENQ\NUL\NUL\130\SOH)\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL \n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL<\n\
+    \\SOH\STX\DC2\ETX\STX\NUL \n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL<\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL<\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL<\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL3\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL3\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL3\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL5\n\
+    \\SOH\b\DC2\ETX\b\NUL5\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL5\n\
+    \\STX\b-\DC2\ETX\b\NUL5\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL6\n\
+    \\SOH\b\DC2\ETX\t\NUL6\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL6\n\
+    \\STX\b%\DC2\ETX\t\NUL6\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL.\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL.\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL.\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL+\n\
+    \\STX\ETX\STX\DC2\ETX\r\NUL+\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX$\NUL,\n\
+    \\STX\ETX\ETX\DC2\ETX\SO\NUL,\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX&\NUL(\n\
+    \\STX\ETX\EOT\DC2\ETX\DLE\NUL(\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT(\NUL2\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\DC2\NUL\FS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX(\b\RS\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC2\b\RS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX)\EOT\DC4\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC3\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX)\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX)\v\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC3\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX)\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC3\DC2\DC3\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX*\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC4\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX*\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\DC4\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX*\t\SYN\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC4\t\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX*\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC4\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX+\EOT0\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\NAK\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX+\EOT#\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\NAK\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX+$+\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\NAK$+\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX+./\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\NAK./\n\
     \\243\SOH\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX0\EOT2\SUB\229\SOH next_retry_delay can be used by the client to override the activity\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\SUB\EOT2\SUB\229\SOH next_retry_delay can be used by the client to override the activity\n\
     \ retry interval calculated by the retry policy. Retry attempts will\n\
     \ still be subject to the maximum retries limit and total time limit\n\
     \ defined by the policy.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX0\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\SUB\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX0\GS-\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\SUB\GS-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX001\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\SUB01\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX1\EOT@\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX\ESC\EOT@\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX1\EOT2\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX\ESC\EOT2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX13;\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX\ESC3;\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX1>?\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX\ESC>?\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT4\NUL7\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\RS\NUL!\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX4\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\RS\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX5\EOT7\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\US\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX5\EOT%\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\US\EOT%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX5&2\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\US&2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX556\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\US56\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX6\EOT?\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX \EOT?\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX6\EOT#\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX \EOT#\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX6$:\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX $:\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX6=>\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX =>\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT9\NUL;\SOH\n\
+    \\STX\EOT\STX\DC2\EOT#\NUL%\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX9\b\ESC\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX#\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX:\EOT0\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX$\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX:\EOT#\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX$\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX:$+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX$$+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX:./\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX$./\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT=\NUL>\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT'\NUL(\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX=\b\GS\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX'\b\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT@\NULB\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT*\NUL,\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX@\b\EM\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX*\b\EM\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXA\EOT\ESC\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX+\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXA\EOT\b\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX+\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXA\t\SYN\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX+\t\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXA\EM\SUB\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX+\EM\SUB\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTD\NULF\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT.\NUL0\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXD\b \n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX.\b \n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXE\EOT?\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX/\EOT?\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETXE\EOT#\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX/\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXE$:\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX/$:\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXE=>\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX/=>\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTH\NULO\SOH\n\
+    \\STX\EOT\ACK\DC2\EOT2\NUL9\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXH\b\ESC\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETX2\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXI\EOT!\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETX3\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXI\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX3\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXI\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX3\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXI\US \n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX3\US \n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXJ\EOT\US\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETX4\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETXJ\EOT\t\n\
+    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETX4\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXJ\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX4\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXJ\GS\RS\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX4\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXK\EOT\CAN\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETX5\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETXK\EOT\n\
+    \\ENQ\EOT\ACK\STX\STX\ENQ\DC2\ETX5\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXK\v\DC3\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETX5\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXK\SYN\ETB\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETX5\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\ETXL\EOT:\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\ETX6\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETXL\EOT'\n\
+    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETX6\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXL(5\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETX6(5\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXL89\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETX689\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\EOT\DC2\ETXM\EOT\ESC\n\
+    \\EOT\EOT\ACK\STX\EOT\DC2\ETX7\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\ENQ\DC2\ETXM\EOT\n\
+    \\ENQ\EOT\ACK\STX\EOT\ENQ\DC2\ETX7\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\ETXM\v\SYN\n\
+    \\ENQ\EOT\ACK\STX\EOT\SOH\DC2\ETX7\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\ETXM\EM\SUB\n\
+    \\ENQ\EOT\ACK\STX\EOT\ETX\DC2\ETX7\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ENQ\DC2\ETXN\EOT5\n\
+    \\EOT\EOT\ACK\STX\ENQ\DC2\ETX8\EOT5\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\ETXN\EOT$\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ACK\DC2\ETX8\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\ETXN%0\n\
+    \\ENQ\EOT\ACK\STX\ENQ\SOH\DC2\ETX8%0\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\ETXN34\n\
+    \\ENQ\EOT\ACK\STX\ENQ\ETX\DC2\ETX834\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTQ\NULX\SOH\n\
+    \\STX\EOT\a\DC2\EOT;\NULB\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXQ\b)\n\
+    \\ETX\EOT\a\SOH\DC2\ETX;\b)\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXR\EOT\EM\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX<\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXR\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX<\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXR\v\DC4\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX<\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXR\ETB\CAN\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX<\ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETXS\EOTD\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETX=\EOTD\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\ETXS\EOT,\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\ETX=\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXS-?\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX=-?\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXSBC\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX=BC\n\
     \\v\n\
-    \\EOT\EOT\a\STX\STX\DC2\ETXT\EOT:\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETX>\EOT:\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETXT\EOT'\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETX>\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXT(5\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETX>(5\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXT89\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETX>89\n\
     \\v\n\
-    \\EOT\EOT\a\STX\ETX\DC2\ETXU\EOT!\n\
+    \\EOT\EOT\a\STX\ETX\DC2\ETX?\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETXU\EOT\t\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETX?\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETXU\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETX?\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETXU\US \n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETX?\US \n\
     \\v\n\
-    \\EOT\EOT\a\STX\EOT\DC2\ETXV\EOT\US\n\
+    \\EOT\EOT\a\STX\EOT\DC2\ETX@\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETXV\EOT\t\n\
+    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETX@\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETXV\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETX@\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETXV\GS\RS\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETX@\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\ETXW\EOT5\n\
+    \\EOT\EOT\a\STX\ENQ\DC2\ETXA\EOT5\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\ETXW\EOT$\n\
+    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\ETXA\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETXW%0\n\
+    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETXA%0\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETXW34\n\
+    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETXA34\n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTZ\NULi\SOH\n\
+    \\STX\EOT\b\DC2\EOTD\NULS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXZ\b!\n\
+    \\ETX\EOT\b\SOH\DC2\ETXD\b!\n\
     \4\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETX\\\EOT!\SUB' The NexusOperationScheduled event ID.\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXF\EOT!\SUB' The NexusOperationScheduled event ID.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETX\\\EOT\t\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXF\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX\\\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXF\n\
     \\FS\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX\\\US \n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXF\US \n\
     \\GS\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETX^\EOT\CAN\SUB\DLE Endpoint name.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXH\EOT\CAN\SUB\DLE Endpoint name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETX^\EOT\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXH\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETX^\v\DC3\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXH\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETX^\SYN\ETB\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXH\SYN\ETB\n\
     \\FS\n\
-    \\EOT\EOT\b\STX\STX\DC2\ETX`\EOT\ETB\SUB\SI Service name.\n\
+    \\EOT\EOT\b\STX\STX\DC2\ETXJ\EOT\ETB\SUB\SI Service name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETX`\EOT\n\
+    \\ENQ\EOT\b\STX\STX\ENQ\DC2\ETXJ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETX`\v\DC2\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\ETXJ\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETX`\NAK\SYN\n\
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\ETXJ\NAK\SYN\n\
     \\RS\n\
-    \\EOT\EOT\b\STX\ETX\DC2\ETXb\EOT\EM\SUB\DC1 Operation name.\n\
+    \\EOT\EOT\b\STX\ETX\DC2\ETXL\EOT\EM\SUB\DC1 Operation name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\ETXb\EOT\n\
+    \\ENQ\EOT\b\STX\ETX\ENQ\DC2\ETXL\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETXb\v\DC4\n\
+    \\ENQ\EOT\b\STX\ETX\SOH\DC2\ETXL\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETXb\ETB\CAN\n\
+    \\ENQ\EOT\b\STX\ETX\ETX\DC2\ETXL\ETB\CAN\n\
     \~\n\
-    \\EOT\EOT\b\STX\EOT\DC2\ETXf\EOT\FS\SUBq Operation ID - may be empty if the operation completed synchronously.\n\
+    \\EOT\EOT\b\STX\EOT\DC2\ETXP\EOT0\SUBq Operation ID - may be empty if the operation completed synchronously.\n\
     \\n\
-    \ Deprecated: Renamed to operation_token.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\ETXf\EOT\n\
+    \ Deprecated. Renamed to operation_token.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\EOT\SOH\DC2\ETXf\v\ETB\n\
+    \\ENQ\EOT\b\STX\EOT\ENQ\DC2\ETXP\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\EOT\ETX\DC2\ETXf\SUB\ESC\n\
+    \\ENQ\EOT\b\STX\EOT\SOH\DC2\ETXP\v\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\ETX\DC2\ETXP\SUB\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\b\STX\EOT\b\DC2\ETXP\FS/\n\
+    \\r\n\
+    \\ACK\EOT\b\STX\EOT\b\ETX\DC2\ETXP\GS.\n\
     \W\n\
-    \\EOT\EOT\b\STX\ENQ\DC2\ETXh\EOT\US\SUBJ Operation token - may be empty if the operation completed synchronously.\n\
+    \\EOT\EOT\b\STX\ENQ\DC2\ETXR\EOT\US\SUBJ Operation token - may be empty if the operation completed synchronously.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ENQ\ENQ\DC2\ETXh\EOT\n\
+    \\ENQ\EOT\b\STX\ENQ\ENQ\DC2\ETXR\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ENQ\SOH\DC2\ETXh\v\SUB\n\
+    \\ENQ\EOT\b\STX\ENQ\SOH\DC2\ETXR\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\ENQ\ETX\DC2\ETXh\GS\RS\n\
+    \\ENQ\EOT\b\STX\ENQ\ETX\DC2\ETXR\GS\RS\n\
     \\n\
     \\n\
-    \\STX\EOT\t\DC2\EOTk\NULq\SOH\n\
+    \\STX\EOT\t\DC2\EOTU\NUL[\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXk\b\US\n\
+    \\ETX\EOT\t\SOH\DC2\ETXU\b\US\n\
     \\138\SOH\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXn\EOT\DC4\SUB} The Nexus error type as defined in the spec:\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETXX\EOT\DC4\SUB} The Nexus error type as defined in the spec:\n\
     \ https://github.com/nexus-rpc/api/blob/main/SPEC.md#predefined-handler-errors.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXn\EOT\n\
+    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETXX\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXn\v\SI\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXX\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXn\DC2\DC3\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXX\DC2\DC3\n\
     \g\n\
-    \\EOT\EOT\t\STX\SOH\DC2\ETXp\EOTL\SUBZ Retry behavior, defaults to the retry behavior of the error type as defined in the spec.\n\
+    \\EOT\EOT\t\STX\SOH\DC2\ETXZ\EOTL\SUBZ Retry behavior, defaults to the retry behavior of the error type as defined in the spec.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXp\EOT8\n\
+    \\ENQ\EOT\t\STX\SOH\ACK\DC2\ETXZ\EOT8\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXp9G\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXZ9G\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXpJK\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXZJK\n\
     \\v\n\
     \\STX\EOT\n\
-    \\DC2\ENQs\NUL\150\SOH\SOH\n\
+    \\DC2\ENQ]\NUL\128\SOH\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETXs\b\SI\n\
+    \\SOH\DC2\ETX]\b\SI\n\
     \\v\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETXt\EOT\ETB\n\
+    \\STX\NUL\DC2\ETX^\EOT\ETB\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETXt\EOT\n\
+    \\STX\NUL\ENQ\DC2\ETX^\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETXt\v\DC2\n\
+    \\STX\NUL\SOH\DC2\ETX^\v\DC2\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETXt\NAK\SYN\n\
+    \\STX\NUL\ETX\DC2\ETX^\NAK\SYN\n\
     \\165\SOH\n\
     \\EOT\EOT\n\
-    \\STX\SOH\DC2\ETXw\EOT\SYN\SUB\151\SOH The source this Failure originated in, e.g. TypeScriptSDK / JavaSDK\n\
+    \\STX\SOH\DC2\ETXa\EOT\SYN\SUB\151\SOH The source this Failure originated in, e.g. TypeScriptSDK / JavaSDK\n\
     \ In some SDKs this is used to rehydrate the stack trace into an exception object.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ENQ\DC2\ETXw\EOT\n\
+    \\STX\SOH\ENQ\DC2\ETXa\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\ETXw\v\DC1\n\
+    \\STX\SOH\SOH\DC2\ETXa\v\DC1\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\ETXw\DC4\NAK\n\
+    \\STX\SOH\ETX\DC2\ETXa\DC4\NAK\n\
     \\v\n\
     \\EOT\EOT\n\
-    \\STX\STX\DC2\ETXx\EOT\ESC\n\
+    \\STX\STX\DC2\ETXb\EOT\ESC\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ENQ\DC2\ETXx\EOT\n\
+    \\STX\STX\ENQ\DC2\ETXb\EOT\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\ETXx\v\SYN\n\
+    \\STX\STX\SOH\DC2\ETXb\v\SYN\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\ETXx\EM\SUB\n\
-    \\252\a\n\
+    \\STX\STX\ETX\DC2\ETXb\EM\SUB\n\
+    \\251\a\n\
     \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\136\SOH\EOT;\SUB\237\a Alternative way to supply `message` and `stack_trace` and possibly other attributes, used for encryption of\n\
+    \\STX\ETX\DC2\ETXr\EOT;\SUB\237\a Alternative way to supply `message` and `stack_trace` and possibly other attributes, used for encryption of\n\
     \ errors originating in user code which might contain sensitive information.\n\
     \ The `encoded_attributes` Payload could represent any serializable object, e.g. JSON object or a `Failure` proto\n\
     \ message.\n\
@@ -3875,160 +3858,160 @@ packedFileDescriptor
     \ - If there's demand, we could allow overriding the default SDK implementation to encode other opaque Failure attributes.\n\
     \ (-- api-linter: core::0203::optional=disabled --)\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ACK\DC2\EOT\136\SOH\EOT\"\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\136\SOH#5\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\136\SOH8:\n\
     \\f\n\
-    \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\137\SOH\EOT\SYN\n\
-    \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ACK\DC2\EOT\137\SOH\EOT\v\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\137\SOH\f\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\137\SOH\DC4\NAK\n\
-    \\SO\n\
-    \\EOT\EOT\n\
-    \\b\NUL\DC2\ACK\138\SOH\EOT\149\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\b\NUL\SOH\DC2\EOT\138\SOH\n\
-    \\SYN\n\
+    \\STX\ETX\ACK\DC2\ETXr\EOT\"\n\
     \\f\n\
-    \\EOT\EOT\n\
-    \\STX\ENQ\DC2\EOT\139\SOH\b<\n\
-    \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\ACK\DC2\EOT\139\SOH\b\RS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\SOH\DC2\EOT\139\SOH\US7\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ETX\DC2\EOT\139\SOH:;\n\
+    \\STX\ETX\SOH\DC2\ETXr#5\n\
     \\f\n\
-    \\EOT\EOT\n\
-    \\STX\ACK\DC2\EOT\140\SOH\b4\n\
-    \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ACK\ACK\DC2\EOT\140\SOH\b\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ACK\SOH\DC2\EOT\140\SOH\ESC/\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ACK\ETX\DC2\EOT\140\SOH23\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\a\DC2\EOT\141\SOH\b6\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\a\ACK\DC2\EOT\141\SOH\b\ESC\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\a\SOH\DC2\EOT\141\SOH\FS1\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\a\ETX\DC2\EOT\141\SOH45\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\b\DC2\EOT\142\SOH\b:\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\b\ACK\DC2\EOT\142\SOH\b\GS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\b\SOH\DC2\EOT\142\SOH\RS5\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\b\ETX\DC2\EOT\142\SOH89\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\t\DC2\EOT\143\SOH\b2\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\t\ACK\DC2\EOT\143\SOH\b\EM\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\t\SOH\DC2\EOT\143\SOH\SUB-\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\t\ETX\DC2\EOT\143\SOH01\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\n\
-    \\DC2\EOT\144\SOH\bB\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\n\
-    \\ACK\DC2\EOT\144\SOH\b \n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\n\
-    \\SOH\DC2\EOT\144\SOH!<\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\n\
-    \\ETX\DC2\EOT\144\SOH?A\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\v\DC2\EOT\145\SOH\b7\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\v\ACK\DC2\EOT\145\SOH\b\ESC\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\v\SOH\DC2\EOT\145\SOH\FS1\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\v\ETX\DC2\EOT\145\SOH46\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\f\DC2\EOT\146\SOH\bU\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\f\ACK\DC2\EOT\146\SOH\b)\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\f\SOH\DC2\EOT\146\SOH*O\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\f\ETX\DC2\EOT\146\SOHRT\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\r\DC2\EOT\147\SOH\bN\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\r\ACK\DC2\EOT\147\SOH\b!\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\r\SOH\DC2\EOT\147\SOH\"H\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\r\ETX\DC2\EOT\147\SOHKM\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\SO\DC2\EOT\148\SOH\b@\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SO\ACK\DC2\EOT\148\SOH\b\US\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SO\SOH\DC2\EOT\148\SOH :\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SO\ETX\DC2\EOT\148\SOH=?\n\
-    \\n\
-    \\n\
-    \\STX\EOT\v\DC2\EOT\152\SOH\NUL)\n\
+    \\STX\ETX\ETX\DC2\ETXr8:\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\152\SOH\b&b\ACKproto3"
+    \\EOT\EOT\n\
+    \\STX\EOT\DC2\ETXs\EOT\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\ACK\DC2\ETXs\EOT\v\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\SOH\DC2\ETXs\f\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\EOT\ETX\DC2\ETXs\DC4\NAK\n\
+    \\f\n\
+    \\EOT\EOT\n\
+    \\b\NUL\DC2\EOTt\EOT\DEL\ENQ\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\b\NUL\SOH\DC2\ETXt\n\
+    \\SYN\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\ENQ\DC2\ETXu\b<\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\ENQ\ACK\DC2\ETXu\b\RS\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\ENQ\SOH\DC2\ETXu\US7\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\ENQ\ETX\DC2\ETXu:;\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\ACK\DC2\ETXv\b4\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\ACK\ACK\DC2\ETXv\b\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\ACK\SOH\DC2\ETXv\ESC/\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\ACK\ETX\DC2\ETXv23\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\a\DC2\ETXw\b6\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\a\ACK\DC2\ETXw\b\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\a\SOH\DC2\ETXw\FS1\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\a\ETX\DC2\ETXw45\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\b\DC2\ETXx\b:\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\b\ACK\DC2\ETXx\b\GS\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\b\SOH\DC2\ETXx\RS5\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\b\ETX\DC2\ETXx89\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\t\DC2\ETXy\b2\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\t\ACK\DC2\ETXy\b\EM\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\t\SOH\DC2\ETXy\SUB-\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\t\ETX\DC2\ETXy01\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\n\
+    \\DC2\ETXz\bB\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\n\
+    \\ACK\DC2\ETXz\b \n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\n\
+    \\SOH\DC2\ETXz!<\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\n\
+    \\ETX\DC2\ETXz?A\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\v\DC2\ETX{\b7\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\v\ACK\DC2\ETX{\b\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\v\SOH\DC2\ETX{\FS1\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\v\ETX\DC2\ETX{46\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\f\DC2\ETX|\bU\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\f\ACK\DC2\ETX|\b)\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\f\SOH\DC2\ETX|*O\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\f\ETX\DC2\ETX|RT\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\r\DC2\ETX}\bN\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\r\ACK\DC2\ETX}\b!\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\r\SOH\DC2\ETX}\"H\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\r\ETX\DC2\ETX}KM\n\
+    \\v\n\
+    \\EOT\EOT\n\
+    \\STX\SO\DC2\ETX~\b@\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\SO\ACK\DC2\ETX~\b\US\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\SO\SOH\DC2\ETX~ :\n\
+    \\f\n\
+    \\ENQ\EOT\n\
+    \\STX\SO\ETX\DC2\ETX~=?\n\
+    \\n\
+    \\n\
+    \\STX\EOT\v\DC2\EOT\130\SOH\NUL)\n\
+    \\v\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\130\SOH\b&b\ACKproto3"

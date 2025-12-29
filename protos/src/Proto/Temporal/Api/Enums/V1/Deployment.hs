@@ -7,8 +7,11 @@ module Proto.Temporal.Api.Enums.V1.Deployment (
         DeploymentReachability(..), DeploymentReachability(),
         DeploymentReachability'UnrecognizedValue,
         VersionDrainageStatus(..), VersionDrainageStatus(),
-        VersionDrainageStatus'UnrecognizedValue, WorkerVersioningMode(..),
-        WorkerVersioningMode(), WorkerVersioningMode'UnrecognizedValue
+        VersionDrainageStatus'UnrecognizedValue,
+        WorkerDeploymentVersionStatus(..), WorkerDeploymentVersionStatus(),
+        WorkerDeploymentVersionStatus'UnrecognizedValue,
+        WorkerVersioningMode(..), WorkerVersioningMode(),
+        WorkerVersioningMode'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -207,6 +210,126 @@ instance Prelude.Enum VersionDrainageStatus where
 instance Data.ProtoLens.FieldDefault VersionDrainageStatus where
   fieldDefault = VERSION_DRAINAGE_STATUS_UNSPECIFIED
 instance Control.DeepSeq.NFData VersionDrainageStatus where
+  rnf x__ = Prelude.seq x__ ()
+newtype WorkerDeploymentVersionStatus'UnrecognizedValue
+  = WorkerDeploymentVersionStatus'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data WorkerDeploymentVersionStatus
+  = WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED |
+    WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE |
+    WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT |
+    WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING |
+    WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING |
+    WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED |
+    WorkerDeploymentVersionStatus'Unrecognized !WorkerDeploymentVersionStatus'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum WorkerDeploymentVersionStatus where
+  maybeToEnum 0
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+  maybeToEnum 1
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+  maybeToEnum 2
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+  maybeToEnum 3
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+  maybeToEnum 4
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+  maybeToEnum 5
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+  maybeToEnum k
+    = Prelude.Just
+        (WorkerDeploymentVersionStatus'Unrecognized
+           (WorkerDeploymentVersionStatus'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+    = "WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED"
+  showEnum WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+    = "WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE"
+  showEnum WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+    = "WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT"
+  showEnum WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+    = "WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING"
+  showEnum WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+    = "WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING"
+  showEnum WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+    = "WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED"
+  showEnum
+    (WorkerDeploymentVersionStatus'Unrecognized (WorkerDeploymentVersionStatus'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED"
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+    | (Prelude.==) k "WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE"
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+    | (Prelude.==) k "WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT"
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+    | (Prelude.==) k "WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING"
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+    | (Prelude.==) k "WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING"
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+    | (Prelude.==) k "WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED"
+    = Prelude.Just WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded WorkerDeploymentVersionStatus where
+  minBound = WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+  maxBound = WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+instance Prelude.Enum WorkerDeploymentVersionStatus where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum WorkerDeploymentVersionStatus: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED = 0
+  fromEnum WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE = 1
+  fromEnum WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT = 2
+  fromEnum WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING = 3
+  fromEnum WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING = 4
+  fromEnum WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED = 5
+  fromEnum
+    (WorkerDeploymentVersionStatus'Unrecognized (WorkerDeploymentVersionStatus'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+    = Prelude.error
+        "WorkerDeploymentVersionStatus.succ: bad argument WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED. This value would be out of bounds."
+  succ WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+    = WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+  succ WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+    = WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+  succ WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+    = WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+  succ WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+    = WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+  succ WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+    = WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+  succ (WorkerDeploymentVersionStatus'Unrecognized _)
+    = Prelude.error
+        "WorkerDeploymentVersionStatus.succ: bad argument: unrecognized value"
+  pred WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+    = Prelude.error
+        "WorkerDeploymentVersionStatus.pred: bad argument WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED. This value would be out of bounds."
+  pred WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+    = WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+  pred WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+    = WORKER_DEPLOYMENT_VERSION_STATUS_INACTIVE
+  pred WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+    = WORKER_DEPLOYMENT_VERSION_STATUS_CURRENT
+  pred WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+    = WORKER_DEPLOYMENT_VERSION_STATUS_RAMPING
+  pred WORKER_DEPLOYMENT_VERSION_STATUS_DRAINED
+    = WORKER_DEPLOYMENT_VERSION_STATUS_DRAINING
+  pred (WorkerDeploymentVersionStatus'Unrecognized _)
+    = Prelude.error
+        "WorkerDeploymentVersionStatus.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault WorkerDeploymentVersionStatus where
+  fieldDefault = WORKER_DEPLOYMENT_VERSION_STATUS_UNSPECIFIED
+instance Control.DeepSeq.NFData WorkerDeploymentVersionStatus where
   rnf x__ = Prelude.seq x__ ()
 newtype WorkerVersioningMode'UnrecognizedValue
   = WorkerVersioningMode'UnrecognizedValue Data.Int.Int32

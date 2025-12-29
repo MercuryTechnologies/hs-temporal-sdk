@@ -406,66 +406,45 @@ packedFileDescriptor
     \\bsdk_name\CAN\ETX \SOH(\tR\asdkName\DC2\US\n\
     \\vsdk_version\CAN\EOT \SOH(\tR\n\
     \sdkVersionB\135\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\EMTaskCompleteMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\164\FS\n\
-    \\ACK\DC2\EOT\SYN\NULK\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SYNio.temporal.api.sdk.v1B\EMTaskCompleteMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\186\DC3\n\
+    \\ACK\DC2\EOT\NUL\NUL5\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\FS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL4\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\FS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL4\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL4\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL/\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL/\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL/\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL/\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL:\n\
+    \\SOH\b\DC2\ETX\a\NUL:\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL:\n\
+    \\STX\b\b\DC2\ETX\a\NUL:\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL1\n\
+    \\SOH\b\DC2\ETX\b\NUL1\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL1\n\
+    \\STX\b-\DC2\ETX\b\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL2\n\
+    \\SOH\b\DC2\ETX\t\NUL2\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL2\n\
+    \\STX\b%\DC2\ETX\t\NUL2\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT!\NULK\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\v\NUL5\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX!\b%\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\v\b%\n\
     \\143\b\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX5\STX&\SUB\129\b Internal flags used by the core SDK. SDKs using flags must comply with the following behavior:\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\US\STX&\SUB\129\b Internal flags used by the core SDK. SDKs using flags must comply with the following behavior:\n\
     \\n\
     \ During replay:\n\
     \ * If a flag is not recognized (value is too high or not defined), it must fail the workflow\n\
@@ -486,16 +465,16 @@ packedFileDescriptor
     \     aip.dev/not-precedent: These really shouldn't have negative values. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\EOT\DC2\ETX5\STX\n\
+    \\ENQ\EOT\NUL\STX\NUL\EOT\DC2\ETX\US\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX5\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\US\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX5\DC2!\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\US\DC2!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX5$%\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\US$%\n\
     \\139\ETX\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX=\STX&\SUB\253\STX Flags used by the SDK lang. No attempt is made to distinguish between different SDK languages\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\STX&\SUB\253\STX Flags used by the SDK lang. No attempt is made to distinguish between different SDK languages\n\
     \ here as processing a workflow with a different language than the one which authored it is\n\
     \ already undefined behavior. See `core_used_patches` for more.\n\
     \\n\
@@ -503,16 +482,16 @@ packedFileDescriptor
     \     aip.dev/not-precedent: These really shouldn't have negative values. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\EOT\DC2\ETX=\STX\n\
+    \\ENQ\EOT\NUL\STX\SOH\EOT\DC2\ETX'\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX=\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX'\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX=\DC2!\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\DC2!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX=$%\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'$%\n\
     \\137\ETX\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETXE\STX\SYN\SUB\251\STX Name of the SDK that processed the task. This is usually something like \"temporal-go\" and is\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX/\STX\SYN\SUB\251\STX Name of the SDK that processed the task. This is usually something like \"temporal-go\" and is\n\
     \ usually the same as client-name gRPC header. This should only be set if its value changed\n\
     \ since the last time recorded on the workflow (or be set on the first task).\n\
     \\n\
@@ -520,19 +499,19 @@ packedFileDescriptor
     \     aip.dev/not-precedent: We're ok with a name suffix here. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETXE\STX\b\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX/\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETXE\t\DC1\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX/\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETXE\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX/\DC4\NAK\n\
     \\149\STX\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETXJ\STX\EM\SUB\135\STX Version of the SDK that processed the task. This is usually something like \"1.20.0\" and is\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX4\STX\EM\SUB\135\STX Version of the SDK that processed the task. This is usually something like \"1.20.0\" and is\n\
     \ usually the same as client-version gRPC header. This should only be set if its value changed\n\
     \ since the last time recorded on the workflow (or be set on the first task).\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETXJ\STX\b\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX4\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETXJ\t\DC4\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX4\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETXJ\ETB\CANb\ACKproto3"
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX4\ETB\CANb\ACKproto3"

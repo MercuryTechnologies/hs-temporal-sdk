@@ -105,6 +105,8 @@ library
       Proto.Temporal.Api.Update.V1.Message_Fields
       Proto.Temporal.Api.Version.V1.Message
       Proto.Temporal.Api.Version.V1.Message_Fields
+      Proto.Temporal.Api.Worker.V1.Message
+      Proto.Temporal.Api.Worker.V1.Message_Fields
       Proto.Temporal.Api.Workflow.V1.Message
       Proto.Temporal.Api.Workflow.V1.Message_Fields
       Proto.Temporal.Api.Workflowservice.V1.RequestResponse

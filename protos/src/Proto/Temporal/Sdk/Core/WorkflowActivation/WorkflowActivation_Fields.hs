@@ -324,12 +324,13 @@ maybe'notifyHasPatch ::
   Lens.Family2.LensLike' f s a
 maybe'notifyHasPatch
   = Data.ProtoLens.Field.field @"maybe'notifyHasPatch"
-maybe'operationId ::
+maybe'operationToken ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'operationId" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'operationToken" a) =>
   Lens.Family2.LensLike' f s a
-maybe'operationId = Data.ProtoLens.Field.field @"maybe'operationId"
+maybe'operationToken
+  = Data.ProtoLens.Field.field @"maybe'operationToken"
 maybe'parentWorkflowInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -545,12 +546,12 @@ notifyHasPatch ::
    Data.ProtoLens.Field.HasField s "notifyHasPatch" a) =>
   Lens.Family2.LensLike' f s a
 notifyHasPatch = Data.ProtoLens.Field.field @"notifyHasPatch"
-operationId ::
+operationToken ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "operationId" a) =>
+   Data.ProtoLens.Field.HasField s "operationToken" a) =>
   Lens.Family2.LensLike' f s a
-operationId = Data.ProtoLens.Field.field @"operationId"
+operationToken = Data.ProtoLens.Field.field @"operationToken"
 parentWorkflowInfo ::
   forall f s a.
   (Prelude.Functor f,

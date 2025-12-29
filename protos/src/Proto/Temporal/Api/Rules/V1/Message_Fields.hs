@@ -51,6 +51,18 @@ createTime ::
    Data.ProtoLens.Field.HasField s "createTime" a) =>
   Lens.Family2.LensLike' f s a
 createTime = Data.ProtoLens.Field.field @"createTime"
+createdByIdentity ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "createdByIdentity" a) =>
+  Lens.Family2.LensLike' f s a
+createdByIdentity = Data.ProtoLens.Field.field @"createdByIdentity"
+description ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "description" a) =>
+  Lens.Family2.LensLike' f s a
+description = Data.ProtoLens.Field.field @"description"
 expirationTime ::
   forall f s a.
   (Prelude.Functor f,

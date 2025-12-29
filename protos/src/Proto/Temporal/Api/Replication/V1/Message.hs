@@ -572,131 +572,110 @@ packedFileDescriptor
     \\SOFailoverStatus\DC2?\n\
     \\rfailover_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ffailoverTime\DC2)\n\
     \\DLEfailover_version\CAN\STX \SOH(\ETXR\SIfailoverVersionB\162\SOH\n\
-    \\RSio.temporal.api.replication.v1B\fMessageProtoP\SOHZ-go.temporal.io/api/replication/v1;replication\170\STX\GSTemporalio.Api.Replication.V1\234\STX Temporalio::Api::Replication::V1J\192\SO\n\
-    \\ACK\DC2\EOT\SYN\NUL4\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\RSio.temporal.api.replication.v1B\fMessageProtoP\SOHZ-go.temporal.io/api/replication/v1;replication\170\STX\GSTemporalio.Api.Replication.V1\234\STX Temporalio::Api::Replication::V1J\214\ENQ\n\
+    \\ACK\DC2\EOT\NUL\NUL\RS\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL$\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NULD\n\
+    \\SOH\STX\DC2\ETX\STX\NUL$\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NULD\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NULD\n\
+    \\STX\b\v\DC2\ETX\EOT\NULD\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL7\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL7\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL7\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL7\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL9\n\
+    \\SOH\b\DC2\ETX\b\NUL9\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL9\n\
+    \\STX\b-\DC2\ETX\b\NUL9\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL:\n\
+    \\SOH\b\DC2\ETX\t\NUL:\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL:\n\
+    \\STX\b%\DC2\ETX\t\NUL:\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL)\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX#\NUL/\n\
+    \\STX\ETX\SOH\DC2\ETX\r\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL'\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\SI\NUL\DC1\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b \n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b \n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\FS\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DLE\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DLE\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\ETB\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DLE\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\SUB\ESC\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DLE\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT)\NUL-\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\DC3\NUL\ETB\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX)\b\"\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\DC3\b\"\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX*\EOT#\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\DC4\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX*\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\DC4\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX*\v\RS\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\DC4\v\RS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX*!\"\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\DC4!\"\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX+\EOT3\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\NAK\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX+\EOT\f\n\
+    \\ENQ\EOT\SOH\STX\SOH\EOT\DC2\ETX\NAK\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX+\r%\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\NAK\r%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX+&.\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\NAK&.\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX+12\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\NAK12\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX,\EOT5\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\SYN\EOT5\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX,\EOT*\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\SYN\EOT*\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX,+0\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\SYN+0\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX,34\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SYN34\n\
     \G\n\
-    \\STX\EOT\STX\DC2\EOT0\NUL4\SOH\SUB; Represents a historical replication status of a Namespace\n\
+    \\STX\EOT\STX\DC2\EOT\SUB\NUL\RS\SOH\SUB; Represents a historical replication status of a Namespace\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX0\b\SYN\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\SUB\b\SYN\n\
     \T\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX2\EOT0\SUBG Timestamp when the Cluster switched to the following failover_version\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\FS\EOT0\SUBG Timestamp when the Cluster switched to the following failover_version\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX2\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\FS\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX2\RS+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\FS\RS+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX2./\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\FS./\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX3\EOT\US\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX\GS\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX3\EOT\t\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX\GS\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX3\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\GS\n\
     \\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX3\GS\RSb\ACKproto3"
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\GS\GS\RSb\ACKproto3"

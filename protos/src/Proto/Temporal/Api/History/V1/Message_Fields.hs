@@ -279,6 +279,12 @@ deployment ::
    Data.ProtoLens.Field.HasField s "deployment" a) =>
   Lens.Family2.LensLike' f s a
 deployment = Data.ProtoLens.Field.field @"deployment"
+deploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "deploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+deploymentVersion = Data.ProtoLens.Field.field @"deploymentVersion"
 details ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
@@ -408,6 +414,13 @@ inheritedBuildId ::
    Data.ProtoLens.Field.HasField s "inheritedBuildId" a) =>
   Lens.Family2.LensLike' f s a
 inheritedBuildId = Data.ProtoLens.Field.field @"inheritedBuildId"
+inheritedPinnedVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "inheritedPinnedVersion" a) =>
+  Lens.Family2.LensLike' f s a
+inheritedPinnedVersion
+  = Data.ProtoLens.Field.field @"inheritedPinnedVersion"
 initiatedEventId ::
   forall f s a.
   (Prelude.Functor f,
@@ -620,6 +633,13 @@ maybe'deployment ::
    Data.ProtoLens.Field.HasField s "maybe'deployment" a) =>
   Lens.Family2.LensLike' f s a
 maybe'deployment = Data.ProtoLens.Field.field @"maybe'deployment"
+maybe'deploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'deploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'deploymentVersion
+  = Data.ProtoLens.Field.field @"maybe'deploymentVersion"
 maybe'details ::
   forall f s a.
   (Prelude.Functor f,
@@ -681,6 +701,13 @@ maybe'heartbeatTimeout ::
   Lens.Family2.LensLike' f s a
 maybe'heartbeatTimeout
   = Data.ProtoLens.Field.field @"maybe'heartbeatTimeout"
+maybe'inheritedPinnedVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'inheritedPinnedVersion" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'inheritedPinnedVersion
+  = Data.ProtoLens.Field.field @"maybe'inheritedPinnedVersion"
 maybe'input ::
   forall f s a.
   (Prelude.Functor f,

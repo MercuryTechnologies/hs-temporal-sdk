@@ -656,159 +656,138 @@ packedFileDescriptor
     \\afailure\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\"W\n\
     \\rQueryRejected\DC2F\n\
     \\ACKstatus\CAN\SOH \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatusB\132\SOH\n\
-    \\CANio.temporal.api.query.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/query/v1;query\170\STX\ETBTemporalio.Api.Query.V1\234\STX\SUBTemporalio::Api::Query::V1J\248\DC4\n\
-    \\ACK\DC2\EOT\SYN\NULC\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\CANio.temporal.api.query.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/query/v1;query\170\STX\ETBTemporalio.Api.Query.V1\234\STX\SUBTemporalio::Api::Query::V1J\142\f\n\
+    \\ACK\DC2\EOT\NUL\NUL-\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\RS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL8\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL8\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL8\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL1\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL1\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL3\n\
+    \\SOH\b\DC2\ETX\b\NUL3\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL3\n\
+    \\STX\b-\DC2\ETX\b\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL4\n\
+    \\SOH\b\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL4\n\
+    \\STX\b%\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL+\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL+\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL.\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL.\n\
+    \\STX\ETX\STX\DC2\ETX\r\NUL.\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX$\NUL/\n\
+    \\STX\ETX\ETX\DC2\ETX\SO\NUL/\n\
     \A\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL/\SOH\SUB5 See https://docs.temporal.io/docs/concepts/queries/\n\
+    \\STX\EOT\NUL\DC2\EOT\DC1\NUL\EM\SOH\SUB5 See https://docs.temporal.io/docs/concepts/queries/\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\NAK\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\NAK\n\
     \^\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX)\EOT\SUB\SUBQ The workflow-author-defined identifier of the query. Typically a function name.\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC3\EOT\SUB\SUBQ The workflow-author-defined identifier of the query. Typically a function name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX)\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX)\v\NAK\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC3\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX)\CAN\EM\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC3\CAN\EM\n\
     \O\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX+\EOT3\SUBB Serialized arguments that will be provided to the query handler.\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\NAK\EOT3\SUBB Serialized arguments that will be provided to the query handler.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX+\EOT#\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\NAK\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX+$.\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\NAK$.\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX+12\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\NAK12\n\
     \y\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX.\EOT-\SUBl Headers that were passed by the caller of the query and copied by temporal\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\CAN\EOT-\SUBl Headers that were passed by the caller of the query and copied by temporal\n\
     \ server into the workflow task.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX.\EOT!\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\CAN\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX.\"(\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\CAN\"(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX.+,\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\CAN+,\n\
     \)\n\
-    \\STX\EOT\SOH\DC2\EOT2\NUL?\SOH\SUB\GS Answer to a `WorkflowQuery`\n\
+    \\STX\EOT\SOH\DC2\EOT\FS\NUL)\SOH\SUB\GS Answer to a `WorkflowQuery`\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX2\b\ESC\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\FS\b\ESC\n\
     \-\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX4\EOT:\SUB  Did the query succeed or fail?\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\RS\EOT:\SUB  Did the query succeed or fail?\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX4\EOT)\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\RS\EOT)\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX4*5\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\RS*5\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX489\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\RS89\n\
     \t\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX7\EOT/\SUBg Set when the query succeeds with the results.\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX!\EOT/\SUBg Set when the query succeeds with the results.\n\
     \ Mutually exclusive with `error_message` and `failure`.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX7\EOT#\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX!\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX7$*\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX!$*\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX7-.\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX!-.\n\
     \o\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX:\EOT\GS\SUBb Mutually exclusive with `answer`. Set when the query fails.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX$\EOT\GS\SUBb Mutually exclusive with `answer`. Set when the query fails.\n\
     \ See also the newer `failure` field.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX:\EOT\n\
+    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX$\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX:\v\CAN\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX$\v\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX:\ESC\FS\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX$\ESC\FS\n\
     \\136\STX\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX>\EOT0\SUB\250\SOH The full reason for this query failure. This field is newer than `error_message` and can be encoded by the SDK's\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETX(\EOT0\SUB\250\SOH The full reason for this query failure. This field is newer than `error_message` and can be encoded by the SDK's\n\
     \ failure converter to support E2E encryption of messages and stack traces.\n\
     \ Mutually exclusive with `answer`. Set when the query fails.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX>\EOT#\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX(\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX>$+\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX($+\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX>./\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX(./\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOTA\NULC\SOH\n\
+    \\STX\EOT\STX\DC2\EOT+\NUL-\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXA\b\NAK\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX+\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXB\EOT=\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX,\EOT=\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXB\EOT1\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX,\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXB28\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX,28\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXB;<b\ACKproto3"
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX,;<b\ACKproto3"

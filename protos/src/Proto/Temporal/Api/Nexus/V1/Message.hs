@@ -103,8 +103,8 @@ instance Data.ProtoLens.Message CancelOperationRequest where
     = "\n\
       \\SYNCancelOperationRequest\DC2\CAN\n\
       \\aservice\CAN\SOH \SOH(\tR\aservice\DC2\FS\n\
-      \\toperation\CAN\STX \SOH(\tR\toperation\DC2!\n\
-      \\foperation_id\CAN\ETX \SOH(\tR\voperationId\DC2'\n\
+      \\toperation\CAN\STX \SOH(\tR\toperation\DC2%\n\
+      \\foperation_id\CAN\ETX \SOH(\tR\voperationIdB\STX\CAN\SOH\DC2'\n\
       \\SIoperation_token\CAN\EOT \SOH(\tR\SOoperationToken"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -3659,9 +3659,9 @@ instance Data.ProtoLens.Message StartOperationResponse where
       \\SIoperation_error\CAN\ETX \SOH(\v21.temporal.api.nexus.v1.UnsuccessfulOperationErrorH\NULR\SOoperationError\SUBt\n\
       \\EOTSync\DC29\n\
       \\apayload\CAN\SOH \SOH(\v2\US.temporal.api.common.v1.PayloadR\apayload\DC21\n\
-      \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\SUB\134\SOH\n\
-      \\ENQAsync\DC2!\n\
-      \\foperation_id\CAN\SOH \SOH(\tR\voperationId\DC21\n\
+      \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\SUB\138\SOH\n\
+      \\ENQAsync\DC2%\n\
+      \\foperation_id\CAN\SOH \SOH(\tR\voperationIdB\STX\CAN\SOH\DC21\n\
       \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\DC2'\n\
       \\SIoperation_token\CAN\ETX \SOH(\tR\SOoperationTokenB\t\n\
       \\avariant"
@@ -3899,8 +3899,8 @@ instance Data.ProtoLens.Message StartOperationResponse'Async where
         "temporal.api.nexus.v1.StartOperationResponse.Async"
   packedMessageDescriptor _
     = "\n\
-      \\ENQAsync\DC2!\n\
-      \\foperation_id\CAN\SOH \SOH(\tR\voperationId\DC21\n\
+      \\ENQAsync\DC2%\n\
+      \\foperation_id\CAN\SOH \SOH(\tR\voperationIdB\STX\CAN\SOH\DC21\n\
       \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\DC2'\n\
       \\SIoperation_token\CAN\ETX \SOH(\tR\SOoperationToken"
   packedFileDescriptor _ = packedFileDescriptor
@@ -4478,11 +4478,11 @@ packedFileDescriptor
     \\ENQlinks\CAN\a \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\SUBA\n\
     \\DC3CallbackHeaderEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"\156\SOH\n\
+    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"\160\SOH\n\
     \\SYNCancelOperationRequest\DC2\CAN\n\
     \\aservice\CAN\SOH \SOH(\tR\aservice\DC2\FS\n\
-    \\toperation\CAN\STX \SOH(\tR\toperation\DC2!\n\
-    \\foperation_id\CAN\ETX \SOH(\tR\voperationId\DC2'\n\
+    \\toperation\CAN\STX \SOH(\tR\toperation\DC2%\n\
+    \\foperation_id\CAN\ETX \SOH(\tR\voperationIdB\STX\CAN\SOH\DC2'\n\
     \\SIoperation_token\CAN\EOT \SOH(\tR\SOoperationToken\"\139\ETX\n\
     \\aRequest\DC2B\n\
     \\ACKheader\CAN\SOH \ETX(\v2*.temporal.api.nexus.v1.Request.HeaderEntryR\ACKheader\DC2A\n\
@@ -4492,16 +4492,16 @@ packedFileDescriptor
     \\vHeaderEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
     \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOHB\t\n\
-    \\avariant\"\181\EOT\n\
+    \\avariant\"\185\EOT\n\
     \\SYNStartOperationResponse\DC2W\n\
     \\fsync_success\CAN\SOH \SOH(\v22.temporal.api.nexus.v1.StartOperationResponse.SyncH\NULR\vsyncSuccess\DC2Z\n\
     \\rasync_success\CAN\STX \SOH(\v23.temporal.api.nexus.v1.StartOperationResponse.AsyncH\NULR\fasyncSuccess\DC2\\\n\
     \\SIoperation_error\CAN\ETX \SOH(\v21.temporal.api.nexus.v1.UnsuccessfulOperationErrorH\NULR\SOoperationError\SUBt\n\
     \\EOTSync\DC29\n\
     \\apayload\CAN\SOH \SOH(\v2\US.temporal.api.common.v1.PayloadR\apayload\DC21\n\
-    \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\SUB\134\SOH\n\
-    \\ENQAsync\DC2!\n\
-    \\foperation_id\CAN\SOH \SOH(\tR\voperationId\DC21\n\
+    \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\SUB\138\SOH\n\
+    \\ENQAsync\DC2%\n\
+    \\foperation_id\CAN\SOH \SOH(\tR\voperationIdB\STX\CAN\SOH\DC21\n\
     \\ENQlinks\CAN\STX \ETX(\v2\ESC.temporal.api.nexus.v1.LinkR\ENQlinks\DC2'\n\
     \\SIoperation_token\CAN\ETX \SOH(\tR\SOoperationTokenB\t\n\
     \\avariant\"\EM\n\
@@ -4532,666 +4532,657 @@ packedFileDescriptor
     \\bExternal\DC2\DLE\n\
     \\ETXurl\CAN\SOH \SOH(\tR\ETXurlB\t\n\
     \\avariantB\132\SOH\n\
-    \\CANio.temporal.api.nexus.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/nexus/v1;nexus\170\STX\ETBTemporalio.Api.Nexus.V1\234\STX\SUBTemporalio::Api::Nexus::V1J\176B\n\
-    \\a\DC2\ENQ\DC4\NUL\215\SOH\SOH\n\
-    \\211\a\n\
-    \\SOH\f\DC2\ETX\DC4\NUL\DC22\200\a The MIT License\n\
-    \\n\
-    \ Copyright (c) 2023 Temporal Technologies Inc. All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\CANio.temporal.api.nexus.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/nexus/v1;nexus\170\STX\ETBTemporalio.Api.Nexus.V1\234\STX\SUBTemporalio::Api::Nexus::V1J\130;\n\
+    \\a\DC2\ENQ\NUL\NUL\195\SOH\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\SYN\NUL\RS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\CAN\NUL8\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL8\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\CAN\NUL8\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\EM\NUL1\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\EM\NUL1\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\SUB\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\ESC\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL3\n\
+    \\SOH\b\DC2\ETX\b\NUL3\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\FS\NUL3\n\
+    \\STX\b-\DC2\ETX\b\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL4\n\
+    \\SOH\b\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\GS\NUL4\n\
+    \\STX\b%\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\US\NUL)\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX \NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL.\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX!\NUL+\n\
+    \\STX\ETX\STX\DC2\ETX\r\NUL+\n\
     \q\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL*\SOH\SUBe A general purpose failure message.\n\
+    \\STX\EOT\NUL\DC2\EOT\DC1\NUL\SYN\SOH\SUBe A general purpose failure message.\n\
     \ See: https://github.com/nexus-rpc/api/blob/main/SPEC.md#failure\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\SI\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\SI\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\ETB\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC2\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC2\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\DC2\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC2\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\NAK\SYN\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC2\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\EOT%\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC3\EOT%\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX'\EOT\ETB\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC3\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\CAN \n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC3\CAN \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'#$\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC3#$\n\
     \7\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX)\EOT\SYN\SUB* UTF-8 encoded JSON serializable details.\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\NAK\EOT\SYN\SUB* UTF-8 encoded JSON serializable details.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX)\EOT\t\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\NAK\EOT\t\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX)\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\NAK\n\
     \\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX)\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\NAK\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT,\NUL2\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\CAN\NUL\RS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX,\b\DC4\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\CAN\b\DC4\n\
     \`\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX.\EOT\SUB\SUBS See https://github.com/nexus-rpc/api/blob/main/SPEC.md#predefined-handler-errors.\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\SUB\EOT\SUB\SUBS See https://github.com/nexus-rpc/api/blob/main/SPEC.md#predefined-handler-errors.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX.\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\SUB\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX.\v\NAK\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\SUB\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX.\CAN\EM\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\SUB\CAN\EM\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX/\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\ESC\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX/\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\ESC\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX/\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\ESC\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX/\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\ESC\SYN\ETB\n\
     \g\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX1\EOTL\SUBZ Retry behavior, defaults to the retry behavior of the error type as defined in the spec.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\GS\EOTL\SUBZ Retry behavior, defaults to the retry behavior of the error type as defined in the spec.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX1\EOT8\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\GS\EOT8\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX19G\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\GS9G\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX1JK\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\GSJK\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT4\NUL8\SOH\n\
+    \\STX\EOT\STX\DC2\EOT \NUL$\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX4\b\"\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX \b\"\n\
     \T\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX6\EOT\US\SUBG See https://github.com/nexus-rpc/api/blob/main/SPEC.md#operationinfo.\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\"\EOT\US\SUBG See https://github.com/nexus-rpc/api/blob/main/SPEC.md#operationinfo.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX6\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\"\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX6\v\SUB\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\"\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX6\GS\RS\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\"\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX7\EOT\CAN\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX#\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX7\EOT\v\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX#\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX7\f\DC3\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX#\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX7\SYN\ETB\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX#\SYN\ETB\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT:\NUL>\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT&\NUL*\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX:\b\f\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX&\b\f\n\
     \L\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX<\EOT\DC3\SUB? See https://github.com/nexus-rpc/api/blob/main/SPEC.md#links.\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX(\EOT\DC3\SUB? See https://github.com/nexus-rpc/api/blob/main/SPEC.md#links.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX<\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX(\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX<\v\SO\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX(\v\SO\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX<\DC1\DC2\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX(\DC1\DC2\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETX=\EOT\DC4\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETX)\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX=\EOT\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX)\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX=\v\SI\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX)\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX=\DC2\DC3\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX)\DC2\DC3\n\
     \.\n\
-    \\STX\EOT\EOT\DC2\EOTA\NULP\SOH\SUB\" A request to start an operation.\n\
+    \\STX\EOT\EOT\DC2\EOT-\NUL<\SOH\SUB\" A request to start an operation.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXA\b\GS\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX-\b\GS\n\
     \9\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXC\EOT\ETB\SUB, Name of service to start the operation in.\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX/\EOT\ETB\SUB, Name of service to start the operation in.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX/\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXC\v\DC2\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX/\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXC\NAK\SYN\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX/\NAK\SYN\n\
     \*\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXE\EOT\EM\SUB\GS Type of operation to start.\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETX1\EOT\EM\SUB\GS Type of operation to start.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXE\EOT\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETX1\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXE\v\DC4\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETX1\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXE\ETB\CAN\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETX1\ETB\CAN\n\
     \F\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXG\EOT\SUB\SUB9 A request ID that can be used as an idempotentency key.\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETX3\EOT\SUB\SUB9 A request ID that can be used as an idempotentency key.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ENQ\DC2\ETXG\EOT\n\
+    \\ENQ\EOT\EOT\STX\STX\ENQ\DC2\ETX3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXG\v\NAK\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETX3\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXG\CAN\EM\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETX3\CAN\EM\n\
     \V\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\ETXI\EOT\CAN\SUBI Callback URL to call upon completion if the started operation is async.\n\
+    \\EOT\EOT\EOT\STX\ETX\DC2\ETX5\EOT\CAN\SUBI Callback URL to call upon completion if the started operation is async.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ENQ\DC2\ETXI\EOT\n\
+    \\ENQ\EOT\EOT\STX\ETX\ENQ\DC2\ETX5\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXI\v\DC3\n\
+    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETX5\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXI\SYN\ETB\n\
+    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETX5\SYN\ETB\n\
     \@\n\
-    \\EOT\EOT\EOT\STX\EOT\DC2\ETXK\EOT/\SUB3 Full request body from the incoming HTTP request.\n\
+    \\EOT\EOT\EOT\STX\EOT\DC2\ETX7\EOT/\SUB3 Full request body from the incoming HTTP request.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\EOT\ACK\DC2\ETXK\EOT\"\n\
+    \\ENQ\EOT\EOT\STX\EOT\ACK\DC2\ETX7\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\ETXK#*\n\
+    \\ENQ\EOT\EOT\STX\EOT\SOH\DC2\ETX7#*\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\ETXK-.\n\
+    \\ENQ\EOT\EOT\STX\EOT\ETX\DC2\ETX7-.\n\
     \k\n\
-    \\EOT\EOT\EOT\STX\ENQ\DC2\ETXM\EOT,\SUB^ Header that is expected to be attached to the callback request when the operation completes.\n\
+    \\EOT\EOT\EOT\STX\ENQ\DC2\ETX9\EOT,\SUB^ Header that is expected to be attached to the callback request when the operation completes.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ENQ\ACK\DC2\ETXM\EOT\ETB\n\
+    \\ENQ\EOT\EOT\STX\ENQ\ACK\DC2\ETX9\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ENQ\SOH\DC2\ETXM\CAN'\n\
+    \\ENQ\EOT\EOT\STX\ENQ\SOH\DC2\ETX9\CAN'\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ENQ\ETX\DC2\ETXM*+\n\
+    \\ENQ\EOT\EOT\STX\ENQ\ETX\DC2\ETX9*+\n\
     \m\n\
-    \\EOT\EOT\EOT\STX\ACK\DC2\ETXO\EOT\FS\SUB` Links contain caller information and can be attached to the operations started by the handler.\n\
+    \\EOT\EOT\EOT\STX\ACK\DC2\ETX;\EOT\FS\SUB` Links contain caller information and can be attached to the operations started by the handler.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ACK\EOT\DC2\ETXO\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\ACK\EOT\DC2\ETX;\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ACK\ACK\DC2\ETXO\r\DC1\n\
+    \\ENQ\EOT\EOT\STX\ACK\ACK\DC2\ETX;\r\DC1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ACK\SOH\DC2\ETXO\DC2\ETB\n\
+    \\ENQ\EOT\EOT\STX\ACK\SOH\DC2\ETX;\DC2\ETB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ACK\ETX\DC2\ETXO\SUB\ESC\n\
+    \\ENQ\EOT\EOT\STX\ACK\ETX\DC2\ETX;\SUB\ESC\n\
     \/\n\
-    \\STX\EOT\ENQ\DC2\EOTS\NUL_\SOH\SUB# A request to cancel an operation.\n\
+    \\STX\EOT\ENQ\DC2\EOT?\NULK\SOH\SUB# A request to cancel an operation.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXS\b\RS\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX?\b\RS\n\
     \\FS\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXU\EOT\ETB\SUB\SI Service name.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXA\EOT\ETB\SUB\SI Service name.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXU\EOT\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXA\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXU\v\DC2\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXA\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXU\NAK\SYN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXA\NAK\SYN\n\
     \+\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXW\EOT\EM\SUB\RS Type of operation to cancel.\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXC\EOT\EM\SUB\RS Type of operation to cancel.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXW\EOT\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETXC\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXW\v\DC4\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXC\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXW\ETB\CAN\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXC\ETB\CAN\n\
     \k\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETX[\EOT\FS\SUB^ Operation ID as originally generated by a Handler.\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETXG\EOT0\SUB^ Operation ID as originally generated by a Handler.\n\
     \\n\
-    \ Deprecated: Renamed to operation_token.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETX[\EOT\n\
+    \ Deprecated. Renamed to operation_token.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETX[\v\ETB\n\
+    \\ENQ\EOT\ENQ\STX\STX\ENQ\DC2\ETXG\EOT\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETX[\SUB\ESC\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXG\v\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXG\SUB\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\STX\b\DC2\ETXG\FS/\n\
+    \\r\n\
+    \\ACK\EOT\ENQ\STX\STX\b\ETX\DC2\ETXG\GS.\n\
     \D\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETX^\EOT\US\SUB7 Operation token as originally generated by a Handler.\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXJ\EOT\US\SUB7 Operation token as originally generated by a Handler.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ENQ\DC2\ETX^\EOT\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ENQ\DC2\ETXJ\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETX^\v\SUB\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXJ\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETX^\GS\RS\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXJ\GS\RS\n\
     \\RS\n\
-    \\STX\EOT\ACK\DC2\EOTb\NULp\SOH\SUB\DC2 A Nexus request.\n\
+    \\STX\EOT\ACK\DC2\EOTN\NUL\\\SOH\SUB\DC2 A Nexus request.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXb\b\SI\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETXN\b\SI\n\
     \\181\SOH\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXe\EOT#\SUB\167\SOH Headers extracted from the original request in the Temporal frontend.\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETXQ\EOT#\SUB\167\SOH Headers extracted from the original request in the Temporal frontend.\n\
     \ When using Nexus over HTTP, this includes the request's HTTP headers ignoring multiple values.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXe\EOT\ETB\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETXQ\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXe\CAN\RS\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXQ\CAN\RS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXe!\"\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXQ!\"\n\
     \\192\SOH\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXj\EOT1\SUB\178\SOH The timestamp when the request was scheduled in the frontend.\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETXV\EOT1\SUB\178\SOH The timestamp when the request was scheduled in the frontend.\n\
     \ (-- api-linter: core::0142::time-field-names=disabled\n\
     \     aip.dev/not-precedent: Not following linter rules. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXj\EOT\GS\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXV\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXj\RS,\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXV\RS,\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXj/0\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXV/0\n\
     \\f\n\
-    \\EOT\EOT\ACK\b\NUL\DC2\EOTl\EOTo\ENQ\n\
+    \\EOT\EOT\ACK\b\NUL\DC2\EOTX\EOT[\ENQ\n\
     \\f\n\
-    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\ETXl\n\
+    \\ENQ\EOT\ACK\b\NUL\SOH\DC2\ETXX\n\
     \\DC1\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXm\b2\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETXY\b2\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXm\b\GS\n\
+    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXY\b\GS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXm\RS-\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXY\RS-\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXm01\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXY01\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\ETX\DC2\ETXn\b4\n\
+    \\EOT\EOT\ACK\STX\ETX\DC2\ETXZ\b4\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETXn\b\RS\n\
+    \\ENQ\EOT\ACK\STX\ETX\ACK\DC2\ETXZ\b\RS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXn\US/\n\
+    \\ENQ\EOT\ACK\STX\ETX\SOH\DC2\ETXZ\US/\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXn23\n\
-    \:\n\
-    \\STX\EOT\a\DC2\ENQs\NUL\137\SOH\SOH\SUB- Response variant for StartOperationRequest.\n\
+    \\ENQ\EOT\ACK\STX\ETX\ETX\DC2\ETXZ23\n\
+    \9\n\
+    \\STX\EOT\a\DC2\EOT_\NULu\SOH\SUB- Response variant for StartOperationRequest.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXs\b\RS\n\
+    \\ETX\EOT\a\SOH\DC2\ETX_\b\RS\n\
     \4\n\
-    \\EOT\EOT\a\ETX\NUL\DC2\EOTu\EOTx\ENQ\SUB& An operation completed successfully.\n\
+    \\EOT\EOT\a\ETX\NUL\DC2\EOTa\EOTd\ENQ\SUB& An operation completed successfully.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\ETX\NUL\SOH\DC2\ETXu\f\DLE\n\
+    \\ENQ\EOT\a\ETX\NUL\SOH\DC2\ETXa\f\DLE\n\
     \\r\n\
-    \\ACK\EOT\a\ETX\NUL\STX\NUL\DC2\ETXv\b3\n\
+    \\ACK\EOT\a\ETX\NUL\STX\NUL\DC2\ETXb\b3\n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\ACK\DC2\ETXv\b&\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\ACK\DC2\ETXb\b&\n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\SOH\DC2\ETXv'.\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\SOH\DC2\ETXb'.\n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\ETX\DC2\ETXv12\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\ETX\DC2\ETXb12\n\
     \\r\n\
-    \\ACK\EOT\a\ETX\NUL\STX\SOH\DC2\ETXw\b \n\
+    \\ACK\EOT\a\ETX\NUL\STX\SOH\DC2\ETXc\b \n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\EOT\DC2\ETXw\b\DLE\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\EOT\DC2\ETXc\b\DLE\n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\ACK\DC2\ETXw\DC1\NAK\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\ACK\DC2\ETXc\DC1\NAK\n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\SOH\DC2\ETXw\SYN\ESC\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\SOH\DC2\ETXc\SYN\ESC\n\
     \\SO\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\ETX\DC2\ETXw\RS\US\n\
-    \v\n\
-    \\EOT\EOT\a\ETX\SOH\DC2\ENQ|\EOT\129\SOH\ENQ\SUBg The operation will complete asynchronously.\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\ETX\DC2\ETXc\RS\US\n\
+    \u\n\
+    \\EOT\EOT\a\ETX\SOH\DC2\EOTh\EOTm\ENQ\SUBg The operation will complete asynchronously.\n\
     \ The returned ID can be used to reference this operation.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\ETX\SOH\SOH\DC2\ETX|\f\DC1\n\
+    \\ENQ\EOT\a\ETX\SOH\SOH\DC2\ETXh\f\DC1\n\
     \8\n\
-    \\ACK\EOT\a\ETX\SOH\STX\NUL\DC2\ETX~\b \SUB) Deprecated: Renamed to operation_token.\n\
+    \\ACK\EOT\a\ETX\SOH\STX\NUL\DC2\ETXj\b4\SUB) Deprecated. Renamed to operation_token.\n\
     \\n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\NUL\ENQ\DC2\ETX~\b\SO\n\
+    \\a\EOT\a\ETX\SOH\STX\NUL\ENQ\DC2\ETXj\b\SO\n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\NUL\SOH\DC2\ETX~\SI\ESC\n\
+    \\a\EOT\a\ETX\SOH\STX\NUL\SOH\DC2\ETXj\SI\ESC\n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\NUL\ETX\DC2\ETX~\RS\US\n\
+    \\a\EOT\a\ETX\SOH\STX\NUL\ETX\DC2\ETXj\RS\US\n\
+    \\SO\n\
+    \\a\EOT\a\ETX\SOH\STX\NUL\b\DC2\ETXj 3\n\
+    \\SI\n\
+    \\b\EOT\a\ETX\SOH\STX\NUL\b\ETX\DC2\ETXj!2\n\
     \\r\n\
-    \\ACK\EOT\a\ETX\SOH\STX\SOH\DC2\ETX\DEL\b \n\
+    \\ACK\EOT\a\ETX\SOH\STX\SOH\DC2\ETXk\b \n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\SOH\EOT\DC2\ETX\DEL\b\DLE\n\
+    \\a\EOT\a\ETX\SOH\STX\SOH\EOT\DC2\ETXk\b\DLE\n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\SOH\ACK\DC2\ETX\DEL\DC1\NAK\n\
+    \\a\EOT\a\ETX\SOH\STX\SOH\ACK\DC2\ETXk\DC1\NAK\n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\SOH\SOH\DC2\ETX\DEL\SYN\ESC\n\
+    \\a\EOT\a\ETX\SOH\STX\SOH\SOH\DC2\ETXk\SYN\ESC\n\
     \\SO\n\
-    \\a\EOT\a\ETX\SOH\STX\SOH\ETX\DC2\ETX\DEL\RS\US\n\
-    \\SO\n\
-    \\ACK\EOT\a\ETX\SOH\STX\STX\DC2\EOT\128\SOH\b#\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\SOH\STX\STX\ENQ\DC2\EOT\128\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\SOH\STX\STX\SOH\DC2\EOT\128\SOH\SI\RS\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\SOH\STX\STX\ETX\DC2\EOT\128\SOH!\"\n\
-    \\SO\n\
-    \\EOT\EOT\a\b\NUL\DC2\ACK\131\SOH\EOT\136\SOH\ENQ\n\
+    \\a\EOT\a\ETX\SOH\STX\SOH\ETX\DC2\ETXk\RS\US\n\
     \\r\n\
-    \\ENQ\EOT\a\b\NUL\SOH\DC2\EOT\131\SOH\n\
+    \\ACK\EOT\a\ETX\SOH\STX\STX\DC2\ETXl\b#\n\
+    \\SO\n\
+    \\a\EOT\a\ETX\SOH\STX\STX\ENQ\DC2\ETXl\b\SO\n\
+    \\SO\n\
+    \\a\EOT\a\ETX\SOH\STX\STX\SOH\DC2\ETXl\SI\RS\n\
+    \\SO\n\
+    \\a\EOT\a\ETX\SOH\STX\STX\ETX\DC2\ETXl!\"\n\
+    \\f\n\
+    \\EOT\EOT\a\b\NUL\DC2\EOTo\EOTt\ENQ\n\
+    \\f\n\
+    \\ENQ\EOT\a\b\NUL\SOH\DC2\ETXo\n\
     \\DC1\n\
-    \\f\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\132\SOH\b\RS\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\EOT\132\SOH\b\f\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\132\SOH\r\EM\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\132\SOH\FS\GS\n\
-    \\f\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\133\SOH\b \n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\133\SOH\b\r\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\133\SOH\SO\ESC\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\133\SOH\RS\US\n\
-    \L\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\135\SOH\b7\SUB> The operation completed unsuccessfully (failed or canceled).\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\135\SOH\b\"\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\135\SOH#2\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\135\SOH56\n\
-    \<\n\
-    \\STX\EOT\b\DC2\ACK\140\SOH\NUL\141\SOH\SOH\SUB. Response variant for CancelOperationRequest.\n\
-    \\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\140\SOH\b\US\n\
-    \\\\n\
-    \\STX\EOT\t\DC2\ACK\144\SOH\NUL\150\SOH\SOH\SUBN A response indicating that the handler has successfully processed a request.\n\
-    \\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXp\b\RS\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETXp\b\f\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXp\r\EM\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXp\FS\GS\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\144\SOH\b\DLE\n\
-    \P\n\
-    \\EOT\EOT\t\b\NUL\DC2\ACK\146\SOH\EOT\149\SOH\ENQ\SUB@ Variant must correlate to the corresponding Request's variant.\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETXq\b \n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\SOH\ACK\DC2\ETXq\b\r\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXq\SO\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXq\RS\US\n\
+    \K\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETXs\b7\SUB> The operation completed unsuccessfully (failed or canceled).\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\t\b\NUL\SOH\DC2\EOT\146\SOH\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\STX\ACK\DC2\ETXs\b\"\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXs#2\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXs56\n\
+    \:\n\
+    \\STX\EOT\b\DC2\EOTx\NULy\SOH\SUB. Response variant for CancelOperationRequest.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\b\SOH\DC2\ETXx\b\US\n\
+    \[\n\
+    \\STX\EOT\t\DC2\ENQ|\NUL\130\SOH\SOH\SUBN A response indicating that the handler has successfully processed a request.\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\t\SOH\DC2\ETX|\b\DLE\n\
+    \O\n\
+    \\EOT\EOT\t\b\NUL\DC2\ENQ~\EOT\129\SOH\ENQ\SUB@ Variant must correlate to the corresponding Request's variant.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\t\b\NUL\SOH\DC2\ETX~\n\
     \\DC1\n\
+    \\v\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETX\DEL\b3\n\
     \\f\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\147\SOH\b3\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\147\SOH\b\RS\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\147\SOH\US.\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\147\SOH12\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETX\DEL\b\RS\n\
     \\f\n\
-    \\EOT\EOT\t\STX\SOH\DC2\EOT\148\SOH\b5\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETX\DEL\US.\n\
+    \\f\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETX\DEL12\n\
+    \\f\n\
+    \\EOT\EOT\t\STX\SOH\DC2\EOT\128\SOH\b5\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ACK\DC2\EOT\148\SOH\b\US\n\
+    \\ENQ\EOT\t\STX\SOH\ACK\DC2\EOT\128\SOH\b\US\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\148\SOH 0\n\
+    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\128\SOH 0\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\148\SOH34\n\
+    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\128\SOH34\n\
     \q\n\
     \\STX\EOT\n\
-    \\DC2\ACK\153\SOH\NUL\176\SOH\SOH\SUBc A cluster-global binding from an endpoint ID to a target for dispatching incoming Nexus requests.\n\
+    \\DC2\ACK\133\SOH\NUL\156\SOH\SOH\SUBc A cluster-global binding from an endpoint ID to a target for dispatching incoming Nexus requests.\n\
     \\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\153\SOH\b\DLE\n\
+    \\SOH\DC2\EOT\133\SOH\b\DLE\n\
     \t\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\155\SOH\EOT\SYN\SUBf Data version for this endpoint, incremented for every update issued via the UpdateNexusEndpoint API.\n\
+    \\STX\NUL\DC2\EOT\135\SOH\EOT\SYN\SUBf Data version for this endpoint, incremented for every update issued via the UpdateNexusEndpoint API.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\EOT\155\SOH\EOT\t\n\
+    \\STX\NUL\ENQ\DC2\EOT\135\SOH\EOT\t\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\155\SOH\n\
+    \\STX\NUL\SOH\DC2\EOT\135\SOH\n\
     \\DC1\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\155\SOH\DC4\NAK\n\
+    \\STX\NUL\ETX\DC2\EOT\135\SOH\DC4\NAK\n\
     \4\n\
     \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\157\SOH\EOT\DC2\SUB& Unique server-generated endpoint ID.\n\
+    \\STX\SOH\DC2\EOT\137\SOH\EOT\DC2\SUB& Unique server-generated endpoint ID.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ENQ\DC2\EOT\157\SOH\EOT\n\
+    \\STX\SOH\ENQ\DC2\EOT\137\SOH\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\157\SOH\v\r\n\
+    \\STX\SOH\SOH\DC2\EOT\137\SOH\v\r\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\157\SOH\DLE\DC1\n\
+    \\STX\SOH\ETX\DC2\EOT\137\SOH\DLE\DC1\n\
     \&\n\
     \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\159\SOH\EOT\SUB\SUB\CAN Spec for the endpoint.\n\
+    \\STX\STX\DC2\EOT\139\SOH\EOT\SUB\SUB\CAN Spec for the endpoint.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ACK\DC2\EOT\159\SOH\EOT\DLE\n\
+    \\STX\STX\ACK\DC2\EOT\139\SOH\EOT\DLE\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\159\SOH\DC1\NAK\n\
+    \\STX\STX\SOH\DC2\EOT\139\SOH\DC1\NAK\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\159\SOH\CAN\EM\n\
+    \\STX\STX\ETX\DC2\EOT\139\SOH\CAN\EM\n\
     \\180\SOH\n\
     \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\164\SOH\EOT/\SUB\165\SOH The date and time when the endpoint was created.\n\
+    \\STX\ETX\DC2\EOT\144\SOH\EOT/\SUB\165\SOH The date and time when the endpoint was created.\n\
     \ (-- api-linter: core::0142::time-field-names=disabled\n\
     \     aip.dev/not-precedent: Not following linter rules. --)\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\ACK\DC2\EOT\164\SOH\EOT\GS\n\
+    \\STX\ETX\ACK\DC2\EOT\144\SOH\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\164\SOH\RS*\n\
+    \\STX\ETX\SOH\DC2\EOT\144\SOH\RS*\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\164\SOH-.\n\
+    \\STX\ETX\ETX\DC2\EOT\144\SOH-.\n\
     \\244\SOH\n\
     \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\170\SOH\EOT5\SUB\229\SOH The date and time when the endpoint was last modified.\n\
+    \\STX\EOT\DC2\EOT\150\SOH\EOT5\SUB\229\SOH The date and time when the endpoint was last modified.\n\
     \ Will not be set if the endpoint has never been modified.\n\
     \ (-- api-linter: core::0142::time-field-names=disabled\n\
     \     aip.dev/not-precedent: Not following linter rules. --)\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ACK\DC2\EOT\170\SOH\EOT\GS\n\
+    \\STX\EOT\ACK\DC2\EOT\150\SOH\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\170\SOH\RS0\n\
+    \\STX\EOT\SOH\DC2\EOT\150\SOH\RS0\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\170\SOH34\n\
+    \\STX\EOT\ETX\DC2\EOT\150\SOH34\n\
     \\130\STX\n\
     \\EOT\EOT\n\
-    \\STX\ENQ\DC2\EOT\175\SOH\EOT\SUB\SUB\243\SOH Server exposed URL prefix for invocation of operations on this endpoint.\n\
+    \\STX\ENQ\DC2\EOT\155\SOH\EOT\SUB\SUB\243\SOH Server exposed URL prefix for invocation of operations on this endpoint.\n\
     \ This doesn't include the protocol, hostname or port as the server does not know how it should be accessed\n\
     \ publicly. The URL is stable in the face of endpoint renames.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\ENQ\DC2\EOT\175\SOH\EOT\n\
+    \\STX\ENQ\ENQ\DC2\EOT\155\SOH\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\SOH\DC2\EOT\175\SOH\v\NAK\n\
+    \\STX\ENQ\SOH\DC2\EOT\155\SOH\v\NAK\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\ETX\DC2\EOT\175\SOH\CAN\EM\n\
+    \\STX\ENQ\ETX\DC2\EOT\155\SOH\CAN\EM\n\
     \8\n\
-    \\STX\EOT\v\DC2\ACK\179\SOH\NUL\191\SOH\SOH\SUB* Contains mutable fields for an Endpoint.\n\
+    \\STX\EOT\v\DC2\ACK\159\SOH\NUL\171\SOH\SOH\SUB* Contains mutable fields for an Endpoint.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\v\SOH\DC2\EOT\179\SOH\b\DC4\n\
+    \\ETX\EOT\v\SOH\DC2\EOT\159\SOH\b\DC4\n\
     \\201\SOH\n\
-    \\EOT\EOT\v\STX\NUL\DC2\EOT\182\SOH\EOT\DC4\SUB\186\SOH Endpoint name, unique for this cluster. Must match `[a-zA-Z_][a-zA-Z0-9_]*`.\n\
+    \\EOT\EOT\v\STX\NUL\DC2\EOT\162\SOH\EOT\DC4\SUB\186\SOH Endpoint name, unique for this cluster. Must match `[a-zA-Z_][a-zA-Z0-9_]*`.\n\
     \ Renaming an endpoint breaks all workflow callers that reference this endpoint, causing operations to fail.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\182\SOH\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\EOT\162\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\182\SOH\v\SI\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\EOT\162\SOH\v\SI\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\182\SOH\DC2\DC3\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\EOT\162\SOH\DC2\DC3\n\
     \\255\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\EOT\187\SOH\EOT3\SUB\240\SOH Markdown description serialized as a single JSON string.\n\
+    \\EOT\EOT\v\STX\SOH\DC2\EOT\167\SOH\EOT3\SUB\240\SOH Markdown description serialized as a single JSON string.\n\
     \ If the Payload is encrypted, the UI and CLI may decrypt with the configured codec server endpoint.\n\
     \ By default, the server enforces a limit of 20,000 bytes for this entire payload.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\187\SOH\EOT\"\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\EOT\167\SOH\EOT\"\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\187\SOH#.\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\EOT\167\SOH#.\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\187\SOH12\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\EOT\167\SOH12\n\
     \,\n\
-    \\EOT\EOT\v\STX\STX\DC2\EOT\190\SOH\EOT\RS\SUB\RS Target to route requests to.\n\
+    \\EOT\EOT\v\STX\STX\DC2\EOT\170\SOH\EOT\RS\SUB\RS Target to route requests to.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\190\SOH\EOT\DC2\n\
+    \\ENQ\EOT\v\STX\STX\ACK\DC2\EOT\170\SOH\EOT\DC2\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\190\SOH\DC3\EM\n\
+    \\ENQ\EOT\v\STX\STX\SOH\DC2\EOT\170\SOH\DC3\EM\n\
     \\r\n\
-    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\190\SOH\FS\GS\n\
+    \\ENQ\EOT\v\STX\STX\ETX\DC2\EOT\170\SOH\FS\GS\n\
     \,\n\
-    \\STX\EOT\f\DC2\ACK\194\SOH\NUL\215\SOH\SOH\SUB\RS Target to route requests to.\n\
+    \\STX\EOT\f\DC2\ACK\174\SOH\NUL\195\SOH\SOH\SUB\RS Target to route requests to.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\f\SOH\DC2\EOT\194\SOH\b\SYN\n\
+    \\ETX\EOT\f\SOH\DC2\EOT\174\SOH\b\SYN\n\
     \X\n\
-    \\EOT\EOT\f\ETX\NUL\DC2\ACK\196\SOH\EOT\201\SOH\ENQ\SUBH Target a worker polling on a Nexus task queue in a specific namespace.\n\
+    \\EOT\EOT\f\ETX\NUL\DC2\ACK\176\SOH\EOT\181\SOH\ENQ\SUBH Target a worker polling on a Nexus task queue in a specific namespace.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\ETX\NUL\SOH\DC2\EOT\196\SOH\f\DC2\n\
+    \\ENQ\EOT\f\ETX\NUL\SOH\DC2\EOT\176\SOH\f\DC2\n\
     \1\n\
-    \\ACK\EOT\f\ETX\NUL\STX\NUL\DC2\EOT\198\SOH\b\GS\SUB! Namespace to route requests to.\n\
+    \\ACK\EOT\f\ETX\NUL\STX\NUL\DC2\EOT\178\SOH\b\GS\SUB! Namespace to route requests to.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\f\ETX\NUL\STX\NUL\ENQ\DC2\EOT\198\SOH\b\SO\n\
+    \\a\EOT\f\ETX\NUL\STX\NUL\ENQ\DC2\EOT\178\SOH\b\SO\n\
     \\SI\n\
-    \\a\EOT\f\ETX\NUL\STX\NUL\SOH\DC2\EOT\198\SOH\SI\CAN\n\
+    \\a\EOT\f\ETX\NUL\STX\NUL\SOH\DC2\EOT\178\SOH\SI\CAN\n\
     \\SI\n\
-    \\a\EOT\f\ETX\NUL\STX\NUL\ETX\DC2\EOT\198\SOH\ESC\FS\n\
+    \\a\EOT\f\ETX\NUL\STX\NUL\ETX\DC2\EOT\178\SOH\ESC\FS\n\
     \8\n\
-    \\ACK\EOT\f\ETX\NUL\STX\SOH\DC2\EOT\200\SOH\b\RS\SUB( Nexus task queue to route requests to.\n\
+    \\ACK\EOT\f\ETX\NUL\STX\SOH\DC2\EOT\180\SOH\b\RS\SUB( Nexus task queue to route requests to.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\f\ETX\NUL\STX\SOH\ENQ\DC2\EOT\200\SOH\b\SO\n\
+    \\a\EOT\f\ETX\NUL\STX\SOH\ENQ\DC2\EOT\180\SOH\b\SO\n\
     \\SI\n\
-    \\a\EOT\f\ETX\NUL\STX\SOH\SOH\DC2\EOT\200\SOH\SI\EM\n\
+    \\a\EOT\f\ETX\NUL\STX\SOH\SOH\DC2\EOT\180\SOH\SI\EM\n\
     \\SI\n\
-    \\a\EOT\f\ETX\NUL\STX\SOH\ETX\DC2\EOT\200\SOH\FS\GS\n\
+    \\a\EOT\f\ETX\NUL\STX\SOH\ETX\DC2\EOT\180\SOH\FS\GS\n\
     \\206\SOH\n\
-    \\EOT\EOT\f\ETX\SOH\DC2\ACK\206\SOH\EOT\209\SOH\ENQ\SUB\189\SOH Target an external server by URL.\n\
+    \\EOT\EOT\f\ETX\SOH\DC2\ACK\186\SOH\EOT\189\SOH\ENQ\SUB\189\SOH Target an external server by URL.\n\
     \ At a later point, this will support providing credentials, in the meantime, an http.RoundTripper can be injected\n\
     \ into the server to modify the request.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\f\ETX\SOH\SOH\DC2\EOT\206\SOH\f\DC4\n\
+    \\ENQ\EOT\f\ETX\SOH\SOH\DC2\EOT\186\SOH\f\DC4\n\
     \\RS\n\
-    \\ACK\EOT\f\ETX\SOH\STX\NUL\DC2\EOT\208\SOH\b\ETB\SUB\SO URL to call.\n\
+    \\ACK\EOT\f\ETX\SOH\STX\NUL\DC2\EOT\188\SOH\b\ETB\SUB\SO URL to call.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\f\ETX\SOH\STX\NUL\ENQ\DC2\EOT\208\SOH\b\SO\n\
+    \\a\EOT\f\ETX\SOH\STX\NUL\ENQ\DC2\EOT\188\SOH\b\SO\n\
     \\SI\n\
-    \\a\EOT\f\ETX\SOH\STX\NUL\SOH\DC2\EOT\208\SOH\SI\DC2\n\
+    \\a\EOT\f\ETX\SOH\STX\NUL\SOH\DC2\EOT\188\SOH\SI\DC2\n\
     \\SI\n\
-    \\a\EOT\f\ETX\SOH\STX\NUL\ETX\DC2\EOT\208\SOH\NAK\SYN\n\
+    \\a\EOT\f\ETX\SOH\STX\NUL\ETX\DC2\EOT\188\SOH\NAK\SYN\n\
     \\SO\n\
-    \\EOT\EOT\f\b\NUL\DC2\ACK\211\SOH\EOT\214\SOH\ENQ\n\
+    \\EOT\EOT\f\b\NUL\DC2\ACK\191\SOH\EOT\194\SOH\ENQ\n\
     \\r\n\
-    \\ENQ\EOT\f\b\NUL\SOH\DC2\EOT\211\SOH\n\
+    \\ENQ\EOT\f\b\NUL\SOH\DC2\EOT\191\SOH\n\
     \\DC1\n\
     \\f\n\
-    \\EOT\EOT\f\STX\NUL\DC2\EOT\212\SOH\b\SUB\n\
+    \\EOT\EOT\f\STX\NUL\DC2\EOT\192\SOH\b\SUB\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ACK\DC2\EOT\212\SOH\b\SO\n\
+    \\ENQ\EOT\f\STX\NUL\ACK\DC2\EOT\192\SOH\b\SO\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\212\SOH\SI\NAK\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\EOT\192\SOH\SI\NAK\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\212\SOH\CAN\EM\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\EOT\192\SOH\CAN\EM\n\
     \\f\n\
-    \\EOT\EOT\f\STX\SOH\DC2\EOT\213\SOH\b\RS\n\
+    \\EOT\EOT\f\STX\SOH\DC2\EOT\193\SOH\b\RS\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\213\SOH\b\DLE\n\
+    \\ENQ\EOT\f\STX\SOH\ACK\DC2\EOT\193\SOH\b\DLE\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\213\SOH\DC1\EM\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\EOT\193\SOH\DC1\EM\n\
     \\r\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\213\SOH\FS\GSb\ACKproto3"
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\EOT\193\SOH\FS\GSb\ACKproto3"
