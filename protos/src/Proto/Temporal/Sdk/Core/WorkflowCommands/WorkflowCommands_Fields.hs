@@ -36,6 +36,7 @@ import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow
 import qualified Proto.Temporal.Sdk.Core.Common.Common
+import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus
 accepted ::
   forall f s a.
   (Prelude.Functor f,

@@ -210,86 +210,65 @@ packedFileDescriptor
     \\fUserMetadata\DC29\n\
     \\asummary\CAN\SOH \SOH(\v2\US.temporal.api.common.v1.PayloadR\asummary\DC29\n\
     \\adetails\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\adetailsB\DEL\n\
-    \\SYNio.temporal.api.sdk.v1B\DC1UserMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\164\DLE\n\
-    \\ACK\DC2\EOT\SYN\NUL0\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2024 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SYNio.temporal.api.sdk.v1B\DC1UserMetadataProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\186\a\n\
+    \\ACK\DC2\EOT\NUL\NUL\SUB\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\FS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL4\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\FS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL4\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL4\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL/\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL/\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL/\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL/\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL2\n\
+    \\SOH\b\DC2\ETX\a\NUL2\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL2\n\
+    \\STX\b\b\DC2\ETX\a\NUL2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL1\n\
+    \\SOH\b\DC2\ETX\b\NUL1\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL1\n\
+    \\STX\b-\DC2\ETX\b\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL2\n\
+    \\SOH\b\DC2\ETX\t\NUL2\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL2\n\
+    \\STX\b%\DC2\ETX\t\NUL2\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\"\NUL.\n\
+    \\STX\ETX\NUL\DC2\ETX\f\NUL.\n\
     \K\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL0\SOH\SUB? Information a user can set, often for use by user interfaces.\n\
+    \\STX\EOT\NUL\DC2\EOT\SI\NUL\SUB\SOH\SUB? Information a user can set, often for use by user interfaces.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\DC4\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b\DC4\n\
     \\189\STX\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX*\STX-\SUB\175\STX Short-form text that provides a summary. This payload should be a \"json/plain\"-encoded payload\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC4\STX-\SUB\175\STX Short-form text that provides a summary. This payload should be a \"json/plain\"-encoded payload\n\
     \ that is a single JSON string for use in user interfaces. User interface formatting may not\n\
     \ apply to this text when used in \"title\" situations. The payload data section is limited to 400\n\
     \ bytes by default.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX*\STX \n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC4\STX \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX*!(\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC4!(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX*+,\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC4+,\n\
     \\165\STX\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX/\STX-\SUB\151\STX Long-form text that provides details. This payload should be a \"json/plain\"-encoded payload\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\EM\STX-\SUB\151\STX Long-form text that provides details. This payload should be a \"json/plain\"-encoded payload\n\
     \ that is a single JSON string for use in user interfaces. User interface formatting may apply to\n\
     \ this text in common use. The payload data section is limited to 20000 bytes by default.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX/\STX \n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\EM\STX \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX/!(\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\EM!(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX/+,b\ACKproto3"
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\EM+,b\ACKproto3"

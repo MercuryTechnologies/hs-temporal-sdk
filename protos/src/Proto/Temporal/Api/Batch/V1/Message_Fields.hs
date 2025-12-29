@@ -179,6 +179,13 @@ options ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "options" a) =>
   Lens.Family2.LensLike' f s a
 options = Data.ProtoLens.Field.field @"options"
+postResetOperations ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "postResetOperations" a) =>
+  Lens.Family2.LensLike' f s a
+postResetOperations
+  = Data.ProtoLens.Field.field @"postResetOperations"
 resetAttempts ::
   forall f s a.
   (Prelude.Functor f,
@@ -235,6 +242,13 @@ updateMask ::
    Data.ProtoLens.Field.HasField s "updateMask" a) =>
   Lens.Family2.LensLike' f s a
 updateMask = Data.ProtoLens.Field.field @"updateMask"
+vec'postResetOperations ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'postResetOperations" a) =>
+  Lens.Family2.LensLike' f s a
+vec'postResetOperations
+  = Data.ProtoLens.Field.field @"vec'postResetOperations"
 workflowExecutionOptions ::
   forall f s a.
   (Prelude.Functor f,

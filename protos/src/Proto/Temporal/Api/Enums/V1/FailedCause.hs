@@ -680,6 +680,7 @@ data WorkflowTaskFailedCause
     WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED |
     WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES |
     WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED |
+    WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE |
     WorkflowTaskFailedCause'Unrecognized !WorkflowTaskFailedCause'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
@@ -776,6 +777,8 @@ instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
         WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
   maybeToEnum 35
     = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+  maybeToEnum 36
+    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
   maybeToEnum k
     = Prelude.Just
         (WorkflowTaskFailedCause'Unrecognized
@@ -870,6 +873,8 @@ instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
     = "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES"
   showEnum WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
     = "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
+  showEnum WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
+    = "WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE"
   showEnum
     (WorkflowTaskFailedCause'Unrecognized (WorkflowTaskFailedCause'UnrecognizedValue k))
     = Prelude.show k
@@ -1009,11 +1014,14 @@ instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
         WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
     | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
     = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+    | (Prelude.==)
+        k "WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE"
+    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded WorkflowTaskFailedCause where
   minBound = WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-  maxBound = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+  maxBound = WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
 instance Prelude.Enum WorkflowTaskFailedCause where
   toEnum k__
     = Prelude.maybe
@@ -1096,12 +1104,13 @@ instance Prelude.Enum WorkflowTaskFailedCause where
     WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
     = 34
   fromEnum WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED = 35
+  fromEnum WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE = 36
   fromEnum
     (WorkflowTaskFailedCause'Unrecognized (WorkflowTaskFailedCause'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+  succ WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
     = Prelude.error
-        "WorkflowTaskFailedCause.succ: bad argument WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED. This value would be out of bounds."
+        "WorkflowTaskFailedCause.succ: bad argument WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE. This value would be out of bounds."
   succ WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
     = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
   succ WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
@@ -1186,6 +1195,8 @@ instance Prelude.Enum WorkflowTaskFailedCause where
   succ
     WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
     = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+  succ WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
+    = WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
   succ (WorkflowTaskFailedCause'Unrecognized _)
     = Prelude.error
         "WorkflowTaskFailedCause.succ: bad argument: unrecognized value"
@@ -1276,6 +1287,8 @@ instance Prelude.Enum WorkflowTaskFailedCause where
     = WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
   pred WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
     = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
+  pred WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
+    = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
   pred (WorkflowTaskFailedCause'Unrecognized _)
     = Prelude.error
         "WorkflowTaskFailedCause.pred: bad argument: unrecognized value"

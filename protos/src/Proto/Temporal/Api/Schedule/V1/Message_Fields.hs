@@ -253,6 +253,13 @@ maybe'scheduleTime ::
   Lens.Family2.LensLike' f s a
 maybe'scheduleTime
   = Data.ProtoLens.Field.field @"maybe'scheduleTime"
+maybe'scheduledTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'scheduledTime" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'scheduledTime
+  = Data.ProtoLens.Field.field @"maybe'scheduledTime"
 maybe'searchAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -408,6 +415,12 @@ scheduleTime ::
    Data.ProtoLens.Field.HasField s "scheduleTime" a) =>
   Lens.Family2.LensLike' f s a
 scheduleTime = Data.ProtoLens.Field.field @"scheduleTime"
+scheduledTime ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "scheduledTime" a) =>
+  Lens.Family2.LensLike' f s a
+scheduledTime = Data.ProtoLens.Field.field @"scheduledTime"
 searchAttributes ::
   forall f s a.
   (Prelude.Functor f,

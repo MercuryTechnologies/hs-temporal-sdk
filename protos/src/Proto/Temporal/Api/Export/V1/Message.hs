@@ -293,88 +293,67 @@ packedFileDescriptor
     \\ahistory\CAN\SOH \SOH(\v2 .temporal.api.history.v1.HistoryR\ahistory\"U\n\
     \\DC2WorkflowExecutions\DC2?\n\
     \\ENQitems\CAN\SOH \ETX(\v2).temporal.api.export.v1.WorkflowExecutionR\ENQitemsB\137\SOH\n\
-    \\EMio.temporal.api.export.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/export/v1;export\170\STX\CANTemporalio.Api.Export.V1\234\STX\ESCTemporalio::Api::Export::V1J\219\f\n\
-    \\ACK\DC2\EOT\SYN\NUL+\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\EMio.temporal.api.export.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/export/v1;export\170\STX\CANTemporalio.Api.Export.V1\234\STX\ESCTemporalio::Api::Export::V1J\241\ETX\n\
+    \\ACK\DC2\EOT\NUL\NUL\NAK\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\US\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL:\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\US\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL:\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL:\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL:\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL2\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL2\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL2\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL4\n\
+    \\SOH\b\DC2\ETX\b\NUL4\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL4\n\
+    \\STX\b-\DC2\ETX\b\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL5\n\
+    \\SOH\b\DC2\ETX\t\NUL5\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL5\n\
+    \\STX\b%\DC2\ETX\t\NUL5\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL/\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT#\NUL%\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\r\NUL\SI\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX#\b\EM\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\r\b\EM\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX$\EOT0\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SO\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX$\EOT#\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\SO\EOT#\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX$$+\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SO$+\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX$./\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SO./\n\
     \\169\SOH\n\
-    \\STX\EOT\SOH\DC2\EOT)\NUL+\SOH\SUB\156\SOH WorkflowExecutions is used by the Cloud Export feature to deserialize \n\
+    \\STX\EOT\SOH\DC2\EOT\DC3\NUL\NAK\SOH\SUB\156\SOH WorkflowExecutions is used by the Cloud Export feature to deserialize \n\
     \ the exported file. It encapsulates a collection of workflow execution information.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX)\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\DC3\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX*\EOT)\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\DC4\EOT)\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX*\EOT\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX\DC4\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX*\r\RS\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\DC4\r\RS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX*\US$\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\DC4\US$\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX*'(b\ACKproto3"
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\DC4'(b\ACKproto3"

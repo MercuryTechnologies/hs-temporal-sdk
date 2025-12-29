@@ -21,7 +21,7 @@ module Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
         ResolveChildWorkflowExecutionStartSuccess(),
         ResolveNexusOperation(), ResolveNexusOperationStart(),
         ResolveNexusOperationStart'Status(..),
-        _ResolveNexusOperationStart'OperationId,
+        _ResolveNexusOperationStart'OperationToken,
         _ResolveNexusOperationStart'StartedSync,
         _ResolveNexusOperationStart'CancelledBeforeStart,
         ResolveRequestCancelExternalWorkflow(),
@@ -4898,8 +4898,8 @@ instance Control.DeepSeq.NFData ResolveNexusOperation where
      
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.seq' @:: Lens' ResolveNexusOperationStart Data.Word.Word32@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'status' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe ResolveNexusOperationStart'Status)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'operationId' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.operationId' @:: Lens' ResolveNexusOperationStart Data.Text.Text@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'operationToken' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Data.Text.Text)@
+         * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.operationToken' @:: Lens' ResolveNexusOperationStart Data.Text.Text@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'startedSync' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Prelude.Bool)@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.startedSync' @:: Lens' ResolveNexusOperationStart Prelude.Bool@
          * 'Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields.maybe'cancelledBeforeStart' @:: Lens' ResolveNexusOperationStart (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@
@@ -4916,7 +4916,7 @@ instance Prelude.Show ResolveNexusOperationStart where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 data ResolveNexusOperationStart'Status
-  = ResolveNexusOperationStart'OperationId !Data.Text.Text |
+  = ResolveNexusOperationStart'OperationToken !Data.Text.Text |
     ResolveNexusOperationStart'StartedSync !Prelude.Bool |
     ResolveNexusOperationStart'CancelledBeforeStart !Proto.Temporal.Api.Failure.V1.Message.Failure
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
@@ -4934,7 +4934,7 @@ instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'status"
            _ResolveNexusOperationStart'status
            (\ x__ y__ -> x__ {_ResolveNexusOperationStart'status = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'operationId" (Prelude.Maybe Data.Text.Text) where
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'operationToken" (Prelude.Maybe Data.Text.Text) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -4943,12 +4943,12 @@ instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'operati
         (Lens.Family2.Unchecked.lens
            (\ x__
               -> case x__ of
-                   (Prelude.Just (ResolveNexusOperationStart'OperationId x__val))
+                   (Prelude.Just (ResolveNexusOperationStart'OperationToken x__val))
                      -> Prelude.Just x__val
                    _otherwise -> Prelude.Nothing)
            (\ _ y__
-              -> Prelude.fmap ResolveNexusOperationStart'OperationId y__))
-instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "operationId" Data.Text.Text where
+              -> Prelude.fmap ResolveNexusOperationStart'OperationToken y__))
+instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "operationToken" Data.Text.Text where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -4958,11 +4958,11 @@ instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "operationId" 
            (Lens.Family2.Unchecked.lens
               (\ x__
                  -> case x__ of
-                      (Prelude.Just (ResolveNexusOperationStart'OperationId x__val))
+                      (Prelude.Just (ResolveNexusOperationStart'OperationToken x__val))
                         -> Prelude.Just x__val
                       _otherwise -> Prelude.Nothing)
               (\ _ y__
-                 -> Prelude.fmap ResolveNexusOperationStart'OperationId y__))
+                 -> Prelude.fmap ResolveNexusOperationStart'OperationToken y__))
            (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
 instance Data.ProtoLens.Field.HasField ResolveNexusOperationStart "maybe'startedSync" (Prelude.Maybe Prelude.Bool) where
   fieldOf _
@@ -5033,8 +5033,8 @@ instance Data.ProtoLens.Message ResolveNexusOperationStart where
   packedMessageDescriptor _
     = "\n\
       \\SUBResolveNexusOperationStart\DC2\DLE\n\
-      \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2#\n\
-      \\foperation_id\CAN\STX \SOH(\tH\NULR\voperationId\DC2#\n\
+      \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2)\n\
+      \\SIoperation_token\CAN\STX \SOH(\tH\NULR\SOoperationToken\DC2#\n\
       \\fstarted_sync\CAN\ETX \SOH(\bH\NULR\vstartedSync\DC2X\n\
       \\SYNcancelled_before_start\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureH\NULR\DC4cancelledBeforeStartB\b\n\
       \\ACKstatus"
@@ -5049,13 +5049,13 @@ instance Data.ProtoLens.Message ResolveNexusOperationStart where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"seq")) ::
               Data.ProtoLens.FieldDescriptor ResolveNexusOperationStart
-        operationId__field_descriptor
+        operationToken__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "operation_id"
+              "operation_token"
               (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
                  Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'operationId")) ::
+                 (Data.ProtoLens.Field.field @"maybe'operationToken")) ::
               Data.ProtoLens.FieldDescriptor ResolveNexusOperationStart
         startedSync__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -5076,7 +5076,7 @@ instance Data.ProtoLens.Message ResolveNexusOperationStart where
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, seq__field_descriptor),
-           (Data.ProtoLens.Tag 2, operationId__field_descriptor),
+           (Data.ProtoLens.Tag 2, operationToken__field_descriptor),
            (Data.ProtoLens.Tag 3, startedSync__field_descriptor),
            (Data.ProtoLens.Tag 4, cancelledBeforeStart__field_descriptor)]
   unknownFields
@@ -5123,9 +5123,10 @@ instance Data.ProtoLens.Message ResolveNexusOperationStart where
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.getText
                                              (Prelude.fromIntegral len))
-                                       "operation_id"
+                                       "operation_token"
                                 loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operationId") y x)
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"operationToken") y x)
                         24
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -5168,7 +5169,7 @@ instance Data.ProtoLens.Message ResolveNexusOperationStart where
                      Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'status") _x
                  of
                    Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just (ResolveNexusOperationStart'OperationId v))
+                   (Prelude.Just (ResolveNexusOperationStart'OperationToken v))
                      -> (Data.Monoid.<>)
                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
                           ((Prelude..)
@@ -5206,20 +5207,20 @@ instance Control.DeepSeq.NFData ResolveNexusOperationStart where
                 (Control.DeepSeq.deepseq
                    (_ResolveNexusOperationStart'status x__) ()))
 instance Control.DeepSeq.NFData ResolveNexusOperationStart'Status where
-  rnf (ResolveNexusOperationStart'OperationId x__)
+  rnf (ResolveNexusOperationStart'OperationToken x__)
     = Control.DeepSeq.rnf x__
   rnf (ResolveNexusOperationStart'StartedSync x__)
     = Control.DeepSeq.rnf x__
   rnf (ResolveNexusOperationStart'CancelledBeforeStart x__)
     = Control.DeepSeq.rnf x__
-_ResolveNexusOperationStart'OperationId ::
+_ResolveNexusOperationStart'OperationToken ::
   Data.ProtoLens.Prism.Prism' ResolveNexusOperationStart'Status Data.Text.Text
-_ResolveNexusOperationStart'OperationId
+_ResolveNexusOperationStart'OperationToken
   = Data.ProtoLens.Prism.prism'
-      ResolveNexusOperationStart'OperationId
+      ResolveNexusOperationStart'OperationToken
       (\ p__
          -> case p__ of
-              (ResolveNexusOperationStart'OperationId p__val)
+              (ResolveNexusOperationStart'OperationToken p__val)
                 -> Prelude.Just p__val
               _otherwise -> Prelude.Nothing)
 _ResolveNexusOperationStart'StartedSync ::
@@ -8144,10 +8145,10 @@ packedFileDescriptor
     \\rrun_validator\CAN\a \SOH(\bR\frunValidator\SUB[\n\
     \\fHeadersEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\220\SOH\n\
+    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\226\SOH\n\
     \\SUBResolveNexusOperationStart\DC2\DLE\n\
-    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2#\n\
-    \\foperation_id\CAN\STX \SOH(\tH\NULR\voperationId\DC2#\n\
+    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2)\n\
+    \\SIoperation_token\CAN\STX \SOH(\tH\NULR\SOoperationToken\DC2#\n\
     \\fstarted_sync\CAN\ETX \SOH(\bH\NULR\vstartedSync\DC2X\n\
     \\SYNcancelled_before_start\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureH\NULR\DC4cancelledBeforeStartB\b\n\
     \\ACKstatus\"f\n\
@@ -8171,7 +8172,7 @@ packedFileDescriptor
     \\ENQFATAL\DLE\b\DC2\US\n\
     \\ESCPAGINATION_OR_HISTORY_FETCH\DLE\t\DC2\GS\n\
     \\EMWORKFLOW_EXECUTION_ENDING\DLE\n\
-    \B8\234\STX5Temporalio::Internal::Bridge::Api::WorkflowActivationJ\247\151\SOH\n\
+    \B8\234\STX5Temporalio::Internal::Bridge::Api::WorkflowActivationJ\249\151\SOH\n\
     \\a\DC2\ENQ\NUL\NUL\141\ETX\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
@@ -9238,17 +9239,17 @@ packedFileDescriptor
     \\r\n\
     \\ENQ\EOT\DC2\b\NUL\SOH\DC2\EOT\216\STX\n\
     \\DLE\n\
-    \\209\SOH\n\
-    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\220\STX\b \SUB\194\SOH The operation started asynchronously. Contains an ID that can be used to perform\n\
+    \\211\SOH\n\
+    \\EOT\EOT\DC2\STX\SOH\DC2\EOT\220\STX\b#\SUB\196\SOH The operation started asynchronously. Contains a token that can be used to perform\n\
     \ operations on the started operation by, ex, clients. A `ResolveNexusOperation` job will\n\
     \ follow at some point.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\DC2\STX\SOH\ENQ\DC2\EOT\220\STX\b\SO\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\220\STX\SI\ESC\n\
+    \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\EOT\220\STX\SI\RS\n\
     \\r\n\
-    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\220\STX\RS\US\n\
+    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\EOT\220\STX!\"\n\
     \\156\SOH\n\
     \\EOT\EOT\DC2\STX\STX\DC2\EOT\223\STX\b\RS\SUB\141\SOH If true the operation \"started\" but only because it's also already resolved. A\n\
     \ `ResolveNexusOperation` job will be in the same activation.\n\

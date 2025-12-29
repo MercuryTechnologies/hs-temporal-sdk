@@ -4,11 +4,14 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Sdk.Core.Nexus.Nexus (
-        CancelNexusTask(), NexusOperationResult(),
-        NexusOperationResult'Status(..), _NexusOperationResult'Completed,
-        _NexusOperationResult'Failed, _NexusOperationResult'Cancelled,
-        _NexusOperationResult'TimedOut, NexusTask(), NexusTask'Variant(..),
-        _NexusTask'Task, _NexusTask'CancelTask, NexusTaskCancelReason(..),
+        CancelNexusTask(), NexusOperationCancellationType(..),
+        NexusOperationCancellationType(),
+        NexusOperationCancellationType'UnrecognizedValue,
+        NexusOperationResult(), NexusOperationResult'Status(..),
+        _NexusOperationResult'Completed, _NexusOperationResult'Failed,
+        _NexusOperationResult'Cancelled, _NexusOperationResult'TimedOut,
+        NexusTask(), NexusTask'Variant(..), _NexusTask'Task,
+        _NexusTask'CancelTask, NexusTaskCancelReason(..),
         NexusTaskCancelReason(), NexusTaskCancelReason'UnrecognizedValue,
         NexusTaskCompletion(), NexusTaskCompletion'Status(..),
         _NexusTaskCompletion'Completed, _NexusTaskCompletion'Error,
@@ -203,6 +206,88 @@ instance Control.DeepSeq.NFData CancelNexusTask where
              (Control.DeepSeq.deepseq
                 (_CancelNexusTask'taskToken x__)
                 (Control.DeepSeq.deepseq (_CancelNexusTask'reason x__) ()))
+newtype NexusOperationCancellationType'UnrecognizedValue
+  = NexusOperationCancellationType'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data NexusOperationCancellationType
+  = WAIT_CANCELLATION_COMPLETED |
+    ABANDON |
+    TRY_CANCEL |
+    WAIT_CANCELLATION_REQUESTED |
+    NexusOperationCancellationType'Unrecognized !NexusOperationCancellationType'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum NexusOperationCancellationType where
+  maybeToEnum 0 = Prelude.Just WAIT_CANCELLATION_COMPLETED
+  maybeToEnum 1 = Prelude.Just ABANDON
+  maybeToEnum 2 = Prelude.Just TRY_CANCEL
+  maybeToEnum 3 = Prelude.Just WAIT_CANCELLATION_REQUESTED
+  maybeToEnum k
+    = Prelude.Just
+        (NexusOperationCancellationType'Unrecognized
+           (NexusOperationCancellationType'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum WAIT_CANCELLATION_COMPLETED
+    = "WAIT_CANCELLATION_COMPLETED"
+  showEnum ABANDON = "ABANDON"
+  showEnum TRY_CANCEL = "TRY_CANCEL"
+  showEnum WAIT_CANCELLATION_REQUESTED
+    = "WAIT_CANCELLATION_REQUESTED"
+  showEnum
+    (NexusOperationCancellationType'Unrecognized (NexusOperationCancellationType'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "WAIT_CANCELLATION_COMPLETED"
+    = Prelude.Just WAIT_CANCELLATION_COMPLETED
+    | (Prelude.==) k "ABANDON" = Prelude.Just ABANDON
+    | (Prelude.==) k "TRY_CANCEL" = Prelude.Just TRY_CANCEL
+    | (Prelude.==) k "WAIT_CANCELLATION_REQUESTED"
+    = Prelude.Just WAIT_CANCELLATION_REQUESTED
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded NexusOperationCancellationType where
+  minBound = WAIT_CANCELLATION_COMPLETED
+  maxBound = WAIT_CANCELLATION_REQUESTED
+instance Prelude.Enum NexusOperationCancellationType where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum NexusOperationCancellationType: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum WAIT_CANCELLATION_COMPLETED = 0
+  fromEnum ABANDON = 1
+  fromEnum TRY_CANCEL = 2
+  fromEnum WAIT_CANCELLATION_REQUESTED = 3
+  fromEnum
+    (NexusOperationCancellationType'Unrecognized (NexusOperationCancellationType'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ WAIT_CANCELLATION_REQUESTED
+    = Prelude.error
+        "NexusOperationCancellationType.succ: bad argument WAIT_CANCELLATION_REQUESTED. This value would be out of bounds."
+  succ WAIT_CANCELLATION_COMPLETED = ABANDON
+  succ ABANDON = TRY_CANCEL
+  succ TRY_CANCEL = WAIT_CANCELLATION_REQUESTED
+  succ (NexusOperationCancellationType'Unrecognized _)
+    = Prelude.error
+        "NexusOperationCancellationType.succ: bad argument: unrecognized value"
+  pred WAIT_CANCELLATION_COMPLETED
+    = Prelude.error
+        "NexusOperationCancellationType.pred: bad argument WAIT_CANCELLATION_COMPLETED. This value would be out of bounds."
+  pred ABANDON = WAIT_CANCELLATION_COMPLETED
+  pred TRY_CANCEL = ABANDON
+  pred WAIT_CANCELLATION_REQUESTED = TRY_CANCEL
+  pred (NexusOperationCancellationType'Unrecognized _)
+    = Prelude.error
+        "NexusOperationCancellationType.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault NexusOperationCancellationType where
+  fieldDefault = WAIT_CANCELLATION_COMPLETED
+instance Control.DeepSeq.NFData NexusOperationCancellationType where
+  rnf x__ = Prelude.seq x__ ()
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.Nexus.Nexus_Fields.maybe'status' @:: Lens' NexusOperationResult (Prelude.Maybe NexusOperationResult'Status)@
@@ -1213,8 +1298,14 @@ packedFileDescriptor
     \\ACKreason\CAN\STX \SOH(\SO2$.coresdk.nexus.NexusTaskCancelReasonR\ACKreason*;\n\
     \\NAKNexusTaskCancelReason\DC2\r\n\
     \\tTIMED_OUT\DLE\NUL\DC2\DC3\n\
-    \\SIWORKER_SHUTDOWN\DLE\SOHB+\234\STX(Temporalio::Internal::Bridge::Api::NexusJ\254\DC3\n\
-    \\ACK\DC2\EOT\NUL\NULF\SOH\n\
+    \\SIWORKER_SHUTDOWN\DLE\SOH*\DEL\n\
+    \\RSNexusOperationCancellationType\DC2\US\n\
+    \\ESCWAIT_CANCELLATION_COMPLETED\DLE\NUL\DC2\v\n\
+    \\aABANDON\DLE\SOH\DC2\SO\n\
+    \\n\
+    \TRY_CANCEL\DLE\STX\DC2\US\n\
+    \\ESCWAIT_CANCELLATION_REQUESTED\DLE\ETXB+\234\STX(Temporalio::Internal::Bridge::Api::NexusJ\213\SUB\n\
+    \\ACK\DC2\EOT\NUL\NULU\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -1411,4 +1502,40 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXE\EOT\DC3\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXE\SYN\ETBb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXE\SYN\ETB\n\
+    \`\n\
+    \\STX\ENQ\SOH\DC2\EOTI\NULU\SOH\SUBT Controls at which point to report back to lang when a nexus operation is cancelled\n\
+    \\n\
+    \\n\
+    \\n\
+    \\ETX\ENQ\SOH\SOH\DC2\ETXI\ENQ#\n\
+    \C\n\
+    \\EOT\ENQ\SOH\STX\NUL\DC2\ETXK\EOT$\SUB6 Wait for operation cancellation completion. Default.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\NUL\SOH\DC2\ETXK\EOT\US\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\NUL\STX\DC2\ETXK\"#\n\
+    \V\n\
+    \\EOT\ENQ\SOH\STX\SOH\DC2\ETXM\EOT\DLE\SUBI Do not request cancellation of the nexus operation if already scheduled\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\SOH\SOH\DC2\ETXM\EOT\v\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\SOH\STX\DC2\ETXM\SO\SI\n\
+    \\234\STX\n\
+    \\EOT\ENQ\SOH\STX\STX\DC2\ETXR\EOT\DC3\SUB\220\STX Initiate a cancellation request for the Nexus operation and immediately report cancellation\n\
+    \ to the caller. Note that it doesn't guarantee that cancellation is delivered to the operation if calling workflow exits before the delivery is done.\n\
+    \ If you want to ensure that cancellation is delivered to the operation, use WAIT_CANCELLATION_REQUESTED.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\STX\SOH\DC2\ETXR\EOT\SO\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\STX\STX\DC2\ETXR\DC1\DC2\n\
+    \m\n\
+    \\EOT\ENQ\SOH\STX\ETX\DC2\ETXT\EOT$\SUB` Request cancellation of the operation and wait for confirmation that the request was received.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\ETX\SOH\DC2\ETXT\EOT\US\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\ETX\STX\DC2\ETXT\"#b\ACKproto3"

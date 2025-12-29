@@ -399,119 +399,98 @@ packedFileDescriptor
     \\rcommand_index\CAN\EOT \SOH(\ETXH\NULR\fcommandIndex\DC2(\n\
     \\EOTbody\CAN\ENQ \SOH(\v2\DC4.google.protobuf.AnyR\EOTbodyB\SI\n\
     \\rsequencing_idB\147\SOH\n\
-    \\ESCio.temporal.api.protocol.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/protocol/v1;protocol\170\STX\SUBTemporalio.Api.Protocol.V1\234\STX\GSTemporalio::Api::Protocol::V1J\183\DC1\n\
-    \\ACK\DC2\EOT\SYN\NUL8\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\ESCio.temporal.api.protocol.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/protocol/v1;protocol\170\STX\SUBTemporalio.Api.Protocol.V1\234\STX\GSTemporalio::Api::Protocol::V1J\205\b\n\
+    \\ACK\DC2\EOT\NUL\NUL\"\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL!\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL>\n\
+    \\SOH\STX\DC2\ETX\STX\NUL!\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL>\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL>\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL>\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL4\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL4\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL4\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL6\n\
+    \\SOH\b\DC2\ETX\b\NUL6\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL6\n\
+    \\STX\b-\DC2\ETX\b\NUL6\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL7\n\
+    \\SOH\b\DC2\ETX\t\NUL7\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL7\n\
+    \\STX\b%\DC2\ETX\t\NUL7\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL#\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL#\n\
     \\135\SOH\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL8\SOH\SUB{ (-- api-linter: core::0146::any=disabled\n\
+    \\STX\EOT\NUL\DC2\EOT\SI\NUL\"\SOH\SUB{ (-- api-linter: core::0146::any=disabled\n\
     \     aip.dev/not-precedent: We want runtime extensibility for the body field --)\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\SI\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b\SI\n\
     \/\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX'\EOT\DC2\SUB\" An ID for this specific message.\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC1\EOT\DC2\SUB\" An ID for this specific message.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX'\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC1\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX'\v\r\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC1\v\r\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX'\DLE\DC1\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC1\DLE\DC1\n\
     \]\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX+\EOT$\SUBP Identifies the specific instance of a protocol to which this message\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\NAK\EOT$\SUBP Identifies the specific instance of a protocol to which this message\n\
     \ belongs.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX+\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\NAK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX+\v\US\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\NAK\v\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX+\"#\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\NAK\"#\n\
     \\233\SOH\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT0\EOT3\ENQ\SUB\218\SOH The event ID or command ID after which this message can be delivered. The\n\
+    \\EOT\EOT\NUL\b\NUL\DC2\EOT\SUB\EOT\GS\ENQ\SUB\218\SOH The event ID or command ID after which this message can be delivered. The\n\
     \ effects of history up to and including this event ID should be visible to\n\
     \ the code that handles this message. Omit to opt out of sequencing.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX0\n\
+    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\SUB\n\
     \\ETB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX1\b\ESC\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\ESC\b\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX1\b\r\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\ESC\b\r\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX1\SO\SYN\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\ESC\SO\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX1\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\ESC\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX2\b \n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\FS\b \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX2\b\r\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX\FS\b\r\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX2\SO\ESC\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\FS\SO\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX2\RS\US\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\FS\RS\US\n\
     \\153\SOH\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX7\EOT!\SUB\139\SOH The opaque data carried by this message. The protocol type can be\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX!\EOT!\SUB\139\SOH The opaque data carried by this message. The protocol type can be\n\
     \ extracted from the package name of the message carried inside the Any.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX7\EOT\ETB\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX!\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX7\CAN\FS\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX!\CAN\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX7\US b\ACKproto3"
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX!\US b\ACKproto3"

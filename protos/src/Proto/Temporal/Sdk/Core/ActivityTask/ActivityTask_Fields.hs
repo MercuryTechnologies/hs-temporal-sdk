@@ -60,6 +60,11 @@ currentAttemptScheduledTime ::
   Lens.Family2.LensLike' f s a
 currentAttemptScheduledTime
   = Data.ProtoLens.Field.field @"currentAttemptScheduledTime"
+details ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
+  Lens.Family2.LensLike' f s a
+details = Data.ProtoLens.Field.field @"details"
 headerFields ::
   forall f s a.
   (Prelude.Functor f,
@@ -83,11 +88,46 @@ input ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "input" a) =>
   Lens.Family2.LensLike' f s a
 input = Data.ProtoLens.Field.field @"input"
+isCancelled ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "isCancelled" a) =>
+  Lens.Family2.LensLike' f s a
+isCancelled = Data.ProtoLens.Field.field @"isCancelled"
 isLocal ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "isLocal" a) =>
   Lens.Family2.LensLike' f s a
 isLocal = Data.ProtoLens.Field.field @"isLocal"
+isNotFound ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "isNotFound" a) =>
+  Lens.Family2.LensLike' f s a
+isNotFound = Data.ProtoLens.Field.field @"isNotFound"
+isPaused ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "isPaused" a) =>
+  Lens.Family2.LensLike' f s a
+isPaused = Data.ProtoLens.Field.field @"isPaused"
+isReset ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "isReset" a) =>
+  Lens.Family2.LensLike' f s a
+isReset = Data.ProtoLens.Field.field @"isReset"
+isTimedOut ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "isTimedOut" a) =>
+  Lens.Family2.LensLike' f s a
+isTimedOut = Data.ProtoLens.Field.field @"isTimedOut"
+isWorkerShutdown ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "isWorkerShutdown" a) =>
+  Lens.Family2.LensLike' f s a
+isWorkerShutdown = Data.ProtoLens.Field.field @"isWorkerShutdown"
 key ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "key" a) =>
@@ -106,6 +146,12 @@ maybe'currentAttemptScheduledTime ::
   Lens.Family2.LensLike' f s a
 maybe'currentAttemptScheduledTime
   = Data.ProtoLens.Field.field @"maybe'currentAttemptScheduledTime"
+maybe'details ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'details" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'details = Data.ProtoLens.Field.field @"maybe'details"
 maybe'heartbeatTimeout ::
   forall f s a.
   (Prelude.Functor f,

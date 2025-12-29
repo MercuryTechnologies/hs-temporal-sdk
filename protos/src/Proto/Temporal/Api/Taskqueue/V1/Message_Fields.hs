@@ -82,6 +82,13 @@ createTime ::
    Data.ProtoLens.Field.HasField s "createTime" a) =>
   Lens.Family2.LensLike' f s a
 createTime = Data.ProtoLens.Field.field @"createTime"
+currentDeploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "currentDeploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+currentDeploymentVersion
+  = Data.ProtoLens.Field.field @"currentDeploymentVersion"
 currentVersion ::
   forall f s a.
   (Prelude.Functor f,
@@ -140,6 +147,13 @@ maybe'createTime ::
    Data.ProtoLens.Field.HasField s "maybe'createTime" a) =>
   Lens.Family2.LensLike' f s a
 maybe'createTime = Data.ProtoLens.Field.field @"maybe'createTime"
+maybe'currentDeploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'currentDeploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'currentDeploymentVersion
+  = Data.ProtoLens.Field.field @"maybe'currentDeploymentVersion"
 maybe'deploymentOptions ::
   forall f s a.
   (Prelude.Functor f,
@@ -174,6 +188,13 @@ maybe'ramp ::
    Data.ProtoLens.Field.HasField s "maybe'ramp" a) =>
   Lens.Family2.LensLike' f s a
 maybe'ramp = Data.ProtoLens.Field.field @"maybe'ramp"
+maybe'rampingDeploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rampingDeploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rampingDeploymentVersion
+  = Data.ProtoLens.Field.field @"maybe'rampingDeploymentVersion"
 maybe'rule ::
   forall f s a.
   (Prelude.Functor f,
@@ -266,6 +287,13 @@ rampPercentage ::
    Data.ProtoLens.Field.HasField s "rampPercentage" a) =>
   Lens.Family2.LensLike' f s a
 rampPercentage = Data.ProtoLens.Field.field @"rampPercentage"
+rampingDeploymentVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rampingDeploymentVersion" a) =>
+  Lens.Family2.LensLike' f s a
+rampingDeploymentVersion
+  = Data.ProtoLens.Field.field @"rampingDeploymentVersion"
 rampingVersion ::
   forall f s a.
   (Prelude.Functor f,

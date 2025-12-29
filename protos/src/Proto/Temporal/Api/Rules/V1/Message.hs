@@ -41,10 +41,14 @@ import qualified Proto.Google.Protobuf.Timestamp
          * 'Proto.Temporal.Api.Rules.V1.Message_Fields.createTime' @:: Lens' WorkflowRule Proto.Google.Protobuf.Timestamp.Timestamp@
          * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'createTime' @:: Lens' WorkflowRule (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
          * 'Proto.Temporal.Api.Rules.V1.Message_Fields.spec' @:: Lens' WorkflowRule WorkflowRuleSpec@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'spec' @:: Lens' WorkflowRule (Prelude.Maybe WorkflowRuleSpec)@ -}
+         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'spec' @:: Lens' WorkflowRule (Prelude.Maybe WorkflowRuleSpec)@
+         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.createdByIdentity' @:: Lens' WorkflowRule Data.Text.Text@
+         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.description' @:: Lens' WorkflowRule Data.Text.Text@ -}
 data WorkflowRule
   = WorkflowRule'_constructor {_WorkflowRule'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                                _WorkflowRule'spec :: !(Prelude.Maybe WorkflowRuleSpec),
+                               _WorkflowRule'createdByIdentity :: !Data.Text.Text,
+                               _WorkflowRule'description :: !Data.Text.Text,
                                _WorkflowRule'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkflowRule where
@@ -79,6 +83,20 @@ instance Data.ProtoLens.Field.HasField WorkflowRule "maybe'spec" (Prelude.Maybe 
         (Lens.Family2.Unchecked.lens
            _WorkflowRule'spec (\ x__ y__ -> x__ {_WorkflowRule'spec = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowRule "createdByIdentity" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowRule'createdByIdentity
+           (\ x__ y__ -> x__ {_WorkflowRule'createdByIdentity = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkflowRule "description" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkflowRule'description
+           (\ x__ y__ -> x__ {_WorkflowRule'description = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkflowRule where
   messageName _ = Data.Text.pack "temporal.api.rules.v1.WorkflowRule"
   packedMessageDescriptor _
@@ -86,7 +104,9 @@ instance Data.ProtoLens.Message WorkflowRule where
       \\fWorkflowRule\DC2;\n\
       \\vcreate_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\n\
       \createTime\DC2;\n\
-      \\EOTspec\CAN\STX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecR\EOTspec"
+      \\EOTspec\CAN\STX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecR\EOTspec\DC2.\n\
+      \\DC3created_by_identity\CAN\ETX \SOH(\tR\DC1createdByIdentity\DC2 \n\
+      \\vdescription\CAN\EOT \SOH(\tR\vdescription"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -106,10 +126,30 @@ instance Data.ProtoLens.Message WorkflowRule where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'spec")) ::
               Data.ProtoLens.FieldDescriptor WorkflowRule
+        createdByIdentity__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "created_by_identity"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"createdByIdentity")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowRule
+        description__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "description"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"description")) ::
+              Data.ProtoLens.FieldDescriptor WorkflowRule
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 2, spec__field_descriptor)]
+           (Data.ProtoLens.Tag 2, spec__field_descriptor),
+           (Data.ProtoLens.Tag 3, createdByIdentity__field_descriptor),
+           (Data.ProtoLens.Tag 4, description__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkflowRule'_unknownFields
@@ -118,6 +158,8 @@ instance Data.ProtoLens.Message WorkflowRule where
     = WorkflowRule'_constructor
         {_WorkflowRule'createTime = Prelude.Nothing,
          _WorkflowRule'spec = Prelude.Nothing,
+         _WorkflowRule'createdByIdentity = Data.ProtoLens.fieldDefault,
+         _WorkflowRule'description = Data.ProtoLens.fieldDefault,
          _WorkflowRule'_unknownFields = []}
   parseMessage
     = let
@@ -156,6 +198,23 @@ instance Data.ProtoLens.Message WorkflowRule where
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "spec"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "created_by_identity"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"createdByIdentity") y x)
+                        34
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "description"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"description") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -198,8 +257,43 @@ instance Data.ProtoLens.Message WorkflowRule where
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                              Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"createdByIdentity") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                            ((Prelude..)
+                               (\ bs
+                                  -> (Data.Monoid.<>)
+                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                               Data.Text.Encoding.encodeUtf8 _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view (Data.ProtoLens.Field.field @"description") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
+                               ((Prelude..)
+                                  (\ bs
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                  Data.Text.Encoding.encodeUtf8 _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
 instance Control.DeepSeq.NFData WorkflowRule where
   rnf
     = \ x__
@@ -207,7 +301,11 @@ instance Control.DeepSeq.NFData WorkflowRule where
              (_WorkflowRule'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_WorkflowRule'createTime x__)
-                (Control.DeepSeq.deepseq (_WorkflowRule'spec x__) ()))
+                (Control.DeepSeq.deepseq
+                   (_WorkflowRule'spec x__)
+                   (Control.DeepSeq.deepseq
+                      (_WorkflowRule'createdByIdentity x__)
+                      (Control.DeepSeq.deepseq (_WorkflowRule'description x__) ()))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'variant' @:: Lens' WorkflowRuleAction (Prelude.Maybe WorkflowRuleAction'Variant)@
@@ -957,113 +1055,94 @@ packedFileDescriptor
     \\SIexpiration_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTime\SUB7\n\
     \\ETBActivityStartingTrigger\DC2\FS\n\
     \\tpredicate\CAN\SOH \SOH(\tR\tpredicateB\t\n\
-    \\atrigger\"\136\SOH\n\
+    \\atrigger\"\218\SOH\n\
     \\fWorkflowRule\DC2;\n\
     \\vcreate_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\n\
     \createTime\DC2;\n\
-    \\EOTspec\CAN\STX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecR\EOTspecB\132\SOH\n\
-    \\CANio.temporal.api.rules.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/rules/v1;rules\170\STX\ETBTemporalio.Api.Rules.V1\234\STX\SUBTemporalio::Api::Rules::V1J\228\GS\n\
-    \\ACK\DC2\EOT\SYN\NULe\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2025 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\EOTspec\CAN\STX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecR\EOTspec\DC2.\n\
+    \\DC3created_by_identity\CAN\ETX \SOH(\tR\DC1createdByIdentity\DC2 \n\
+    \\vdescription\CAN\EOT \SOH(\tR\vdescriptionB\132\SOH\n\
+    \\CANio.temporal.api.rules.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/rules/v1;rules\170\STX\ETBTemporalio.Api.Rules.V1\234\STX\SUBTemporalio::Api::Rules::V1J\207\CAN\n\
+    \\ACK\DC2\EOT\NUL\NULY\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\RS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL8\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL8\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL8\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL1\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL1\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL3\n\
+    \\SOH\b\DC2\ETX\b\NUL3\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL3\n\
+    \\STX\b-\DC2\ETX\b\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL4\n\
+    \\SOH\b\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL4\n\
+    \\STX\b%\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\"\NUL)\n\
+    \\STX\ETX\NUL\DC2\ETX\f\NUL)\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT$\NUL,\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\SO\NUL\SYN\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX$\b\SUB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\SO\b\SUB\n\
     \\f\n\
-    \\EOT\EOT\NUL\ETX\NUL\DC2\EOT%\STX&\ETX\n\
+    \\EOT\EOT\NUL\ETX\NUL\DC2\EOT\SI\STX\DLE\ETX\n\
     \\f\n\
-    \\ENQ\EOT\NUL\ETX\NUL\SOH\DC2\ETX%\n\
+    \\ENQ\EOT\NUL\ETX\NUL\SOH\DC2\ETX\SI\n\
     \\GS\n\
     \\"\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT)\STX+\ETX\SUB\DC4 Supported actions.\n\
+    \\EOT\EOT\NUL\b\NUL\DC2\EOT\DC3\STX\NAK\ETX\SUB\DC4 Supported actions.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX)\b\SI\n\
+    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\DC3\b\SI\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX*\EOT+\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC4\EOT+\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX*\EOT\ETB\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC4\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX*\CAN&\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC4\CAN&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX*)*\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC4)*\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT.\NUL\\\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\CAN\NULF\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX.\b\CAN\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\CAN\b\CAN\n\
     \\140\SOH\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX1\STX\DLE\SUB\DEL The id of the new workflow rule. Must be unique within the namespace.\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ESC\STX\DLE\SUB\DEL The id of the new workflow rule. Must be unique within the namespace.\n\
     \ Can be set by the user, and can have business meaning.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX1\STX\b\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\ESC\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX1\t\v\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ESC\t\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX1\SO\SI\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ESC\SO\SI\n\
     \V\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT4\STXD\ETX\SUBH Activity trigger will be triggered when an activity is about to start.\n\
+    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\RS\STX.\ETX\SUBH Activity trigger will be triggered when an activity is about to start.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX4\n\
+    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\RS\n\
     \!\n\
     \\149\ACK\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETXC\EOT\EM\SUB\133\ACK Activity predicate is a SQL-like string filter parameter.\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX-\EOT\EM\SUB\133\ACK Activity predicate is a SQL-like string filter parameter.\n\
     \ It is used to match against workflow data.\n\
     \ The following activity attributes are supported as part of the predicate:\n\
     \ - ActivityType: An Activity Type is the mapping of a name to an Activity Definition..\n\
@@ -1079,28 +1158,28 @@ packedFileDescriptor
     \    STARTS_WITH\n\
     \\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ENQ\DC2\ETX-\EOT\n\
     \\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETXC\v\DC4\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX-\v\DC4\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETXC\ETB\CAN\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX-\ETB\CAN\n\
     \~\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOTH\STXJ\ETX\SUBp Specifies how the rule should be triggered and evaluated.\n\
+    \\EOT\EOT\SOH\b\NUL\DC2\EOT2\STX4\ETX\SUBp Specifies how the rule should be triggered and evaluated.\n\
     \ Currently, only \"activity start\" type is supported.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETXH\b\SI\n\
+    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX2\b\SI\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETXI\EOT/\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX3\EOT/\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETXI\EOT\ESC\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX3\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETXI\FS*\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX3\FS*\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETXI-.\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX3-.\n\
     \\238\STX\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETXT\STX\RS\SUB\224\STX Restricted Visibility query.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX>\STX\RS\SUB\224\STX Restricted Visibility query.\n\
     \ This query is used to filter workflows in this namespace to which this rule should apply.\n\
     \ It is applied to any running workflow each time a triggering event occurs, before the trigger predicate is evaluated.\n\
     \ The following workflow attributes are supported:\n\
@@ -1110,54 +1189,76 @@ packedFileDescriptor
     \ - ExecutionStatus\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETXT\STX\b\n\
+    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX>\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETXT\t\EM\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX>\t\EM\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETXT\FS\GS\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX>\FS\GS\n\
     \b\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETXW\STX*\SUBU WorkflowRuleAction to be taken when the rule is triggered and predicate is matched.\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETXA\STX*\SUBU WorkflowRuleAction to be taken when the rule is triggered and predicate is matched.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETXW\STX\n\
+    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETXA\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXW\v\GS\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXA\v\GS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXW\RS%\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXA\RS%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXW()\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXA()\n\
     \\133\SOH\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETX[\STX0\SUBx Expiration time of the rule. After this time, the rule will be deleted.\n\
+    \\EOT\EOT\SOH\STX\EOT\DC2\ETXE\STX0\SUBx Expiration time of the rule. After this time, the rule will be deleted.\n\
     \ Can be empty if the rule should never expire.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX[\STX\ESC\n\
+    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETXE\STX\ESC\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX[\FS+\n\
+    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETXE\FS+\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX[./\n\
+    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETXE./\n\
     \b\n\
-    \\STX\EOT\STX\DC2\EOT_\NULe\SOH\SUBV WorkflowRule describes a rule that can be applied to any workflow in this namespace.\n\
+    \\STX\EOT\STX\DC2\EOTI\NULY\SOH\SUBV WorkflowRule describes a rule that can be applied to any workflow in this namespace.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX_\b\DC4\n\
+    \\ETX\EOT\STX\SOH\DC2\ETXI\b\DC4\n\
     \\"\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXa\STX,\SUB\NAK Rule creation time.\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXK\STX,\SUB\NAK Rule creation time.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXa\STX\ESC\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXK\STX\ESC\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXa\FS'\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXK\FS'\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXa*+\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXK*+\n\
     \!\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXd\STX\FS\SUB\DC4 Rule specification\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXN\STX\FS\SUB\DC4 Rule specification\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXd\STX\DC2\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXN\STX\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXd\DC3\ETB\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXN\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXd\SUB\ESCb\ACKproto3"
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXN\SUB\ESC\n\
+    \\220\STX\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETXU\STX!\SUB\206\STX Identity of the actor that created the rule\n\
+    \ (-- api-linter: core::0140::prepositions=disabled\n\
+    \     aip.dev/not-precedent: It is better reflect the intent this way, we will also have updated_by. --)\n\
+    \ (-- api-linter: core::0142::time-field-names=disabled\n\
+    \     aip.dev/not-precedent: Same as above. All other options sounds clumsy --)\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETXU\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXU\t\FS\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXU\US \n\
+    \ \n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETXX\STX\EM\SUB\DC3 Rule description.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETXX\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXX\t\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXX\ETB\CANb\ACKproto3"

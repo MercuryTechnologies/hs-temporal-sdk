@@ -446,93 +446,72 @@ packedFileDescriptor
     \\SYNstart_to_close_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
     \\DC1heartbeat_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
     \\fretry_policy\CAN\ACK \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicyB\147\SOH\n\
-    \\ESCio.temporal.api.activity.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/activity/v1;activity\170\STX\SUBTemporalio.Api.Activity.V1\234\STX\GSTemporalio::Api::Activity::V1J\187\NAK\n\
-    \\ACK\DC2\EOT\SYN\NULB\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\ESCio.temporal.api.activity.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/activity/v1;activity\170\STX\SUBTemporalio.Api.Activity.V1\234\STX\GSTemporalio::Api::Activity::V1J\209\f\n\
+    \\ACK\DC2\EOT\NUL\NUL,\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL!\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL>\n\
+    \\SOH\STX\DC2\ETX\STX\NUL!\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL>\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL>\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL>\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL4\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL4\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL4\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL6\n\
+    \\SOH\b\DC2\ETX\b\NUL6\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL6\n\
+    \\STX\b-\DC2\ETX\b\NUL6\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL7\n\
+    \\SOH\b\DC2\ETX\t\NUL7\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL7\n\
+    \\STX\b%\DC2\ETX\t\NUL7\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL.\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL.\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL1\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL1\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX$\NUL(\n\
+    \\STX\ETX\STX\DC2\ETX\SO\NUL(\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT&\NULB\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\DLE\NUL,\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX&\b\ETB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DLE\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX'\EOT7\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC1\EOT7\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX'\EOT'\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC1\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX'(2\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC1(2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX'56\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC156\n\
     \\186\STX\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX.\EOT;\SUB\172\STX Indicates how long the caller is willing to wait for an activity completion. Limits how long\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\CAN\EOT;\SUB\172\STX Indicates how long the caller is willing to wait for an activity completion. Limits how long\n\
     \ retries will be attempted. Either this or `start_to_close_timeout` must be specified.\n\
     \\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX.\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\CAN\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX.\GS6\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\CAN\GS6\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX.9:\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\CAN9:\n\
     \\158\ETX\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX6\EOT;\SUB\144\ETX Limits time an activity task can stay in a task queue before a worker picks it up. This\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX \EOT;\SUB\144\ETX Limits time an activity task can stay in a task queue before a worker picks it up. This\n\
     \ timeout is always non retryable, as all a retry would achieve is to put it back into the same\n\
     \ queue. Defaults to `schedule_to_close_timeout` or workflow execution timeout if not\n\
     \ specified.\n\
@@ -541,13 +520,13 @@ packedFileDescriptor
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX6\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX \EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX6\GS6\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX \GS6\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX69:\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX 9:\n\
     \\186\STX\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX=\EOT8\SUB\172\STX Maximum time an activity is allowed to execute after being picked up by a worker. This\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX'\EOT8\SUB\172\STX Maximum time an activity is allowed to execute after being picked up by a worker. This\n\
     \ timeout is always retryable. Either this or `schedule_to_close_timeout` must be\n\
     \ specified.\n\
     \\n\
@@ -555,25 +534,25 @@ packedFileDescriptor
     \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX=\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX'\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX=\GS3\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX'\GS3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX=67\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX'67\n\
     \K\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX?\EOT3\SUB> Maximum permitted time between successful worker heartbeats.\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX)\EOT3\SUB> Maximum permitted time between successful worker heartbeats.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX?\EOT\FS\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX)\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX?\GS.\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX)\GS.\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX?12\n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX)12\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETXA\EOT8\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX+\EOT8\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ACK\DC2\ETXA\EOT&\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ACK\DC2\ETX+\EOT&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETXA'3\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX+'3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETXA67b\ACKproto3"
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX+67b\ACKproto3"

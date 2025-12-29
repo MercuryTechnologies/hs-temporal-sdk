@@ -141,6 +141,11 @@ lastWorkflowTask ::
    Data.ProtoLens.Field.HasField s "lastWorkflowTask" a) =>
   Lens.Family2.LensLike' f s a
 lastWorkflowTask = Data.ProtoLens.Field.field @"lastWorkflowTask"
+links ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "links" a) =>
+  Lens.Family2.LensLike' f s a
+links = Data.ProtoLens.Field.field @"links"
 maximumAttempts ::
   forall f s a.
   (Prelude.Functor f,
@@ -217,6 +222,13 @@ maybe'reference ::
    Data.ProtoLens.Field.HasField s "maybe'reference" a) =>
   Lens.Family2.LensLike' f s a
 maybe'reference = Data.ProtoLens.Field.field @"maybe'reference"
+maybe'requestIdRef ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'requestIdRef" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'requestIdRef
+  = Data.ProtoLens.Field.field @"maybe'requestIdRef"
 maybe'target ::
   forall f s a.
   (Prelude.Functor f,
@@ -298,6 +310,18 @@ priorityKey ::
    Data.ProtoLens.Field.HasField s "priorityKey" a) =>
   Lens.Family2.LensLike' f s a
 priorityKey = Data.ProtoLens.Field.field @"priorityKey"
+requestId ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "requestId" a) =>
+  Lens.Family2.LensLike' f s a
+requestId = Data.ProtoLens.Field.field @"requestId"
+requestIdRef ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "requestIdRef" a) =>
+  Lens.Family2.LensLike' f s a
+requestIdRef = Data.ProtoLens.Field.field @"requestIdRef"
 resetReapplyExcludeTypes ::
   forall f s a.
   (Prelude.Functor f,
@@ -332,6 +356,12 @@ value ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "value" a) =>
   Lens.Family2.LensLike' f s a
 value = Data.ProtoLens.Field.field @"value"
+vec'links ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'links" a) =>
+  Lens.Family2.LensLike' f s a
+vec'links = Data.ProtoLens.Field.field @"vec'links"
 vec'nonRetryableErrorTypes ::
   forall f s a.
   (Prelude.Functor f,

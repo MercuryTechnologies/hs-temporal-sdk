@@ -558,12 +558,15 @@ instance Control.DeepSeq.NFData BatchOperationInfo where
          * 'Proto.Temporal.Api.Batch.V1.Message_Fields.options' @:: Lens' BatchOperationReset Proto.Temporal.Api.Common.V1.Message.ResetOptions@
          * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'options' @:: Lens' BatchOperationReset (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.ResetOptions)@
          * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetType' @:: Lens' BatchOperationReset Proto.Temporal.Api.Enums.V1.Reset.ResetType@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetReapplyType' @:: Lens' BatchOperationReset Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@ -}
+         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetReapplyType' @:: Lens' BatchOperationReset Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@
+         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.postResetOperations' @:: Lens' BatchOperationReset [Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation]@
+         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.vec'postResetOperations' @:: Lens' BatchOperationReset (Data.Vector.Vector Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation)@ -}
 data BatchOperationReset
   = BatchOperationReset'_constructor {_BatchOperationReset'identity :: !Data.Text.Text,
                                       _BatchOperationReset'options :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.ResetOptions),
                                       _BatchOperationReset'resetType :: !Proto.Temporal.Api.Enums.V1.Reset.ResetType,
                                       _BatchOperationReset'resetReapplyType :: !Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType,
+                                      _BatchOperationReset'postResetOperations :: !(Data.Vector.Vector Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation),
                                       _BatchOperationReset'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show BatchOperationReset where
@@ -607,6 +610,24 @@ instance Data.ProtoLens.Field.HasField BatchOperationReset "resetReapplyType" Pr
            _BatchOperationReset'resetReapplyType
            (\ x__ y__ -> x__ {_BatchOperationReset'resetReapplyType = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField BatchOperationReset "postResetOperations" [Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BatchOperationReset'postResetOperations
+           (\ x__ y__
+              -> x__ {_BatchOperationReset'postResetOperations = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField BatchOperationReset "vec'postResetOperations" (Data.Vector.Vector Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _BatchOperationReset'postResetOperations
+           (\ x__ y__
+              -> x__ {_BatchOperationReset'postResetOperations = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message BatchOperationReset where
   messageName _
     = Data.Text.pack "temporal.api.batch.v1.BatchOperationReset"
@@ -614,10 +635,11 @@ instance Data.ProtoLens.Message BatchOperationReset where
     = "\n\
       \\DC3BatchOperationReset\DC2\SUB\n\
       \\bidentity\CAN\ETX \SOH(\tR\bidentity\DC2>\n\
-      \\aoptions\CAN\EOT \SOH(\v2$.temporal.api.common.v1.ResetOptionsR\aoptions\DC2?\n\
+      \\aoptions\CAN\EOT \SOH(\v2$.temporal.api.common.v1.ResetOptionsR\aoptions\DC2C\n\
       \\n\
-      \reset_type\CAN\SOH \SOH(\SO2 .temporal.api.enums.v1.ResetTypeR\tresetType\DC2U\n\
-      \\DC2reset_reapply_type\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyType"
+      \reset_type\CAN\SOH \SOH(\SO2 .temporal.api.enums.v1.ResetTypeR\tresetTypeB\STX\CAN\SOH\DC2Y\n\
+      \\DC2reset_reapply_type\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyTypeB\STX\CAN\SOH\DC2`\n\
+      \\NAKpost_reset_operations\CAN\ENQ \ETX(\v2,.temporal.api.workflow.v1.PostResetOperationR\DC3postResetOperations"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -656,12 +678,22 @@ instance Data.ProtoLens.Message BatchOperationReset where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"resetReapplyType")) ::
               Data.ProtoLens.FieldDescriptor BatchOperationReset
+        postResetOperations__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "post_reset_operations"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"postResetOperations")) ::
+              Data.ProtoLens.FieldDescriptor BatchOperationReset
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 3, identity__field_descriptor),
            (Data.ProtoLens.Tag 4, options__field_descriptor),
            (Data.ProtoLens.Tag 1, resetType__field_descriptor),
-           (Data.ProtoLens.Tag 2, resetReapplyType__field_descriptor)]
+           (Data.ProtoLens.Tag 2, resetReapplyType__field_descriptor),
+           (Data.ProtoLens.Tag 5, postResetOperations__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _BatchOperationReset'_unknownFields
@@ -672,16 +704,21 @@ instance Data.ProtoLens.Message BatchOperationReset where
          _BatchOperationReset'options = Prelude.Nothing,
          _BatchOperationReset'resetType = Data.ProtoLens.fieldDefault,
          _BatchOperationReset'resetReapplyType = Data.ProtoLens.fieldDefault,
+         _BatchOperationReset'postResetOperations = Data.Vector.Generic.empty,
          _BatchOperationReset'_unknownFields = []}
   parseMessage
     = let
         loop ::
           BatchOperationReset
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationReset
-        loop x
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation
+             -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationReset
+        loop x mutable'postResetOperations
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
-                   do (let missing = []
+                   do frozen'postResetOperations <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                      (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                         mutable'postResetOperations)
+                      (let missing = []
                        in
                          if Prelude.null missing then
                              Prelude.return ()
@@ -692,7 +729,10 @@ instance Data.ProtoLens.Message BatchOperationReset where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'postResetOperations")
+                              frozen'postResetOperations x))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
@@ -704,13 +744,16 @@ instance Data.ProtoLens.Message BatchOperationReset where
                                        "identity"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
+                                  mutable'postResetOperations
                         34
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "options"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"options") y x)
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"options") y x)
+                                  mutable'postResetOperations
                         8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
                                           Prelude.toEnum
@@ -720,6 +763,7 @@ instance Data.ProtoLens.Message BatchOperationReset where
                                        "reset_type"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"resetType") y x)
+                                  mutable'postResetOperations
                         16
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -731,15 +775,31 @@ instance Data.ProtoLens.Message BatchOperationReset where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"resetReapplyType") y x)
+                                  mutable'postResetOperations
+                        42
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "post_reset_operations"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'postResetOperations y)
+                                loop x v
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'postResetOperations
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationReset"
+          (do mutable'postResetOperations <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                               Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'postResetOperations)
+          "BatchOperationReset"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
@@ -801,8 +861,23 @@ instance Data.ProtoLens.Message BatchOperationReset where
                                   ((Prelude..)
                                      Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
                                   Prelude.fromEnum _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+                      ((Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                            (\ _v
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                    ((Prelude..)
+                                       (\ bs
+                                          -> (Data.Monoid.<>)
+                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                  (Prelude.fromIntegral
+                                                     (Data.ByteString.length bs)))
+                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                       Data.ProtoLens.encodeMessage _v))
+                            (Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"vec'postResetOperations") _x))
+                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
 instance Control.DeepSeq.NFData BatchOperationReset where
   rnf
     = \ x__
@@ -815,7 +890,9 @@ instance Control.DeepSeq.NFData BatchOperationReset where
                    (Control.DeepSeq.deepseq
                       (_BatchOperationReset'resetType x__)
                       (Control.DeepSeq.deepseq
-                         (_BatchOperationReset'resetReapplyType x__) ()))))
+                         (_BatchOperationReset'resetReapplyType x__)
+                         (Control.DeepSeq.deepseq
+                            (_BatchOperationReset'postResetOperations x__) ())))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Batch.V1.Message_Fields.signal' @:: Lens' BatchOperationSignal Data.Text.Text@
@@ -2231,13 +2308,14 @@ packedFileDescriptor
     \\SUBBatchOperationCancellation\DC2\SUB\n\
     \\bidentity\CAN\SOH \SOH(\tR\bidentity\"4\n\
     \\SYNBatchOperationDeletion\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\"\137\STX\n\
+    \\bidentity\CAN\SOH \SOH(\tR\bidentity\"\243\STX\n\
     \\DC3BatchOperationReset\DC2\SUB\n\
     \\bidentity\CAN\ETX \SOH(\tR\bidentity\DC2>\n\
-    \\aoptions\CAN\EOT \SOH(\v2$.temporal.api.common.v1.ResetOptionsR\aoptions\DC2?\n\
+    \\aoptions\CAN\EOT \SOH(\v2$.temporal.api.common.v1.ResetOptionsR\aoptions\DC2C\n\
     \\n\
-    \reset_type\CAN\SOH \SOH(\SO2 .temporal.api.enums.v1.ResetTypeR\tresetType\DC2U\n\
-    \\DC2reset_reapply_type\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyType\"\249\SOH\n\
+    \reset_type\CAN\SOH \SOH(\SO2 .temporal.api.enums.v1.ResetTypeR\tresetTypeB\STX\CAN\SOH\DC2Y\n\
+    \\DC2reset_reapply_type\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyTypeB\STX\CAN\SOH\DC2`\n\
+    \\NAKpost_reset_operations\CAN\ENQ \ETX(\v2,.temporal.api.workflow.v1.PostResetOperationR\DC3postResetOperations\"\249\SOH\n\
     \,BatchOperationUpdateWorkflowExecutionOptions\DC2\SUB\n\
     \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2p\n\
     \\SUBworkflow_execution_options\CAN\STX \SOH(\v22.temporal.api.workflow.v1.WorkflowExecutionOptionsR\CANworkflowExecutionOptions\DC2;\n\
@@ -2257,396 +2335,398 @@ packedFileDescriptor
     \\STXid\CAN\STX \SOH(\tH\NULR\STXid\DC2=\n\
     \\EOTspec\CAN\ETX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecH\NULR\EOTspecB\ACK\n\
     \\EOTruleB\132\SOH\n\
-    \\CANio.temporal.api.batch.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/batch/v1;batch\170\STX\ETBTemporalio.Api.Batch.V1\234\STX\SUBTemporalio::Api::Batch::V1J\246\&0\n\
-    \\a\DC2\ENQ\SYN\NUL\155\SOH\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\CANio.temporal.api.batch.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/batch/v1;batch\170\STX\ETBTemporalio.Api.Batch.V1\234\STX\SUBTemporalio::Api::Batch::V1J\132+\n\
+    \\a\DC2\ENQ\NUL\NUL\136\SOH\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\RS\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL8\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL8\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL8\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL1\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL1\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL3\n\
+    \\SOH\b\DC2\ETX\b\NUL3\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL3\n\
+    \\STX\b-\DC2\ETX\b\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL4\n\
+    \\SOH\b\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL4\n\
+    \\STX\b%\DC2\ETX\t\NUL4\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL*\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL*\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX#\NUL)\n\
+    \\STX\ETX\STX\DC2\ETX\r\NUL)\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX$\NUL.\n\
+    \\STX\ETX\ETX\DC2\ETX\SO\NUL.\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX%\NUL5\n\
+    \\STX\ETX\EOT\DC2\ETX\SI\NUL5\n\
     \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX&\NUL+\n\
+    \\STX\ETX\ENQ\DC2\ETX\DLE\NUL+\n\
     \\t\n\
-    \\STX\ETX\ACK\DC2\ETX'\NUL-\n\
+    \\STX\ETX\ACK\DC2\ETX\DC1\NUL-\n\
     \\t\n\
-    \\STX\ETX\a\DC2\ETX(\NUL0\n\
+    \\STX\ETX\a\DC2\ETX\DC2\NUL0\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT*\NUL3\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\DC4\NUL\GS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX*\b\SUB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC4\b\SUB\n\
     \\ESC\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\STX\DC4\SUB\SO Batch job ID\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SYN\STX\DC4\SUB\SO Batch job ID\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX,\STX\b\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\SYN\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,\t\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SYN\t\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SYN\DC2\DC3\n\
     \$\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX.\STX6\SUB\ETB Batch operation state\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\CAN\STX6\SUB\ETB Batch operation state\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX.\STX+\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\CAN\STX+\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX.,1\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\CAN,1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX.45\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\CAN45\n\
     \)\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX0\STX+\SUB\FS Batch operation start time\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\SUB\STX+\SUB\FS Batch operation start time\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX0\STX\ESC\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\SUB\STX\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX0\FS&\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\SUB\FS&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX0)*\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\SUB)*\n\
     \)\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX2\STX+\SUB\FS Batch operation close time\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\FS\STX+\SUB\FS Batch operation close time\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX2\STX\ESC\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\FS\STX\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX2\FS&\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\FS\FS&\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX2)*\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\FS)*\n\
     \\140\STX\n\
-    \\STX\EOT\SOH\DC2\EOT8\NUL=\SOH\SUB\255\SOH BatchOperationTermination sends terminate requests to batch workflows.\n\
+    \\STX\EOT\SOH\DC2\EOT\"\NUL'\SOH\SUB\255\SOH BatchOperationTermination sends terminate requests to batch workflows.\n\
     \ Keep the parameter in sync with temporal.api.workflowservice.v1.TerminateWorkflowExecutionRequest.\n\
     \ Ignore first_execution_run_id because this is used for single workflow operation.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX8\b!\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\"\b!\n\
     \F\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX:\STX.\SUB9 Serialized value(s) to provide to the termination event\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX$\STX.\SUB9 Serialized value(s) to provide to the termination event\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX:\STX!\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX$\STX!\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX:\")\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX$\")\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX:,-\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX$,-\n\
     \0\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX<\STX\SYN\SUB# The identity of the worker/client\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX&\STX\SYN\SUB# The identity of the worker/client\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX<\STX\b\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX&\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX<\t\DC1\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX&\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX<\DC4\NAK\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX&\DC4\NAK\n\
     \\166\SOH\n\
-    \\STX\EOT\STX\DC2\EOTA\NULK\SOH\SUB\153\SOH BatchOperationSignal sends signals to batch workflows.\n\
+    \\STX\EOT\STX\DC2\EOT+\NUL5\SOH\SUB\153\SOH BatchOperationSignal sends signals to batch workflows.\n\
     \ Keep the parameter in sync with temporal.api.workflowservice.v1.SignalWorkflowExecutionRequest.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXA\b\FS\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX+\b\FS\n\
     \U\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXC\STX\DC4\SUBH The workflow author-defined name of the signal to send to the workflow\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX-\STX\DC4\SUBH The workflow author-defined name of the signal to send to the workflow\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETXC\STX\b\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX-\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXC\t\SI\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX-\t\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXC\DC2\DC3\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX-\DC2\DC3\n\
     \=\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXE\STX,\SUB0 Serialized value(s) to provide with the signal\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX/\STX,\SUB0 Serialized value(s) to provide with the signal\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXE\STX!\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX/\STX!\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXE\"'\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX/\"'\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXE*+\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX/*+\n\
     \\137\SOH\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXH\STX+\SUB| Headers that are passed with the signal to the processing workflow.\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX2\STX+\SUB| Headers that are passed with the signal to the processing workflow.\n\
     \ These can include things like auth or tracing tokens.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETXH\STX\US\n\
+    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETX2\STX\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXH &\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX2 &\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXH)*\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX2)*\n\
     \0\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXJ\STX\SYN\SUB# The identity of the worker/client\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETX4\STX\SYN\SUB# The identity of the worker/client\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETXJ\STX\b\n\
+    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX4\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXJ\t\DC1\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX4\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXJ\DC4\NAK\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX4\DC4\NAK\n\
     \\142\STX\n\
-    \\STX\EOT\ETX\DC2\EOTP\NULS\SOH\SUB\129\STX BatchOperationCancellation sends cancel requests to batch workflows.\n\
+    \\STX\EOT\ETX\DC2\EOT:\NUL=\SOH\SUB\129\STX BatchOperationCancellation sends cancel requests to batch workflows.\n\
     \ Keep the parameter in sync with temporal.api.workflowservice.v1.RequestCancelWorkflowExecutionRequest.\n\
     \ Ignore first_execution_run_id because this is used for single workflow operation.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXP\b\"\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX:\b\"\n\
     \0\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXR\STX\SYN\SUB# The identity of the worker/client\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX<\STX\SYN\SUB# The identity of the worker/client\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXR\STX\b\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX<\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXR\t\DC1\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX<\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXR\DC4\NAK\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX<\DC4\NAK\n\
     \\178\SOH\n\
-    \\STX\EOT\EOT\DC2\EOTW\NULZ\SOH\SUB\165\SOH BatchOperationDeletion sends deletion requests to batch workflows.\n\
+    \\STX\EOT\EOT\DC2\EOTA\NULD\SOH\SUB\165\SOH BatchOperationDeletion sends deletion requests to batch workflows.\n\
     \ Keep the parameter in sync with temporal.api.workflowservice.v1.DeleteWorkflowExecutionRequest.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXW\b\RS\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXA\b\RS\n\
     \0\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXY\STX\SYN\SUB# The identity of the worker/client\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXC\STX\SYN\SUB# The identity of the worker/client\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXY\STX\b\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXC\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXY\t\DC1\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXC\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXY\DC4\NAK\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXC\DC4\NAK\n\
     \\171\SOH\n\
-    \\STX\EOT\ENQ\DC2\EOT^\NULj\SOH\SUB\158\SOH BatchOperationReset sends reset requests to batch workflows.\n\
+    \\STX\EOT\ENQ\DC2\EOTH\NULW\SOH\SUB\158\SOH BatchOperationReset sends reset requests to batch workflows.\n\
     \ Keep the parameter in sync with temporal.api.workflowservice.v1.ResetWorkflowExecutionRequest.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX^\b\ESC\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXH\b\ESC\n\
     \1\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX`\STX\SYN\SUB$ The identity of the worker/client.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXJ\STX\SYN\SUB$ The identity of the worker/client.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX`\STX\b\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXJ\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX`\t\DC1\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXJ\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX`\DC4\NAK\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXJ\DC4\NAK\n\
     \m\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXc\STX2\SUB` Describes what to reset to and how. If set, `reset_type` and `reset_reapply_type` are ignored.\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXM\STX2\SUB` Describes what to reset to and how. If set, `reset_type` and `reset_reapply_type` are ignored.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXc\STX%\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXM\STX%\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXc&-\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXM&-\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXc01\n\
-    \6\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXf\STX1\SUB) Reset type (deprecated, use `options`).\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXM01\n\
+    \)\n\
+    \\EOT\EOT\ENQ\STX\STX\DC2\ETXP\STXE\SUB\FS Deprecated. Use `options`.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXf\STX!\n\
+    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXP\STX!\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXf\",\n\
+    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXP\",\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXf/0\n\
-    \I\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXh\STX@\SUB< History event reapply options (deprecated, use `options`).\n\
+    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXP/0\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\STX\b\DC2\ETXP1D\n\
+    \\r\n\
+    \\ACK\EOT\ENQ\STX\STX\b\ETX\DC2\ETXP2C\n\
+    \)\n\
+    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXR\STXT\SUB\FS Deprecated. Use `options`.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXh\STX(\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXR\STX(\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXh);\n\
+    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXR);\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXh>?\n\
+    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXR>?\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\ETX\b\DC2\ETXR@S\n\
+    \\r\n\
+    \\ACK\EOT\ENQ\STX\ETX\b\ETX\DC2\ETXRAR\n\
+    \\145\STX\n\
+    \\EOT\EOT\ENQ\STX\EOT\DC2\ETXV\STXQ\SUB\131\STX Operations to perform after the workflow has been reset. These operations will be applied\n\
+    \ to the *new* run of the workflow execution in the order they are provided.\n\
+    \ All operations are applied to the workflow before the first new workflow task is generated\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\EOT\EOT\DC2\ETXV\STX\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\EOT\ACK\DC2\ETXV\v6\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\EOT\SOH\DC2\ETXV7L\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\EOT\ETX\DC2\ETXVOP\n\
     \\230\SOH\n\
-    \\STX\EOT\ACK\DC2\EOTn\NULx\SOH\SUB\217\SOH BatchOperationUpdateWorkflowExecutionOptions sends UpdateWorkflowExecutionOptions requests to batch workflows.\n\
+    \\STX\EOT\ACK\DC2\EOT[\NULe\SOH\SUB\217\SOH BatchOperationUpdateWorkflowExecutionOptions sends UpdateWorkflowExecutionOptions requests to batch workflows.\n\
     \ Keep the parameters in sync with temporal.api.workflowservice.v1.UpdateWorkflowExecutionOptionsRequest.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXn\b4\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETX[\b4\n\
     \1\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXp\STX\SYN\SUB$ The identity of the worker/client.\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETX]\STX\SYN\SUB$ The identity of the worker/client.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXp\STX\b\n\
+    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX]\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXp\t\DC1\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX]\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXp\DC4\NAK\n\
-    \f\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXs\STXS\SUBY Workflow Execution options. Partial updates are accepted and controlled by update_mask.\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX]\DC4\NAK\n\
+    \\158\SOH\n\
+    \\EOT\EOT\ACK\STX\SOH\DC2\ETX`\STXS\SUB\144\SOH Update Workflow options that were originally specified via StartWorkflowExecution. Partial updates are accepted and controlled by update_mask.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXs\STX3\n\
+    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETX`\STX3\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXs4N\n\
+    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX`4N\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXsQR\n\
+    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX`QR\n\
     \\185\SOH\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXw\STX,\SUB\171\SOH Controls which fields from `workflow_execution_options` will be applied.\n\
+    \\EOT\EOT\ACK\STX\STX\DC2\ETXd\STX,\SUB\171\SOH Controls which fields from `workflow_execution_options` will be applied.\n\
     \ To unset a field, set it to null and use the update mask to indicate that it should be mutated.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXw\STX\ESC\n\
+    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXd\STX\ESC\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXw\FS'\n\
+    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXd\FS'\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXw*+\n\
-    \Y\n\
-    \\STX\EOT\a\DC2\ENQ{\NUL\142\SOH\SOH\SUBL BatchOperationUnpauseActivities sends unpause requests to batch workflows.\n\
+    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXd*+\n\
+    \X\n\
+    \\STX\EOT\a\DC2\EOTh\NUL{\SOH\SUBL BatchOperationUnpauseActivities sends unpause requests to batch workflows.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX{\b'\n\
+    \\ETX\EOT\a\SOH\DC2\ETXh\b'\n\
     \1\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX}\STX\SYN\SUB$ The identity of the worker/client.\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETXj\STX\SYN\SUB$ The identity of the worker/client.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX}\STX\b\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXj\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX}\t\DC1\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXj\t\DC1\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX}\DC4\NAK\n\
-    \h\n\
-    \\EOT\EOT\a\b\NUL\DC2\ACK\128\SOH\STX\131\SOH\ETX\SUBX The activity to unpause. If match_all is set to true, all activities will be unpaused.\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXj\DC4\NAK\n\
+    \f\n\
+    \\EOT\EOT\a\b\NUL\DC2\EOTm\STXp\ETX\SUBX The activity to unpause. If match_all is set to true, all activities will be unpaused.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\a\b\NUL\SOH\DC2\EOT\128\SOH\b\DLE\n\
     \\f\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\129\SOH\EOT\DC4\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\EOT\129\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\129\SOH\v\SI\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\129\SOH\DC2\DC3\n\
+    \\ENQ\EOT\a\b\NUL\SOH\DC2\ETXm\b\DLE\n\
+    \\v\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETXn\EOT\DC4\n\
     \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\130\SOH\EOT\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ENQ\DC2\EOT\130\SOH\EOT\b\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\130\SOH\t\DC2\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\130\SOH\NAK\SYN\n\
-    \K\n\
-    \\EOT\EOT\a\STX\ETX\DC2\EOT\134\SOH\STX\SUB\SUB= Providing this flag will also reset the number of attempts.\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXn\EOT\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\EOT\134\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\134\SOH\a\NAK\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\134\SOH\CAN\EM\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXn\v\SI\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXn\DC2\DC3\n\
+    \\v\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETXo\EOT\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\ETXo\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXo\t\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXo\NAK\SYN\n\
     \J\n\
-    \\EOT\EOT\a\STX\EOT\DC2\EOT\137\SOH\STX\ESC\SUB< Providing this flag will also reset the heartbeat details.\n\
+    \\EOT\EOT\a\STX\ETX\DC2\ETXs\STX\SUB\SUB= Providing this flag will also reset the number of attempts.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\EOT\137\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\137\SOH\a\SYN\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\137\SOH\EM\SUB\n\
-    \\147\SOH\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\EOT\141\SOH\STX&\SUB\132\SOH If set, the activity will start at a random time within the specified jitter\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETXs\STX\ACK\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETXs\a\NAK\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETXs\CAN\EM\n\
+    \I\n\
+    \\EOT\EOT\a\STX\EOT\DC2\ETXv\STX\ESC\SUB< Providing this flag will also reset the heartbeat details.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETXv\STX\ACK\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETXv\a\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETXv\EM\SUB\n\
+    \\146\SOH\n\
+    \\EOT\EOT\a\STX\ENQ\DC2\ETXz\STX&\SUB\132\SOH If set, the activity will start at a random time within the specified jitter\n\
     \ duration, introducing variability to the start time.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\EOT\141\SOH\STX\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\141\SOH\ESC!\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\141\SOH$%\n\
-    \h\n\
-    \\STX\EOT\b\DC2\ACK\145\SOH\NUL\155\SOH\SOH\SUBZ BatchOperationTriggerWorkflowRule sends TriggerWorkflowRule requests to batch workflows.\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\ETXz\STX\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETXz\ESC!\n\
+    \\f\n\
+    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETXz$%\n\
+    \g\n\
+    \\STX\EOT\b\DC2\ENQ~\NUL\136\SOH\SOH\SUBZ BatchOperationTriggerWorkflowRule sends TriggerWorkflowRule requests to batch workflows.\n\
     \\n\
-    \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\145\SOH\b)\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\b\SOH\DC2\ETX~\b)\n\
     \2\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\147\SOH\STX\SYN\SUB$ The identity of the worker/client.\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\128\SOH\STX\SYN\SUB$ The identity of the worker/client.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\147\SOH\STX\b\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\128\SOH\STX\b\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\147\SOH\t\DC1\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\128\SOH\t\DC1\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\147\SOH\DC4\NAK\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\128\SOH\DC4\NAK\n\
     \\SO\n\
-    \\EOT\EOT\b\b\NUL\DC2\ACK\149\SOH\STX\154\SOH\ETX\n\
+    \\EOT\EOT\b\b\NUL\DC2\ACK\130\SOH\STX\135\SOH\ETX\n\
     \\r\n\
-    \\ENQ\EOT\b\b\NUL\SOH\DC2\EOT\149\SOH\b\f\n\
+    \\ENQ\EOT\b\b\NUL\SOH\DC2\EOT\130\SOH\b\f\n\
     \$\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\151\SOH\EOT\DC2\SUB\SYN ID of existing rule.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\132\SOH\EOT\DC2\SUB\SYN ID of existing rule.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\151\SOH\EOT\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\132\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\151\SOH\v\r\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\132\SOH\v\r\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\151\SOH\DLE\DC1\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\132\SOH\DLE\DC1\n\
     \]\n\
-    \\EOT\EOT\b\STX\STX\DC2\EOT\153\SOH\EOT4\SUBO Rule specification to be applied to the workflow without creating a new rule.\n\
+    \\EOT\EOT\b\STX\STX\DC2\EOT\134\SOH\EOT4\SUBO Rule specification to be applied to the workflow without creating a new rule.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ACK\DC2\EOT\153\SOH\EOT*\n\
+    \\ENQ\EOT\b\STX\STX\ACK\DC2\EOT\134\SOH\EOT*\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\153\SOH+/\n\
+    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\134\SOH+/\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\153\SOH23b\ACKproto3"
+    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\134\SOH23b\ACKproto3"

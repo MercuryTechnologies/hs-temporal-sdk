@@ -763,163 +763,142 @@ packedFileDescriptor
     \\finstructions\CAN\ETX \SOH(\tR\finstructions\DC26\n\
     \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2D\n\
     \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTimeB\142\SOH\n\
-    \\SUBio.temporal.api.version.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/version/v1;version\170\STX\EMTemporalio.Api.Version.V1\234\STX\FSTemporalio::Api::Version::V1J\135\DC1\n\
-    \\ACK\DC2\EOT\SYN\NUL8\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\SUBio.temporal.api.version.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/version/v1;version\170\STX\EMTemporalio.Api.Version.V1\234\STX\FSTemporalio::Api::Version::V1J\157\b\n\
+    \\ACK\DC2\EOT\NUL\NUL\"\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL \n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL<\n\
+    \\SOH\STX\DC2\ETX\STX\NUL \n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL<\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL<\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL<\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL3\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL3\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL3\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL3\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL5\n\
+    \\SOH\b\DC2\ETX\b\NUL5\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL5\n\
+    \\STX\b-\DC2\ETX\b\NUL5\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL6\n\
+    \\SOH\b\DC2\ETX\t\NUL6\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL6\n\
+    \\STX\b%\DC2\ETX\t\NUL6\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL)\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL,\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL,\n\
     \R\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL)\SOH\SUBF ReleaseInfo contains information about specific version of temporal.\n\
+    \\STX\EOT\NUL\DC2\EOT\SI\NUL\DC3\SOH\SUBF ReleaseInfo contains information about specific version of temporal.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\DC3\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\ETB\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DLE\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DLE\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\DC2\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DLE\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\NAK\SYN\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DLE\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\EOT/\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC1\EOT/\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX'\EOT\GS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC1\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\RS*\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC1\RS*\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'-.\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC1-.\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX(\EOT\NAK\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC2\EOT\NAK\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX(\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\DC2\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX(\v\DLE\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC2\v\DLE\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX(\DC3\DC4\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC2\DC3\DC4\n\
     \7\n\
-    \\STX\EOT\SOH\DC2\EOT,\NUL/\SOH\SUB+ Alert contains notification and severity.\n\
+    \\STX\EOT\SOH\DC2\EOT\SYN\NUL\EM\SOH\SUB+ Alert contains notification and severity.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX,\b\r\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SYN\b\r\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX-\EOT\ETB\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ETB\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX-\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\ETB\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX-\v\DC2\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ETB\v\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX-\NAK\SYN\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ETB\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX.\EOT0\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\CAN\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX.\EOT\"\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\CAN\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX.#+\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\CAN#+\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX../\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\CAN./\n\
     \\133\SOH\n\
-    \\STX\EOT\STX\DC2\EOT2\NUL8\SOH\SUBy VersionInfo contains details about current and recommended release versions as well as alerts and upgrade instructions.\n\
+    \\STX\EOT\STX\DC2\EOT\FS\NUL\"\SOH\SUBy VersionInfo contains details about current and recommended release versions as well as alerts and upgrade instructions.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX2\b\DC3\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\FS\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX3\EOT\FS\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\GS\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX3\EOT\SI\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\GS\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX3\DLE\ETB\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\GS\DLE\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX3\SUB\ESC\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\GS\SUB\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX4\EOT \n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX\RS\EOT \n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX4\EOT\SI\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX\RS\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX4\DLE\ESC\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\RS\DLE\ESC\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX4\RS\US\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\RS\RS\US\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX5\EOT\FS\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX\US\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX5\EOT\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX\US\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX5\v\ETB\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX\US\v\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX5\SUB\ESC\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX\US\SUB\ESC\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX6\EOT\RS\n\
+    \\EOT\EOT\STX\STX\ETX\DC2\ETX \EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETX6\EOT\f\n\
+    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETX \EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETX6\r\DC2\n\
+    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETX \r\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX6\DC3\EM\n\
+    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX \DC3\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX6\FS\GS\n\
+    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX \FS\GS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX7\EOT3\n\
+    \\EOT\EOT\STX\STX\EOT\DC2\ETX!\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX7\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX!\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX7\RS.\n\
+    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX!\RS.\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX712b\ACKproto3"
+    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX!12b\ACKproto3"

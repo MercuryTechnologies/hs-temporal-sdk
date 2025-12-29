@@ -2851,445 +2851,428 @@ packedFileDescriptor
     \\EOTcode\CAN\SOH \SOH(\ENQR\EOTcode\DC2\CAN\n\
     \\amessage\CAN\STX \SOH(\tR\amessage\DC2.\n\
     \\adetails\CAN\ETX \ETX(\v2\DC4.google.protobuf.AnyR\adetailsB\167\SOH\n\
-    \\USio.temporal.api.errordetails.v1B\fMessageProtoP\SOHZ/go.temporal.io/api/errordetails/v1;errordetails\170\STX\RSTemporalio.Api.ErrorDetails.V1\234\STX!Temporalio::Api::ErrorDetails::V1J\197)\n\
-    \\a\DC2\ENQ\SYN\NUL\144\SOH\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\USio.temporal.api.errordetails.v1B\fMessageProtoP\SOHZ/go.temporal.io/api/errordetails/v1;errordetails\170\STX\RSTemporalio.Api.ErrorDetails.V1\234\STX!Temporalio::Api::ErrorDetails::V1J\194 \n\
+    \\ACK\DC2\EOT\NUL\NULz\SOH\n\
+    \\b\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\177\STX\n\
-    \\SOH\STX\DC2\ETX\ESC\NUL%2\166\STX These error details are supplied in google.rpc.Status#details as described in \"Google APIs, Error Model\" (https://cloud.google.com/apis/design/errors#error_model)\n\
+    \\SOH\STX\DC2\ETX\ENQ\NUL%2\166\STX These error details are supplied in google.rpc.Status#details as described in \"Google APIs, Error Model\" (https://cloud.google.com/apis/design/errors#error_model)\n\
     \ and extend standard Error Details defined in https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto\n\
     \\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NULF\n\
+    \\SOH\b\DC2\ETX\a\NULF\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\GS\NULF\n\
+    \\STX\b\v\DC2\ETX\a\NULF\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL8\n\
+    \\SOH\b\DC2\ETX\b\NUL8\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\RS\NUL8\n\
+    \\STX\b\SOH\DC2\ETX\b\NUL8\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL\"\n\
+    \\SOH\b\DC2\ETX\t\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\US\NUL\"\n\
+    \\DC2\ETX\t\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX \NUL-\n\
+    \\SOH\b\DC2\ETX\n\
+    \\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX \NUL-\n\
+    \\STX\b\b\DC2\ETX\n\
+    \\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX!\NUL:\n\
+    \\SOH\b\DC2\ETX\v\NUL:\n\
     \\t\n\
-    \\STX\b-\DC2\ETX!\NUL:\n\
+    \\STX\b-\DC2\ETX\v\NUL:\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\"\NUL;\n\
+    \\SOH\b\DC2\ETX\f\NUL;\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\"\NUL;\n\
+    \\STX\b%\DC2\ETX\f\NUL;\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX$\NUL#\n\
+    \\STX\ETX\NUL\DC2\ETX\SO\NUL#\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX%\NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX\SI\NUL.\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX'\NUL2\n\
+    \\STX\ETX\STX\DC2\ETX\DC1\NUL2\n\
     \\t\n\
-    \\STX\ETX\ETX\DC2\ETX(\NUL/\n\
+    \\STX\ETX\ETX\DC2\ETX\DC2\NUL/\n\
     \\t\n\
-    \\STX\ETX\EOT\DC2\ETX)\NUL/\n\
+    \\STX\ETX\EOT\DC2\ETX\DC3\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT+\NUL.\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\NAK\NUL\CAN\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX+\b\ETB\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\NAK\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX,\EOT\US\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SYN\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX,\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\SYN\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX,\v\SUB\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SYN\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX,\GS\RS\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SYN\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX-\EOT\RS\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\ETB\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX-\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\ETB\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX-\v\EM\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\ETB\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX-\FS\GS\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\ETB\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT0\NUL3\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\SUB\NUL\GS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX0\b.\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SUB\b.\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX1\EOT \n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ESC\EOT \n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX1\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\ESC\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX1\v\ESC\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ESC\v\ESC\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX1\RS\US\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ESC\RS\US\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX2\EOT\SYN\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\FS\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX2\EOT\n\
+    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\FS\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX2\v\DC1\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\FS\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX2\DC4\NAK\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\FS\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT5\NUL9\SOH\n\
+    \\STX\EOT\STX\DC2\EOT\US\NUL#\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX5\b!\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\US\b!\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX6\EOT\EM\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX \EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX6\EOT\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX \EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX6\v\DC4\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX \v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX6\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX \ETB\CAN\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX7\EOT\US\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX!\EOT\US\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX7\EOT\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX!\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX7\v\SUB\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX!\v\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX7\GS\RS\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX!\GS\RS\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX8\EOT\RS\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX\"\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX8\EOT\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX\"\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX8\v\EM\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX\"\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX8\FS\GS\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX\"\FS\GS\n\
     \\158\STX\n\
-    \\STX\EOT\ETX\DC2\EOT>\NUL@\SOH\SUB\145\STX NamespaceUnavailableFailure is returned by the service when a request addresses a namespace that is unavailable. For\n\
+    \\STX\EOT\ETX\DC2\EOT(\NUL*\SOH\SUB\145\STX NamespaceUnavailableFailure is returned by the service when a request addresses a namespace that is unavailable. For\n\
     \ example, when a namespace is in the process of failing over between clusters.\n\
     \ This is a transient error that should be automatically retried by clients.\n\
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX>\b#\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX(\b#\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX?\EOT\EM\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX)\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX?\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX)\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX?\v\DC4\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX)\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX?\ETB\CAN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX)\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTB\NULI\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT,\NUL3\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXB\b$\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX,\b$\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXC\EOT\EM\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX-\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX-\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXC\v\DC4\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX-\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXC\ETB\CAN\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX-\ETB\CAN\n\
     \8\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXE\EOT3\SUB+ Current state of the requested namespace.\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETX/\EOT3\SUB+ Current state of the requested namespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETXE\EOT(\n\
+    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETX/\EOT(\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXE).\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETX/).\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXE12\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETX/12\n\
     \\170\SOH\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXH\EOTE\SUB\156\SOH Allowed namespace states for requested operation.\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETX2\EOTE\SUB\156\SOH Allowed namespace states for requested operation.\n\
     \ For example NAMESPACE_STATE_DELETED is forbidden for most operations but allowed for DescribeNamespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\EOT\DC2\ETXH\EOT\f\n\
+    \\ENQ\EOT\EOT\STX\STX\EOT\DC2\ETX2\EOT\f\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXH\r1\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETX2\r1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXH2@\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETX22@\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXHCD\n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETX2CD\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTK\NULM\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT5\NUL7\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXK\b \n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX5\b \n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXL\EOT\EM\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX6\EOT\EM\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXL\EOT\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX6\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXL\v\DC4\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX6\v\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXL\ETB\CAN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX6\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOTO\NULP\SOH\n\
+    \\STX\EOT\ACK\DC2\EOT9\NUL:\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXO\b%\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETX9\b%\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOTR\NULV\SOH\n\
+    \\STX\EOT\a\DC2\EOT<\NUL@\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXR\b(\n\
+    \\ETX\EOT\a\SOH\DC2\ETX<\b(\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXS\EOT\RS\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX=\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXS\EOT\n\
+    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX=\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXS\v\EM\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX=\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXS\FS\GS\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX=\FS\GS\n\
     \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETXT\EOT\ESC\n\
+    \\EOT\EOT\a\STX\SOH\DC2\ETX>\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXT\EOT\n\
+    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETX>\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXT\v\SYN\n\
+    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX>\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXT\EM\SUB\n\
+    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX>\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\a\STX\STX\DC2\ETXU\EOT\"\n\
+    \\EOT\EOT\a\STX\STX\DC2\ETX?\EOT\"\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ENQ\DC2\ETXU\EOT\n\
+    \\ENQ\EOT\a\STX\STX\ENQ\DC2\ETX?\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXU\v\GS\n\
+    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETX?\v\GS\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXU !\n\
+    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETX? !\n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOTX\NUL[\SOH\n\
+    \\STX\EOT\b\DC2\EOTB\NULE\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXX\b(\n\
+    \\ETX\EOT\b\SOH\DC2\ETXB\b(\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXY\EOT\RS\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETXC\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXY\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXC\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXY\v\EM\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXC\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXY\FS\GS\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXC\FS\GS\n\
     \\v\n\
-    \\EOT\EOT\b\STX\SOH\DC2\ETXZ\EOT0\n\
+    \\EOT\EOT\b\STX\SOH\DC2\ETXD\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXZ\EOT\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\ETXD\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXZ\v+\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\ETXD\v+\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXZ./\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\ETXD./\n\
     \\n\
     \\n\
-    \\STX\EOT\t\DC2\EOT]\NUL^\SOH\n\
+    \\STX\EOT\t\DC2\EOTG\NULH\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETX]\b+\n\
+    \\ETX\EOT\t\SOH\DC2\ETXG\b+\n\
     \\n\
     \\n\
     \\STX\EOT\n\
-    \\DC2\EOT`\NULe\SOH\n\
+    \\DC2\EOTJ\NULO\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETX`\b\SUB\n\
+    \\SOH\DC2\ETXJ\b\SUB\n\
     \\235\SOH\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETXd\EOT0\SUB\221\SOH The full reason for this query failure. May not be available if the response is generated by an old\n\
+    \\STX\NUL\DC2\ETXN\EOT0\SUB\221\SOH The full reason for this query failure. May not be available if the response is generated by an old\n\
     \ SDK. This field can be encoded by the SDK's failure converter to support E2E encryption of messages and stack\n\
     \ traces.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\ETXd\EOT#\n\
+    \\STX\NUL\ACK\DC2\ETXN\EOT#\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETXd$+\n\
+    \\STX\NUL\SOH\DC2\ETXN$+\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETXd./\n\
+    \\STX\NUL\ETX\DC2\ETXN./\n\
     \\n\
     \\n\
-    \\STX\EOT\v\DC2\EOTg\NULi\SOH\n\
+    \\STX\EOT\v\DC2\EOTQ\NULS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETXg\b\US\n\
+    \\ETX\EOT\v\SOH\DC2\ETXQ\b\US\n\
     \\v\n\
-    \\EOT\EOT\v\STX\NUL\DC2\ETXh\EOT\SYN\n\
+    \\EOT\EOT\v\STX\NUL\DC2\ETXR\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETXh\EOT\n\
+    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETXR\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETXh\v\DC1\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETXR\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETXh\DC4\NAK\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETXR\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\f\DC2\EOTk\NULn\SOH\n\
+    \\STX\EOT\f\DC2\EOTU\NULX\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\f\SOH\DC2\ETXk\b \n\
+    \\ETX\EOT\f\SOH\DC2\ETXU\b \n\
     \\v\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETXl\EOT;\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETXV\EOT;\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ACK\DC2\ETXl\EOT0\n\
+    \\ENQ\EOT\f\STX\NUL\ACK\DC2\ETXV\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXl16\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXV16\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXl9:\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXV9:\n\
     \\v\n\
-    \\EOT\EOT\f\STX\SOH\DC2\ETXm\EOT;\n\
+    \\EOT\EOT\f\STX\SOH\DC2\ETXW\EOT;\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ACK\DC2\ETXm\EOT0\n\
+    \\ENQ\EOT\f\STX\SOH\ACK\DC2\ETXW\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXm16\n\
+    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETXW16\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXm9:\n\
+    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETXW9:\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOTp\NULv\SOH\n\
+    \\STX\EOT\r\DC2\EOTZ\NUL`\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETXp\b\GS\n\
+    \\ETX\EOT\r\SOH\DC2\ETXZ\b\GS\n\
     \\202\SOH\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETXs\EOTD\SUB\188\SOH WorkflowId and RunId of the Temporal system workflow performing the underlying operation.\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETX]\EOTD\SUB\188\SOH WorkflowId and RunId of the Temporal system workflow performing the underlying operation.\n\
     \ Looking up the info of the system workflow run may help identify the issue causing the failure.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETXs\EOT,\n\
+    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETX]\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXs-?\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETX]-?\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXsBC\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETX]BC\n\
     \d\n\
-    \\EOT\EOT\r\STX\SOH\DC2\ETXu\EOT\RS\SUBW Serialized error returned by the system workflow performing the underlying operation.\n\
+    \\EOT\EOT\r\STX\SOH\DC2\ETX_\EOT\RS\SUBW Serialized error returned by the system workflow performing the underlying operation.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETXu\EOT\n\
+    \\ENQ\EOT\r\STX\SOH\ENQ\DC2\ETX_\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETXu\v\EM\n\
+    \\ENQ\EOT\r\STX\SOH\SOH\DC2\ETX_\v\EM\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETXu\FS\GS\n\
+    \\ENQ\EOT\r\STX\SOH\ETX\DC2\ETX_\FS\GS\n\
     \\n\
     \\n\
-    \\STX\EOT\SO\DC2\EOTx\NULy\SOH\n\
+    \\STX\EOT\SO\DC2\EOTb\NULc\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETXx\b\US\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXb\b\US\n\
     \\n\
     \\n\
-    \\STX\EOT\SI\DC2\EOT{\NUL~\SOH\n\
+    \\STX\EOT\SI\DC2\EOTe\NULh\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SI\SOH\DC2\ETX{\b\US\n\
+    \\ETX\EOT\SI\SOH\DC2\ETXe\b\US\n\
     \O\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\ETX}\EOT \SUBB The current default compatible build ID which will receive tasks\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\ETXg\EOT \SUBB The current default compatible build ID which will receive tasks\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETX}\EOT\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETXg\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETX}\v\ESC\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXg\v\ESC\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETX}\RS\US\n\
-    \\f\n\
-    \\STX\EOT\DLE\DC2\ACK\128\SOH\NUL\144\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\128\SOH\b&\n\
-    \\168\STX\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\132\SOH\EOT*\SUB\153\STX One status for each requested operation from the failed MultiOperation. The failed\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXg\RS\US\n\
+    \\n\
+    \\n\
+    \\STX\EOT\DLE\DC2\EOTj\NULz\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\DLE\SOH\DC2\ETXj\b&\n\
+    \\167\STX\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\ETXn\EOT*\SUB\153\STX One status for each requested operation from the failed MultiOperation. The failed\n\
     \ operation(s) have the same error details as if it was executed separately. All other operations have the\n\
     \ status code `Aborted` and `MultiOperationExecutionAborted` is added to the details field.\n\
     \\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\EOT\DC2\EOT\132\SOH\EOT\f\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\EOT\132\SOH\r\FS\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\132\SOH\GS%\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\132\SOH()\n\
-    \\155\STX\n\
-    \\EOT\EOT\DLE\ETX\NUL\DC2\ACK\139\SOH\EOT\143\SOH\ENQ\SUB\138\STX NOTE: `OperationStatus` is modelled after\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\EOT\DC2\ETXn\EOT\f\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\ETXn\r\FS\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\ETXn\GS%\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\ETXn()\n\
+    \\153\STX\n\
+    \\EOT\EOT\DLE\ETX\NUL\DC2\EOTu\EOTy\ENQ\SUB\138\STX NOTE: `OperationStatus` is modelled after\n\
     \ [`google.rpc.Status`](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto).\n\
     \\n\
     \ (-- api-linter: core::0146::any=disabled\n\
     \     aip.dev/not-precedent: details are meant to hold arbitrary payloads. --)\n\
     \\n\
+    \\f\n\
+    \\ENQ\EOT\DLE\ETX\NUL\SOH\DC2\ETXu\f\ESC\n\
     \\r\n\
-    \\ENQ\EOT\DLE\ETX\NUL\SOH\DC2\EOT\139\SOH\f\ESC\n\
+    \\ACK\EOT\DLE\ETX\NUL\STX\NUL\DC2\ETXv\b\ETB\n\
     \\SO\n\
-    \\ACK\EOT\DLE\ETX\NUL\STX\NUL\DC2\EOT\140\SOH\b\ETB\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\NUL\ENQ\DC2\EOT\140\SOH\b\r\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\NUL\SOH\DC2\EOT\140\SOH\SO\DC2\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\NUL\ETX\DC2\EOT\140\SOH\NAK\SYN\n\
+    \\a\EOT\DLE\ETX\NUL\STX\NUL\ENQ\DC2\ETXv\b\r\n\
     \\SO\n\
-    \\ACK\EOT\DLE\ETX\NUL\STX\SOH\DC2\EOT\141\SOH\b\ESC\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\SOH\ENQ\DC2\EOT\141\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\SOH\SOH\DC2\EOT\141\SOH\SI\SYN\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\SOH\ETX\DC2\EOT\141\SOH\EM\SUB\n\
+    \\a\EOT\DLE\ETX\NUL\STX\NUL\SOH\DC2\ETXv\SO\DC2\n\
     \\SO\n\
-    \\ACK\EOT\DLE\ETX\NUL\STX\STX\DC2\EOT\142\SOH\b1\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\STX\EOT\DC2\EOT\142\SOH\b\DLE\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\STX\ACK\DC2\EOT\142\SOH\DC1$\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\STX\SOH\DC2\EOT\142\SOH%,\n\
-    \\SI\n\
-    \\a\EOT\DLE\ETX\NUL\STX\STX\ETX\DC2\EOT\142\SOH/0b\ACKproto3"
+    \\a\EOT\DLE\ETX\NUL\STX\NUL\ETX\DC2\ETXv\NAK\SYN\n\
+    \\r\n\
+    \\ACK\EOT\DLE\ETX\NUL\STX\SOH\DC2\ETXw\b\ESC\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\SOH\ENQ\DC2\ETXw\b\SO\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\SOH\SOH\DC2\ETXw\SI\SYN\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\SOH\ETX\DC2\ETXw\EM\SUB\n\
+    \\r\n\
+    \\ACK\EOT\DLE\ETX\NUL\STX\STX\DC2\ETXx\b1\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\EOT\DC2\ETXx\b\DLE\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\ACK\DC2\ETXx\DC1$\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\SOH\DC2\ETXx%,\n\
+    \\SO\n\
+    \\a\EOT\DLE\ETX\NUL\STX\STX\ETX\DC2\ETXx/0b\ACKproto3"

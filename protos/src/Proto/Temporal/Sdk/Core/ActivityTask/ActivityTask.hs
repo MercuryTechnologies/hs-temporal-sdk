@@ -5,7 +5,8 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask (
         ActivityCancelReason(..), ActivityCancelReason(),
-        ActivityCancelReason'UnrecognizedValue, ActivityTask(),
+        ActivityCancelReason'UnrecognizedValue,
+        ActivityCancellationDetails(), ActivityTask(),
         ActivityTask'Variant(..), _ActivityTask'Start,
         _ActivityTask'Cancel, Cancel(), Start(), Start'HeaderFieldsEntry()
     ) where
@@ -46,6 +47,8 @@ data ActivityCancelReason
     CANCELLED |
     TIMED_OUT |
     WORKER_SHUTDOWN |
+    PAUSED |
+    RESET |
     ActivityCancelReason'Unrecognized !ActivityCancelReason'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum ActivityCancelReason where
@@ -53,6 +56,8 @@ instance Data.ProtoLens.MessageEnum ActivityCancelReason where
   maybeToEnum 1 = Prelude.Just CANCELLED
   maybeToEnum 2 = Prelude.Just TIMED_OUT
   maybeToEnum 3 = Prelude.Just WORKER_SHUTDOWN
+  maybeToEnum 4 = Prelude.Just PAUSED
+  maybeToEnum 5 = Prelude.Just RESET
   maybeToEnum k
     = Prelude.Just
         (ActivityCancelReason'Unrecognized
@@ -61,6 +66,8 @@ instance Data.ProtoLens.MessageEnum ActivityCancelReason where
   showEnum CANCELLED = "CANCELLED"
   showEnum TIMED_OUT = "TIMED_OUT"
   showEnum WORKER_SHUTDOWN = "WORKER_SHUTDOWN"
+  showEnum PAUSED = "PAUSED"
+  showEnum RESET = "RESET"
   showEnum
     (ActivityCancelReason'Unrecognized (ActivityCancelReason'UnrecognizedValue k))
     = Prelude.show k
@@ -69,11 +76,13 @@ instance Data.ProtoLens.MessageEnum ActivityCancelReason where
     | (Prelude.==) k "CANCELLED" = Prelude.Just CANCELLED
     | (Prelude.==) k "TIMED_OUT" = Prelude.Just TIMED_OUT
     | (Prelude.==) k "WORKER_SHUTDOWN" = Prelude.Just WORKER_SHUTDOWN
+    | (Prelude.==) k "PAUSED" = Prelude.Just PAUSED
+    | (Prelude.==) k "RESET" = Prelude.Just RESET
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded ActivityCancelReason where
   minBound = NOT_FOUND
-  maxBound = WORKER_SHUTDOWN
+  maxBound = RESET
 instance Prelude.Enum ActivityCancelReason where
   toEnum k__
     = Prelude.maybe
@@ -86,15 +95,19 @@ instance Prelude.Enum ActivityCancelReason where
   fromEnum CANCELLED = 1
   fromEnum TIMED_OUT = 2
   fromEnum WORKER_SHUTDOWN = 3
+  fromEnum PAUSED = 4
+  fromEnum RESET = 5
   fromEnum
     (ActivityCancelReason'Unrecognized (ActivityCancelReason'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ WORKER_SHUTDOWN
+  succ RESET
     = Prelude.error
-        "ActivityCancelReason.succ: bad argument WORKER_SHUTDOWN. This value would be out of bounds."
+        "ActivityCancelReason.succ: bad argument RESET. This value would be out of bounds."
   succ NOT_FOUND = CANCELLED
   succ CANCELLED = TIMED_OUT
   succ TIMED_OUT = WORKER_SHUTDOWN
+  succ WORKER_SHUTDOWN = PAUSED
+  succ PAUSED = RESET
   succ (ActivityCancelReason'Unrecognized _)
     = Prelude.error
         "ActivityCancelReason.succ: bad argument: unrecognized value"
@@ -104,6 +117,8 @@ instance Prelude.Enum ActivityCancelReason where
   pred CANCELLED = NOT_FOUND
   pred TIMED_OUT = CANCELLED
   pred WORKER_SHUTDOWN = TIMED_OUT
+  pred PAUSED = WORKER_SHUTDOWN
+  pred RESET = PAUSED
   pred (ActivityCancelReason'Unrecognized _)
     = Prelude.error
         "ActivityCancelReason.pred: bad argument: unrecognized value"
@@ -115,6 +130,337 @@ instance Data.ProtoLens.FieldDefault ActivityCancelReason where
   fieldDefault = NOT_FOUND
 instance Control.DeepSeq.NFData ActivityCancelReason where
   rnf x__ = Prelude.seq x__ ()
+{- | Fields :
+     
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isNotFound' @:: Lens' ActivityCancellationDetails Prelude.Bool@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isCancelled' @:: Lens' ActivityCancellationDetails Prelude.Bool@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isPaused' @:: Lens' ActivityCancellationDetails Prelude.Bool@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isTimedOut' @:: Lens' ActivityCancellationDetails Prelude.Bool@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isWorkerShutdown' @:: Lens' ActivityCancellationDetails Prelude.Bool@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isReset' @:: Lens' ActivityCancellationDetails Prelude.Bool@ -}
+data ActivityCancellationDetails
+  = ActivityCancellationDetails'_constructor {_ActivityCancellationDetails'isNotFound :: !Prelude.Bool,
+                                              _ActivityCancellationDetails'isCancelled :: !Prelude.Bool,
+                                              _ActivityCancellationDetails'isPaused :: !Prelude.Bool,
+                                              _ActivityCancellationDetails'isTimedOut :: !Prelude.Bool,
+                                              _ActivityCancellationDetails'isWorkerShutdown :: !Prelude.Bool,
+                                              _ActivityCancellationDetails'isReset :: !Prelude.Bool,
+                                              _ActivityCancellationDetails'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ActivityCancellationDetails where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isNotFound" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivityCancellationDetails'isNotFound
+           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isNotFound = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isCancelled" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivityCancellationDetails'isCancelled
+           (\ x__ y__
+              -> x__ {_ActivityCancellationDetails'isCancelled = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isPaused" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivityCancellationDetails'isPaused
+           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isPaused = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isTimedOut" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivityCancellationDetails'isTimedOut
+           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isTimedOut = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isWorkerShutdown" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivityCancellationDetails'isWorkerShutdown
+           (\ x__ y__
+              -> x__ {_ActivityCancellationDetails'isWorkerShutdown = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isReset" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ActivityCancellationDetails'isReset
+           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isReset = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ActivityCancellationDetails where
+  messageName _
+    = Data.Text.pack
+        "coresdk.activity_task.ActivityCancellationDetails"
+  packedMessageDescriptor _
+    = "\n\
+      \\ESCActivityCancellationDetails\DC2 \n\
+      \\fis_not_found\CAN\SOH \SOH(\bR\n\
+      \isNotFound\DC2!\n\
+      \\fis_cancelled\CAN\STX \SOH(\bR\visCancelled\DC2\ESC\n\
+      \\tis_paused\CAN\ETX \SOH(\bR\bisPaused\DC2 \n\
+      \\fis_timed_out\CAN\EOT \SOH(\bR\n\
+      \isTimedOut\DC2,\n\
+      \\DC2is_worker_shutdown\CAN\ENQ \SOH(\bR\DLEisWorkerShutdown\DC2\EM\n\
+      \\bis_reset\CAN\ACK \SOH(\bR\aisReset"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        isNotFound__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_not_found"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"isNotFound")) ::
+              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
+        isCancelled__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_cancelled"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"isCancelled")) ::
+              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
+        isPaused__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_paused"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"isPaused")) ::
+              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
+        isTimedOut__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_timed_out"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"isTimedOut")) ::
+              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
+        isWorkerShutdown__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_worker_shutdown"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"isWorkerShutdown")) ::
+              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
+        isReset__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "is_reset"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"isReset")) ::
+              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, isNotFound__field_descriptor),
+           (Data.ProtoLens.Tag 2, isCancelled__field_descriptor),
+           (Data.ProtoLens.Tag 3, isPaused__field_descriptor),
+           (Data.ProtoLens.Tag 4, isTimedOut__field_descriptor),
+           (Data.ProtoLens.Tag 5, isWorkerShutdown__field_descriptor),
+           (Data.ProtoLens.Tag 6, isReset__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ActivityCancellationDetails'_unknownFields
+        (\ x__ y__
+           -> x__ {_ActivityCancellationDetails'_unknownFields = y__})
+  defMessage
+    = ActivityCancellationDetails'_constructor
+        {_ActivityCancellationDetails'isNotFound = Data.ProtoLens.fieldDefault,
+         _ActivityCancellationDetails'isCancelled = Data.ProtoLens.fieldDefault,
+         _ActivityCancellationDetails'isPaused = Data.ProtoLens.fieldDefault,
+         _ActivityCancellationDetails'isTimedOut = Data.ProtoLens.fieldDefault,
+         _ActivityCancellationDetails'isWorkerShutdown = Data.ProtoLens.fieldDefault,
+         _ActivityCancellationDetails'isReset = Data.ProtoLens.fieldDefault,
+         _ActivityCancellationDetails'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ActivityCancellationDetails
+          -> Data.ProtoLens.Encoding.Bytes.Parser ActivityCancellationDetails
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_not_found"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isNotFound") y x)
+                        16
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_cancelled"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isCancelled") y x)
+                        24
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_paused"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isPaused") y x)
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_timed_out"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isTimedOut") y x)
+                        40
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_worker_shutdown"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"isWorkerShutdown") y x)
+                        48
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "is_reset"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"isReset") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ActivityCancellationDetails"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view (Data.ProtoLens.Field.field @"isNotFound") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                         _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view (Data.ProtoLens.Field.field @"isCancelled") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                            _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isPaused") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
+                               _v))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view (Data.ProtoLens.Field.field @"isTimedOut") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (\ b -> if b then 1 else 0) _v))
+                      ((Data.Monoid.<>)
+                         (let
+                            _v
+                              = Lens.Family2.view
+                                  (Data.ProtoLens.Field.field @"isWorkerShutdown") _x
+                          in
+                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                Data.Monoid.mempty
+                            else
+                                (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
+                                  ((Prelude..)
+                                     Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (\ b -> if b then 1 else 0) _v))
+                         ((Data.Monoid.<>)
+                            (let
+                               _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isReset") _x
+                             in
+                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                   Data.Monoid.mempty
+                               else
+                                   (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
+                                     ((Prelude..)
+                                        Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (\ b -> if b then 1 else 0) _v))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+instance Control.DeepSeq.NFData ActivityCancellationDetails where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ActivityCancellationDetails'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ActivityCancellationDetails'isNotFound x__)
+                (Control.DeepSeq.deepseq
+                   (_ActivityCancellationDetails'isCancelled x__)
+                   (Control.DeepSeq.deepseq
+                      (_ActivityCancellationDetails'isPaused x__)
+                      (Control.DeepSeq.deepseq
+                         (_ActivityCancellationDetails'isTimedOut x__)
+                         (Control.DeepSeq.deepseq
+                            (_ActivityCancellationDetails'isWorkerShutdown x__)
+                            (Control.DeepSeq.deepseq
+                               (_ActivityCancellationDetails'isReset x__) ()))))))
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.taskToken' @:: Lens' ActivityTask Data.ByteString.ByteString@
@@ -383,9 +729,12 @@ _ActivityTask'Cancel
               _otherwise -> Prelude.Nothing)
 {- | Fields :
      
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.reason' @:: Lens' Cancel ActivityCancelReason@ -}
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.reason' @:: Lens' Cancel ActivityCancelReason@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.details' @:: Lens' Cancel ActivityCancellationDetails@
+         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'details' @:: Lens' Cancel (Prelude.Maybe ActivityCancellationDetails)@ -}
 data Cancel
   = Cancel'_constructor {_Cancel'reason :: !ActivityCancelReason,
+                         _Cancel'details :: !(Prelude.Maybe ActivityCancellationDetails),
                          _Cancel'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show Cancel where
@@ -400,12 +749,25 @@ instance Data.ProtoLens.Field.HasField Cancel "reason" ActivityCancelReason wher
         (Lens.Family2.Unchecked.lens
            _Cancel'reason (\ x__ y__ -> x__ {_Cancel'reason = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField Cancel "details" ActivityCancellationDetails where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cancel'details (\ x__ y__ -> x__ {_Cancel'details = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Cancel "maybe'details" (Prelude.Maybe ActivityCancellationDetails) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cancel'details (\ x__ y__ -> x__ {_Cancel'details = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message Cancel where
   messageName _ = Data.Text.pack "coresdk.activity_task.Cancel"
   packedMessageDescriptor _
     = "\n\
       \\ACKCancel\DC2C\n\
-      \\ACKreason\CAN\SOH \SOH(\SO2+.coresdk.activity_task.ActivityCancelReasonR\ACKreason"
+      \\ACKreason\CAN\SOH \SOH(\SO2+.coresdk.activity_task.ActivityCancelReasonR\ACKreason\DC2L\n\
+      \\adetails\CAN\STX \SOH(\v22.coresdk.activity_task.ActivityCancellationDetailsR\adetails"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -417,9 +779,18 @@ instance Data.ProtoLens.Message Cancel where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"reason")) ::
               Data.ProtoLens.FieldDescriptor Cancel
+        details__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "details"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ActivityCancellationDetails)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'details")) ::
+              Data.ProtoLens.FieldDescriptor Cancel
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, reason__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, reason__field_descriptor),
+           (Data.ProtoLens.Tag 2, details__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Cancel'_unknownFields
@@ -427,7 +798,7 @@ instance Data.ProtoLens.Message Cancel where
   defMessage
     = Cancel'_constructor
         {_Cancel'reason = Data.ProtoLens.fieldDefault,
-         _Cancel'_unknownFields = []}
+         _Cancel'details = Prelude.Nothing, _Cancel'_unknownFields = []}
   parseMessage
     = let
         loop :: Cancel -> Data.ProtoLens.Encoding.Bytes.Parser Cancel
@@ -457,6 +828,13 @@ instance Data.ProtoLens.Message Cancel where
                                              Data.ProtoLens.Encoding.Bytes.getVarInt))
                                        "reason"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "details"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"details") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -481,14 +859,31 @@ instance Data.ProtoLens.Message Cancel where
                          ((Prelude..)
                             Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
                          Prelude.fromEnum _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'details") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData Cancel where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_Cancel'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Cancel'reason x__) ())
+             (Control.DeepSeq.deepseq
+                (_Cancel'reason x__)
+                (Control.DeepSeq.deepseq (_Cancel'details x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.workflowNamespace' @:: Lens' Start Data.Text.Text@
@@ -1796,15 +2191,28 @@ packedFileDescriptor
     \\bis_local\CAN\DC1 \SOH(\bR\aisLocal\SUB`\n\
     \\DC1HeaderFieldsEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"M\n\
+    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\155\SOH\n\
     \\ACKCancel\DC2C\n\
-    \\ACKreason\CAN\SOH \SOH(\SO2+.coresdk.activity_task.ActivityCancelReasonR\ACKreason*X\n\
+    \\ACKreason\CAN\SOH \SOH(\SO2+.coresdk.activity_task.ActivityCancelReasonR\ACKreason\DC2L\n\
+    \\adetails\CAN\STX \SOH(\v22.coresdk.activity_task.ActivityCancellationDetailsR\adetails\"\234\SOH\n\
+    \\ESCActivityCancellationDetails\DC2 \n\
+    \\fis_not_found\CAN\SOH \SOH(\bR\n\
+    \isNotFound\DC2!\n\
+    \\fis_cancelled\CAN\STX \SOH(\bR\visCancelled\DC2\ESC\n\
+    \\tis_paused\CAN\ETX \SOH(\bR\bisPaused\DC2 \n\
+    \\fis_timed_out\CAN\EOT \SOH(\bR\n\
+    \isTimedOut\DC2,\n\
+    \\DC2is_worker_shutdown\CAN\ENQ \SOH(\bR\DLEisWorkerShutdown\DC2\EM\n\
+    \\bis_reset\CAN\ACK \SOH(\bR\aisReset*o\n\
     \\DC4ActivityCancelReason\DC2\r\n\
     \\tNOT_FOUND\DLE\NUL\DC2\r\n\
     \\tCANCELLED\DLE\SOH\DC2\r\n\
     \\tTIMED_OUT\DLE\STX\DC2\DC3\n\
-    \\SIWORKER_SHUTDOWN\DLE\ETXB2\234\STX/Temporalio::Internal::Bridge::Api::ActivityTaskJ\148\EM\n\
-    \\ACK\DC2\EOT\NUL\NULQ\SOH\n\
+    \\SIWORKER_SHUTDOWN\DLE\ETX\DC2\n\
+    \\n\
+    \\ACKPAUSED\DLE\EOT\DC2\t\n\
+    \\ENQRESET\DLE\ENQB2\234\STX/Temporalio::Internal::Bridge::Api::ActivityTaskJ\144\RS\n\
+    \\ACK\DC2\EOT\NUL\NULa\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \a\n\
@@ -2046,50 +2454,129 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\SOH\STX\DC1\ETX\DC2\ETX@\DC4\SYN\n\
     \2\n\
-    \\STX\EOT\STX\DC2\EOTD\NULF\SOH\SUB& Attempt to cancel a running activity\n\
+    \\STX\EOT\STX\DC2\EOTD\NULI\SOH\SUB& Attempt to cancel a running activity\n\
     \\n\
     \\n\
     \\n\
     \\ETX\EOT\STX\SOH\DC2\ETXD\b\SO\n\
+    \*\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETXF\EOT$\SUB\GS Primary cancellation reason\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXF\EOT\CAN\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXF\EM\US\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXF\"#\n\
+    \P\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETXH\EOT,\SUBC Activity cancellation details, surfaces all cancellation reasons.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXH\EOT\US\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXH '\n\
+    \\f\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXH*+\n\
+    \\n\
+    \\n\
+    \\STX\EOT\ETX\DC2\EOTK\NULR\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETXK\b#\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXE\EOT$\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXL\EOT\SUB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXE\EOT\CAN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXL\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXE\EM\US\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXL\t\NAK\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXE\"#\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXL\CAN\EM\n\
+    \\v\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXM\EOT\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXM\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXM\t\NAK\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXM\CAN\EM\n\
+    \\v\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETXN\EOT\ETB\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETXN\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXN\t\DC2\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXN\NAK\SYN\n\
+    \\v\n\
+    \\EOT\EOT\ETX\STX\ETX\DC2\ETXO\EOT\SUB\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETXO\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETXO\t\NAK\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETXO\CAN\EM\n\
+    \\v\n\
+    \\EOT\EOT\ETX\STX\EOT\DC2\ETXP\EOT \n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\EOT\ENQ\DC2\ETXP\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETXP\t\ESC\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETXP\RS\US\n\
+    \\v\n\
+    \\EOT\EOT\ETX\STX\ENQ\DC2\ETXQ\EOT\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\ENQ\ENQ\DC2\ETXQ\EOT\b\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\ENQ\SOH\DC2\ETXQ\t\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\ETX\STX\ENQ\ETX\DC2\ETXQ\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\ENQ\NUL\DC2\EOTH\NULQ\SOH\n\
+    \\STX\ENQ\NUL\DC2\EOTT\NULa\SOH\n\
     \\n\
     \\n\
-    \\ETX\ENQ\NUL\SOH\DC2\ETXH\ENQ\EM\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETXT\ENQ\EM\n\
     \[\n\
-    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXJ\EOT\DC2\SUBN The activity no longer exists according to server (may be already completed)\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXV\EOT\DC2\SUBN The activity no longer exists according to server (may be already completed)\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXJ\EOT\r\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXV\EOT\r\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXJ\DLE\DC1\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXV\DLE\DC1\n\
     \0\n\
-    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXL\EOT\DC2\SUB# Activity was explicitly cancelled\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXX\EOT\DC2\SUB# Activity was explicitly cancelled\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXL\EOT\r\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXX\EOT\r\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXL\DLE\DC1\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXX\DLE\DC1\n\
     \!\n\
-    \\EOT\ENQ\NUL\STX\STX\DC2\ETXN\EOT\DC2\SUB\DC4 Activity timed out\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETXZ\EOT\DC2\SUB\DC4 Activity timed out\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXN\EOT\r\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXZ\EOT\r\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXN\DLE\DC1\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXZ\DLE\DC1\n\
     \I\n\
-    \\EOT\ENQ\NUL\STX\ETX\DC2\ETXP\EOT\CAN\SUB< Core is shutting down and the graceful timeout has elapsed\n\
+    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX\\\EOT\CAN\SUB< Core is shutting down and the graceful timeout has elapsed\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETXP\EOT\DC3\n\
+    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX\\\EOT\DC3\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETXP\SYN\ETBb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX\\\SYN\ETB\n\
+    \\"\n\
+    \\EOT\ENQ\NUL\STX\EOT\DC2\ETX^\EOT\SI\SUB\NAK Activity was paused\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\EOT\SOH\DC2\ETX^\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\EOT\STX\DC2\ETX^\r\SO\n\
+    \!\n\
+    \\EOT\ENQ\NUL\STX\ENQ\DC2\ETX`\EOT\SO\SUB\DC4 Activity was reset\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\ENQ\SOH\DC2\ETX`\EOT\t\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\ENQ\STX\DC2\ETX`\f\rb\ACKproto3"

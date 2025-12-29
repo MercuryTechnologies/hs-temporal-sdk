@@ -615,134 +615,113 @@ packedFileDescriptor
     \latestTime\"V\n\
     \\fStatusFilter\DC2F\n\
     \\ACKstatus\CAN\SOH \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatusB\137\SOH\n\
-    \\EMio.temporal.api.filter.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/filter/v1;filter\170\STX\CANTemporalio.Api.Filter.V1\234\STX\ESCTemporalio::Api::Filter::V1J\196\r\n\
-    \\ACK\DC2\EOT\SYN\NUL5\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\EMio.temporal.api.filter.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/filter/v1;filter\170\STX\CANTemporalio.Api.Filter.V1\234\STX\ESCTemporalio::Api::Filter::V1J\218\EOT\n\
+    \\ACK\DC2\EOT\NUL\NUL\US\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\US\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL:\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\US\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL:\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL:\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL:\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL2\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL2\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL2\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL4\n\
+    \\SOH\b\DC2\ETX\b\NUL4\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL4\n\
+    \\STX\b-\DC2\ETX\b\NUL4\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL5\n\
+    \\SOH\b\DC2\ETX\t\NUL5\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL5\n\
+    \\STX\b%\DC2\ETX\t\NUL5\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL)\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL)\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX#\NUL.\n\
+    \\STX\ETX\SOH\DC2\ETX\r\NUL.\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT%\NUL(\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\SI\NUL\DC2\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX%\b\US\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b\US\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX&\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DLE\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX&\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DLE\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX&\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DLE\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX&\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DLE\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX'\EOT\SYN\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC1\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX'\EOT\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\DC1\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX'\v\DC1\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC1\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX'\DC4\NAK\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC1\DC4\NAK\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT*\NUL,\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\DC4\NUL\SYN\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX*\b\SUB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\DC4\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX+\EOT\DC4\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\NAK\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX+\EOT\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\NAK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX+\v\SI\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\NAK\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX+\DC2\DC3\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\NAK\DC2\DC3\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT.\NUL1\SOH\n\
+    \\STX\EOT\STX\DC2\EOT\CAN\NUL\ESC\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX.\b\ETB\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\CAN\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX/\EOT0\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\EM\EOT0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX/\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\EM\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX/\RS+\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\EM\RS+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX/./\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\EM./\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX0\EOT.\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX\SUB\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX0\EOT\GS\n\
+    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX\SUB\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX0\RS)\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\SUB\RS)\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX0,-\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\SUB,-\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT3\NUL5\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT\GS\NUL\US\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX3\b\DC4\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX\GS\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX4\EOT=\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\RS\EOT=\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX4\EOT1\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX\RS\EOT1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX428\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\RS28\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX4;<b\ACKproto3"
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\RS;<b\ACKproto3"

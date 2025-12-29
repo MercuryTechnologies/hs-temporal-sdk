@@ -2617,349 +2617,328 @@ packedFileDescriptor
     \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\":\n\
     \\SINamespaceFilter\DC2'\n\
     \\SIinclude_deleted\CAN\SOH \SOH(\bR\SOincludeDeletedB\152\SOH\n\
-    \\FSio.temporal.api.namespace.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/namespace/v1;namespace\170\STX\ESCTemporalio.Api.Namespace.V1\234\STX\RSTemporalio::Api::Namespace::V1J\146\"\n\
-    \\ACK\DC2\EOT\SYN\NULl\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
+    \\FSio.temporal.api.namespace.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/namespace/v1;namespace\170\STX\ESCTemporalio.Api.Namespace.V1\234\STX\RSTemporalio::Api::Namespace::V1J\168\EM\n\
+    \\ACK\DC2\EOT\NUL\NULV\SOH\n\
     \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL\"\n\
+    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NUL@\n\
+    \\SOH\STX\DC2\ETX\STX\NUL\"\n\
+    \\b\n\
+    \\SOH\b\DC2\ETX\EOT\NUL@\n\
     \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NUL@\n\
+    \\STX\b\v\DC2\ETX\EOT\NUL@\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL5\n\
+    \\SOH\b\DC2\ETX\ENQ\NUL5\n\
     \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL5\n\
+    \\STX\b\SOH\DC2\ETX\ENQ\NUL5\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
+    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
     \\t\n\
     \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
+    \\DC2\ETX\ACK\NUL\"\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL-\n\
+    \\SOH\b\DC2\ETX\a\NUL-\n\
     \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL-\n\
+    \\STX\b\b\DC2\ETX\a\NUL-\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL7\n\
+    \\SOH\b\DC2\ETX\b\NUL7\n\
     \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL7\n\
+    \\STX\b-\DC2\ETX\b\NUL7\n\
     \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL8\n\
+    \\SOH\b\DC2\ETX\t\NUL8\n\
     \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL8\n\
+    \\STX\b%\DC2\ETX\t\NUL8\n\
     \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
+    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
     \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL)\n\
+    \\STX\ETX\SOH\DC2\ETX\f\NUL)\n\
     \\t\n\
-    \\STX\ETX\STX\DC2\ETX$\NUL/\n\
+    \\STX\ETX\STX\DC2\ETX\SO\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT'\NUL?\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\DC1\NUL)\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX'\b\NAK\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX(\EOT\DC4\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC2\EOT\DC4\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX(\EOT\n\
+    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC2\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX(\v\SI\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC2\v\SI\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX(\DC2\DC3\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC2\DC2\DC3\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX)\EOT3\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC3\EOT3\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX)\EOT(\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC3\EOT(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX)).\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC3).\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX)12\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC312\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX*\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC4\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX*\EOT\n\
+    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\DC4\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX*\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC4\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX*\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC4\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX+\EOT\ESC\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\NAK\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX+\EOT\n\
+    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX\NAK\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX+\v\SYN\n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\NAK\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX+\EM\SUB\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\NAK\EM\SUB\n\
     \:\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX-\EOT!\SUB- A key-value map for any customized purpose.\n\
+    \\EOT\EOT\NUL\STX\EOT\DC2\ETX\ETB\EOT!\SUB- A key-value map for any customized purpose.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX-\EOT\ETB\n\
+    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX\ETB\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX-\CAN\FS\n\
+    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX\ETB\CAN\FS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX-\US \n\
+    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX\ETB\US \n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX.\EOT\DC2\n\
+    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX\CAN\EOT\DC2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX.\EOT\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX\CAN\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX.\v\r\n\
+    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX\CAN\v\r\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX.\DLE\DC1\n\
+    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX\CAN\DLE\DC1\n\
     \7\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETX0\EOT\"\SUB* All capabilities the namespace supports.\n\
+    \\EOT\EOT\NUL\STX\ACK\DC2\ETX\SUB\EOT\"\SUB* All capabilities the namespace supports.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ACK\DC2\ETX0\EOT\DLE\n\
+    \\ENQ\EOT\NUL\STX\ACK\ACK\DC2\ETX\SUB\EOT\DLE\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX0\DC1\GS\n\
+    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX\SUB\DC1\GS\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX0 !\n\
+    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX\SUB !\n\
     \f\n\
-    \\EOT\EOT\NUL\ETX\SOH\DC2\EOT3\EOT:\ENQ\SUBX Namespace capability details. Should contain what features are enabled in a namespace.\n\
+    \\EOT\EOT\NUL\ETX\SOH\DC2\EOT\GS\EOT$\ENQ\SUBX Namespace capability details. Should contain what features are enabled in a namespace.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\ETX\SOH\SOH\DC2\ETX3\f\CAN\n\
+    \\ENQ\EOT\NUL\ETX\SOH\SOH\DC2\ETX\GS\f\CAN\n\
     \E\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\NUL\DC2\ETX5\b&\SUB6 True if the namespace supports eager workflow start.\n\
+    \\ACK\EOT\NUL\ETX\SOH\STX\NUL\DC2\ETX\US\b&\SUB6 True if the namespace supports eager workflow start.\n\
     \\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\NUL\ENQ\DC2\ETX5\b\f\n\
+    \\a\EOT\NUL\ETX\SOH\STX\NUL\ENQ\DC2\ETX\US\b\f\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\NUL\SOH\DC2\ETX5\r!\n\
+    \\a\EOT\NUL\ETX\SOH\STX\NUL\SOH\DC2\ETX\US\r!\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\NUL\ETX\DC2\ETX5$%\n\
+    \\a\EOT\NUL\ETX\SOH\STX\NUL\ETX\DC2\ETX\US$%\n\
     \;\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\SOH\DC2\ETX7\b\GS\SUB, True if the namespace supports sync update\n\
+    \\ACK\EOT\NUL\ETX\SOH\STX\SOH\DC2\ETX!\b\GS\SUB, True if the namespace supports sync update\n\
     \\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\SOH\ENQ\DC2\ETX7\b\f\n\
+    \\a\EOT\NUL\ETX\SOH\STX\SOH\ENQ\DC2\ETX!\b\f\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\SOH\SOH\DC2\ETX7\r\CAN\n\
+    \\a\EOT\NUL\ETX\SOH\STX\SOH\SOH\DC2\ETX!\r\CAN\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\SOH\ETX\DC2\ETX7\ESC\FS\n\
+    \\a\EOT\NUL\ETX\SOH\STX\SOH\ETX\DC2\ETX!\ESC\FS\n\
     \<\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\STX\DC2\ETX9\b\RS\SUB- True if the namespace supports async update\n\
+    \\ACK\EOT\NUL\ETX\SOH\STX\STX\DC2\ETX#\b\RS\SUB- True if the namespace supports async update\n\
     \\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\STX\ENQ\DC2\ETX9\b\f\n\
+    \\a\EOT\NUL\ETX\SOH\STX\STX\ENQ\DC2\ETX#\b\f\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\STX\SOH\DC2\ETX9\r\EM\n\
+    \\a\EOT\NUL\ETX\SOH\STX\STX\SOH\DC2\ETX#\r\EM\n\
     \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\STX\ETX\DC2\ETX9\FS\GS\n\
+    \\a\EOT\NUL\ETX\SOH\STX\STX\ETX\DC2\ETX#\FS\GS\n\
     \\174\SOH\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETX>\EOT\"\SUB\160\SOH Whether scheduled workflows are supported on this namespace. This is only needed\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETX(\EOT\"\SUB\160\SOH Whether scheduled workflows are supported on this namespace. This is only needed\n\
     \ temporarily while the feature is experimental, so we can give it a high tag.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETX>\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETX(\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX>\t\ESC\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX(\t\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX>\RS!\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX(\RS!\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOTA\NULL\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT+\NUL6\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETXA\b\ETB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX+\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETXB\EOTB\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX,\EOTB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETXB\EOT\FS\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX,\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETXB\GS=\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX,\GS=\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETXB@A\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX,@A\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETXC\EOT!\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX-\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETXC\EOT\SI\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX-\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETXC\DLE\FS\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX-\DLE\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETXC\US \n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX-\US \n\
     \e\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETXE\EOTC\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX/\EOTC\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETXE\EOT'\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX/\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETXE(>\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX/(>\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETXEAB\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX/AB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETXF\EOT$\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETX0\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ENQ\DC2\ETXF\EOT\n\
+    \\ENQ\EOT\SOH\STX\ETX\ENQ\DC2\ETX0\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXF\v\US\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX0\v\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXF\"#\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX0\"#\n\
     \e\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETXH\EOTF\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
+    \\EOT\EOT\SOH\STX\EOT\DC2\ETX2\EOTF\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETXH\EOT'\n\
+    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX2\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETXH(A\n\
+    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX2(A\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETXHDE\n\
+    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX2DE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\ENQ\DC2\ETXI\EOT'\n\
+    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX3\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ENQ\DC2\ETXI\EOT\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ENQ\DC2\ETX3\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETXI\v\"\n\
+    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX3\v\"\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETXI%&\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX3%&\n\
     \,\n\
-    \\EOT\EOT\SOH\STX\ACK\DC2\ETXK\EOT<\SUB\US Map from field name to alias.\n\
+    \\EOT\EOT\SOH\STX\ACK\DC2\ETX5\EOT<\SUB\US Map from field name to alias.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETXK\EOT\ETB\n\
+    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETX5\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETXK\CAN7\n\
+    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETX5\CAN7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETXK:;\n\
+    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETX5:;\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOTN\NULP\SOH\n\
+    \\STX\EOT\STX\DC2\EOT8\NUL:\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXN\b\DC3\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX8\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXO\EOT,\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX9\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXO\EOT\RS\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX9\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXO\US'\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX9\US'\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXO*+\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX9*+\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOTR\NULV\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT<\NUL@\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXR\b\NAK\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX<\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXS\EOT\SYN\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX=\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXS\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX=\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXS\v\DC1\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX=\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXS\DC4\NAK\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX=\DC4\NAK\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXT\EOT\CAN\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETX>\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXT\EOT\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX>\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXT\v\DC3\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX>\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXT\SYN\ETB\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX>\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETXU\EOT.\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETX?\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ACK\DC2\ETXU\EOT\GS\n\
+    \\ENQ\EOT\ETX\STX\STX\ACK\DC2\ETX?\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXU\RS)\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX?\RS)\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXU,-\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX?,-\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTX\NULe\SOH\n\
+    \\STX\EOT\EOT\DC2\EOTB\NULO\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXX\b\ESC\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXB\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXY\EOT\ESC\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXC\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXY\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXC\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXY\v\SYN\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXC\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXY\EM\SUB\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXC\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXZ\EOT\ESC\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXD\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXZ\EOT\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXD\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXZ\v\SYN\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXD\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXZ\EM\SUB\n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXD\EM\SUB\n\
     \\150\SOH\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETX^\EOT!\SUB\136\SOH A key-value map for any customized purpose.\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETXH\EOT!\SUB\136\SOH A key-value map for any customized purpose.\n\
     \ If data already exists on the namespace, \n\
     \ this will merge with the existing key values. \n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETX^\EOT\ETB\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXH\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETX^\CAN\FS\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXH\CAN\FS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETX^\US \n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXH\US \n\
     \\134\STX\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\ETXd\EOT3\SUB\248\SOH New namespace state, server will reject if transition is not allowed.\n\
+    \\EOT\EOT\EOT\STX\ETX\DC2\ETXN\EOT3\SUB\248\SOH New namespace state, server will reject if transition is not allowed.\n\
     \ Allowed transitions are:\n\
     \  Registered -> [ Deleted | Deprecated | Handover ]\n\
     \  Handover -> [ Registered ]\n\
     \ Default is NAMESPACE_STATE_UNSPECIFIED which is do not change state.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXd\EOT(\n\
+    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXN\EOT(\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXd).\n\
+    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXN).\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXd12\n\
+    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXN12\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTg\NULl\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTQ\NULV\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXg\b\ETB\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXQ\b\ETB\n\
     \\155\STX\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXk\EOT\GS\SUB\141\STX By default namespaces in NAMESPACE_STATE_DELETED state are not included.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXU\EOT\GS\SUB\141\STX By default namespaces in NAMESPACE_STATE_DELETED state are not included.\n\
     \ Setting include_deleted to true will include deleted namespaces.\n\
     \ Note: Namespace is in NAMESPACE_STATE_DELETED state when it was deleted from the system but associated data is not deleted yet.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXk\EOT\b\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXU\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXk\t\CAN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXU\t\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXk\ESC\FSb\ACKproto3"
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXU\ESC\FSb\ACKproto3"
