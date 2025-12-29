@@ -36,7 +36,7 @@
     };
 in {
   git-hooks.hooks = {
-    alejandra = ignoreCrate2Nix {
+    nixfmt-rfc-style = ignoreCrate2Nix {
       enable = true;
     };
     shellcheck.enable = true;
