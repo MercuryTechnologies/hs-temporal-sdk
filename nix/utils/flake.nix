@@ -1,10 +1,14 @@
-{ nixpkgs, self, fenix, ... }:
+{
+  nixpkgs,
+  self,
+  fenix,
+  ...
+}:
 
 let
   forAllSystems = forTheseSystems (import ./matrix.nix).systems;
   forTheseSystems =
-    systems:
-    withPkgs:
+    systems: withPkgs:
     nixpkgs.lib.genAttrs systems (
       system:
       withPkgs {
@@ -19,6 +23,7 @@ let
         };
       }
     );
-in {
+in
+{
   inherit forAllSystems forTheseSystems;
 }

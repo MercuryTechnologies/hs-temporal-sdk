@@ -5,7 +5,8 @@
   autoPatchelfHook,
   fixDarwinDylibNames,
   ...
-}: let
+}:
+let
   version = "1.32.1";
   systems = {
     "aarch64-darwin" = {
@@ -28,35 +29,37 @@
 
   srcFor = system: fetchurl { inherit (systems.${system}) url hash; };
 in
-  stdenv.mkDerivation (finalAttrs: {
-    pname = "temporal-test-server";
-    inherit version;
-    src = srcFor stdenv.system;
+stdenv.mkDerivation (_finalAttrs: {
+  pname = "temporal-test-server";
+  inherit version;
+  src = srcFor stdenv.system;
 
-    nativeBuildInputs = lib.optionals stdenv.hostPlatform.isDarwin [
+  nativeBuildInputs =
+    lib.optionals stdenv.hostPlatform.isDarwin [
       fixDarwinDylibNames
-    ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+    ]
+    ++ lib.optionals stdenv.hostPlatform.isLinux [
       autoPatchelfHook
     ];
 
-    installPhase = ''
-      runHook preInstall
+  installPhase = ''
+    runHook preInstall
 
-      mkdir -p $out/bin
-      mv temporal-test-server $out/bin/temporal-test-server
-      chmod +x $out/bin/temporal-test-server
+    mkdir -p $out/bin
+    mv temporal-test-server $out/bin/temporal-test-server
+    chmod +x $out/bin/temporal-test-server
 
-      runHook postInstall
-    '';
+    runHook postInstall
+  '';
 
-    # dummy target that can be built with `nix build` to get hash mismatches
-    # for all systems whenever we need to bump the version.
-    passthru.sources = lib.mapAttrs (name: _: srcFor name) systems;
+  # dummy target that can be built with `nix build` to get hash mismatches
+  # for all systems whenever we need to bump the version.
+  passthru.sources = lib.mapAttrs (name: _: srcFor name) systems;
 
-    meta = {
-      description = "Temporal Test Workflow Server";
-      homepage = "https://github.com/temporalio/sdk-java/tree/master/temporal-test-server";
-      platforms = builtins.attrNames systems;
-      license = lib.licenses.asl20;
-    };
-  })
+  meta = {
+    description = "Temporal Test Workflow Server";
+    homepage = "https://github.com/temporalio/sdk-java/tree/master/temporal-test-server";
+    platforms = builtins.attrNames systems;
+    license = lib.licenses.asl20;
+  };
+})

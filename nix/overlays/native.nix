@@ -1,4 +1,4 @@
-final: prev:
+final: _prev:
 let
   temporalBridgeDrvs = final.callPackage ../packages/temporal-bridge.nix { };
 in

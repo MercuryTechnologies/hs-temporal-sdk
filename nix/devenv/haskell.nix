@@ -1,6 +1,9 @@
-ghcVersion: {pkgs, ...}: let
+ghcVersion:
+{ pkgs, ... }:
+let
   haskellUtils = import ../utils/haskell.nix pkgs;
-in {
+in
+{
   packages = [
     (pkgs.callPackage ../packages/protogen.nix {
       inherit (pkgs.haskell.packages.${ghcVersion}) proto-lens-protoc;
