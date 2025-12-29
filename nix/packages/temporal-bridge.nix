@@ -1,4 +1,9 @@
-{ callPackage, fenix, lib, ... }:
+{
+  callPackage,
+  fenix,
+  lib,
+  ...
+}:
 let
   toolchain = fenix.toolchainOf {
     channel = "stable";

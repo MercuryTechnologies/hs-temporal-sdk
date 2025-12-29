@@ -5,13 +5,12 @@
   protobuf,
   ...
 }:
-hfinal: hprev:
+_hfinal: hprev:
 let
   inherit (haskell.lib.compose)
     addSetupDepends
     appendPatch
     doJailbreak
-    markUnbroken
     ;
 in
 {
