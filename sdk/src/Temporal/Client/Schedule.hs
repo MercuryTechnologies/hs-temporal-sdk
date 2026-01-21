@@ -511,22 +511,34 @@ scheduleToProto p =
     & S.state .~ scheduleStateToProto p.state
 
 
+-- | The set of policies that can be used to customize scheduling behavior.
+--
+-- https://docs.temporal.io/schedule#policies
 data SchedulePolicies = SchedulePolicies
   { overlapPolicy :: !OverlapPolicy
   -- ^ Policy for overlaps.
+  -- 
   -- Note that this can be changed after a schedule has taken some actions,
   -- and some changes might produce unintuitive results. In general, the later
   -- policy overrides the earlier policy.
+  --
+  -- https://docs.temporal.io/schedule#overlap-policy
   , catchupWindow :: !(Maybe Duration)
   -- ^ Policy for catchups:
+  -- 
   -- If the Temporal server misses an action due to one or more components
   -- being down, and comes back up, the action will be run if the scheduled
   -- time is within this window from the current time.
-  -- This value defaults to 60 seconds, and can't be less than 10 seconds.
+  -- 
+  -- This value defaults to 1 year, and can't be less than 10 seconds.
+  --
+  -- https://docs.temporal.io/schedule#catchup-window
   , pauseOnFailure :: !Bool
   -- ^ If true, and a workflow run fails or times out, turn on "paused".
   -- This applies after retry policies: the full chain of retries must fail to
   -- trigger a pause here.
+  --
+  -- https://docs.temporal.io/schedule#pause-on-failure
   }
   deriving stock (Show, Eq, Ord, Generic)
 
