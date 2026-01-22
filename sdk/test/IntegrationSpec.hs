@@ -1087,7 +1087,7 @@ needsClient = do
             workflow :: MyWorkflow ()
             workflow = do
               W.setQueryHandler echoQuery $ \msg -> pure msg
-              W.sleep $ seconds 2
+              W.sleep $ seconds 5
             wf = W.provideWorkflow defaultCodec "queryWorkflow" workflow
             conf = configure () wf $ do
               baseConf
@@ -1100,7 +1100,7 @@ needsClient = do
                     }
             h <- useClient (C.start wf.reference "queryWorks" opts)
             result <- C.query h echoQuery C.defaultQueryOptions "hello"
-            C.waitWorkflowResult h
+            C.cancel h (C.CancellationOptions mempty)
             result `shouldBe` Right "hello"
 
       specify "query not found" $ \TestEnv {..} -> do
@@ -1121,7 +1121,7 @@ needsClient = do
                   }
           h <- useClient (C.start wf.reference (WorkflowId uuid) opts)
           result <- C.query h echoQuery C.defaultQueryOptions "hello"
-          -- C.cancel client h
+          C.cancel h (C.CancellationOptions mempty)
           result `shouldBe` Right "hello"
     -- specify "query and unblock" pending
     describe "Await condition" $ do
