@@ -6,7 +6,7 @@
 
 module Temporal.Common where
 
-import Data.Aeson (FromJSON, ToJSON)
+import Data.Aeson (FromJSON, FromJSONKey, ToJSON, ToJSONKey)
 import Data.ByteString (ByteString)
 import Data.Data (Data)
 import Data.Hashable (Hashable)
@@ -38,24 +38,24 @@ import Temporal.Payload
 -- | This is generally the name of the function itself
 newtype WorkflowType = WorkflowType {rawWorkflowType :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 -- | A Workflow Id is a customizable, application-level identifier for a Workflow Execution that is unique to an Open Workflow Execution within a Namespace.
 newtype WorkflowId = WorkflowId {rawWorkflowId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype UpdateId = UpdateId {rawUpdateId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace {rawNamespace :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 {- | A Run Id is a globally unique, platform-level identifier for a Workflow Execution.
@@ -68,12 +68,12 @@ A Run Id uniquely identifies a Workflow Execution even if it shares a Workflow I
 -}
 newtype RunId = RunId {rawRunId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype PatchId = PatchId {rawPatchId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 {- | A Task Queue is a queue that a Worker Process polls for Tasks.
@@ -89,43 +89,43 @@ can maintain.
 -}
 newtype TaskQueue = TaskQueue {rawTaskQueue :: Text}
   deriving stock (Data, Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype ActivityType = ActivityType {rawActivityType :: Text}
   deriving stock (Data, Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 -- | A unique identifier for an Activity Execution.
 newtype ActivityId = ActivityId {rawActivityId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype ScheduleId = ScheduleId {rawScheduleId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype SignalId = SignalId {rawSignalId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype TimerId = TimerId {rawTimerId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype CancellationId = CancellationId {rawCancellationId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 newtype QueryId = QueryId {rawQueryId :: Text}
   deriving stock (Lift)
-  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
 -- | A Task Token is a unique identifier for a Task. It can be used with the 'Temporal.Client.AsyncActivity' API to signal activity completion or failure.
