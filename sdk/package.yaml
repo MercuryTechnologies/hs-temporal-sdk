@@ -51,6 +51,7 @@ dependencies:
 - first-class-families
 - validation-selective
 - vault
+- primitive
 
 ghc-options:
 - -g
