@@ -8,6 +8,7 @@ import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Error.Class
 import Control.Monad.Fix
+import Control.Monad.Primitive (PrimMonad)
 import Control.Monad.Reader
 import Data.Kind
 import Data.Text (Text)
@@ -180,6 +181,7 @@ newtype Activity env a = Activity {unActivity :: ReaderT (ActivityEnv env) IO a}
     , MonadThrow
     , MonadCatch
     , MonadMask
+    , PrimMonad
     )
 
 
