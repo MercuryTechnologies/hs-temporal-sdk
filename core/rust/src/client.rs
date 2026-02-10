@@ -3,16 +3,16 @@ use ffi_convert::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::ffi::CStr;
-use std::str::{from_utf8_unchecked, FromStr};
+use std::str::{FromStr, from_utf8_unchecked};
 use std::time::Duration;
 use temporal_client::{
     ClientOptions, ClientOptionsBuilder, ClientOptionsBuilderError, ConfiguredClient, RetryClient,
-    RetryConfig, TemporalServiceClientWithMetrics, TlsConfig,
+    RetryConfig, TemporalServiceClient, TlsConfig,
 };
-use tonic::metadata::{errors::InvalidMetadataValue, MetadataKey};
+use tonic::metadata::{MetadataKey, errors::InvalidMetadataValue};
 use url::Url;
 
-type Client = RetryClient<ConfiguredClient<TemporalServiceClientWithMetrics>>;
+type Client = RetryClient<ConfiguredClient<TemporalServiceClient>>;
 
 #[derive(Serialize, Deserialize)]
 pub struct ClientConfig {
