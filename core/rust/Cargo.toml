@@ -9,7 +9,7 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9" }
+temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "fb14d9c3cf4e9e6d0894fd9bb2985dbf6d6de1fe" }
 temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9", features = ["ephemeral-server"] }
 temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9" }
 temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "aebb0a56426880b208341eef47820a8f13dec1a9" }
