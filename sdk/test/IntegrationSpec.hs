@@ -36,6 +36,7 @@ import Data.Int
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust, isJust)
+import Data.ProtoLens.Field (field)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Time (Day (ModifiedJulianDay), diffUTCTime, getCurrentTime)
@@ -47,6 +48,7 @@ import qualified Data.Vector as V
 import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
+import IntegrationSpec.FetchHistory (NoopActivity (..), NoopWorkflow (..))
 import IntegrationSpec.HangingWorkflow
 import IntegrationSpec.NoOpWorkflow
 import IntegrationSpec.Signals
@@ -1077,6 +1079,19 @@ needsClient = do
       specify "fail" $ const pending
       specify "async fail signal?" $ const pending
       specify "always delivered" $ const pending
+
+    describe "fetchHistory" do
+      it "correctly paginates workflow history" \TestEnv {..} -> do
+        let defns = (workflowDefinition NoopWorkflow, activityDefinition NoopActivity)
+            conf = configure () defns $ baseConf
+        withWorker conf $ do
+          let opts = C.startWorkflowOptions taskQueue
+          wfHandle <- useClient $ C.start NoopWorkflow "fetchhistory-test" opts
+          res <- C.waitWorkflowResult wfHandle
+          history <- C.fetchHistory wfHandle
+          (length $ view (field @"vec'events") history)
+            `shouldBe` 399
+
     describe "Query" $ do
       specify "works" $ \TestEnv {..} -> do
         tp <- getGlobalTracerProvider
