@@ -153,6 +153,7 @@ tests:
       AsyncCompletionSpec,
       DurationSpec,
       IntegrationSpec,
+      IntegrationSpec.FetchHistory,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.NoOpWorkflow,
       IntegrationSpec.TimeoutsInWorkflows,
