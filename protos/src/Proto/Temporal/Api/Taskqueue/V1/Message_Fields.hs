@@ -106,6 +106,13 @@ endId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "endId" a) =>
   Lens.Family2.LensLike' f s a
 endId = Data.ProtoLens.Field.field @"endId"
+fairnessKeysRateLimitDefault ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "fairnessKeysRateLimitDefault" a) =>
+  Lens.Family2.LensLike' f s a
+fairnessKeysRateLimitDefault
+  = Data.ProtoLens.Field.field @"fairnessKeysRateLimitDefault"
 identity ::
   forall f s a.
   (Prelude.Functor f,
@@ -161,6 +168,13 @@ maybe'deploymentOptions ::
   Lens.Family2.LensLike' f s a
 maybe'deploymentOptions
   = Data.ProtoLens.Field.field @"maybe'deploymentOptions"
+maybe'fairnessKeysRateLimitDefault ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'fairnessKeysRateLimitDefault" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'fairnessKeysRateLimitDefault
+  = Data.ProtoLens.Field.field @"maybe'fairnessKeysRateLimitDefault"
 maybe'lastAccessTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -175,6 +189,12 @@ maybe'maxTasksPerSecond ::
   Lens.Family2.LensLike' f s a
 maybe'maxTasksPerSecond
   = Data.ProtoLens.Field.field @"maybe'maxTasksPerSecond"
+maybe'metadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'metadata" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'metadata = Data.ProtoLens.Field.field @"maybe'metadata"
 maybe'percentageRamp ::
   forall f s a.
   (Prelude.Functor f,
@@ -182,6 +202,13 @@ maybe'percentageRamp ::
   Lens.Family2.LensLike' f s a
 maybe'percentageRamp
   = Data.ProtoLens.Field.field @"maybe'percentageRamp"
+maybe'queueRateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'queueRateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'queueRateLimit
+  = Data.ProtoLens.Field.field @"maybe'queueRateLimit"
 maybe'ramp ::
   forall f s a.
   (Prelude.Functor f,
@@ -195,6 +222,12 @@ maybe'rampingDeploymentVersion ::
   Lens.Family2.LensLike' f s a
 maybe'rampingDeploymentVersion
   = Data.ProtoLens.Field.field @"maybe'rampingDeploymentVersion"
+maybe'rateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rateLimit = Data.ProtoLens.Field.field @"maybe'rateLimit"
 maybe'rule ::
   forall f s a.
   (Prelude.Functor f,
@@ -246,6 +279,12 @@ maybe'workerVersionCapabilities ::
   Lens.Family2.LensLike' f s a
 maybe'workerVersionCapabilities
   = Data.ProtoLens.Field.field @"maybe'workerVersionCapabilities"
+metadata ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "metadata" a) =>
+  Lens.Family2.LensLike' f s a
+metadata = Data.ProtoLens.Field.field @"metadata"
 name ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
@@ -281,6 +320,12 @@ pollers ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "pollers" a) =>
   Lens.Family2.LensLike' f s a
 pollers = Data.ProtoLens.Field.field @"pollers"
+queueRateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "queueRateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+queueRateLimit = Data.ProtoLens.Field.field @"queueRateLimit"
 rampPercentage ::
   forall f s a.
   (Prelude.Functor f,
@@ -307,6 +352,12 @@ rampingVersionPercentage ::
   Lens.Family2.LensLike' f s a
 rampingVersionPercentage
   = Data.ProtoLens.Field.field @"rampingVersionPercentage"
+rateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+rateLimit = Data.ProtoLens.Field.field @"rateLimit"
 ratePerSecond ::
   forall f s a.
   (Prelude.Functor f,
@@ -325,6 +376,17 @@ readLevel ::
    Data.ProtoLens.Field.HasField s "readLevel" a) =>
   Lens.Family2.LensLike' f s a
 readLevel = Data.ProtoLens.Field.field @"readLevel"
+reason ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>
+  Lens.Family2.LensLike' f s a
+reason = Data.ProtoLens.Field.field @"reason"
+requestsPerSecond ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "requestsPerSecond" a) =>
+  Lens.Family2.LensLike' f s a
+requestsPerSecond = Data.ProtoLens.Field.field @"requestsPerSecond"
 rule ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "rule" a) =>
@@ -408,6 +470,12 @@ unversioned ::
    Data.ProtoLens.Field.HasField s "unversioned" a) =>
   Lens.Family2.LensLike' f s a
 unversioned = Data.ProtoLens.Field.field @"unversioned"
+updateIdentity ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateIdentity" a) =>
+  Lens.Family2.LensLike' f s a
+updateIdentity = Data.ProtoLens.Field.field @"updateIdentity"
 updateTime ::
   forall f s a.
   (Prelude.Functor f,

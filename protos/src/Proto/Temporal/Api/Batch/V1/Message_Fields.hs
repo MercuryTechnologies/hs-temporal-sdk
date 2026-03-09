@@ -30,11 +30,18 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.FieldMask
 import qualified Proto.Google.Protobuf.Timestamp
+import qualified Proto.Temporal.Api.Activity.V1.Message
 import qualified Proto.Temporal.Api.Common.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.BatchOperation
 import qualified Proto.Temporal.Api.Enums.V1.Reset
 import qualified Proto.Temporal.Api.Rules.V1.Message
 import qualified Proto.Temporal.Api.Workflow.V1.Message
+activityOptions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "activityOptions" a) =>
+  Lens.Family2.LensLike' f s a
+activityOptions = Data.ProtoLens.Field.field @"activityOptions"
 closeTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -77,6 +84,12 @@ jobId ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "jobId" a) =>
   Lens.Family2.LensLike' f s a
 jobId = Data.ProtoLens.Field.field @"jobId"
+keepPaused ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "keepPaused" a) =>
+  Lens.Family2.LensLike' f s a
+keepPaused = Data.ProtoLens.Field.field @"keepPaused"
 matchAll ::
   forall f s a.
   (Prelude.Functor f,
@@ -89,6 +102,13 @@ maybe'activity ::
    Data.ProtoLens.Field.HasField s "maybe'activity" a) =>
   Lens.Family2.LensLike' f s a
 maybe'activity = Data.ProtoLens.Field.field @"maybe'activity"
+maybe'activityOptions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'activityOptions" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'activityOptions
+  = Data.ProtoLens.Field.field @"maybe'activityOptions"
 maybe'closeTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -210,6 +230,19 @@ resetType ::
    Data.ProtoLens.Field.HasField s "resetType" a) =>
   Lens.Family2.LensLike' f s a
 resetType = Data.ProtoLens.Field.field @"resetType"
+restoreOriginal ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "restoreOriginal" a) =>
+  Lens.Family2.LensLike' f s a
+restoreOriginal = Data.ProtoLens.Field.field @"restoreOriginal"
+restoreOriginalOptions ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "restoreOriginalOptions" a) =>
+  Lens.Family2.LensLike' f s a
+restoreOriginalOptions
+  = Data.ProtoLens.Field.field @"restoreOriginalOptions"
 signal ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "signal" a) =>

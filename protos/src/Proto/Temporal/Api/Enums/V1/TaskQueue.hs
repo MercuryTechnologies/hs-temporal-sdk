@@ -7,11 +7,13 @@ module Proto.Temporal.Api.Enums.V1.TaskQueue (
         BuildIdTaskReachability(..), BuildIdTaskReachability(),
         BuildIdTaskReachability'UnrecognizedValue,
         DescribeTaskQueueMode(..), DescribeTaskQueueMode(),
-        DescribeTaskQueueMode'UnrecognizedValue, TaskQueueKind(..),
-        TaskQueueKind(), TaskQueueKind'UnrecognizedValue,
-        TaskQueueType(..), TaskQueueType(),
-        TaskQueueType'UnrecognizedValue, TaskReachability(..),
-        TaskReachability(), TaskReachability'UnrecognizedValue
+        DescribeTaskQueueMode'UnrecognizedValue, RateLimitSource(..),
+        RateLimitSource(), RateLimitSource'UnrecognizedValue,
+        TaskQueueKind(..), TaskQueueKind(),
+        TaskQueueKind'UnrecognizedValue, TaskQueueType(..),
+        TaskQueueType(), TaskQueueType'UnrecognizedValue,
+        TaskReachability(..), TaskReachability(),
+        TaskReachability'UnrecognizedValue
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -199,6 +201,88 @@ instance Prelude.Enum DescribeTaskQueueMode where
 instance Data.ProtoLens.FieldDefault DescribeTaskQueueMode where
   fieldDefault = DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
 instance Control.DeepSeq.NFData DescribeTaskQueueMode where
+  rnf x__ = Prelude.seq x__ ()
+newtype RateLimitSource'UnrecognizedValue
+  = RateLimitSource'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+data RateLimitSource
+  = RATE_LIMIT_SOURCE_UNSPECIFIED |
+    RATE_LIMIT_SOURCE_API |
+    RATE_LIMIT_SOURCE_WORKER |
+    RATE_LIMIT_SOURCE_SYSTEM |
+    RateLimitSource'Unrecognized !RateLimitSource'UnrecognizedValue
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.MessageEnum RateLimitSource where
+  maybeToEnum 0 = Prelude.Just RATE_LIMIT_SOURCE_UNSPECIFIED
+  maybeToEnum 1 = Prelude.Just RATE_LIMIT_SOURCE_API
+  maybeToEnum 2 = Prelude.Just RATE_LIMIT_SOURCE_WORKER
+  maybeToEnum 3 = Prelude.Just RATE_LIMIT_SOURCE_SYSTEM
+  maybeToEnum k
+    = Prelude.Just
+        (RateLimitSource'Unrecognized
+           (RateLimitSource'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum RATE_LIMIT_SOURCE_UNSPECIFIED
+    = "RATE_LIMIT_SOURCE_UNSPECIFIED"
+  showEnum RATE_LIMIT_SOURCE_API = "RATE_LIMIT_SOURCE_API"
+  showEnum RATE_LIMIT_SOURCE_WORKER = "RATE_LIMIT_SOURCE_WORKER"
+  showEnum RATE_LIMIT_SOURCE_SYSTEM = "RATE_LIMIT_SOURCE_SYSTEM"
+  showEnum
+    (RateLimitSource'Unrecognized (RateLimitSource'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "RATE_LIMIT_SOURCE_UNSPECIFIED"
+    = Prelude.Just RATE_LIMIT_SOURCE_UNSPECIFIED
+    | (Prelude.==) k "RATE_LIMIT_SOURCE_API"
+    = Prelude.Just RATE_LIMIT_SOURCE_API
+    | (Prelude.==) k "RATE_LIMIT_SOURCE_WORKER"
+    = Prelude.Just RATE_LIMIT_SOURCE_WORKER
+    | (Prelude.==) k "RATE_LIMIT_SOURCE_SYSTEM"
+    = Prelude.Just RATE_LIMIT_SOURCE_SYSTEM
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded RateLimitSource where
+  minBound = RATE_LIMIT_SOURCE_UNSPECIFIED
+  maxBound = RATE_LIMIT_SOURCE_SYSTEM
+instance Prelude.Enum RateLimitSource where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum RateLimitSource: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum RATE_LIMIT_SOURCE_UNSPECIFIED = 0
+  fromEnum RATE_LIMIT_SOURCE_API = 1
+  fromEnum RATE_LIMIT_SOURCE_WORKER = 2
+  fromEnum RATE_LIMIT_SOURCE_SYSTEM = 3
+  fromEnum
+    (RateLimitSource'Unrecognized (RateLimitSource'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ RATE_LIMIT_SOURCE_SYSTEM
+    = Prelude.error
+        "RateLimitSource.succ: bad argument RATE_LIMIT_SOURCE_SYSTEM. This value would be out of bounds."
+  succ RATE_LIMIT_SOURCE_UNSPECIFIED = RATE_LIMIT_SOURCE_API
+  succ RATE_LIMIT_SOURCE_API = RATE_LIMIT_SOURCE_WORKER
+  succ RATE_LIMIT_SOURCE_WORKER = RATE_LIMIT_SOURCE_SYSTEM
+  succ (RateLimitSource'Unrecognized _)
+    = Prelude.error
+        "RateLimitSource.succ: bad argument: unrecognized value"
+  pred RATE_LIMIT_SOURCE_UNSPECIFIED
+    = Prelude.error
+        "RateLimitSource.pred: bad argument RATE_LIMIT_SOURCE_UNSPECIFIED. This value would be out of bounds."
+  pred RATE_LIMIT_SOURCE_API = RATE_LIMIT_SOURCE_UNSPECIFIED
+  pred RATE_LIMIT_SOURCE_WORKER = RATE_LIMIT_SOURCE_API
+  pred RATE_LIMIT_SOURCE_SYSTEM = RATE_LIMIT_SOURCE_WORKER
+  pred (RateLimitSource'Unrecognized _)
+    = Prelude.error
+        "RateLimitSource.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault RateLimitSource where
+  fieldDefault = RATE_LIMIT_SOURCE_UNSPECIFIED
+instance Control.DeepSeq.NFData RateLimitSource where
   rnf x__ = Prelude.seq x__ ()
 newtype TaskQueueKind'UnrecognizedValue
   = TaskQueueKind'UnrecognizedValue Data.Int.Int32

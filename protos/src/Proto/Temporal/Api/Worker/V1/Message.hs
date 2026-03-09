@@ -4,7 +4,7 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.Temporal.Api.Worker.V1.Message (
-        WorkerHeartbeat(), WorkerHostInfo(), WorkerInfo(),
+        PluginInfo(), WorkerHeartbeat(), WorkerHostInfo(), WorkerInfo(),
         WorkerPollerInfo(), WorkerSlotsInfo()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
@@ -36,6 +36,161 @@ import qualified Proto.Google.Protobuf.Duration
 import qualified Proto.Google.Protobuf.Timestamp
 import qualified Proto.Temporal.Api.Deployment.V1.Message
 import qualified Proto.Temporal.Api.Enums.V1.Common
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Worker.V1.Message_Fields.name' @:: Lens' PluginInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Worker.V1.Message_Fields.version' @:: Lens' PluginInfo Data.Text.Text@ -}
+data PluginInfo
+  = PluginInfo'_constructor {_PluginInfo'name :: !Data.Text.Text,
+                             _PluginInfo'version :: !Data.Text.Text,
+                             _PluginInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show PluginInfo where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField PluginInfo "name" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PluginInfo'name (\ x__ y__ -> x__ {_PluginInfo'name = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField PluginInfo "version" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _PluginInfo'version (\ x__ y__ -> x__ {_PluginInfo'version = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message PluginInfo where
+  messageName _ = Data.Text.pack "temporal.api.worker.v1.PluginInfo"
+  packedMessageDescriptor _
+    = "\n\
+      \\n\
+      \PluginInfo\DC2\DC2\n\
+      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2\CAN\n\
+      \\aversion\CAN\STX \SOH(\tR\aversion"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        name__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "name"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
+              Data.ProtoLens.FieldDescriptor PluginInfo
+        version__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "version"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
+              Data.ProtoLens.FieldDescriptor PluginInfo
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, name__field_descriptor),
+           (Data.ProtoLens.Tag 2, version__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _PluginInfo'_unknownFields
+        (\ x__ y__ -> x__ {_PluginInfo'_unknownFields = y__})
+  defMessage
+    = PluginInfo'_constructor
+        {_PluginInfo'name = Data.ProtoLens.fieldDefault,
+         _PluginInfo'version = Data.ProtoLens.fieldDefault,
+         _PluginInfo'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          PluginInfo -> Data.ProtoLens.Encoding.Bytes.Parser PluginInfo
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "name"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "version"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "PluginInfo"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData PluginInfo where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_PluginInfo'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_PluginInfo'name x__)
+                (Control.DeepSeq.deepseq (_PluginInfo'version x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Worker.V1.Message_Fields.workerInstanceKey' @:: Lens' WorkerHeartbeat Data.Text.Text@
@@ -72,7 +227,9 @@ import qualified Proto.Temporal.Api.Enums.V1.Common
          * 'Proto.Temporal.Api.Worker.V1.Message_Fields.maybe'nexusPollerInfo' @:: Lens' WorkerHeartbeat (Prelude.Maybe WorkerPollerInfo)@
          * 'Proto.Temporal.Api.Worker.V1.Message_Fields.totalStickyCacheHit' @:: Lens' WorkerHeartbeat Data.Int.Int32@
          * 'Proto.Temporal.Api.Worker.V1.Message_Fields.totalStickyCacheMiss' @:: Lens' WorkerHeartbeat Data.Int.Int32@
-         * 'Proto.Temporal.Api.Worker.V1.Message_Fields.currentStickyCacheSize' @:: Lens' WorkerHeartbeat Data.Int.Int32@ -}
+         * 'Proto.Temporal.Api.Worker.V1.Message_Fields.currentStickyCacheSize' @:: Lens' WorkerHeartbeat Data.Int.Int32@
+         * 'Proto.Temporal.Api.Worker.V1.Message_Fields.plugins' @:: Lens' WorkerHeartbeat [PluginInfo]@
+         * 'Proto.Temporal.Api.Worker.V1.Message_Fields.vec'plugins' @:: Lens' WorkerHeartbeat (Data.Vector.Vector PluginInfo)@ -}
 data WorkerHeartbeat
   = WorkerHeartbeat'_constructor {_WorkerHeartbeat'workerInstanceKey :: !Data.Text.Text,
                                   _WorkerHeartbeat'workerIdentity :: !Data.Text.Text,
@@ -96,6 +253,7 @@ data WorkerHeartbeat
                                   _WorkerHeartbeat'totalStickyCacheHit :: !Data.Int.Int32,
                                   _WorkerHeartbeat'totalStickyCacheMiss :: !Data.Int.Int32,
                                   _WorkerHeartbeat'currentStickyCacheSize :: !Data.Int.Int32,
+                                  _WorkerHeartbeat'plugins :: !(Data.Vector.Vector PluginInfo),
                                   _WorkerHeartbeat'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkerHeartbeat where
@@ -353,6 +511,22 @@ instance Data.ProtoLens.Field.HasField WorkerHeartbeat "currentStickyCacheSize" 
            _WorkerHeartbeat'currentStickyCacheSize
            (\ x__ y__ -> x__ {_WorkerHeartbeat'currentStickyCacheSize = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerHeartbeat "plugins" [PluginInfo] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerHeartbeat'plugins
+           (\ x__ y__ -> x__ {_WorkerHeartbeat'plugins = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField WorkerHeartbeat "vec'plugins" (Data.Vector.Vector PluginInfo) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerHeartbeat'plugins
+           (\ x__ y__ -> x__ {_WorkerHeartbeat'plugins = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkerHeartbeat where
   messageName _
     = Data.Text.pack "temporal.api.worker.v1.WorkerHeartbeat"
@@ -384,7 +558,8 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
       \\DC1nexus_poller_info\CAN\DC3 \SOH(\v2(.temporal.api.worker.v1.WorkerPollerInfoR\SInexusPollerInfo\DC23\n\
       \\SYNtotal_sticky_cache_hit\CAN\DC4 \SOH(\ENQR\DC3totalStickyCacheHit\DC25\n\
       \\ETBtotal_sticky_cache_miss\CAN\NAK \SOH(\ENQR\DC4totalStickyCacheMiss\DC29\n\
-      \\EMcurrent_sticky_cache_size\CAN\SYN \SOH(\ENQR\SYNcurrentStickyCacheSize"
+      \\EMcurrent_sticky_cache_size\CAN\SYN \SOH(\ENQR\SYNcurrentStickyCacheSize\DC2<\n\
+      \\aplugins\CAN\ETB \ETX(\v2\".temporal.api.worker.v1.PluginInfoR\aplugins"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -571,6 +746,14 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"currentStickyCacheSize")) ::
               Data.ProtoLens.FieldDescriptor WorkerHeartbeat
+        plugins__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "plugins"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor PluginInfo)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"plugins")) ::
+              Data.ProtoLens.FieldDescriptor WorkerHeartbeat
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, workerInstanceKey__field_descriptor),
@@ -596,7 +779,8 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
            (Data.ProtoLens.Tag 19, nexusPollerInfo__field_descriptor),
            (Data.ProtoLens.Tag 20, totalStickyCacheHit__field_descriptor),
            (Data.ProtoLens.Tag 21, totalStickyCacheMiss__field_descriptor),
-           (Data.ProtoLens.Tag 22, currentStickyCacheSize__field_descriptor)]
+           (Data.ProtoLens.Tag 22, currentStickyCacheSize__field_descriptor),
+           (Data.ProtoLens.Tag 23, plugins__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkerHeartbeat'_unknownFields
@@ -625,16 +809,21 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
          _WorkerHeartbeat'totalStickyCacheHit = Data.ProtoLens.fieldDefault,
          _WorkerHeartbeat'totalStickyCacheMiss = Data.ProtoLens.fieldDefault,
          _WorkerHeartbeat'currentStickyCacheSize = Data.ProtoLens.fieldDefault,
+         _WorkerHeartbeat'plugins = Data.Vector.Generic.empty,
          _WorkerHeartbeat'_unknownFields = []}
   parseMessage
     = let
         loop ::
           WorkerHeartbeat
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerHeartbeat
-        loop x
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld PluginInfo
+             -> Data.ProtoLens.Encoding.Bytes.Parser WorkerHeartbeat
+        loop x mutable'plugins
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
-                   do (let missing = []
+                   do frozen'plugins <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                          (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                             mutable'plugins)
+                      (let missing = []
                        in
                          if Prelude.null missing then
                              Prelude.return ()
@@ -645,7 +834,9 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'plugins") frozen'plugins x))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
@@ -658,6 +849,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"workerInstanceKey") y x)
+                                  mutable'plugins
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -667,6 +859,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"workerIdentity") y x)
+                                  mutable'plugins
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -675,6 +868,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                        "host_info"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"hostInfo") y x)
+                                  mutable'plugins
                         34
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -683,6 +877,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                        "task_queue"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"taskQueue") y x)
+                                  mutable'plugins
                         42
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -692,13 +887,16 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"deploymentVersion") y x)
+                                  mutable'plugins
                         50
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.getText
                                              (Prelude.fromIntegral len))
                                        "sdk_name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"sdkName") y x)
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"sdkName") y x)
+                                  mutable'plugins
                         58
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -707,6 +905,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                        "sdk_version"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"sdkVersion") y x)
+                                  mutable'plugins
                         64
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -715,7 +914,9 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                              Prelude.fromIntegral
                                              Data.ProtoLens.Encoding.Bytes.getVarInt))
                                        "status"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"status") y x)
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"status") y x)
+                                  mutable'plugins
                         74
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -724,6 +925,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                        "start_time"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"startTime") y x)
+                                  mutable'plugins
                         82
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -733,6 +935,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"heartbeatTime") y x)
+                                  mutable'plugins
                         90
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -742,6 +945,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"elapsedSinceLastHeartbeat") y x)
+                                  mutable'plugins
                         98
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -751,6 +955,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"workflowTaskSlotsInfo") y x)
+                                  mutable'plugins
                         106
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -760,6 +965,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"activityTaskSlotsInfo") y x)
+                                  mutable'plugins
                         114
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -769,6 +975,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"nexusTaskSlotsInfo") y x)
+                                  mutable'plugins
                         122
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -778,6 +985,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"localActivitySlotsInfo") y x)
+                                  mutable'plugins
                         130
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -787,6 +995,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"workflowPollerInfo") y x)
+                                  mutable'plugins
                         138
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -796,6 +1005,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"workflowStickyPollerInfo") y x)
+                                  mutable'plugins
                         146
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -805,6 +1015,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"activityPollerInfo") y x)
+                                  mutable'plugins
                         154
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -814,6 +1025,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"nexusPollerInfo") y x)
+                                  mutable'plugins
                         160
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -823,6 +1035,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"totalStickyCacheHit") y x)
+                                  mutable'plugins
                         168
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -832,6 +1045,7 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"totalStickyCacheMiss") y x)
+                                  mutable'plugins
                         176
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (Prelude.fmap
@@ -841,15 +1055,30 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"currentStickyCacheSize") y x)
+                                  mutable'plugins
+                        186
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "plugins"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'plugins y)
+                                loop x v
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'plugins
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkerHeartbeat"
+          (do mutable'plugins <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                   Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'plugins)
+          "WorkerHeartbeat"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
@@ -1286,10 +1515,31 @@ instance Data.ProtoLens.Message WorkerHeartbeat where
                                                                                         Data.ProtoLens.Encoding.Bytes.putVarInt
                                                                                         Prelude.fromIntegral
                                                                                         _v))
-                                                                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                                               (Lens.Family2.view
-                                                                                  Data.ProtoLens.unknownFields
-                                                                                  _x)))))))))))))))))))))))
+                                                                            ((Data.Monoid.<>)
+                                                                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                                                                  (\ _v
+                                                                                     -> (Data.Monoid.<>)
+                                                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                             186)
+                                                                                          ((Prelude..)
+                                                                                             (\ bs
+                                                                                                -> (Data.Monoid.<>)
+                                                                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                                                                        (Prelude.fromIntegral
+                                                                                                           (Data.ByteString.length
+                                                                                                              bs)))
+                                                                                                     (Data.ProtoLens.Encoding.Bytes.putBytes
+                                                                                                        bs))
+                                                                                             Data.ProtoLens.encodeMessage
+                                                                                             _v))
+                                                                                  (Lens.Family2.view
+                                                                                     (Data.ProtoLens.Field.field
+                                                                                        @"vec'plugins")
+                                                                                     _x))
+                                                                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                                                                  (Lens.Family2.view
+                                                                                     Data.ProtoLens.unknownFields
+                                                                                     _x))))))))))))))))))))))))
 instance Control.DeepSeq.NFData WorkerHeartbeat where
   rnf
     = \ x__
@@ -1347,7 +1597,10 @@ instance Control.DeepSeq.NFData WorkerHeartbeat where
                                                                             (Control.DeepSeq.deepseq
                                                                                (_WorkerHeartbeat'currentStickyCacheSize
                                                                                   x__)
-                                                                               ()))))))))))))))))))))))
+                                                                               (Control.DeepSeq.deepseq
+                                                                                  (_WorkerHeartbeat'plugins
+                                                                                     x__)
+                                                                                  ())))))))))))))))))))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Worker.V1.Message_Fields.hostName' @:: Lens' WorkerHostInfo Data.Text.Text@
@@ -2411,7 +2664,7 @@ packedFileDescriptor
     \\n\
     \process_id\CAN\STX \SOH(\tR\tprocessId\DC23\n\
     \\SYNcurrent_host_cpu_usage\CAN\ETX \SOH(\STXR\DC3currentHostCpuUsage\DC23\n\
-    \\SYNcurrent_host_mem_usage\CAN\EOT \SOH(\STXR\DC3currentHostMemUsage\"\167\f\n\
+    \\SYNcurrent_host_mem_usage\CAN\EOT \SOH(\STXR\DC3currentHostMemUsage\"\229\f\n\
     \\SIWorkerHeartbeat\DC2.\n\
     \\DC3worker_instance_key\CAN\SOH \SOH(\tR\DC1workerInstanceKey\DC2'\n\
     \\SIworker_identity\CAN\STX \SOH(\tR\SOworkerIdentity\DC2C\n\
@@ -2438,12 +2691,17 @@ packedFileDescriptor
     \\DC1nexus_poller_info\CAN\DC3 \SOH(\v2(.temporal.api.worker.v1.WorkerPollerInfoR\SInexusPollerInfo\DC23\n\
     \\SYNtotal_sticky_cache_hit\CAN\DC4 \SOH(\ENQR\DC3totalStickyCacheHit\DC25\n\
     \\ETBtotal_sticky_cache_miss\CAN\NAK \SOH(\ENQR\DC4totalStickyCacheMiss\DC29\n\
-    \\EMcurrent_sticky_cache_size\CAN\SYN \SOH(\ENQR\SYNcurrentStickyCacheSize\"`\n\
+    \\EMcurrent_sticky_cache_size\CAN\SYN \SOH(\ENQR\SYNcurrentStickyCacheSize\DC2<\n\
+    \\aplugins\CAN\ETB \ETX(\v2\".temporal.api.worker.v1.PluginInfoR\aplugins\"`\n\
     \\n\
     \WorkerInfo\DC2R\n\
-    \\DLEworker_heartbeat\CAN\SOH \SOH(\v2'.temporal.api.worker.v1.WorkerHeartbeatR\SIworkerHeartbeatB\137\SOH\n\
-    \\EMio.temporal.api.worker.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/worker/v1;worker\170\STX\CANTemporalio.Api.Worker.V1\234\STX\ESCTemporalio::Api::Worker::V1J\237)\n\
-    \\a\DC2\ENQ\NUL\NUL\133\SOH\SOH\n\
+    \\DLEworker_heartbeat\CAN\SOH \SOH(\v2'.temporal.api.worker.v1.WorkerHeartbeatR\SIworkerHeartbeat\":\n\
+    \\n\
+    \PluginInfo\DC2\DC2\n\
+    \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2\CAN\n\
+    \\aversion\CAN\STX \SOH(\tR\aversionB\137\SOH\n\
+    \\EMio.temporal.api.worker.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/worker/v1;worker\170\STX\CANTemporalio.Api.Worker.V1\234\STX\ESCTemporalio::Api::Worker::V1J\194,\n\
+    \\a\DC2\ENQ\NUL\NUL\143\SOH\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -2646,7 +2904,7 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETXI!\"\n\
     \\147\STX\n\
-    \\STX\EOT\ETX\DC2\ENQP\NUL\129\SOH\SOH\SUB\133\STX Worker info message, contains information about the worker and its current state.\n\
+    \\STX\EOT\ETX\DC2\ENQP\NUL\132\SOH\SOH\SUB\133\STX Worker info message, contains information about the worker and its current state.\n\
     \ All information is provided by the worker itself.\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: Removing those words make names less clear. --)\n\
@@ -2849,15 +3107,51 @@ packedFileDescriptor
     \\ENQ\EOT\ETX\STX\NAK\SOH\DC2\EOT\128\SOH\b!\n\
     \\r\n\
     \\ENQ\EOT\ETX\STX\NAK\ETX\DC2\EOT\128\SOH$&\n\
+    \5\n\
+    \\EOT\EOT\ETX\STX\SYN\DC2\EOT\131\SOH\STX#\SUB' Plugins currently in use by this SDK.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SYN\EOT\DC2\EOT\131\SOH\STX\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SYN\ACK\DC2\EOT\131\SOH\v\NAK\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SYN\SOH\DC2\EOT\131\SOH\SYN\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ETX\STX\SYN\ETX\DC2\EOT\131\SOH \"\n\
     \\f\n\
-    \\STX\EOT\EOT\DC2\ACK\131\SOH\NUL\133\SOH\SOH\n\
+    \\STX\EOT\EOT\DC2\ACK\134\SOH\NUL\136\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\EOT\SOH\DC2\EOT\131\SOH\b\DC2\n\
+    \\ETX\EOT\EOT\SOH\DC2\EOT\134\SOH\b\DC2\n\
     \\f\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\132\SOH\STX'\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\EOT\135\SOH\STX'\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\EOT\132\SOH\STX\DC1\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\EOT\135\SOH\STX\DC1\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\132\SOH\DC2\"\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\EOT\135\SOH\DC2\"\n\
     \\r\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\132\SOH%&b\ACKproto3"
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\EOT\135\SOH%&\n\
+    \\f\n\
+    \\STX\EOT\ENQ\DC2\ACK\138\SOH\NUL\143\SOH\SOH\n\
+    \\v\n\
+    \\ETX\EOT\ENQ\SOH\DC2\EOT\138\SOH\b\DC2\n\
+    \1\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\EOT\140\SOH\EOT\DC4\SUB# The name of the plugin, required.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\EOT\140\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\EOT\140\SOH\v\SI\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\EOT\140\SOH\DC2\DC3\n\
+    \8\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\EOT\142\SOH\EOT\ETB\SUB* The version of the plugin, may be empty.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\EOT\142\SOH\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\EOT\142\SOH\v\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\EOT\142\SOH\NAK\SYNb\ACKproto3"

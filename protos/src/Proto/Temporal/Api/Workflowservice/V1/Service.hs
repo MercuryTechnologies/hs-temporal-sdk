@@ -56,6 +56,7 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "describeWorkflowExecution",
                                           "describeWorkflowRule",
                                           "executeMultiOperation",
+                                          "fetchWorkerConfig",
                                           "getClusterInfo",
                                           "getCurrentDeployment",
                                           "getDeploymentReachability",
@@ -121,7 +122,9 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "updateActivityOptions",
                                           "updateNamespace",
                                           "updateSchedule",
+                                          "updateTaskQueueConfig",
                                           "updateWorkerBuildIdCompatibility",
+                                          "updateWorkerConfig",
                                           "updateWorkerDeploymentVersionMetadata",
                                           "updateWorkerVersioningRules",
                                           "updateWorkflowExecution",
@@ -217,7 +220,10 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
       \\DC1ListWorkflowRules\DC29.temporal.api.workflowservice.v1.ListWorkflowRulesRequest\SUB:.temporal.api.workflowservice.v1.ListWorkflowRulesResponse\"_\130\211\228\147\STXY\DC2&/namespaces/{namespace}/workflow-rulesZ/\DC2-/api/v1/namespaces/{namespace}/workflow-rules\DC2\185\STX\n\
       \\DC3TriggerWorkflowRule\DC2;.temporal.api.workflowservice.v1.TriggerWorkflowRuleRequest\SUB<.temporal.api.workflowservice.v1.TriggerWorkflowRuleResponse\"\166\SOH\130\211\228\147\STX\159\SOH\"F/namespaces/{namespace}/workflows/{execution.workflow_id}/trigger-rule:\SOH*ZR\"M/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/trigger-rule:\SOH*\DC2\131\STX\n\
       \\NAKRecordWorkerHeartbeat\DC2=.temporal.api.workflowservice.v1.RecordWorkerHeartbeatRequest\SUB>.temporal.api.workflowservice.v1.RecordWorkerHeartbeatResponse\"k\130\211\228\147\STXe\")/namespaces/{namespace}/workers/heartbeat:\SOH*Z5\"0/api/v1/namespaces/{namespace}/workers/heartbeat:\SOH*\DC2\203\SOH\n\
-      \\vListWorkers\DC23.temporal.api.workflowservice.v1.ListWorkersRequest\SUB4.temporal.api.workflowservice.v1.ListWorkersResponse\"Q\130\211\228\147\STXK\DC2\US/namespaces/{namespace}/workersZ(\DC2&/api/v1/namespaces/{namespace}/workers"
+      \\vListWorkers\DC23.temporal.api.workflowservice.v1.ListWorkersRequest\SUB4.temporal.api.workflowservice.v1.ListWorkersResponse\"Q\130\211\228\147\STXK\DC2\US/namespaces/{namespace}/workersZ(\DC2&/api/v1/namespaces/{namespace}/workers\DC2\175\STX\n\
+      \\NAKUpdateTaskQueueConfig\DC2=.temporal.api.workflowservice.v1.UpdateTaskQueueConfigRequest\SUB>.temporal.api.workflowservice.v1.UpdateTaskQueueConfigResponse\"\150\SOH\130\211\228\147\STX\143\SOH\">/namespaces/{namespace}/task-queues/{task_queue}/update-config:\SOH*ZJ\"E/api/v1/namespaces/{namespace}/task-queues/{task_queue}/update-config:\SOH*\DC2\253\SOH\n\
+      \\DC1FetchWorkerConfig\DC29.temporal.api.workflowservice.v1.FetchWorkerConfigRequest\SUB:.temporal.api.workflowservice.v1.FetchWorkerConfigResponse\"q\130\211\228\147\STXk\",/namespaces/{namespace}/workers/fetch-config:\SOH*Z8\"3/api/v1/namespaces/{namespace}/workers/fetch-config:\SOH*\DC2\130\STX\n\
+      \\DC2UpdateWorkerConfig\DC2:.temporal.api.workflowservice.v1.UpdateWorkerConfigRequest\SUB;.temporal.api.workflowservice.v1.UpdateWorkerConfigResponse\"s\130\211\228\147\STXm\"-/namespaces/{namespace}/workers/update-config:\SOH*Z9\"4/api/v1/namespaces/{namespace}/workers/update-config:\SOH*"
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "registerNamespace" where
   type MethodName WorkflowService "registerNamespace" = "RegisterNamespace"
   type MethodInput WorkflowService "registerNamespace" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.RegisterNamespaceRequest
@@ -663,3 +669,18 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "listWorkers
   type MethodInput WorkflowService "listWorkers" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListWorkersRequest
   type MethodOutput WorkflowService "listWorkers" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.ListWorkersResponse
   type MethodStreamingType WorkflowService "listWorkers" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateTaskQueueConfig" where
+  type MethodName WorkflowService "updateTaskQueueConfig" = "UpdateTaskQueueConfig"
+  type MethodInput WorkflowService "updateTaskQueueConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateTaskQueueConfigRequest
+  type MethodOutput WorkflowService "updateTaskQueueConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateTaskQueueConfigResponse
+  type MethodStreamingType WorkflowService "updateTaskQueueConfig" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "fetchWorkerConfig" where
+  type MethodName WorkflowService "fetchWorkerConfig" = "FetchWorkerConfig"
+  type MethodInput WorkflowService "fetchWorkerConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.FetchWorkerConfigRequest
+  type MethodOutput WorkflowService "fetchWorkerConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.FetchWorkerConfigResponse
+  type MethodStreamingType WorkflowService "fetchWorkerConfig" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorkerConfig" where
+  type MethodName WorkflowService "updateWorkerConfig" = "UpdateWorkerConfig"
+  type MethodInput WorkflowService "updateWorkerConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerConfigRequest
+  type MethodOutput WorkflowService "updateWorkerConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerConfigResponse
+  type MethodStreamingType WorkflowService "updateWorkerConfig" = 'Data.ProtoLens.Service.Types.NonStreaming

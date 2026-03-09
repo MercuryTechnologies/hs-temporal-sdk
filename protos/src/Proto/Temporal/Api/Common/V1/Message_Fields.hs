@@ -91,6 +91,18 @@ eventType ::
    Data.ProtoLens.Field.HasField s "eventType" a) =>
   Lens.Family2.LensLike' f s a
 eventType = Data.ProtoLens.Field.field @"eventType"
+fairnessKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "fairnessKey" a) =>
+  Lens.Family2.LensLike' f s a
+fairnessKey = Data.ProtoLens.Field.field @"fairnessKey"
+fairnessWeight ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "fairnessWeight" a) =>
+  Lens.Family2.LensLike' f s a
+fairnessWeight = Data.ProtoLens.Field.field @"fairnessWeight"
 fields ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "fields" a) =>
@@ -229,6 +241,12 @@ maybe'requestIdRef ::
   Lens.Family2.LensLike' f s a
 maybe'requestIdRef
   = Data.ProtoLens.Field.field @"maybe'requestIdRef"
+maybe'selector ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'selector" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'selector = Data.ProtoLens.Field.field @"maybe'selector"
 maybe'target ::
   forall f s a.
   (Prelude.Functor f,
@@ -247,6 +265,13 @@ maybe'variant ::
    Data.ProtoLens.Field.HasField s "maybe'variant" a) =>
   Lens.Family2.LensLike' f s a
 maybe'variant = Data.ProtoLens.Field.field @"maybe'variant"
+maybe'workerInstanceKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'workerInstanceKey" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'workerInstanceKey
+  = Data.ProtoLens.Field.field @"maybe'workerInstanceKey"
 maybe'workflowEvent ::
   forall f s a.
   (Prelude.Functor f,
@@ -382,6 +407,12 @@ vec'resetReapplyExcludeTypes ::
   Lens.Family2.LensLike' f s a
 vec'resetReapplyExcludeTypes
   = Data.ProtoLens.Field.field @"vec'resetReapplyExcludeTypes"
+workerInstanceKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workerInstanceKey" a) =>
+  Lens.Family2.LensLike' f s a
+workerInstanceKey = Data.ProtoLens.Field.field @"workerInstanceKey"
 workflowEvent ::
   forall f s a.
   (Prelude.Functor f,

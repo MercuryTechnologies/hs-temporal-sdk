@@ -18,8 +18,10 @@ module Proto.Temporal.Api.Common.V1.Message (
         ResetOptions'Target(..), _ResetOptions'FirstWorkflowTask,
         _ResetOptions'LastWorkflowTask, _ResetOptions'WorkflowTaskId,
         _ResetOptions'BuildId, RetryPolicy(), SearchAttributes(),
-        SearchAttributes'IndexedFieldsEntry(), WorkerVersionCapabilities(),
-        WorkerVersionStamp(), WorkflowExecution(), WorkflowType()
+        SearchAttributes'IndexedFieldsEntry(), WorkerSelector(),
+        WorkerSelector'Selector(..), _WorkerSelector'WorkerInstanceKey,
+        WorkerVersionCapabilities(), WorkerVersionStamp(),
+        WorkflowExecution(), WorkflowType()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -3283,9 +3285,13 @@ instance Control.DeepSeq.NFData Payloads where
              (Control.DeepSeq.deepseq (_Payloads'payloads x__) ())
 {- | Fields :
      
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.priorityKey' @:: Lens' Priority Data.Int.Int32@ -}
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.priorityKey' @:: Lens' Priority Data.Int.Int32@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.fairnessKey' @:: Lens' Priority Data.Text.Text@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.fairnessWeight' @:: Lens' Priority Prelude.Float@ -}
 data Priority
   = Priority'_constructor {_Priority'priorityKey :: !Data.Int.Int32,
+                           _Priority'fairnessKey :: !Data.Text.Text,
+                           _Priority'fairnessWeight :: !Prelude.Float,
                            _Priority'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show Priority where
@@ -3301,12 +3307,28 @@ instance Data.ProtoLens.Field.HasField Priority "priorityKey" Data.Int.Int32 whe
            _Priority'priorityKey
            (\ x__ y__ -> x__ {_Priority'priorityKey = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField Priority "fairnessKey" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Priority'fairnessKey
+           (\ x__ y__ -> x__ {_Priority'fairnessKey = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Priority "fairnessWeight" Prelude.Float where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Priority'fairnessWeight
+           (\ x__ y__ -> x__ {_Priority'fairnessWeight = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message Priority where
   messageName _ = Data.Text.pack "temporal.api.common.v1.Priority"
   packedMessageDescriptor _
     = "\n\
       \\bPriority\DC2!\n\
-      \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKey"
+      \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKey\DC2!\n\
+      \\ffairness_key\CAN\STX \SOH(\tR\vfairnessKey\DC2'\n\
+      \\SIfairness_weight\CAN\ETX \SOH(\STXR\SOfairnessWeight"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -3319,9 +3341,29 @@ instance Data.ProtoLens.Message Priority where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"priorityKey")) ::
               Data.ProtoLens.FieldDescriptor Priority
+        fairnessKey__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "fairness_key"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"fairnessKey")) ::
+              Data.ProtoLens.FieldDescriptor Priority
+        fairnessWeight__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "fairness_weight"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"fairnessWeight")) ::
+              Data.ProtoLens.FieldDescriptor Priority
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, priorityKey__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, priorityKey__field_descriptor),
+           (Data.ProtoLens.Tag 2, fairnessKey__field_descriptor),
+           (Data.ProtoLens.Tag 3, fairnessWeight__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Priority'_unknownFields
@@ -3329,6 +3371,8 @@ instance Data.ProtoLens.Message Priority where
   defMessage
     = Priority'_constructor
         {_Priority'priorityKey = Data.ProtoLens.fieldDefault,
+         _Priority'fairnessKey = Data.ProtoLens.fieldDefault,
+         _Priority'fairnessWeight = Data.ProtoLens.fieldDefault,
          _Priority'_unknownFields = []}
   parseMessage
     = let
@@ -3358,6 +3402,23 @@ instance Data.ProtoLens.Message Priority where
                                        "priority_key"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"priorityKey") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "fairness_key"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"fairnessKey") y x)
+                        29
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
+                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
+                                       "fairness_weight"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"fairnessWeight") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -3381,14 +3442,49 @@ instance Data.ProtoLens.Message Priority where
                       (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
                       ((Prelude..)
                          Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view (Data.ProtoLens.Field.field @"fairnessKey") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (let
+                      _v
+                        = Lens.Family2.view
+                            (Data.ProtoLens.Field.field @"fairnessWeight") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putFixed32
+                               Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData Priority where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_Priority'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Priority'priorityKey x__) ())
+             (Control.DeepSeq.deepseq
+                (_Priority'priorityKey x__)
+                (Control.DeepSeq.deepseq
+                   (_Priority'fairnessKey x__)
+                   (Control.DeepSeq.deepseq (_Priority'fairnessWeight x__) ())))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.resetReapplyType' @:: Lens' ResetOptions Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@
@@ -4607,6 +4703,167 @@ instance Control.DeepSeq.NFData SearchAttributes'IndexedFieldsEntry where
                    (_SearchAttributes'IndexedFieldsEntry'value x__) ()))
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'selector' @:: Lens' WorkerSelector (Prelude.Maybe WorkerSelector'Selector)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'workerInstanceKey' @:: Lens' WorkerSelector (Prelude.Maybe Data.Text.Text)@
+         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workerInstanceKey' @:: Lens' WorkerSelector Data.Text.Text@ -}
+data WorkerSelector
+  = WorkerSelector'_constructor {_WorkerSelector'selector :: !(Prelude.Maybe WorkerSelector'Selector),
+                                 _WorkerSelector'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show WorkerSelector where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+data WorkerSelector'Selector
+  = WorkerSelector'WorkerInstanceKey !Data.Text.Text
+  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
+instance Data.ProtoLens.Field.HasField WorkerSelector "maybe'selector" (Prelude.Maybe WorkerSelector'Selector) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerSelector'selector
+           (\ x__ y__ -> x__ {_WorkerSelector'selector = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerSelector "maybe'workerInstanceKey" (Prelude.Maybe Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerSelector'selector
+           (\ x__ y__ -> x__ {_WorkerSelector'selector = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (WorkerSelector'WorkerInstanceKey x__val))
+                     -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap WorkerSelector'WorkerInstanceKey y__))
+instance Data.ProtoLens.Field.HasField WorkerSelector "workerInstanceKey" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerSelector'selector
+           (\ x__ y__ -> x__ {_WorkerSelector'selector = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (WorkerSelector'WorkerInstanceKey x__val))
+                        -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap WorkerSelector'WorkerInstanceKey y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Message WorkerSelector where
+  messageName _
+    = Data.Text.pack "temporal.api.common.v1.WorkerSelector"
+  packedMessageDescriptor _
+    = "\n\
+      \\SOWorkerSelector\DC20\n\
+      \\DC3worker_instance_key\CAN\SOH \SOH(\tH\NULR\DC1workerInstanceKeyB\n\
+      \\n\
+      \\bselector"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        workerInstanceKey__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "worker_instance_key"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'workerInstanceKey")) ::
+              Data.ProtoLens.FieldDescriptor WorkerSelector
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, workerInstanceKey__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _WorkerSelector'_unknownFields
+        (\ x__ y__ -> x__ {_WorkerSelector'_unknownFields = y__})
+  defMessage
+    = WorkerSelector'_constructor
+        {_WorkerSelector'selector = Prelude.Nothing,
+         _WorkerSelector'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          WorkerSelector
+          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerSelector
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "worker_instance_key"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workerInstanceKey") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "WorkerSelector"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'selector") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just (WorkerSelector'WorkerInstanceKey v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.Text.Encoding.encodeUtf8 v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData WorkerSelector where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_WorkerSelector'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_WorkerSelector'selector x__) ())
+instance Control.DeepSeq.NFData WorkerSelector'Selector where
+  rnf (WorkerSelector'WorkerInstanceKey x__)
+    = Control.DeepSeq.rnf x__
+_WorkerSelector'WorkerInstanceKey ::
+  Data.ProtoLens.Prism.Prism' WorkerSelector'Selector Data.Text.Text
+_WorkerSelector'WorkerInstanceKey
+  = Data.ProtoLens.Prism.prism'
+      WorkerSelector'WorkerInstanceKey
+      (\ p__
+         -> case p__ of
+              (WorkerSelector'WorkerInstanceKey p__val) -> Prelude.Just p__val)
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionCapabilities Data.Text.Text@
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionCapabilities Prelude.Bool@
          * 'Proto.Temporal.Api.Common.V1.Message_Fields.deploymentSeriesName' @:: Lens' WorkerVersionCapabilities Data.Text.Text@ -}
@@ -5349,11 +5606,17 @@ packedFileDescriptor
     \\treference\SUB!\n\
     \\bBatchJob\DC2\NAK\n\
     \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobIdB\t\n\
-    \\avariant\"-\n\
+    \\avariant\"y\n\
     \\bPriority\DC2!\n\
-    \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKeyB\137\SOH\n\
-    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\228Z\n\
-    \\a\DC2\ENQ\NUL\NUL\143\STX\SOH\n\
+    \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKey\DC2!\n\
+    \\ffairness_key\CAN\STX \SOH(\tR\vfairnessKey\DC2'\n\
+    \\SIfairness_weight\CAN\ETX \SOH(\STXR\SOfairnessWeight\"N\n\
+    \\SOWorkerSelector\DC20\n\
+    \\DC3worker_instance_key\CAN\SOH \SOH(\tH\NULR\DC1workerInstanceKeyB\n\
+    \\n\
+    \\bselectorB\137\SOH\n\
+    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\220r\n\
+    \\a\DC2\ENQ\NUL\NUL\211\STX\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -6024,31 +6287,44 @@ packedFileDescriptor
     \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\236\SOH\DC1\SUB\n\
     \\r\n\
     \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\236\SOH\GS\RS\n\
-    \\161\b\n\
-    \\STX\EOT\DLE\DC2\ACK\131\STX\NUL\143\STX\SOH\SUB\146\b Priority contains metadata that controls relative ordering of task processing\n\
-    \ when tasks are backlogged in a queue. Initially, Priority will be used in\n\
-    \ activity and workflow task queues, which are typically where backlogs exist.\n\
-    \ Other queues in the server (such as transfer and timer queues) and rate\n\
-    \ limiting decisions do not use Priority, but may in the future.\n\
+    \\230\f\n\
+    \\STX\EOT\DLE\DC2\ACK\144\STX\NUL\193\STX\SOH\SUB\215\f Priority contains metadata that controls relative ordering of task processing\n\
+    \ when tasks are backed up in a queue. Initially, Priority will be used in\n\
+    \ matching (workflow and activity) task queues. Later it may be used in history\n\
+    \ task queues and in rate limiting decisions.\n\
     \\n\
-    \ Priority is attached to workflows and activities. Activities and child\n\
-    \ workflows inherit Priority from the workflow that created them, but may\n\
-    \ override fields when they are started or modified. For each field of a\n\
-    \ Priority on an activity/workflow, not present or equal to zero/empty string\n\
-    \ means to inherit the value from the calling workflow, or if there is no\n\
-    \ calling workflow, then use the default (documented below).\n\
+    \ Priority is attached to workflows and activities. By default, activities\n\
+    \ inherit Priority from the workflow that created them, but may override fields\n\
+    \ when an activity is started or modified.\n\
     \\n\
-    \ Despite being named \"Priority\", this message will also contains fields that\n\
+    \ Despite being named \"Priority\", this message also contains fields that\n\
     \ control \"fairness\" mechanisms.\n\
     \\n\
+    \ For all fields, the field not present or equal to zero/empty string means to\n\
+    \ inherit the value from the calling workflow, or if there is no calling\n\
+    \ workflow, then use the default value.\n\
+    \\n\
+    \ For all fields other than fairness_key, the zero value isn't meaningful so\n\
+    \ there's no confusion between inherit/default and a meaningful value. For\n\
+    \ fairness_key, the empty string will be interpreted as \"inherit\". This means\n\
+    \ that if a workflow has a non-empty fairness key, you can't override the\n\
+    \ fairness key of its activity to the empty string.\n\
+    \\n\
     \ The overall semantics of Priority are:\n\
-    \ 1. First, consider \"priority_key\": lower number goes first.\n\
-    \ (more will be added here later)\n\
+    \ 1. First, consider \"priority\": higher priority (lower number) goes first.\n\
+    \ 2. Then, consider fairness: try to dispatch tasks for different fairness keys\n\
+    \    in proportion to their weight.\n\
+    \\n\
+    \ Applications may use any subset of mechanisms that are useful to them and\n\
+    \ leave the other fields to use default values.\n\
+    \\n\
+    \ Not all queues in the system may support the \"full\" semantics of all priority\n\
+    \ fields. (Currently only support in matching task queues is planned.)\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\131\STX\b\DLE\n\
-    \\211\ETX\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\142\STX\EOT\ESC\SUB\196\ETX Priority key is a positive integer from 1 to n, where smaller integers\n\
+    \\ETX\EOT\DLE\SOH\DC2\EOT\144\STX\b\DLE\n\
+    \\183\EOT\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\156\STX\EOT\ESC\SUB\168\EOT Priority key is a positive integer from 1 to n, where smaller integers\n\
     \ correspond to higher priorities (tasks run sooner). In general, tasks in\n\
     \ a queue should be processed in close to priority order, although small\n\
     \ deviations are possible.\n\
@@ -6056,13 +6332,93 @@ packedFileDescriptor
     \ The maximum priority value (minimum priority) is determined by server\n\
     \ configuration, and defaults to 5.\n\
     \\n\
-    \ The default priority is (min+max)/2. With the default max of 5 and min of\n\
-    \ 1, that comes out to 3.\n\
+    \ If priority is not present (or zero), then the effective priority will be\n\
+    \ the default priority, which is is calculated by (min+max)/2. With the\n\
+    \ default max of 5, and min of 1, that comes out to 3.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\142\STX\EOT\t\n\
+    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\156\STX\EOT\t\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\142\STX\n\
+    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\156\STX\n\
     \\SYN\n\
     \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\142\STX\EM\SUBb\ACKproto3"
+    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\156\STX\EM\SUB\n\
+    \\146\t\n\
+    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\182\STX\EOT\FS\SUB\131\t Fairness key is a short string that's used as a key for a fairness\n\
+    \ balancing mechanism. It may correspond to a tenant id, or to a fixed\n\
+    \ string like \"high\" or \"low\". The default is the empty string.\n\
+    \\n\
+    \ The fairness mechanism attempts to dispatch tasks for a given key in\n\
+    \ proportion to its weight. For example, using a thousand distinct tenant\n\
+    \ ids, each with a weight of 1.0 (the default) will result in each tenant\n\
+    \ getting a roughly equal share of task dispatch throughput.\n\
+    \\n\
+    \ (Note: this does not imply equal share of worker capacity! Fairness\n\
+    \ decisions are made based on queue statistics, not\n\
+    \ current worker load.)\n\
+    \\n\
+    \ As another example, using keys \"high\" and \"low\" with weight 9.0 and 1.0\n\
+    \ respectively will prefer dispatching \"high\" tasks over \"low\" tasks at a\n\
+    \ 9:1 ratio, while allowing either key to use all worker capacity if the\n\
+    \ other is not present.\n\
+    \\n\
+    \ All fairness mechanisms, including rate limits, are best-effort and\n\
+    \ probabilistic. The results may not match what a \"perfect\" algorithm with\n\
+    \ infinite resources would produce. The more unique keys are used, the less\n\
+    \ accurate the results will be.\n\
+    \\n\
+    \ Fairness keys are limited to 64 bytes.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\ENQ\DC2\EOT\182\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\182\STX\v\ETB\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\182\STX\SUB\ESC\n\
+    \\133\ETX\n\
+    \\EOT\EOT\DLE\STX\STX\DC2\EOT\192\STX\EOT\RS\SUB\246\STX Fairness weight for a task can come from multiple sources for\n\
+    \ flexibility. From highest to lowest precedence:\n\
+    \ 1. Weights for a small set of keys can be overridden in task queue\n\
+    \    configuration with an API.\n\
+    \ 2. It can be attached to the workflow/activity in this field.\n\
+    \ 3. The default weight of 1.0 will be used.\n\
+    \\n\
+    \ Weight values are clamped to the range [0.001, 1000].\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\STX\ENQ\DC2\EOT\192\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\STX\SOH\DC2\EOT\192\STX\n\
+    \\EM\n\
+    \\r\n\
+    \\ENQ\EOT\DLE\STX\STX\ETX\DC2\EOT\192\STX\FS\GS\n\
+    \\227\SOH\n\
+    \\STX\EOT\DC1\DC2\ACK\198\STX\NUL\211\STX\SOH\SUB\212\SOH This is used to send commands to a specific worker or a group of workers.\n\
+    \ Right now, it is used to send commands to a specific worker instance.\n\
+    \ Will be extended to be able to send command to multiple workers.\n\
+    \\n\
+    \\v\n\
+    \\ETX\EOT\DC1\SOH\DC2\EOT\198\STX\b\SYN\n\
+    \\220\STX\n\
+    \\EOT\EOT\DC1\b\NUL\DC2\ACK\207\STX\EOT\210\STX\ENQ\SUB\203\STX Options are:\n\
+    \ - query (will be used as query to ListWorkers, same format as in ListWorkersRequest.query)\n\
+    \ - task queue (just a shortcut. Same as query=' \"TaskQueue\"=\"my-task-queue\" ')\n\
+    \ - etc.\n\
+    \   All but 'query' are shortcuts, can be replaced with a query, but it is not convenient.\n\
+    \ string query = 5;\n\
+    \ string task_queue = 6;\n\
+    \ ...\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\b\NUL\SOH\DC2\EOT\207\STX\n\
+    \\DC2\n\
+    \H\n\
+    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\209\STX\b'\SUB: Worker instance key to which the command should be sent.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\209\STX\b\SO\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\209\STX\SI\"\n\
+    \\r\n\
+    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\209\STX%&b\ACKproto3"
