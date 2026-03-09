@@ -55,6 +55,7 @@ module Temporal.Interceptor (
   HandleUpdateInput (..),
   WorkflowOutboundInterceptor (..),
   ActivityInput (..),
+  LocalActivityInput (..),
   ActivityInboundInterceptor (..),
   ExecuteActivityInput (..),
   ActivityOutboundInterceptor (..),

@@ -312,6 +312,16 @@ makeOpenTelemetryInterceptor = do
                   ctxt <- getContext
                   hdrs <- inject headersPropagator ctxt headers
                   next wfName $ StartChildWorkflowOptions {headers = hdrs, ..}
+            , scheduleLocalActivity = \input next -> do
+                let StartLocalActivityOptions {..} = input.localOptions
+                    spanArgs =
+                      defaultSpanArguments
+                        { kind = Client
+                        }
+                inSpan'' tracer ("StartLocalActivity:" <> input.localActivityType) spanArgs $ \_ -> do
+                  ctxt <- getContext
+                  hdrs <- inject headersPropagator ctxt headers
+                  next $ input {localOptions = StartLocalActivityOptions {headers = hdrs, ..}}
             }
       , activityInboundInterceptors =
           ActivityInboundInterceptor
