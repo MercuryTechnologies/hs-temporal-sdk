@@ -1,7 +1,8 @@
 module DurationSpec where
 
-import Data.Aeson (FromJSON, ToJSON, Value, eitherDecode, encode)
+import Data.Aeson (eitherDecode, encode)
 import Data.Either (isLeft)
+import qualified Data.Text as T
 import Data.Time.Clock.System
 import Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -226,3 +227,54 @@ spec = describe "Duration" $ do
       let d3 = diffSystemTime t1 t3
       let sum = addDurations d1 d2
       sum === d3
+
+  describe "JSON rendering" $ do
+    it "renders zero" $
+      renderDuration (mkDuration 0 0) `shouldBe` "0s"
+    it "renders whole seconds" $
+      renderDuration (mkDuration 42 0) `shouldBe` "42s"
+    it "renders millisecond precision" $
+      renderDuration (mkDuration 1 500_000_000) `shouldBe` "1.500s"
+    it "renders microsecond precision" $
+      renderDuration (mkDuration 0 1_500_000) `shouldBe` "0.001500s"
+    it "renders nanosecond precision" $
+      renderDuration (mkDuration 0 1) `shouldBe` "0.000000001s"
+    it "renders negative whole seconds" $
+      renderDuration (mkDuration (-3) 0) `shouldBe` "-3s"
+    it "renders negative fractional" $
+      renderDuration (mkDuration (-1) (-500_000_000)) `shouldBe` "-1.500s"
+    it "renders negative sub-second" $
+      renderDuration (mkDuration 0 (-151_648)) `shouldBe` "-0.000151648s"
+    it "never produces a bare minus in the fractional part" $ hedgehog $ do
+      d <- forAll genSafeDuration
+      let rendered = renderDuration d
+      annotateShow rendered
+      assert $ not $ T.isInfixOf ".-" rendered
+
+  describe "JSON round-trip" $ do
+    it "round-trips positive durations" $ hedgehog $ do
+      d <- forAll genPositiveSafeDuration
+      tripping d encode eitherDecode
+    it "round-trips arbitrary normalized durations" $ hedgehog $ do
+      d <- forAll genSafeDuration
+      tripping d encode eitherDecode
+
+  describe "JSON parsing edge cases" $ do
+    it "parses whole seconds" $
+      eitherDecode "\"10s\"" `shouldBe` Right (mkDuration 10 0)
+    it "parses negative seconds" $
+      eitherDecode "\"-3s\"" `shouldBe` Right (mkDuration (-3) 0)
+    it "parses fractional seconds" $
+      eitherDecode "\"1.5s\"" `shouldBe` Right (mkDuration 1 500_000_000)
+    it "parses negative fractional" $
+      eitherDecode "\"-1.5s\"" `shouldBe` Right (mkDuration (-1) (-500_000_000))
+    it "parses nanosecond precision" $
+      eitherDecode "\"0.000000001s\"" `shouldBe` Right (mkDuration 0 1)
+    it "parses trailing decimal point" $
+      eitherDecode "\"5.s\"" `shouldBe` Right (mkDuration 5 0)
+    it "rejects missing suffix" $
+      eitherDecode @Duration "\"10\"" `shouldSatisfy` isLeft
+    it "rejects garbage" $
+      eitherDecode @Duration "\"abcs\"" `shouldSatisfy` isLeft
+    it "rejects multiple dots" $
+      eitherDecode @Duration "\"1.2.3s\"" `shouldSatisfy` isLeft

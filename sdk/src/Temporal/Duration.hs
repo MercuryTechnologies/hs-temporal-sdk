@@ -41,6 +41,7 @@ module Temporal.Duration (
   durationToMilliseconds,
   addDurationToSystemTime,
   diffSystemTime,
+  renderDuration,
 ) where
 
 import Data.Aeson
@@ -57,6 +58,7 @@ import Lens.Family2 ((&), (.~), (^.))
 import qualified Proto.Google.Protobuf.Duration as Duration
 import qualified Proto.Google.Protobuf.Duration_Fields as Duration
 import Text.Printf
+import Text.Read (readMaybe)
 
 
 -- | A duration of time. Durations are always positive.
@@ -80,19 +82,80 @@ mkDuration s ns = case normalize s (fromIntegral ns) of
   (# s', ns' #) -> Duration s' ns'
 
 
--- | 	Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.
+-- | Renders per the protobuf JSON mapping: optional @-@ prefix, integer
+-- seconds, 0\/3\/6\/9 fractional digits as needed, then @s@.
 instance ToJSON Duration where
-  toJSON Duration {..} = String $ T.pack $ printf "%d.%09ds" durationSeconds durationNanoseconds
+  toJSON d = String $ renderDuration d
+
+
+renderDuration :: Duration -> T.Text
+renderDuration (Duration s ns)
+  | s == 0 && ns == 0 = "0s"
+  | s < 0 || ns < 0 =
+      T.cons '-' $ renderPositive (abs s) (fromIntegral (abs ns))
+  | otherwise =
+      renderPositive s (fromIntegral ns)
+  where
+    renderPositive :: Int64 -> Int64 -> T.Text
+    renderPositive secs nanos
+      | nanos == 0 = T.pack (show secs) <> "s"
+      | nanos `rem` 1_000_000 == 0 =
+          T.pack (printf "%d.%03ds" secs (nanos `quot` 1_000_000))
+      | nanos `rem` 1_000 == 0 =
+          T.pack (printf "%d.%06ds" secs (nanos `quot` 1_000))
+      | otherwise =
+          T.pack (printf "%d.%09ds" secs nanos)
 
 
 instance FromJSON Duration where
   parseJSON = withText "Duration" parseDuration
 
 
+-- | Parse a protobuf-style duration string: @\<decimal\>s@.
+-- Accepts any number of fractional digits (including none).
 parseDuration :: T.Text -> Parser Duration
-parseDuration t
-  | T.last t == 's' = pure $ nominalDiffTimeToDuration $ secondsToNominalDiffTime $ read $ T.unpack (T.init t)
-  | otherwise = fail "Duration must end with 's'"
+parseDuration t = case T.unsnoc t of
+  Just (body, 's') -> case parseDurationBody body of
+    Right d -> pure d
+    Left err -> fail err
+  _ -> fail $ "Duration must end with 's', got: " <> show t
+
+
+parseDurationBody :: T.Text -> Either String Duration
+parseDurationBody body = do
+  let (isNeg, rest) = case T.uncons body of
+        Just ('-', r) -> (True, r)
+        _ -> (False, body)
+      sign :: (Num a) => a -> a
+      sign = if isNeg then negate else id
+  case T.splitOn "." rest of
+    [wholePart] -> do
+      secs <- parseField "seconds" wholePart
+      Right $ mkDuration (sign secs) 0
+    [wholePart, fracPart]
+      | T.null fracPart -> do
+          secs <- parseField "seconds" wholePart
+          Right $ mkDuration (sign secs) 0
+      | otherwise -> do
+          secs <- parseField "seconds" wholePart
+          nanos <- parseFrac fracPart
+          Right $ mkDuration (sign secs) (sign nanos)
+    _ -> Left $ "Invalid duration format (multiple '.'): " <> show body
+  where
+    parseField :: (Read a, Num a) => String -> T.Text -> Either String a
+    parseField label txt
+      | T.null txt = Right 0
+      | otherwise = case readMaybe (T.unpack txt) of
+          Just v -> Right v
+          Nothing -> Left $ "Could not parse " <> label <> ": " <> show txt
+
+    -- Pad or truncate fractional digits to 9, then parse as nanoseconds.
+    parseFrac :: T.Text -> Either String Int32
+    parseFrac frac =
+      let padded = T.take 9 (frac <> "000000000")
+      in case readMaybe (T.unpack padded) of
+          Just ns -> Right ns
+          Nothing -> Left $ "Could not parse fractional seconds: " <> show frac
 
 
 -- | Add two durations together. Durations are subject to integer overflow.
@@ -199,12 +262,11 @@ infinity = Duration ((2 :: Int64) ^ (32 :: Int64)) 0
 
 
 -- | Convert a protocol buffer duration to a 'Duration'.
+-- Normalizes the result to ensure seconds and nanoseconds have matching signs
+-- and nanoseconds are in @[-999_999_999, 999_999_999]@.
 durationFromProto :: Duration.Duration -> Duration
 durationFromProto d =
-  Duration
-    { durationSeconds = d ^. Duration.seconds
-    , durationNanoseconds = d ^. Duration.nanos
-    }
+  mkDuration (d ^. Duration.seconds) (d ^. Duration.nanos)
 
 
 -- | Convert a 'Duration' to a protocol buffer duration.
