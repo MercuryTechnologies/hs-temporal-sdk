@@ -171,6 +171,7 @@ module Temporal.Client.Schedule (
   ScheduleAction (..),
   SchedulePolicies (..),
   ScheduleState (..),
+  PauseState (..),
   OverlapPolicy (..),
   Range (..),
   module Temporal.Duration,
