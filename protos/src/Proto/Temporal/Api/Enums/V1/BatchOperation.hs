@@ -133,6 +133,9 @@ data BatchOperationType
     BATCH_OPERATION_TYPE_DELETE |
     BATCH_OPERATION_TYPE_RESET |
     BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS |
+    BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY |
+    BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS |
+    BATCH_OPERATION_TYPE_RESET_ACTIVITY |
     BatchOperationType'Unrecognized !BatchOperationType'UnrecognizedValue
   deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
 instance Data.ProtoLens.MessageEnum BatchOperationType where
@@ -144,6 +147,10 @@ instance Data.ProtoLens.MessageEnum BatchOperationType where
   maybeToEnum 5 = Prelude.Just BATCH_OPERATION_TYPE_RESET
   maybeToEnum 6
     = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+  maybeToEnum 7 = Prelude.Just BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+  maybeToEnum 8
+    = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
+  maybeToEnum 9 = Prelude.Just BATCH_OPERATION_TYPE_RESET_ACTIVITY
   maybeToEnum k
     = Prelude.Just
         (BatchOperationType'Unrecognized
@@ -161,6 +168,12 @@ instance Data.ProtoLens.MessageEnum BatchOperationType where
   showEnum BATCH_OPERATION_TYPE_RESET = "BATCH_OPERATION_TYPE_RESET"
   showEnum BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
     = "BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS"
+  showEnum BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+    = "BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY"
+  showEnum BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
+    = "BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS"
+  showEnum BATCH_OPERATION_TYPE_RESET_ACTIVITY
+    = "BATCH_OPERATION_TYPE_RESET_ACTIVITY"
   showEnum
     (BatchOperationType'Unrecognized (BatchOperationType'UnrecognizedValue k))
     = Prelude.show k
@@ -179,11 +192,17 @@ instance Data.ProtoLens.MessageEnum BatchOperationType where
     = Prelude.Just BATCH_OPERATION_TYPE_RESET
     | (Prelude.==) k "BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS"
     = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+    | (Prelude.==) k "BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY"
+    = Prelude.Just BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+    | (Prelude.==) k "BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS"
+    = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
+    | (Prelude.==) k "BATCH_OPERATION_TYPE_RESET_ACTIVITY"
+    = Prelude.Just BATCH_OPERATION_TYPE_RESET_ACTIVITY
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded BatchOperationType where
   minBound = BATCH_OPERATION_TYPE_UNSPECIFIED
-  maxBound = BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+  maxBound = BATCH_OPERATION_TYPE_RESET_ACTIVITY
 instance Prelude.Enum BatchOperationType where
   toEnum k__
     = Prelude.maybe
@@ -199,12 +218,15 @@ instance Prelude.Enum BatchOperationType where
   fromEnum BATCH_OPERATION_TYPE_DELETE = 4
   fromEnum BATCH_OPERATION_TYPE_RESET = 5
   fromEnum BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS = 6
+  fromEnum BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY = 7
+  fromEnum BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS = 8
+  fromEnum BATCH_OPERATION_TYPE_RESET_ACTIVITY = 9
   fromEnum
     (BatchOperationType'Unrecognized (BatchOperationType'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+  succ BATCH_OPERATION_TYPE_RESET_ACTIVITY
     = Prelude.error
-        "BatchOperationType.succ: bad argument BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS. This value would be out of bounds."
+        "BatchOperationType.succ: bad argument BATCH_OPERATION_TYPE_RESET_ACTIVITY. This value would be out of bounds."
   succ BATCH_OPERATION_TYPE_UNSPECIFIED
     = BATCH_OPERATION_TYPE_TERMINATE
   succ BATCH_OPERATION_TYPE_TERMINATE = BATCH_OPERATION_TYPE_CANCEL
@@ -213,6 +235,12 @@ instance Prelude.Enum BatchOperationType where
   succ BATCH_OPERATION_TYPE_DELETE = BATCH_OPERATION_TYPE_RESET
   succ BATCH_OPERATION_TYPE_RESET
     = BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+  succ BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+    = BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+  succ BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+    = BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
+  succ BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
+    = BATCH_OPERATION_TYPE_RESET_ACTIVITY
   succ (BatchOperationType'Unrecognized _)
     = Prelude.error
         "BatchOperationType.succ: bad argument: unrecognized value"
@@ -227,6 +255,12 @@ instance Prelude.Enum BatchOperationType where
   pred BATCH_OPERATION_TYPE_RESET = BATCH_OPERATION_TYPE_DELETE
   pred BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
     = BATCH_OPERATION_TYPE_RESET
+  pred BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+    = BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
+  pred BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
+    = BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
+  pred BATCH_OPERATION_TYPE_RESET_ACTIVITY
+    = BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
   pred (BatchOperationType'Unrecognized _)
     = Prelude.error
         "BatchOperationType.pred: bad argument: unrecognized value"

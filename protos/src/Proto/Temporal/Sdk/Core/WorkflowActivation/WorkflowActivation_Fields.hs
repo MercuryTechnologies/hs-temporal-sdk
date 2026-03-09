@@ -68,13 +68,6 @@ cancelled ::
    Data.ProtoLens.Field.HasField s "cancelled" a) =>
   Lens.Family2.LensLike' f s a
 cancelled = Data.ProtoLens.Field.field @"cancelled"
-cancelledBeforeStart ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "cancelledBeforeStart" a) =>
-  Lens.Family2.LensLike' f s a
-cancelledBeforeStart
-  = Data.ProtoLens.Field.field @"cancelledBeforeStart"
 cause ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "cause" a) =>
@@ -237,13 +230,6 @@ maybe'cancelled ::
    Data.ProtoLens.Field.HasField s "maybe'cancelled" a) =>
   Lens.Family2.LensLike' f s a
 maybe'cancelled = Data.ProtoLens.Field.field @"maybe'cancelled"
-maybe'cancelledBeforeStart ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'cancelledBeforeStart" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'cancelledBeforeStart
-  = Data.ProtoLens.Field.field @"maybe'cancelledBeforeStart"
 maybe'continuedFailure ::
   forall f s a.
   (Prelude.Functor f,

@@ -57,6 +57,7 @@ import qualified Proto.Temporal.Api.Rules.V1.Message
 import qualified Proto.Temporal.Api.Schedule.V1.Message
 import qualified Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata
 import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
+import qualified Proto.Temporal.Api.Sdk.V1.WorkerConfig
 import qualified Proto.Temporal.Api.Taskqueue.V1.Message
 import qualified Proto.Temporal.Api.Update.V1.Message
 import qualified Proto.Temporal.Api.Version.V1.Message
@@ -462,6 +463,13 @@ eagerWorkflowTask ::
    Data.ProtoLens.Field.HasField s "eagerWorkflowTask" a) =>
   Lens.Family2.LensLike' f s a
 eagerWorkflowTask = Data.ProtoLens.Field.field @"eagerWorkflowTask"
+effectiveRateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "effectiveRateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+effectiveRateLimit
+  = Data.ProtoLens.Field.field @"effectiveRateLimit"
 encodedFailureAttributes ::
   forall f s a.
   (Prelude.Functor f,
@@ -767,6 +775,12 @@ makeSetDefault ::
    Data.ProtoLens.Field.HasField s "makeSetDefault" a) =>
   Lens.Family2.LensLike' f s a
 makeSetDefault = Data.ProtoLens.Field.field @"makeSetDefault"
+matchAll ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "matchAll" a) =>
+  Lens.Family2.LensLike' f s a
+matchAll = Data.ProtoLens.Field.field @"matchAll"
 maxOperationsPerSecond ::
   forall f s a.
   (Prelude.Functor f,
@@ -954,6 +968,13 @@ maybe'eagerWorkflowTask ::
   Lens.Family2.LensLike' f s a
 maybe'eagerWorkflowTask
   = Data.ProtoLens.Field.field @"maybe'eagerWorkflowTask"
+maybe'effectiveRateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'effectiveRateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'effectiveRateLimit
+  = Data.ProtoLens.Field.field @"maybe'effectiveRateLimit"
 maybe'endTime ::
   forall f s a.
   (Prelude.Functor f,
@@ -1096,6 +1117,12 @@ maybe'link ::
    Data.ProtoLens.Field.HasField s "maybe'link" a) =>
   Lens.Family2.LensLike' f s a
 maybe'link = Data.ProtoLens.Field.field @"maybe'link"
+maybe'matchAll ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'matchAll" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'matchAll = Data.ProtoLens.Field.field @"maybe'matchAll"
 maybe'memo ::
   forall f s a.
   (Prelude.Functor f,
@@ -1234,6 +1261,12 @@ maybe'rampingVersionSummary ::
   Lens.Family2.LensLike' f s a
 maybe'rampingVersionSummary
   = Data.ProtoLens.Field.field @"maybe'rampingVersionSummary"
+maybe'rateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'rateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'rateLimit = Data.ProtoLens.Field.field @"maybe'rateLimit"
 maybe'replaceAssignmentRule ::
   forall f s a.
   (Prelude.Functor f,
@@ -1261,6 +1294,13 @@ maybe'request ::
    Data.ProtoLens.Field.HasField s "maybe'request" a) =>
   Lens.Family2.LensLike' f s a
 maybe'request = Data.ProtoLens.Field.field @"maybe'request"
+maybe'resetActivitiesOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'resetActivitiesOperation" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'resetActivitiesOperation
+  = Data.ProtoLens.Field.field @"maybe'resetActivitiesOperation"
 maybe'resetOperation ::
   forall f s a.
   (Prelude.Functor f,
@@ -1332,6 +1372,12 @@ maybe'searchAttributes ::
   Lens.Family2.LensLike' f s a
 maybe'searchAttributes
   = Data.ProtoLens.Field.field @"maybe'searchAttributes"
+maybe'selector ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'selector" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'selector = Data.ProtoLens.Field.field @"maybe'selector"
 maybe'signalInput ::
   forall f s a.
   (Prelude.Functor f,
@@ -1456,6 +1502,22 @@ maybe'unpauseAll ::
    Data.ProtoLens.Field.HasField s "maybe'unpauseAll" a) =>
   Lens.Family2.LensLike' f s a
 maybe'unpauseAll = Data.ProtoLens.Field.field @"maybe'unpauseAll"
+maybe'updateActivityOptionsOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'updateActivityOptionsOperation" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'updateActivityOptionsOperation
+  = Data.ProtoLens.Field.field
+      @"maybe'updateActivityOptionsOperation"
+maybe'updateFairnessKeyRateLimitDefault ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'updateFairnessKeyRateLimitDefault" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'updateFairnessKeyRateLimitDefault
+  = Data.ProtoLens.Field.field
+      @"maybe'updateFairnessKeyRateLimitDefault"
 maybe'updateInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -1475,6 +1537,13 @@ maybe'updateMetadata ::
   Lens.Family2.LensLike' f s a
 maybe'updateMetadata
   = Data.ProtoLens.Field.field @"maybe'updateMetadata"
+maybe'updateQueueRateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'updateQueueRateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'updateQueueRateLimit
+  = Data.ProtoLens.Field.field @"maybe'updateQueueRateLimit"
 maybe'updateRef ::
   forall f s a.
   (Prelude.Functor f,
@@ -1541,6 +1610,13 @@ maybe'waitPolicy ::
    Data.ProtoLens.Field.HasField s "maybe'waitPolicy" a) =>
   Lens.Family2.LensLike' f s a
 maybe'waitPolicy = Data.ProtoLens.Field.field @"maybe'waitPolicy"
+maybe'workerConfig ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'workerConfig" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'workerConfig
+  = Data.ProtoLens.Field.field @"maybe'workerConfig"
 maybe'workerDeploymentInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -1954,6 +2030,18 @@ rampingVersionSummary ::
   Lens.Family2.LensLike' f s a
 rampingVersionSummary
   = Data.ProtoLens.Field.field @"rampingVersionSummary"
+rateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+rateLimit = Data.ProtoLens.Field.field @"rateLimit"
+rateLimitSource ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "rateLimitSource" a) =>
+  Lens.Family2.LensLike' f s a
+rateLimitSource = Data.ProtoLens.Field.field @"rateLimitSource"
 rawHistory ::
   forall f s a.
   (Prelude.Functor f,
@@ -1997,6 +2085,12 @@ replicationConfig ::
    Data.ProtoLens.Field.HasField s "replicationConfig" a) =>
   Lens.Family2.LensLike' f s a
 replicationConfig = Data.ProtoLens.Field.field @"replicationConfig"
+reportConfig ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "reportConfig" a) =>
+  Lens.Family2.LensLike' f s a
+reportConfig = Data.ProtoLens.Field.field @"reportConfig"
 reportPollers ::
   forall f s a.
   (Prelude.Functor f,
@@ -2041,6 +2135,19 @@ requestId ::
    Data.ProtoLens.Field.HasField s "requestId" a) =>
   Lens.Family2.LensLike' f s a
 requestId = Data.ProtoLens.Field.field @"requestId"
+requestsPerSecond ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "requestsPerSecond" a) =>
+  Lens.Family2.LensLike' f s a
+requestsPerSecond = Data.ProtoLens.Field.field @"requestsPerSecond"
+resetActivitiesOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "resetActivitiesOperation" a) =>
+  Lens.Family2.LensLike' f s a
+resetActivitiesOperation
+  = Data.ProtoLens.Field.field @"resetActivitiesOperation"
 resetAttempts ::
   forall f s a.
   (Prelude.Functor f,
@@ -2210,6 +2317,12 @@ securityToken ::
    Data.ProtoLens.Field.HasField s "securityToken" a) =>
   Lens.Family2.LensLike' f s a
 securityToken = Data.ProtoLens.Field.field @"securityToken"
+selector ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "selector" a) =>
+  Lens.Family2.LensLike' f s a
+selector = Data.ProtoLens.Field.field @"selector"
 seriesName ::
   forall f s a.
   (Prelude.Functor f,
@@ -2327,6 +2440,13 @@ stats ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "stats" a) =>
   Lens.Family2.LensLike' f s a
 stats = Data.ProtoLens.Field.field @"stats"
+statsByPriorityKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "statsByPriorityKey" a) =>
+  Lens.Family2.LensLike' f s a
+statsByPriorityKey
+  = Data.ProtoLens.Field.field @"statsByPriorityKey"
 status ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "status" a) =>
@@ -2448,6 +2568,20 @@ unpauseAll ::
    Data.ProtoLens.Field.HasField s "unpauseAll" a) =>
   Lens.Family2.LensLike' f s a
 unpauseAll = Data.ProtoLens.Field.field @"unpauseAll"
+updateActivityOptionsOperation ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateActivityOptionsOperation" a) =>
+  Lens.Family2.LensLike' f s a
+updateActivityOptionsOperation
+  = Data.ProtoLens.Field.field @"updateActivityOptionsOperation"
+updateFairnessKeyRateLimitDefault ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateFairnessKeyRateLimitDefault" a) =>
+  Lens.Family2.LensLike' f s a
+updateFairnessKeyRateLimitDefault
+  = Data.ProtoLens.Field.field @"updateFairnessKeyRateLimitDefault"
 updateInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -2466,6 +2600,13 @@ updateMetadata ::
    Data.ProtoLens.Field.HasField s "updateMetadata" a) =>
   Lens.Family2.LensLike' f s a
 updateMetadata = Data.ProtoLens.Field.field @"updateMetadata"
+updateQueueRateLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "updateQueueRateLimit" a) =>
+  Lens.Family2.LensLike' f s a
+updateQueueRateLimit
+  = Data.ProtoLens.Field.field @"updateQueueRateLimit"
 updateRef ::
   forall f s a.
   (Prelude.Functor f,
@@ -2858,6 +2999,12 @@ waitPolicy ::
    Data.ProtoLens.Field.HasField s "waitPolicy" a) =>
   Lens.Family2.LensLike' f s a
 waitPolicy = Data.ProtoLens.Field.field @"waitPolicy"
+workerConfig ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workerConfig" a) =>
+  Lens.Family2.LensLike' f s a
+workerConfig = Data.ProtoLens.Field.field @"workerConfig"
 workerDeploymentInfo ::
   forall f s a.
   (Prelude.Functor f,

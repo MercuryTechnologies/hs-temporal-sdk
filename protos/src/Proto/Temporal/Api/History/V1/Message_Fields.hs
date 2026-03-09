@@ -290,6 +290,13 @@ details ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
   Lens.Family2.LensLike' f s a
 details = Data.ProtoLens.Field.field @"details"
+eagerExecutionAccepted ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "eagerExecutionAccepted" a) =>
+  Lens.Family2.LensLike' f s a
+eagerExecutionAccepted
+  = Data.ProtoLens.Field.field @"eagerExecutionAccepted"
 endpoint ::
   forall f s a.
   (Prelude.Functor f,

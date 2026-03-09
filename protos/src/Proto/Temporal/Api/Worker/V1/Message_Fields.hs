@@ -253,6 +253,11 @@ maybe'workflowTaskSlotsInfo ::
   Lens.Family2.LensLike' f s a
 maybe'workflowTaskSlotsInfo
   = Data.ProtoLens.Field.field @"maybe'workflowTaskSlotsInfo"
+name ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "name" a) =>
+  Lens.Family2.LensLike' f s a
+name = Data.ProtoLens.Field.field @"name"
 nexusPollerInfo ::
   forall f s a.
   (Prelude.Functor f,
@@ -266,6 +271,11 @@ nexusTaskSlotsInfo ::
   Lens.Family2.LensLike' f s a
 nexusTaskSlotsInfo
   = Data.ProtoLens.Field.field @"nexusTaskSlotsInfo"
+plugins ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "plugins" a) =>
+  Lens.Family2.LensLike' f s a
+plugins = Data.ProtoLens.Field.field @"plugins"
 processId ::
   forall f s a.
   (Prelude.Functor f,
@@ -339,6 +349,17 @@ totalStickyCacheMiss ::
   Lens.Family2.LensLike' f s a
 totalStickyCacheMiss
   = Data.ProtoLens.Field.field @"totalStickyCacheMiss"
+vec'plugins ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'plugins" a) =>
+  Lens.Family2.LensLike' f s a
+vec'plugins = Data.ProtoLens.Field.field @"vec'plugins"
+version ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "version" a) =>
+  Lens.Family2.LensLike' f s a
+version = Data.ProtoLens.Field.field @"version"
 workerHeartbeat ::
   forall f s a.
   (Prelude.Functor f,

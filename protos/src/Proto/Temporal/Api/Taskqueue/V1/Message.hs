@@ -7,13 +7,15 @@ module Proto.Temporal.Api.Taskqueue.V1.Message (
         BuildIdAssignmentRule(), BuildIdAssignmentRule'Ramp(..),
         _BuildIdAssignmentRule'PercentageRamp, BuildIdReachability(),
         CompatibleBuildIdRedirectRule(), CompatibleVersionSet(),
-        PollerInfo(), PollerScalingDecision(), RampByPercentage(),
+        ConfigMetadata(), PollerInfo(), PollerScalingDecision(),
+        RampByPercentage(), RateLimit(), RateLimitConfig(),
         StickyExecutionAttributes(), TaskIdBlock(), TaskQueue(),
-        TaskQueueMetadata(), TaskQueuePartitionMetadata(),
-        TaskQueueReachability(), TaskQueueStats(), TaskQueueStatus(),
-        TaskQueueTypeInfo(), TaskQueueVersionInfo(),
-        TaskQueueVersionInfo'TypesInfoEntry(), TaskQueueVersionSelection(),
-        TaskQueueVersioningInfo(), TimestampedBuildIdAssignmentRule(),
+        TaskQueueConfig(), TaskQueueMetadata(),
+        TaskQueuePartitionMetadata(), TaskQueueReachability(),
+        TaskQueueStats(), TaskQueueStatus(), TaskQueueTypeInfo(),
+        TaskQueueVersionInfo(), TaskQueueVersionInfo'TypesInfoEntry(),
+        TaskQueueVersionSelection(), TaskQueueVersioningInfo(),
+        TimestampedBuildIdAssignmentRule(),
         TimestampedCompatibleBuildIdRedirectRule()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
@@ -757,6 +759,225 @@ instance Control.DeepSeq.NFData CompatibleVersionSet where
              (Control.DeepSeq.deepseq (_CompatibleVersionSet'buildIds x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.reason' @:: Lens' ConfigMetadata Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.updateIdentity' @:: Lens' ConfigMetadata Data.Text.Text@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.updateTime' @:: Lens' ConfigMetadata Proto.Google.Protobuf.Timestamp.Timestamp@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'updateTime' @:: Lens' ConfigMetadata (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
+data ConfigMetadata
+  = ConfigMetadata'_constructor {_ConfigMetadata'reason :: !Data.Text.Text,
+                                 _ConfigMetadata'updateIdentity :: !Data.Text.Text,
+                                 _ConfigMetadata'updateTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
+                                 _ConfigMetadata'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show ConfigMetadata where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField ConfigMetadata "reason" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ConfigMetadata'reason
+           (\ x__ y__ -> x__ {_ConfigMetadata'reason = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ConfigMetadata "updateIdentity" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ConfigMetadata'updateIdentity
+           (\ x__ y__ -> x__ {_ConfigMetadata'updateIdentity = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField ConfigMetadata "updateTime" Proto.Google.Protobuf.Timestamp.Timestamp where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ConfigMetadata'updateTime
+           (\ x__ y__ -> x__ {_ConfigMetadata'updateTime = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField ConfigMetadata "maybe'updateTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _ConfigMetadata'updateTime
+           (\ x__ y__ -> x__ {_ConfigMetadata'updateTime = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message ConfigMetadata where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.ConfigMetadata"
+  packedMessageDescriptor _
+    = "\n\
+      \\SOConfigMetadata\DC2\SYN\n\
+      \\ACKreason\CAN\SOH \SOH(\tR\ACKreason\DC2'\n\
+      \\SIupdate_identity\CAN\STX \SOH(\tR\SOupdateIdentity\DC2;\n\
+      \\vupdate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+      \updateTime"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        reason__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "reason"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"reason")) ::
+              Data.ProtoLens.FieldDescriptor ConfigMetadata
+        updateIdentity__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "update_identity"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"updateIdentity")) ::
+              Data.ProtoLens.FieldDescriptor ConfigMetadata
+        updateTime__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "update_time"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'updateTime")) ::
+              Data.ProtoLens.FieldDescriptor ConfigMetadata
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, reason__field_descriptor),
+           (Data.ProtoLens.Tag 2, updateIdentity__field_descriptor),
+           (Data.ProtoLens.Tag 3, updateTime__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _ConfigMetadata'_unknownFields
+        (\ x__ y__ -> x__ {_ConfigMetadata'_unknownFields = y__})
+  defMessage
+    = ConfigMetadata'_constructor
+        {_ConfigMetadata'reason = Data.ProtoLens.fieldDefault,
+         _ConfigMetadata'updateIdentity = Data.ProtoLens.fieldDefault,
+         _ConfigMetadata'updateTime = Prelude.Nothing,
+         _ConfigMetadata'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          ConfigMetadata
+          -> Data.ProtoLens.Encoding.Bytes.Parser ConfigMetadata
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "reason"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "update_identity"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"updateIdentity") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "update_time"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"updateTime") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "ConfigMetadata"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"reason") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                      ((Prelude..)
+                         (\ bs
+                            -> (Data.Monoid.<>)
+                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                         Data.Text.Encoding.encodeUtf8 _v))
+             ((Data.Monoid.<>)
+                (let
+                   _v
+                     = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"updateIdentity") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((Prelude..)
+                            (\ bs
+                               -> (Data.Monoid.<>)
+                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            Data.Text.Encoding.encodeUtf8 _v))
+                ((Data.Monoid.<>)
+                   (case
+                        Lens.Family2.view
+                          (Data.ProtoLens.Field.field @"maybe'updateTime") _x
+                    of
+                      Prelude.Nothing -> Data.Monoid.mempty
+                      (Prelude.Just _v)
+                        -> (Data.Monoid.<>)
+                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                             ((Prelude..)
+                                (\ bs
+                                   -> (Data.Monoid.<>)
+                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                Data.ProtoLens.encodeMessage _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+instance Control.DeepSeq.NFData ConfigMetadata where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_ConfigMetadata'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_ConfigMetadata'reason x__)
+                (Control.DeepSeq.deepseq
+                   (_ConfigMetadata'updateIdentity x__)
+                   (Control.DeepSeq.deepseq (_ConfigMetadata'updateTime x__) ())))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.lastAccessTime' @:: Lens' PollerInfo Proto.Google.Protobuf.Timestamp.Timestamp@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'lastAccessTime' @:: Lens' PollerInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.identity' @:: Lens' PollerInfo Data.Text.Text@
@@ -1317,6 +1538,296 @@ instance Control.DeepSeq.NFData RampByPercentage where
              (Control.DeepSeq.deepseq (_RampByPercentage'rampPercentage x__) ())
 {- | Fields :
      
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.requestsPerSecond' @:: Lens' RateLimit Prelude.Float@ -}
+data RateLimit
+  = RateLimit'_constructor {_RateLimit'requestsPerSecond :: !Prelude.Float,
+                            _RateLimit'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show RateLimit where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField RateLimit "requestsPerSecond" Prelude.Float where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _RateLimit'requestsPerSecond
+           (\ x__ y__ -> x__ {_RateLimit'requestsPerSecond = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message RateLimit where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.RateLimit"
+  packedMessageDescriptor _
+    = "\n\
+      \\tRateLimit\DC2.\n\
+      \\DC3requests_per_second\CAN\SOH \SOH(\STXR\DC1requestsPerSecond"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        requestsPerSecond__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "requests_per_second"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"requestsPerSecond")) ::
+              Data.ProtoLens.FieldDescriptor RateLimit
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, requestsPerSecond__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _RateLimit'_unknownFields
+        (\ x__ y__ -> x__ {_RateLimit'_unknownFields = y__})
+  defMessage
+    = RateLimit'_constructor
+        {_RateLimit'requestsPerSecond = Data.ProtoLens.fieldDefault,
+         _RateLimit'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: RateLimit -> Data.ProtoLens.Encoding.Bytes.Parser RateLimit
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        13
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
+                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
+                                       "requests_per_second"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"requestsPerSecond") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "RateLimit"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (let
+                _v
+                  = Lens.Family2.view
+                      (Data.ProtoLens.Field.field @"requestsPerSecond") _x
+              in
+                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                    Data.Monoid.mempty
+                else
+                    (Data.Monoid.<>)
+                      (Data.ProtoLens.Encoding.Bytes.putVarInt 13)
+                      ((Prelude..)
+                         Data.ProtoLens.Encoding.Bytes.putFixed32
+                         Data.ProtoLens.Encoding.Bytes.floatToWord _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData RateLimit where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_RateLimit'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_RateLimit'requestsPerSecond x__) ())
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.rateLimit' @:: Lens' RateLimitConfig RateLimit@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'rateLimit' @:: Lens' RateLimitConfig (Prelude.Maybe RateLimit)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.metadata' @:: Lens' RateLimitConfig ConfigMetadata@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'metadata' @:: Lens' RateLimitConfig (Prelude.Maybe ConfigMetadata)@ -}
+data RateLimitConfig
+  = RateLimitConfig'_constructor {_RateLimitConfig'rateLimit :: !(Prelude.Maybe RateLimit),
+                                  _RateLimitConfig'metadata :: !(Prelude.Maybe ConfigMetadata),
+                                  _RateLimitConfig'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show RateLimitConfig where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField RateLimitConfig "rateLimit" RateLimit where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _RateLimitConfig'rateLimit
+           (\ x__ y__ -> x__ {_RateLimitConfig'rateLimit = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField RateLimitConfig "maybe'rateLimit" (Prelude.Maybe RateLimit) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _RateLimitConfig'rateLimit
+           (\ x__ y__ -> x__ {_RateLimitConfig'rateLimit = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField RateLimitConfig "metadata" ConfigMetadata where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _RateLimitConfig'metadata
+           (\ x__ y__ -> x__ {_RateLimitConfig'metadata = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField RateLimitConfig "maybe'metadata" (Prelude.Maybe ConfigMetadata) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _RateLimitConfig'metadata
+           (\ x__ y__ -> x__ {_RateLimitConfig'metadata = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message RateLimitConfig where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.RateLimitConfig"
+  packedMessageDescriptor _
+    = "\n\
+      \\SIRateLimitConfig\DC2C\n\
+      \\n\
+      \rate_limit\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.RateLimitR\trateLimit\DC2E\n\
+      \\bmetadata\CAN\STX \SOH(\v2).temporal.api.taskqueue.v1.ConfigMetadataR\bmetadata"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        rateLimit__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "rate_limit"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor RateLimit)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'rateLimit")) ::
+              Data.ProtoLens.FieldDescriptor RateLimitConfig
+        metadata__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "metadata"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor ConfigMetadata)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'metadata")) ::
+              Data.ProtoLens.FieldDescriptor RateLimitConfig
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, rateLimit__field_descriptor),
+           (Data.ProtoLens.Tag 2, metadata__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _RateLimitConfig'_unknownFields
+        (\ x__ y__ -> x__ {_RateLimitConfig'_unknownFields = y__})
+  defMessage
+    = RateLimitConfig'_constructor
+        {_RateLimitConfig'rateLimit = Prelude.Nothing,
+         _RateLimitConfig'metadata = Prelude.Nothing,
+         _RateLimitConfig'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          RateLimitConfig
+          -> Data.ProtoLens.Encoding.Bytes.Parser RateLimitConfig
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "rate_limit"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"rateLimit") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "metadata"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"metadata") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "RateLimitConfig"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'rateLimit") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'metadata") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData RateLimitConfig where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_RateLimitConfig'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_RateLimitConfig'rateLimit x__)
+                (Control.DeepSeq.deepseq (_RateLimitConfig'metadata x__) ()))
+{- | Fields :
+     
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.workerTaskQueue' @:: Lens' StickyExecutionAttributes TaskQueue@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'workerTaskQueue' @:: Lens' StickyExecutionAttributes (Prelude.Maybe TaskQueue)@
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.scheduleToStartTimeout' @:: Lens' StickyExecutionAttributes Proto.Google.Protobuf.Duration.Duration@
@@ -1848,6 +2359,192 @@ instance Control.DeepSeq.NFData TaskQueue where
                 (Control.DeepSeq.deepseq
                    (_TaskQueue'kind x__)
                    (Control.DeepSeq.deepseq (_TaskQueue'normalName x__) ())))
+{- | Fields :
+     
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.queueRateLimit' @:: Lens' TaskQueueConfig RateLimitConfig@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'queueRateLimit' @:: Lens' TaskQueueConfig (Prelude.Maybe RateLimitConfig)@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.fairnessKeysRateLimitDefault' @:: Lens' TaskQueueConfig RateLimitConfig@
+         * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maybe'fairnessKeysRateLimitDefault' @:: Lens' TaskQueueConfig (Prelude.Maybe RateLimitConfig)@ -}
+data TaskQueueConfig
+  = TaskQueueConfig'_constructor {_TaskQueueConfig'queueRateLimit :: !(Prelude.Maybe RateLimitConfig),
+                                  _TaskQueueConfig'fairnessKeysRateLimitDefault :: !(Prelude.Maybe RateLimitConfig),
+                                  _TaskQueueConfig'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord)
+instance Prelude.Show TaskQueueConfig where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Data.ProtoLens.Field.HasField TaskQueueConfig "queueRateLimit" RateLimitConfig where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueConfig'queueRateLimit
+           (\ x__ y__ -> x__ {_TaskQueueConfig'queueRateLimit = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueConfig "maybe'queueRateLimit" (Prelude.Maybe RateLimitConfig) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueConfig'queueRateLimit
+           (\ x__ y__ -> x__ {_TaskQueueConfig'queueRateLimit = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField TaskQueueConfig "fairnessKeysRateLimitDefault" RateLimitConfig where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueConfig'fairnessKeysRateLimitDefault
+           (\ x__ y__
+              -> x__ {_TaskQueueConfig'fairnessKeysRateLimitDefault = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField TaskQueueConfig "maybe'fairnessKeysRateLimitDefault" (Prelude.Maybe RateLimitConfig) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _TaskQueueConfig'fairnessKeysRateLimitDefault
+           (\ x__ y__
+              -> x__ {_TaskQueueConfig'fairnessKeysRateLimitDefault = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message TaskQueueConfig where
+  messageName _
+    = Data.Text.pack "temporal.api.taskqueue.v1.TaskQueueConfig"
+  packedMessageDescriptor _
+    = "\n\
+      \\SITaskQueueConfig\DC2T\n\
+      \\DLEqueue_rate_limit\CAN\SOH \SOH(\v2*.temporal.api.taskqueue.v1.RateLimitConfigR\SOqueueRateLimit\DC2r\n\
+      \ fairness_keys_rate_limit_default\CAN\STX \SOH(\v2*.temporal.api.taskqueue.v1.RateLimitConfigR\FSfairnessKeysRateLimitDefault"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        queueRateLimit__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "queue_rate_limit"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor RateLimitConfig)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'queueRateLimit")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueConfig
+        fairnessKeysRateLimitDefault__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "fairness_keys_rate_limit_default"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor RateLimitConfig)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field
+                    @"maybe'fairnessKeysRateLimitDefault")) ::
+              Data.ProtoLens.FieldDescriptor TaskQueueConfig
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, queueRateLimit__field_descriptor),
+           (Data.ProtoLens.Tag 2, 
+            fairnessKeysRateLimitDefault__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _TaskQueueConfig'_unknownFields
+        (\ x__ y__ -> x__ {_TaskQueueConfig'_unknownFields = y__})
+  defMessage
+    = TaskQueueConfig'_constructor
+        {_TaskQueueConfig'queueRateLimit = Prelude.Nothing,
+         _TaskQueueConfig'fairnessKeysRateLimitDefault = Prelude.Nothing,
+         _TaskQueueConfig'_unknownFields = []}
+  parseMessage
+    = let
+        loop ::
+          TaskQueueConfig
+          -> Data.ProtoLens.Encoding.Bytes.Parser TaskQueueConfig
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "queue_rate_limit"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"queueRateLimit") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "fairness_keys_rate_limit_default"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"fairnessKeysRateLimitDefault") y
+                                     x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "TaskQueueConfig"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view
+                    (Data.ProtoLens.Field.field @"maybe'queueRateLimit") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'fairnessKeysRateLimitDefault")
+                       _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData TaskQueueConfig where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_TaskQueueConfig'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_TaskQueueConfig'queueRateLimit x__)
+                (Control.DeepSeq.deepseq
+                   (_TaskQueueConfig'fairnessKeysRateLimitDefault x__) ()))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Taskqueue.V1.Message_Fields.maxTasksPerSecond' @:: Lens' TaskQueueMetadata Proto.Google.Protobuf.Wrappers.DoubleValue@
@@ -4531,9 +5228,23 @@ packedFileDescriptor
     \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
     \createTime\"Z\n\
     \\NAKPollerScalingDecision\DC2A\n\
-    \\GSpoll_request_delta_suggestion\CAN\SOH \SOH(\ENQR\SUBpollRequestDeltaSuggestionB\152\SOH\n\
-    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\143w\n\
-    \\a\DC2\ENQ\NUL\NUL\188\STX\SOH\n\
+    \\GSpoll_request_delta_suggestion\CAN\SOH \SOH(\ENQR\SUBpollRequestDeltaSuggestion\";\n\
+    \\tRateLimit\DC2.\n\
+    \\DC3requests_per_second\CAN\SOH \SOH(\STXR\DC1requestsPerSecond\"\142\SOH\n\
+    \\SOConfigMetadata\DC2\SYN\n\
+    \\ACKreason\CAN\SOH \SOH(\tR\ACKreason\DC2'\n\
+    \\SIupdate_identity\CAN\STX \SOH(\tR\SOupdateIdentity\DC2;\n\
+    \\vupdate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
+    \updateTime\"\157\SOH\n\
+    \\SIRateLimitConfig\DC2C\n\
+    \\n\
+    \rate_limit\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.RateLimitR\trateLimit\DC2E\n\
+    \\bmetadata\CAN\STX \SOH(\v2).temporal.api.taskqueue.v1.ConfigMetadataR\bmetadata\"\219\SOH\n\
+    \\SITaskQueueConfig\DC2T\n\
+    \\DLEqueue_rate_limit\CAN\SOH \SOH(\v2*.temporal.api.taskqueue.v1.RateLimitConfigR\SOqueueRateLimit\DC2r\n\
+    \ fairness_keys_rate_limit_default\CAN\STX \SOH(\v2*.temporal.api.taskqueue.v1.RateLimitConfigR\FSfairnessKeysRateLimitDefaultB\152\SOH\n\
+    \\FSio.temporal.api.taskqueue.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/taskqueue/v1;taskqueue\170\STX\ESCTemporalio.Api.TaskQueue.V1\234\STX\RSTemporalio::Api::TaskQueue::V1J\166~\n\
+    \\a\DC2\ENQ\NUL\NUL\217\STX\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -5336,4 +6047,94 @@ packedFileDescriptor
     \\r\n\
     \\ENQ\EOT\DC4\STX\NUL\SOH\DC2\EOT\187\STX\b%\n\
     \\r\n\
-    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\187\STX()b\ACKproto3"
+    \\ENQ\EOT\DC4\STX\NUL\ETX\DC2\EOT\187\STX()\n\
+    \\f\n\
+    \\STX\EOT\NAK\DC2\ACK\190\STX\NUL\193\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\NAK\SOH\DC2\EOT\190\STX\b\DC1\n\
+    \+\n\
+    \\EOT\EOT\NAK\STX\NUL\DC2\EOT\192\STX\EOT\"\SUB\GS Zero is a valid rate limit.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\ENQ\DC2\EOT\192\STX\EOT\t\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\SOH\DC2\EOT\192\STX\n\
+    \\GS\n\
+    \\r\n\
+    \\ENQ\EOT\NAK\STX\NUL\ETX\DC2\EOT\192\STX !\n\
+    \\f\n\
+    \\STX\EOT\SYN\DC2\ACK\195\STX\NUL\205\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\SYN\SOH\DC2\EOT\195\STX\b\SYN\n\
+    \2\n\
+    \\EOT\EOT\SYN\STX\NUL\DC2\EOT\197\STX\EOT\SYN\SUB$ Reason for why the config was set.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\NUL\ENQ\DC2\EOT\197\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\NUL\SOH\DC2\EOT\197\STX\v\DC1\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\NUL\ETX\DC2\EOT\197\STX\DC4\NAK\n\
+    \S\n\
+    \\EOT\EOT\SYN\STX\SOH\DC2\EOT\201\STX\EOT\US\SUBE Identity of the last updater.\n\
+    \ Set by the request's identity field.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\SOH\ENQ\DC2\EOT\201\STX\EOT\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\SOH\SOH\DC2\EOT\201\STX\v\SUB\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\SOH\ETX\DC2\EOT\201\STX\GS\RS\n\
+    \(\n\
+    \\EOT\EOT\SYN\STX\STX\DC2\EOT\204\STX\EOT.\SUB\SUB Time of the last update.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\STX\ACK\DC2\EOT\204\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\STX\SOH\DC2\EOT\204\STX\RS)\n\
+    \\r\n\
+    \\ENQ\EOT\SYN\STX\STX\ETX\DC2\EOT\204\STX,-\n\
+    \\f\n\
+    \\STX\EOT\ETB\DC2\ACK\207\STX\NUL\210\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\ETB\SOH\DC2\EOT\207\STX\b\ETB\n\
+    \\f\n\
+    \\EOT\EOT\ETB\STX\NUL\DC2\EOT\208\STX\EOT\GS\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\NUL\ACK\DC2\EOT\208\STX\EOT\r\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\NUL\SOH\DC2\EOT\208\STX\SO\CAN\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\NUL\ETX\DC2\EOT\208\STX\ESC\FS\n\
+    \\f\n\
+    \\EOT\EOT\ETB\STX\SOH\DC2\EOT\209\STX\EOT \n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\SOH\ACK\DC2\EOT\209\STX\EOT\DC2\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\SOH\SOH\DC2\EOT\209\STX\DC3\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\ETB\STX\SOH\ETX\DC2\EOT\209\STX\RS\US\n\
+    \\f\n\
+    \\STX\EOT\CAN\DC2\ACK\212\STX\NUL\217\STX\SOH\n\
+    \\v\n\
+    \\ETX\EOT\CAN\SOH\DC2\EOT\212\STX\b\ETB\n\
+    \G\n\
+    \\EOT\EOT\CAN\STX\NUL\DC2\EOT\214\STX\EOT)\SUB9 Unless modified, this is the system-defined rate limit.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\NUL\ACK\DC2\EOT\214\STX\EOT\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\NUL\SOH\DC2\EOT\214\STX\DC4$\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\NUL\ETX\DC2\EOT\214\STX'(\n\
+    \|\n\
+    \\EOT\EOT\CAN\STX\SOH\DC2\EOT\216\STX\EOT9\SUBn If set, each individual fairness key will be limited to this rate, scaled by the weight of the fairness key.\n\
+    \\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\ACK\DC2\EOT\216\STX\EOT\DC3\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\SOH\DC2\EOT\216\STX\DC44\n\
+    \\r\n\
+    \\ENQ\EOT\CAN\STX\SOH\ETX\DC2\EOT\216\STX78b\ACKproto3"
