@@ -261,6 +261,26 @@ tests = describe "Signals" $ do
       _ <- useClient (C.signalWithStart wf wfId opts sig 42)
       C.waitWorkflowResult h1 `shouldReturn` 42
 
+  it "signalWithStart with conflict policy UseExisting delivers to existing" $ \TestEnv {..} -> do
+    let sig = W.KnownSignal @'[Int] "swsConflictSig" defaultCodec
+        workflow :: W.Workflow Int
+        workflow = provideCallStack $ do
+          st <- W.newStateVar (0 :: Int)
+          W.setSignalHandler sig $ \n -> W.writeStateVar st n
+          W.waitCondition $ (/= 0) <$> W.readStateVar st
+          W.readStateVar st
+        wf = W.provideWorkflow defaultCodec "signalWithStartConflictWf" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = (C.startWorkflowOptions taskQueue)
+            { C.workflowIdConflictPolicy = Just C.WorkflowIdConflictPolicyUseExisting
+            , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+            }
+      wfId <- W.WorkflowId <$> uuidText
+      h1 <- useClient (C.start wf.reference wfId opts)
+      _ <- useClient (C.signalWithStart wf.reference wfId opts sig 55)
+      C.waitWorkflowResult h1 `shouldReturn` 55
+
   it "signal and timer in same workflow task" $ \TestEnv {..} -> do
     let timerSig = W.KnownSignal @'[Int] "timerSig" defaultCodec
         workflow :: W.Workflow Text

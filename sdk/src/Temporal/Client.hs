@@ -715,6 +715,9 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
             & RR.workflowIdReusePolicy
               .~ workflowIdReusePolicyToProto
                 (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.signalWithStartOptions.workflowIdReusePolicy)
+            & RR.workflowIdConflictPolicy
+              .~ workflowIdConflictPolicyToProto
+                (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.signalWithStartOptions.workflowIdConflictPolicy)
             & RR.signalName .~ sigName
             & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload sigPayloads'')
             -- Deprecated, no need to set
