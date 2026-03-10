@@ -86,6 +86,8 @@ module Temporal.Client (
 
   -- * Common types
   WorkflowIdConflictPolicy (..),
+  Priority (..),
+  mkPriority,
 ) where
 
 import Conduit
@@ -117,6 +119,7 @@ import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
 import Lens.Family2
+import qualified Proto.Temporal.Api.Common.V1.Message as CommonMsg
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
@@ -620,6 +623,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
               WF.lastCompletionResult
             -}
             & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
+            & WF.maybe'priority .~ fmap priorityToProto opts'.priority
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
@@ -1241,3 +1245,11 @@ checkWorkflowExecutionExists wfRef wfId = do
         Core.RpcError status _ _ | fromIntegral status == fromEnum StatusNotFound -> pure False
         _ -> throwIO $ coreRpcErrorToRpcError err
       Right _ -> pure True
+
+
+priorityToProto :: Priority -> CommonMsg.Priority
+priorityToProto p =
+  defMessage
+    & Common.priorityKey .~ p.priorityKey
+    & Common.fairnessKey .~ p.fairnessKey
+    & Common.fairnessWeight .~ p.fairnessWeight

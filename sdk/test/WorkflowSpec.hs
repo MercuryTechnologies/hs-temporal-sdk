@@ -723,6 +723,16 @@ tests = do
         let opts = defaultStartOpts taskQueue
         useClient (C.execute wf.reference "buildIdInfoWf" opts) `shouldReturn` "my-build-abc"
 
+  describe "Workflow priorities" $ do
+    specify "workflow with priority runs successfully" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Text
+          workflow = pure "prioritized"
+          wf = W.provideWorkflow defaultCodec "priorityWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = (defaultStartOpts taskQueue) { C.priority = Just (C.mkPriority 3) }
+        useClient (C.execute wf.reference "priorityWf" opts) `shouldReturn` "prioritized"
+
   describe "Memo operations (Py/TS: memo access)" $ do
     specify "getMemoValues returns initial memos (Py: test_workflow_memo)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow (Map Text Payload)
