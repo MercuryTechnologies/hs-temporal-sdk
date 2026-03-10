@@ -68,10 +68,10 @@ instance Cancel (ExternalWorkflowHandle a) where
 
   cancel h = ilift $ do
     inst <- ask
-    s@(Sequence sVal) <- nextExternalSignalSequence
+    s@(Sequence sVal) <- nextExternalCancelSequence
     res <- newIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
-      seqMaps {externalSignals = HashMap.insert s res (externalSignals seqMaps)}
+      seqMaps {externalCancels = HashMap.insert s res (externalCancels seqMaps)}
     addCommand
       ( defMessage
           & Command.requestCancelExternalWorkflowExecution

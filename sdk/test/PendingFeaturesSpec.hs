@@ -101,9 +101,6 @@ spec = do
     it "empty histories replay returns empty result" $ const pending
     it "task failure fails replay" $ const pending
 
-  describe "Cancel external workflow (SDK issue)" $ do
-    it "cancel external workflow via getExternalWorkflowHandle" $ const pending
-
   describe "Update handler executing activity (Py/TS)" $ do
     it "update timeout or cancel" $ const pending
     it "update separate handle" $ const pending

@@ -322,10 +322,11 @@ tests = describe "Cancellation" $ do
 
   describe "External workflow cancellation" $ do
     specify "cancel external workflow from parent" $ \TestEnv {..} -> do
-      pendingWith "External cancel IVar for sequence not found — SDK issue"
       let childWfId = W.WorkflowId "ext-cancel-child-target"
           childWorkflow :: MyWorkflow ()
-          childWorkflow = W.sleep $ minutes 100
+          childWorkflow = do
+            W.waitCancellation
+            Catch.throwM WorkflowCancelRequested
           childWf = W.provideWorkflow defaultCodec "extCancelChild" childWorkflow
           parentWorkflow :: MyWorkflow Text
           parentWorkflow = do
@@ -333,7 +334,8 @@ tests = describe "Cancellation" $ do
             h <- W.startChildWorkflow childWf.reference childOpts
             _ <- W.waitChildWorkflowStart h
             extHandle <- W.getExternalWorkflowHandle childWfId Nothing
-            W.cancel extHandle
+            waiter <- W.cancel extHandle
+            waiter
             result <- Catch.try $ W.waitChildWorkflowResult h
             case (result :: Either SomeException ()) of
               Left _ -> pure "cancelled"
