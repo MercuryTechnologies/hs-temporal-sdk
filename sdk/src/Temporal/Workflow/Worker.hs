@@ -240,6 +240,15 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                             , parentRunId = RunId $ parent ^. CommonProto.runId
                             , parentWorkflowId = WorkflowId $ parent ^. CommonProto.workflowId
                             }
+                    rootExec = do
+                      rootWf <- initializeWorkflow ^. Activation.maybe'rootWorkflow
+                      let rWfId = rootWf ^. CommonProto.workflowId
+                          rRunId = rootWf ^. CommonProto.runId
+                      if Text.null rWfId then Nothing
+                      else Just RootExecution
+                        { rootWorkflowId = WorkflowId rWfId
+                        , rootRunId = RunId rRunId
+                        }
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength
@@ -249,15 +258,18 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
                         , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType
                         , continuedRunId = fmap RunId $ initializeWorkflow ^. Activation.continuedFromExecutionRunId . to nonEmptyString
+                        , continuedFailure = initializeWorkflow ^. Activation.maybe'continuedFailure
                         , cronSchedule = initializeWorkflow ^. Activation.cronSchedule . to nonEmptyString
                         , taskTimeout = initializeWorkflow ^. Activation.workflowTaskTimeout . to durationFromProto
                         , executionTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowExecutionTimeout
+                        , firstExecutionRunId = RunId $ initializeWorkflow ^. Activation.firstExecutionRunId
                         , namespace = Namespace $ Core.namespace $ Core.getWorkerConfig workerCore
                         , parent = parentInfo
                         , headers = hdrs
                         , rawMemo = memo
                         , searchAttributes = searchAttrs
                         , retryPolicy = retryPolicyFromProto <$> initializeWorkflow ^. Activation.maybe'retryPolicy
+                        , rootExecution = rootExec
                         , runId = RunId $ activation ^. CommonProto.runId
                         , runTimeout = fmap durationFromProto $ initializeWorkflow ^. Activation.maybe'workflowRunTimeout
                         , startTime =

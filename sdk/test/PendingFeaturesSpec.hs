@@ -79,8 +79,6 @@ spec = do
     it "worker deployment versioning" $ const pending
 
   describe "Workflow Advanced (Py/TS)" $ do
-    it "previous run failure / lastFailure" $ const pending
-    it "root execution exposed" $ const pending
     it "user metadata on workflow, timer, activity, child" $ const pending
     it "workflow priorities" $ const pending
 

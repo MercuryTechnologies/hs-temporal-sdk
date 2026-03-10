@@ -4,6 +4,7 @@
 module Temporal.WorkflowInstance (
   WorkflowInstance,
   Info (..),
+  RootExecution (..),
   create,
   activate,
   addCommand,

@@ -11,6 +11,7 @@ import Data.Time.Clock.System (SystemTime)
 import Data.Vector (Vector)
 import Data.Word (Word32)
 import Language.Haskell.TH.Syntax (Lift)
+import qualified Proto.Temporal.Api.Failure.V1.Message
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
 import Temporal.Activity.Types
 import Temporal.Common
@@ -25,13 +26,20 @@ data Info = Info
   , attempt :: {-# UNPACK #-} !Int
   , buildId :: !Text
   , continuedRunId :: !(Maybe RunId)
+  , continuedFailure :: !(Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)
+  -- ^ If this workflow is a retry or continue-as-new of a previous run that failed,
+  -- the failure from that previous run.
   , cronSchedule :: !(Maybe Text)
   , executionTimeout :: !(Maybe Duration)
+  , firstExecutionRunId :: !RunId
+  -- ^ Run ID of the very first run in the workflow execution chain.
   , headers :: !(Map Text Payload)
   , namespace :: !Namespace
   , parent :: !(Maybe ParentInfo)
   , rawMemo :: !(Map Text Payload)
   , retryPolicy :: !(Maybe RetryPolicy)
+  , rootExecution :: !(Maybe RootExecution)
+  -- ^ The root workflow that started this execution chain (if set by the server).
   , runId :: !RunId
   , runTimeout :: !(Maybe Duration)
   , searchAttributes :: !(Map SearchAttributeKey SearchAttributeType)
@@ -43,6 +51,14 @@ data Info = Info
   , continueAsNewSuggested :: !Bool
   }
   deriving stock (Show)
+
+
+-- | Information about the root workflow execution in the chain.
+data RootExecution = RootExecution
+  { rootWorkflowId :: !WorkflowId
+  , rootRunId :: !RunId
+  }
+  deriving stock (Show, Eq)
 
 
 data ActivityTimeoutPolicy

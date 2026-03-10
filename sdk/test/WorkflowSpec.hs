@@ -986,3 +986,45 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
+  describe "Workflow Advanced" $ do
+    specify "firstExecutionRunId is set on workflow info" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Text
+          workflow = do
+            i <- W.info
+            let (W.RunId rid) = i.firstExecutionRunId
+            pure rid
+          wf = W.provideWorkflow defaultCodec "firstExecRunIdWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        result <- useClient (C.execute wf.reference "firstExecRunIdWf" opts)
+        result `shouldSatisfy` (not . Text.null)
+
+    specify "rootExecution field is accessible" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Text
+          workflow = do
+            i <- W.info
+            pure $ case i.rootExecution of
+              Just r -> let (W.WorkflowId wid) = r.rootWorkflowId in wid
+              Nothing -> "no-root"
+          wf = W.provideWorkflow defaultCodec "rootExecWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        result <- useClient (C.execute wf.reference "rootExecWf" opts)
+        result `shouldSatisfy` (not . Text.null)
+
+    specify "continuedFailure is Nothing for fresh workflow" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Bool
+          workflow = do
+            i <- W.info
+            pure $ case i.continuedFailure of
+              Nothing -> True
+              Just _ -> False
+          wf = W.provideWorkflow defaultCodec "continuedFailureWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "continuedFailureWf" opts)
+          `shouldReturn` True
