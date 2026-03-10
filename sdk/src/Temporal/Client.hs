@@ -107,7 +107,7 @@ import qualified Control.Monad.Trans.Writer.CPS as CW
 import qualified Control.Monad.Trans.Writer.Lazy as LW
 import qualified Control.Monad.Trans.Writer.Strict as SW
 import Data.Foldable (for_)
-import Data.Map (Map)
+import Data.Map (Map, fromList)
 import Data.Maybe
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
@@ -117,6 +117,7 @@ import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
 import Lens.Family2
+import qualified Proto.Temporal.Api.Common.V1.Message as CommonMsg
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
@@ -143,6 +144,8 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   UpdateWorkflowExecutionRequest,
   UpdateWorkflowExecutionResponse,
  )
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata as UserMetadataMsg
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata_Fields as UM
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
 import qualified Temporal.Client.TestService as TestService
@@ -620,6 +623,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
               WF.lastCompletionResult
             -}
             & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
+            & WF.maybe'userMetadata .~ buildUserMetadata opts'.staticSummary opts'.staticDetails
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
@@ -723,6 +727,7 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
             & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
             & RR.memo .~ convertToProtoMemo memo'
             & RR.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+            & RR.maybe'userMetadata .~ buildUserMetadata opts'.signalWithStartOptions.staticSummary opts'.signalWithStartOptions.staticDetails
     -- & RR.workflowStartDelay .~ _
     -- & RR.skipGenerateWorkflowTask .~ _
     res <-
@@ -1241,3 +1246,27 @@ checkWorkflowExecutionExists wfRef wfId = do
         Core.RpcError status _ _ | fromIntegral status == fromEnum StatusNotFound -> pure False
         _ -> throwIO $ coreRpcErrorToRpcError err
       Right _ -> pure True
+
+
+-- | Build a proto UserMetadata from optional summary/details text.
+-- The Temporal API encodes these as @\"json\/plain\"@ payloads containing a JSON string.
+buildUserMetadata :: Maybe Text -> Maybe Text -> Maybe UserMetadataMsg.UserMetadata
+buildUserMetadata Nothing Nothing = Nothing
+buildUserMetadata mSummary mDetails =
+  Just $
+    defMessage
+      & UM.maybe'summary .~ fmap mkJsonPlainPayload mSummary
+      & UM.maybe'details .~ fmap mkJsonPlainPayload mDetails
+
+
+-- | Build a summary-only proto UserMetadata from optional summary text.
+buildSummaryMetadata :: Maybe Text -> Maybe UserMetadataMsg.UserMetadata
+buildSummaryMetadata Nothing = Nothing
+buildSummaryMetadata s = buildUserMetadata s Nothing
+
+
+mkJsonPlainPayload :: Text -> CommonMsg.Payload
+mkJsonPlainPayload t =
+  defMessage
+    & Common.metadata .~ fromList [("encoding", "json/plain")]
+    & Common.data' .~ textToJsonPlainPayload t

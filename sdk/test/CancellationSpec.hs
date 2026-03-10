@@ -35,6 +35,8 @@ childOptsWithId wfId =
     , W.workflowIdReusePolicy = W.WorkflowIdReusePolicyUnspecified
     , W.workflowId = Just wfId
     , W.taskQueue = Nothing
+    , W.staticSummary = Nothing
+    , W.staticDetails = Nothing
     }
 
 

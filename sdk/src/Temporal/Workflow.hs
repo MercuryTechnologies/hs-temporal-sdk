@@ -212,10 +212,12 @@ module Temporal.Workflow (
   now,
   time,
   sleep,
+  sleepWithSummary,
   sleepUntilSystemTime,
   sleepUntilUTCTime,
   Timer,
   createTimer,
+  createTimerWithSummary,
   scheduledTime,
 
   -- * Workflow cancellation
@@ -278,6 +280,7 @@ import Data.Proxy
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
+import qualified Data.Text.Encoding
 import Data.These (These (..))
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.System (SystemTime (..), systemToUTCTime, utcToSystemTime)
@@ -296,6 +299,10 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as Activi
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Api.Common.V1.Message as CommonMsg
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as CommonFields
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata_Fields as UM
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import RequireCallStack
@@ -424,7 +431,10 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
                     & Command.scheduleToCloseTimeout .~ durationToProto stc'
                 & Command.doNotEagerlyExecute .~ activityInput.options.disableEagerExecution
 
-    let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
+    let cmd =
+          defMessage
+            & Command.scheduleActivity .~ scheduleActivity
+            & Command.maybe'userMetadata .~ mkSummaryMetadata activityInput.options.summary
     addCommand cmd
     pure $
       Task
@@ -638,6 +648,7 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
             cmd =
               defMessage
                 & Command.startChildWorkflowExecution .~ childWorkflowOptions
+                & Command.maybe'userMetadata .~ mkUserMetadata opts'.staticSummary opts'.staticDetails
 
             wfHandle =
               ChildWorkflowHandle
@@ -1327,7 +1338,19 @@ by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWork
 If the duration is less than or equal to zero, the timer will not be created.
 -}
 createTimer :: Duration -> Workflow (Maybe Timer)
-createTimer ts = provideCallStack $ ilift $ do
+createTimer ts = createTimerInternal ts Nothing
+
+
+{- | Like 'createTimer', but attaches a user metadata summary to the timer
+command. The summary appears on the @TimerStarted@ history event and is
+visible in the Temporal UI.
+-}
+createTimerWithSummary :: Duration -> Text -> Workflow (Maybe Timer)
+createTimerWithSummary ts summary = createTimerInternal ts (Just summary)
+
+
+createTimerInternal :: Duration -> Maybe Text -> Workflow (Maybe Timer)
+createTimerInternal ts mSummary = provideCallStack $ ilift $ do
   inst <- ask
   s@(Sequence seqId) <- nextTimerSequence
   if ts <= mempty
@@ -1341,6 +1364,7 @@ createTimer ts = provideCallStack $ ilift $ do
                       & Command.seq .~ seqId
                       & Command.startToFireTimeout .~ durationToProto ts'
                    )
+              & Command.maybe'userMetadata .~ mkSummaryMetadata mSummary
       Logging.logDebug "Add command: sleep"
       res <- newIVar
       atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
@@ -1367,6 +1391,18 @@ sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
   t <- createTimer ts
+  mapM_ Temporal.Workflow.Unsafe.Handle.wait t
+
+
+{- | Like 'sleep', but attaches a user metadata summary to the timer.
+
+The summary appears on the @TimerStarted@ history event and is visible
+in the Temporal UI.
+-}
+sleepWithSummary :: RequireCallStack => Duration -> Text -> Workflow ()
+sleepWithSummary ts summary = do
+  updateCallStackW
+  t <- createTimerWithSummary ts summary
   mapM_ Temporal.Workflow.Unsafe.Handle.wait t
 
 
@@ -1818,6 +1854,29 @@ defaultRetryPolicy =
     , maximumAttempts = 0
     , nonRetryableErrorTypes = mempty
     }
+
+
+-- Internal: build a proto UserMetadata containing only a summary payload.
+mkSummaryMetadata :: Maybe Text -> Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata
+mkSummaryMetadata Nothing = Nothing
+mkSummaryMetadata s = mkUserMetadata s Nothing
+
+
+-- Internal: build a proto UserMetadata from optional summary/details text.
+mkUserMetadata :: Maybe Text -> Maybe Text -> Maybe Proto.Temporal.Api.Sdk.V1.UserMetadata.UserMetadata
+mkUserMetadata Nothing Nothing = Nothing
+mkUserMetadata mSummary mDetails =
+  Just $
+    defMessage
+      & UM.maybe'summary .~ fmap mkJsonPlainPayload' mSummary
+      & UM.maybe'details .~ fmap mkJsonPlainPayload' mDetails
+  where
+    mkJsonPlainPayload' :: Text -> CommonMsg.Payload
+    mkJsonPlainPayload' t =
+      defMessage
+        & CommonFields.metadata .~ Map.fromList [("encoding", "json/plain")]
+        & CommonFields.data' .~ ("\"" <> encodeUtf8 t <> "\"")
+    encodeUtf8 = Data.Text.Encoding.encodeUtf8
 
 
 {- | A value of type 'ConcurrentWorkflow' a is a 'Workflow' operation that can be composed with other ConcurrentWorkflow values, using the Applicative and Alternative instances.

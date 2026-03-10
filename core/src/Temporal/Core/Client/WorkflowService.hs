@@ -8,15 +8,22 @@ module Temporal.Core.Client.WorkflowService (
   countWorkflowExecutions,
   createSchedule,
   deleteSchedule,
+  deleteWorkerDeployment,
+  deleteWorkerDeploymentVersion,
   deprecateNamespace,
   describeNamespace,
   describeSchedule,
   describeTaskQueue,
+  describeWorkerDeployment,
+  describeWorkerDeploymentVersion,
   describeWorkflowExecution,
+  executeMultiOperation,
   getClusterInfo,
   getSearchAttributes,
   getSystemInfo,
   getWorkerBuildIdCompatibility,
+  getWorkerTaskReachability,
+  getWorkerVersioningRules,
   getWorkflowExecutionHistory,
   getWorkflowExecutionHistoryReverse,
   listArchivedWorkflowExecutions,
@@ -26,8 +33,10 @@ module Temporal.Core.Client.WorkflowService (
   listScheduleMatchingTimes,
   listSchedules,
   listTaskQueuePartitions,
+  listWorkerDeployments,
   listWorkflowExecutions,
   patchSchedule,
+  pauseActivity,
   pollActivityTaskQueue,
   pollWorkflowExecutionUpdate,
   pollWorkflowTaskQueue,
@@ -36,6 +45,7 @@ module Temporal.Core.Client.WorkflowService (
   recordActivityTaskHeartbeatById,
   registerNamespace,
   requestCancelWorkflowExecution,
+  resetActivity,
   resetStickyTaskQueue,
   resetWorkflowExecution,
   respondActivityTaskCanceled,
@@ -48,14 +58,20 @@ module Temporal.Core.Client.WorkflowService (
   respondWorkflowTaskCompleted,
   respondWorkflowTaskFailed,
   scanWorkflowExecutions,
+  setWorkerDeploymentCurrentVersion,
+  setWorkerDeploymentRampingVersion,
   signalWithStartWorkflowExecution,
   signalWorkflowExecution,
   startWorkflowExecution,
   terminateWorkflowExecution,
+  unpauseActivity,
+  updateActivityOptions,
   updateNamespace,
   updateSchedule,
-  updateWorkflowExecution,
   updateWorkerBuildIdCompatibility,
+  updateWorkerDeploymentVersionMetadata,
+  updateWorkerVersioningRules,
+  updateWorkflowExecution,
 ) where
 
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
@@ -617,3 +633,131 @@ members are compatible with one another.
 -}
 updateWorkerBuildIdCompatibility :: Client -> UpdateWorkerBuildIdCompatibilityRequest -> IO (Either RpcError UpdateWorkerBuildIdCompatibilityResponse)
 updateWorkerBuildIdCompatibility = call @WorkflowService @"updateWorkerBuildIdCompatibility" hs_update_worker_build_id_compatibility
+
+
+foreign import ccall "hs_get_worker_versioning_rules" hs_get_worker_versioning_rules :: PrimRpcCall
+
+
+-- | Fetches the worker versioning rules for a task queue.
+getWorkerVersioningRules :: Client -> GetWorkerVersioningRulesRequest -> IO (Either RpcError GetWorkerVersioningRulesResponse)
+getWorkerVersioningRules = call @WorkflowService @"getWorkerVersioningRules" hs_get_worker_versioning_rules
+
+
+foreign import ccall "hs_update_worker_versioning_rules" hs_update_worker_versioning_rules :: PrimRpcCall
+
+
+-- | Creates or updates worker versioning rules for a task queue.
+updateWorkerVersioningRules :: Client -> UpdateWorkerVersioningRulesRequest -> IO (Either RpcError UpdateWorkerVersioningRulesResponse)
+updateWorkerVersioningRules = call @WorkflowService @"updateWorkerVersioningRules" hs_update_worker_versioning_rules
+
+
+foreign import ccall "hs_get_worker_task_reachability" hs_get_worker_task_reachability :: PrimRpcCall
+
+
+-- | Fetches the reachability of worker task queues for given build IDs.
+getWorkerTaskReachability :: Client -> GetWorkerTaskReachabilityRequest -> IO (Either RpcError GetWorkerTaskReachabilityResponse)
+getWorkerTaskReachability = call @WorkflowService @"getWorkerTaskReachability" hs_get_worker_task_reachability
+
+
+foreign import ccall "hs_describe_worker_deployment" hs_describe_worker_deployment :: PrimRpcCall
+
+
+-- | Describes a worker deployment by name.
+describeWorkerDeployment :: Client -> DescribeWorkerDeploymentRequest -> IO (Either RpcError DescribeWorkerDeploymentResponse)
+describeWorkerDeployment = call @WorkflowService @"describeWorkerDeployment" hs_describe_worker_deployment
+
+
+foreign import ccall "hs_describe_worker_deployment_version" hs_describe_worker_deployment_version :: PrimRpcCall
+
+
+-- | Describes a specific version within a worker deployment.
+describeWorkerDeploymentVersion :: Client -> DescribeWorkerDeploymentVersionRequest -> IO (Either RpcError DescribeWorkerDeploymentVersionResponse)
+describeWorkerDeploymentVersion = call @WorkflowService @"describeWorkerDeploymentVersion" hs_describe_worker_deployment_version
+
+
+foreign import ccall "hs_set_worker_deployment_current_version" hs_set_worker_deployment_current_version :: PrimRpcCall
+
+
+-- | Sets the current (default) version for a worker deployment.
+setWorkerDeploymentCurrentVersion :: Client -> SetWorkerDeploymentCurrentVersionRequest -> IO (Either RpcError SetWorkerDeploymentCurrentVersionResponse)
+setWorkerDeploymentCurrentVersion = call @WorkflowService @"setWorkerDeploymentCurrentVersion" hs_set_worker_deployment_current_version
+
+
+foreign import ccall "hs_set_worker_deployment_ramping_version" hs_set_worker_deployment_ramping_version :: PrimRpcCall
+
+
+-- | Sets a ramping version for a worker deployment, allowing gradual traffic shifts.
+setWorkerDeploymentRampingVersion :: Client -> SetWorkerDeploymentRampingVersionRequest -> IO (Either RpcError SetWorkerDeploymentRampingVersionResponse)
+setWorkerDeploymentRampingVersion = call @WorkflowService @"setWorkerDeploymentRampingVersion" hs_set_worker_deployment_ramping_version
+
+
+foreign import ccall "hs_delete_worker_deployment" hs_delete_worker_deployment :: PrimRpcCall
+
+
+-- | Deletes a worker deployment.
+deleteWorkerDeployment :: Client -> DeleteWorkerDeploymentRequest -> IO (Either RpcError DeleteWorkerDeploymentResponse)
+deleteWorkerDeployment = call @WorkflowService @"deleteWorkerDeployment" hs_delete_worker_deployment
+
+
+foreign import ccall "hs_delete_worker_deployment_version" hs_delete_worker_deployment_version :: PrimRpcCall
+
+
+-- | Deletes a specific version from a worker deployment.
+deleteWorkerDeploymentVersion :: Client -> DeleteWorkerDeploymentVersionRequest -> IO (Either RpcError DeleteWorkerDeploymentVersionResponse)
+deleteWorkerDeploymentVersion = call @WorkflowService @"deleteWorkerDeploymentVersion" hs_delete_worker_deployment_version
+
+
+foreign import ccall "hs_list_worker_deployments" hs_list_worker_deployments :: PrimRpcCall
+
+
+-- | Lists all worker deployments in a namespace.
+listWorkerDeployments :: Client -> ListWorkerDeploymentsRequest -> IO (Either RpcError ListWorkerDeploymentsResponse)
+listWorkerDeployments = call @WorkflowService @"listWorkerDeployments" hs_list_worker_deployments
+
+
+foreign import ccall "hs_update_worker_deployment_version_metadata" hs_update_worker_deployment_version_metadata :: PrimRpcCall
+
+
+-- | Updates the metadata for a specific worker deployment version.
+updateWorkerDeploymentVersionMetadata :: Client -> UpdateWorkerDeploymentVersionMetadataRequest -> IO (Either RpcError UpdateWorkerDeploymentVersionMetadataResponse)
+updateWorkerDeploymentVersionMetadata = call @WorkflowService @"updateWorkerDeploymentVersionMetadata" hs_update_worker_deployment_version_metadata
+
+
+foreign import ccall "hs_pause_activity" hs_pause_activity :: PrimRpcCall
+
+
+-- | Pauses an activity, preventing it from being dispatched until unpaused.
+pauseActivity :: Client -> PauseActivityRequest -> IO (Either RpcError PauseActivityResponse)
+pauseActivity = call @WorkflowService @"pauseActivity" hs_pause_activity
+
+
+foreign import ccall "hs_unpause_activity" hs_unpause_activity :: PrimRpcCall
+
+
+-- | Unpauses a previously paused activity, allowing it to be dispatched again.
+unpauseActivity :: Client -> UnpauseActivityRequest -> IO (Either RpcError UnpauseActivityResponse)
+unpauseActivity = call @WorkflowService @"unpauseActivity" hs_unpause_activity
+
+
+foreign import ccall "hs_reset_activity" hs_reset_activity :: PrimRpcCall
+
+
+-- | Resets an activity, clearing its current attempt and restarting it.
+resetActivity :: Client -> ResetActivityRequest -> IO (Either RpcError ResetActivityResponse)
+resetActivity = call @WorkflowService @"resetActivity" hs_reset_activity
+
+
+foreign import ccall "hs_update_activity_options" hs_update_activity_options :: PrimRpcCall
+
+
+-- | Updates the options of a running activity (e.g. retry policy, timeouts).
+updateActivityOptions :: Client -> UpdateActivityOptionsRequest -> IO (Either RpcError UpdateActivityOptionsResponse)
+updateActivityOptions = call @WorkflowService @"updateActivityOptions" hs_update_activity_options
+
+
+foreign import ccall "hs_execute_multi_operation" hs_execute_multi_operation :: PrimRpcCall
+
+
+-- | Executes multiple operations atomically (e.g. update-with-start).
+executeMultiOperation :: Client -> ExecuteMultiOperationRequest -> IO (Either RpcError ExecuteMultiOperationResponse)
+executeMultiOperation = call @WorkflowService @"executeMultiOperation" hs_execute_multi_operation

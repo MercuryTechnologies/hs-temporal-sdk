@@ -517,6 +517,118 @@ void hs_update_worker_build_id_compatibility(struct ClientRef *client,
                                              struct CRPCError **error_slot,
                                              struct CArray_u8 **result_slot);
 
+void hs_get_worker_versioning_rules(struct ClientRef *client,
+                                    const struct RpcCall *c_call,
+                                    struct MVar *mvar,
+                                    struct Capability cap,
+                                    struct CRPCError **error_slot,
+                                    struct CArray_u8 **result_slot);
+
+void hs_update_worker_versioning_rules(struct ClientRef *client,
+                                       const struct RpcCall *c_call,
+                                       struct MVar *mvar,
+                                       struct Capability cap,
+                                       struct CRPCError **error_slot,
+                                       struct CArray_u8 **result_slot);
+
+void hs_get_worker_task_reachability(struct ClientRef *client,
+                                     const struct RpcCall *c_call,
+                                     struct MVar *mvar,
+                                     struct Capability cap,
+                                     struct CRPCError **error_slot,
+                                     struct CArray_u8 **result_slot);
+
+void hs_describe_worker_deployment(struct ClientRef *client,
+                                   const struct RpcCall *c_call,
+                                   struct MVar *mvar,
+                                   struct Capability cap,
+                                   struct CRPCError **error_slot,
+                                   struct CArray_u8 **result_slot);
+
+void hs_describe_worker_deployment_version(struct ClientRef *client,
+                                           const struct RpcCall *c_call,
+                                           struct MVar *mvar,
+                                           struct Capability cap,
+                                           struct CRPCError **error_slot,
+                                           struct CArray_u8 **result_slot);
+
+void hs_set_worker_deployment_current_version(struct ClientRef *client,
+                                              const struct RpcCall *c_call,
+                                              struct MVar *mvar,
+                                              struct Capability cap,
+                                              struct CRPCError **error_slot,
+                                              struct CArray_u8 **result_slot);
+
+void hs_set_worker_deployment_ramping_version(struct ClientRef *client,
+                                              const struct RpcCall *c_call,
+                                              struct MVar *mvar,
+                                              struct Capability cap,
+                                              struct CRPCError **error_slot,
+                                              struct CArray_u8 **result_slot);
+
+void hs_delete_worker_deployment(struct ClientRef *client,
+                                 const struct RpcCall *c_call,
+                                 struct MVar *mvar,
+                                 struct Capability cap,
+                                 struct CRPCError **error_slot,
+                                 struct CArray_u8 **result_slot);
+
+void hs_delete_worker_deployment_version(struct ClientRef *client,
+                                         const struct RpcCall *c_call,
+                                         struct MVar *mvar,
+                                         struct Capability cap,
+                                         struct CRPCError **error_slot,
+                                         struct CArray_u8 **result_slot);
+
+void hs_list_worker_deployments(struct ClientRef *client,
+                                const struct RpcCall *c_call,
+                                struct MVar *mvar,
+                                struct Capability cap,
+                                struct CRPCError **error_slot,
+                                struct CArray_u8 **result_slot);
+
+void hs_update_worker_deployment_version_metadata(struct ClientRef *client,
+                                                  const struct RpcCall *c_call,
+                                                  struct MVar *mvar,
+                                                  struct Capability cap,
+                                                  struct CRPCError **error_slot,
+                                                  struct CArray_u8 **result_slot);
+
+void hs_pause_activity(struct ClientRef *client,
+                       const struct RpcCall *c_call,
+                       struct MVar *mvar,
+                       struct Capability cap,
+                       struct CRPCError **error_slot,
+                       struct CArray_u8 **result_slot);
+
+void hs_unpause_activity(struct ClientRef *client,
+                         const struct RpcCall *c_call,
+                         struct MVar *mvar,
+                         struct Capability cap,
+                         struct CRPCError **error_slot,
+                         struct CArray_u8 **result_slot);
+
+void hs_reset_activity(struct ClientRef *client,
+                       const struct RpcCall *c_call,
+                       struct MVar *mvar,
+                       struct Capability cap,
+                       struct CRPCError **error_slot,
+                       struct CArray_u8 **result_slot);
+
+void hs_update_activity_options(struct ClientRef *client,
+                                const struct RpcCall *c_call,
+                                struct MVar *mvar,
+                                struct Capability cap,
+                                struct CRPCError **error_slot,
+                                struct CArray_u8 **result_slot);
+
+void hs_execute_multi_operation(struct ClientRef *client,
+                                const struct RpcCall *c_call,
+                                struct MVar *mvar,
+                                struct Capability cap,
+                                struct CRPCError **error_slot,
+                                struct CArray_u8 **result_slot);
+
 void hs_get_current_time(struct ClientRef *client,
                          const struct RpcCall *c_call,
                          struct MVar *mvar,

@@ -1,10 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fconstraint-solver-iterations=20 #-}
 
 module WorkflowSpec where
 
 import Conduit
 import Control.Concurrent (threadDelay)
+import Data.Either (isRight)
+import Data.Maybe (isJust)
 import Control.Exception (SomeException, bracket)
+import Control.Concurrent.MVar
+import Control.Monad (void)
+import Data.IORef
 import Control.Exception.Annotated (checkpoint)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
@@ -19,12 +25,17 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata_Fields as UM
 import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as WFInfo
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
+import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
+import RequireCallStack (provideCallStack)
 import qualified Temporal.Activity as A
 import qualified Temporal.Client as C
+import qualified Temporal.Core.Client.WorkflowService as WS
 import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
@@ -723,6 +734,32 @@ tests = do
         let opts = defaultStartOpts taskQueue
         useClient (C.execute wf.reference "buildIdInfoWf" opts) `shouldReturn` "my-build-abc"
 
+  describe "RPC bindings" $ do
+    specify "describeTaskQueue returns info for task queue with worker" $ \TestEnv {..} -> do
+      let workflow :: W.Workflow Int
+          workflow = pure 42
+          wf = W.provideWorkflow defaultCodec "buildIdDescribeWf" workflow
+          conf = configure () wf $ do
+            baseConf
+            setBuildId "describe-build-xyz"
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "buildIdDescribe" opts) `shouldReturn` 42
+        let tqProto = defMessage & TQ.name .~ W.rawTaskQueue taskQueue
+            descReq =
+              defMessage
+                & RR.namespace .~ "default"
+                & RR.taskQueue .~ tqProto
+        descRes <- WS.describeTaskQueue coreClient descReq
+        descRes `shouldSatisfy` isRight
+
+    specify "listWorkerDeployments returns successfully" $ \TestEnv {..} -> do
+      let listReq =
+            defMessage
+              & RR.namespace .~ "default"
+      listRes <- WS.listWorkerDeployments coreClient listReq
+      listRes `shouldSatisfy` isRight
+
   describe "Memo operations (Py/TS: memo access)" $ do
     specify "getMemoValues returns initial memos (Py: test_workflow_memo)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow (Map Text Payload)
@@ -986,3 +1023,204 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
+  describe "Activity pause / unpause / reset" $ do
+    specify "pauseActivity pauses a running activity" $ \TestEnv {..} -> do
+      actStarted <- newEmptyMVar
+      actGate <- newEmptyMVar
+      let act :: A.Activity () ()
+          act = do
+            liftIO $ putMVar actStarted ()
+            liftIO $ takeMVar actGate
+          actDef = A.provideActivity defaultCodec "pausableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 60)
+          wf = W.provideWorkflow defaultCodec "pauseActWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        takeMVar actStarted
+        let wfExec = defMessage
+              & Common.workflowId .~ W.rawWorkflowId wfId
+            pauseReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "pausableAct"
+        pauseRes <- WS.pauseActivity coreClient pauseReq
+        pauseRes `shouldSatisfy` isRight
+        putMVar actGate ()
+        C.waitWorkflowResult h `shouldReturn` ()
+
+    specify "unpauseActivity unpauses a paused activity" $ \TestEnv {..} -> do
+      actStarted <- newEmptyMVar
+      actGate <- newEmptyMVar
+      let act :: A.Activity () ()
+          act = do
+            liftIO $ putMVar actStarted ()
+            liftIO $ takeMVar actGate
+          actDef = A.provideActivity defaultCodec "unpausableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 60)
+          wf = W.provideWorkflow defaultCodec "unpauseActWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        takeMVar actStarted
+        let wfExec = defMessage
+              & Common.workflowId .~ W.rawWorkflowId wfId
+            pauseReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "unpausableAct"
+        _ <- WS.pauseActivity coreClient pauseReq
+        let unpauseReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "unpausableAct"
+        unpauseRes <- WS.unpauseActivity coreClient unpauseReq
+        unpauseRes `shouldSatisfy` isRight
+        putMVar actGate ()
+        C.waitWorkflowResult h `shouldReturn` ()
+
+    specify "resetActivity resets a running activity" $ \TestEnv {..} -> do
+      attemptCount <- newIORef (0 :: Int)
+      actStarted <- newEmptyMVar
+      actGate <- newEmptyMVar
+      let act :: A.Activity () ()
+          act = do
+            n <- liftIO $ atomicModifyIORef' attemptCount (\c -> (c + 1, c + 1))
+            liftIO $ void $ tryPutMVar actStarted ()
+            if n <= 1
+              then liftIO $ takeMVar actGate
+              else pure ()
+          actDef = A.provideActivity defaultCodec "resettableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 60)
+          wf = W.provideWorkflow defaultCodec "resetActWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        takeMVar actStarted
+        let wfExec = defMessage
+              & Common.workflowId .~ W.rawWorkflowId wfId
+            resetReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "resettableAct"
+        resetRes <- WS.resetActivity coreClient resetReq
+        resetRes `shouldSatisfy` isRight
+        putMVar actGate ()
+        C.waitWorkflowResult h `shouldReturn` ()
+
+  describe "Update with start (executeMultiOperation)" $ do
+    specify "executeMultiOperation atomically starts workflow and sends update" $ \TestEnv {..} -> do
+      let uwsUpdate :: W.KnownUpdate '[Int] Int SomeException
+          uwsUpdate = W.KnownUpdate defaultCodec "uws-update"
+          workflow :: W.Workflow Int
+          workflow = provideCallStack do
+            stateVar <- W.newStateVar (0 :: Int)
+            let handleUpdate arg = do
+                  W.modifyStateVar stateVar (+ arg)
+                  W.readStateVar stateVar
+            W.setUpdateHandler uwsUpdate handleUpdate Nothing
+            W.waitCondition $ do
+              x <- W.readStateVar stateVar
+              pure $ x > 0
+            W.readStateVar stateVar
+          wf = W.provideWorkflow defaultCodec "uwsWorkflow" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        wfId <- uuidText
+        let tqProto = defMessage & TQ.name .~ W.rawTaskQueue taskQueue
+            wfType = defMessage & Common.name .~ "uwsWorkflow"
+            startReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.workflowId .~ wfId
+              & RR.workflowType .~ wfType
+              & RR.taskQueue .~ tqProto
+            argPayload = defMessage
+              & Common.metadata .~ Map.fromList [("encoding", "json/plain"), ("messageType", "Int")]
+              & Common.data' .~ "42"
+            argPayloads = defMessage & Common.payloads .~ [argPayload]
+            updateInput = defMessage
+              & Update.name .~ ("uws-update" :: Text)
+              & Update.args .~ argPayloads
+            updateMeta = defMessage
+              & Update.updateId .~ ("uws-update-1" :: Text)
+            updateReqProto = defMessage
+              & Update.input .~ updateInput
+              & Update.meta .~ updateMeta
+            updateReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.workflowExecution .~ (defMessage & Common.workflowId .~ wfId)
+              & RR.request .~ updateReqProto
+            startOp = defMessage & RR.startWorkflow .~ startReq
+            updateOp = defMessage & RR.updateWorkflow .~ updateReq
+            multiReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.operations .~ [startOp, updateOp]
+        multiRes <- WS.executeMultiOperation coreClient multiReq
+        multiRes `shouldSatisfy` isRight
+
+  describe "User Metadata" $ do
+    specify "workflow start with user metadata runs successfully" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Text
+          workflow = pure "meta-ok"
+          wf = W.provideWorkflow defaultCodec "userMetaWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = (defaultStartOptsWithTimeout taskQueue (seconds 60))
+              { C.staticSummary = Just "wf-summary"
+              , C.staticDetails = Just "wf-details"
+              }
+        useClient (C.execute wf.reference "userMetaWf" opts) `shouldReturn` "meta-ok"
+
+    specify "activity command carries user metadata summary" $ \TestEnv {..} -> do
+      let act :: A.Activity () ()
+          act = pure ()
+          actDef = A.provideActivity defaultCodec "metaAct2" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions (W.StartToClose $ seconds 30))
+              { W.summary = Just "my-activity-summary" }
+          wf = W.provideWorkflow defaultCodec "actMetaWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        C.waitWorkflowResult h `shouldReturn` ()
+
+        history <- C.fetchHistory h
+        let events = history ^. History.events
+            actScheduledEvents = filter (\e -> isJust (e ^. History.maybe'activityTaskScheduledEventAttributes)) events
+            actMeta = fmap (\e -> e ^. History.userMetadata . UM.summary . Common.data') actScheduledEvents
+        actMeta `shouldSatisfy` any (== "\"my-activity-summary\"")
+
+    specify "timer command carries user metadata summary" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow ()
+          workflow = do
+            W.sleepWithSummary (seconds 1) "my-timer-summary"
+          wf = W.provideWorkflow defaultCodec "timerMetaWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        C.waitWorkflowResult h `shouldReturn` ()
+
+        history <- C.fetchHistory h
+        let events = history ^. History.events
+            timerStartedEvents = filter (\e -> isJust (e ^. History.maybe'timerStartedEventAttributes)) events
+            timerMeta = fmap (\e -> e ^. History.userMetadata . UM.summary . Common.data') timerStartedEvents
+        timerMeta `shouldSatisfy` any (== "\"my-timer-summary\"")

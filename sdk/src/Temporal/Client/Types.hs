@@ -3,8 +3,10 @@
 
 module Temporal.Client.Types where
 
+import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
+import qualified Data.Text.Encoding as Text
 import Data.Vector (Vector)
 import Language.Haskell.TH.Syntax (Lift)
 import Temporal.Common
@@ -79,6 +81,14 @@ data StartWorkflowOptions = StartWorkflowOptions
   -- ^ Eager activity execution is an optimization on some servers that sends activities
   -- back to the same worker as the calling workflow if they can run there.
   , workflowStartDelay :: Maybe Duration
+  , staticSummary :: Maybe Text
+  -- ^ Short-form text that provides a summary of the workflow execution.
+  -- This value is stored as a @\"json\/plain\"@-encoded payload on the server and appears
+  -- in the Temporal UI. Limited to 400 bytes.
+  , staticDetails :: Maybe Text
+  -- ^ Long-form text that provides details about the workflow execution.
+  -- This value is stored as a @\"json\/plain\"@-encoded payload on the server and appears
+  -- in the Temporal UI. Limited to 20000 bytes.
   }
   deriving stock (Show, Eq, Lift)
 
@@ -111,6 +121,8 @@ startWorkflowOptions tq =
           }
     , requestEagerExecution = False
     , workflowStartDelay = Nothing
+    , staticSummary = Nothing
+    , staticDetails = Nothing
     }
 
 
@@ -276,3 +288,11 @@ instance Monoid ClientInterceptors where
 --   -- , cancel :: CancelWorkflowInput -> (CancelWorkflowInput -> IO ()) -> IO ()
 --   -- , describe :: DescribeWorkflowInput -> (DescribeWorkflowInput -> IO ()) -> IO ()
 --   }
+
+
+-- | Encode a 'Text' value as a @\"json\/plain\"@-encoded proto 'Payload',
+-- suitable for the @summary@ or @details@ field of a @UserMetadata@ message.
+textToJsonPlainPayload :: Text -> ByteString
+textToJsonPlainPayload t =
+  -- The wire format is a JSON string: a quoted UTF-8 value.
+  "\"" <> Text.encodeUtf8 t <> "\""

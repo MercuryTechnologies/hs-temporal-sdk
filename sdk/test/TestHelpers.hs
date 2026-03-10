@@ -154,6 +154,9 @@ withServer f = do
                 defaultTemporalDevServerConfig
                   { TemporalDevServerConfig.port = Just $ fromIntegral fp
                   , TemporalDevServerConfig.exe = ExistingPath temporalPath
+                  , TemporalDevServerConfig.extraArgs =
+                      [ "--dynamic-config-value", "system.enableDeploymentVersions=true"
+                      ]
                   }
           pure serverConfig
       withDevServer globalRuntime conf $ \_ -> do
