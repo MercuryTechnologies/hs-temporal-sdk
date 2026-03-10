@@ -88,14 +88,6 @@ spec = do
     it "workflow isolation" $ const pending
     it "global state isolation" $ const pending
 
-  describe "Ephemeral Server (Py/TS)" $ do
-    it "start test server" $ const pending
-    it "start dev server" $ const pending
-    it "server options" $ const pending
-
-  describe "Runtime (Py/TS)" $ do
-    it "runtime configuration" $ const pending
-    it "runtime shutdown" $ const pending
 
   describe "Replay Advanced (Py/TS)" $ do
     it "empty histories replay returns empty result" $ const pending
@@ -118,4 +110,3 @@ spec = do
 
   describe "Query Advanced (Py/TS)" $ do
     it "default query handler for unknown queries (no API)" $ const pending
-    it "query workflow metadata" $ const pending

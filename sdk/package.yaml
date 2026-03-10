@@ -151,6 +151,7 @@ tests:
       Spec,
       ContinueAsNewSpec,
       DurationSpec,
+      EphemeralServerSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.NoOpWorkflow,
