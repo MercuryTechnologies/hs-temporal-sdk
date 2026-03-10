@@ -2,6 +2,7 @@ module QuerySpec where
 
 import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
+import qualified Data.Vector as V
 import Data.Text (Text)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
@@ -254,3 +255,26 @@ tests = describe "Query" $ do
       r2 `shouldBe` Right 42
       C.signal h sig C.defaultSignalOptions
       C.waitWorkflowResult h `shouldReturn` ()
+
+  specify "default query handler catches unknown query types" $ \TestEnv {..} -> do
+    let unknownQuery :: W.KnownQuery '[Text] Text
+        unknownQuery = W.KnownQuery "neverRegistered" defaultCodec
+        sig :: W.KnownSignal '[]
+        sig = W.KnownSignal "defaultQSig" defaultCodec
+        workflow :: MyWorkflow ()
+        workflow = provideCallStack $ do
+          W.setDefaultQueryHandler $ \_args ->
+            pure $ encodeJSON ("default-response" :: Text)
+          st <- W.newStateVar False
+          W.setSignalHandler sig $ W.writeStateVar st True
+          W.waitCondition (W.readStateVar st)
+        wf = W.provideWorkflow defaultCodec "defaultQueryHandlerWf" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOpts taskQueue
+      wfId <- W.WorkflowId <$> uuidText
+      h <- useClient (C.start wf.reference wfId opts)
+      result <- C.query h unknownQuery C.defaultQueryOptions "anything"
+      C.signal h sig C.defaultSignalOptions
+      _ <- C.waitWorkflowResult h
+      result `shouldBe` Right "default-response"

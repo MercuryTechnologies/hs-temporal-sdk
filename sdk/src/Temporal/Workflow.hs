@@ -182,6 +182,7 @@ module Temporal.Workflow (
   Query,
   KnownQuery (..),
   setQueryHandler,
+  setDefaultQueryHandler,
 
   -- ** Signals
   -- $signals
@@ -1184,6 +1185,28 @@ setQueryHandler (queryRef -> KnownQuery n codec) f = ilift $ do
           case eResult of
             Left err -> pure $ Left err
             Right result -> liftIO $ UnliftIO.try $ encode codec result
+
+
+{- | Register a default query handler that catches all query types without a specific handler.
+
+The handler receives the raw 'Payload' arguments and must return an encoded 'Payload'.
+Use this to provide a catch-all response for unknown query types.
+-}
+setDefaultQueryHandler
+  :: RequireCallStack
+  => (Vector Payload -> Query Payload)
+  -> Workflow ()
+setDefaultQueryHandler f = ilift $ do
+  updateCallStack
+  inst <- ask
+  withRunInIO $ \runInIO -> do
+    liftIO $ modifyIORef' inst.workflowQueryHandlers $ \handles ->
+      HashMap.insert Nothing (\_ vec _ -> runInIO $ qHandler vec) handles
+  where
+    qHandler :: Vector Payload -> InstanceM (Either SomeException Payload)
+    qHandler vec = do
+      let (Query action) = f vec
+      UnliftIO.try action
 
 
 {- | Register an update handler, optionally with a validator.
