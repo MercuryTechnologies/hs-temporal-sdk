@@ -244,7 +244,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength
                         , attempt = fromIntegral $ initializeWorkflow ^. Activation.attempt
-                        , buildId = Core.buildId $ Core.getWorkerConfig workerCore
+                        , buildId = BuildId $ Core.buildId $ Core.getWorkerConfig workerCore
                         , taskQueue = worker.workerTaskQueue
                         , workflowId = WorkflowId $ initializeWorkflow ^. Activation.workflowId
                         , workflowType = initializeWorkflow ^. Activation.workflowType . to WorkflowType

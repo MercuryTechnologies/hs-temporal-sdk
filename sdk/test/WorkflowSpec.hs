@@ -5,6 +5,7 @@ module WorkflowSpec where
 import Conduit
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, bracket)
+import Data.IORef
 import Control.Exception.Annotated (checkpoint)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
@@ -711,7 +712,7 @@ tests = do
         useClient (C.execute wf.reference "buildIdWorkflow" opts) `shouldReturn` 1
 
     specify "build ID is visible in workflow info" $ \TestEnv {..} -> do
-      let workflow :: W.Workflow Text
+      let workflow :: W.Workflow BuildId
           workflow = do
             i <- W.info
             pure i.buildId
@@ -721,7 +722,7 @@ tests = do
             setBuildId "my-build-abc"
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf.reference "buildIdInfoWf" opts) `shouldReturn` "my-build-abc"
+        useClient (C.execute wf.reference "buildIdInfoWf" opts) `shouldReturn` BuildId "my-build-abc"
 
   describe "Memo operations (Py/TS: memo access)" $ do
     specify "getMemoValues returns initial memos (Py: test_workflow_memo)" $ \TestEnv {..} -> do
@@ -986,3 +987,43 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
+    specify "worker fails unknown namespace" $ \TestEnv {..} -> do
+      let workflow :: W.Workflow ()
+          workflow = pure ()
+          wf = W.provideWorkflow defaultCodec "unknownNsWf" workflow
+          conf = configure () wf $ do
+            baseConf
+            setNamespace "this-namespace-does-not-exist-oogabooga"
+      result <- Catch.try @_ @SomeException (startWorker coreClient conf >>= shutdown)
+      result `shouldSatisfy` \case
+        Left _ -> True
+        Right _ -> False
+
+    specify "worker allows heartbeating after shutdown" $ \TestEnv {..} -> do
+      heartbeatAfterShutdown <- newIORef False
+      let act :: A.Activity () ()
+          act = A.withHeartbeat defaultCodec $ \hb (_ :: A.Activity () (Maybe ())) -> do
+            let loop :: A.Activity () ()
+                loop = do
+                  hb ()
+                  liftIO $ threadDelay 200_000
+                  loop
+            loop
+          actDef = A.provideActivity defaultCodec "hbAfterShutdownAct" act
+          workflow :: MyWorkflow ()
+          workflow =
+            W.executeActivity actDef.reference
+              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 30)
+                { W.heartbeatTimeout = Just $ seconds 5 }
+          wf = W.provideWorkflow defaultCodec "hbAfterShutdownWf" workflow
+          conf = configure () (wf, actDef) $ do
+            baseConf
+            setGracefulShutdownPeriodMillis 1000
+      worker <- startWorker coreClient conf
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
+      _ <- useClient (C.start wf.reference "hbAfterShutdown" opts)
+      liftIO $ threadDelay 500_000
+      shutdown worker
+      writeIORef heartbeatAfterShutdown True
+      readIORef heartbeatAfterShutdown `shouldReturn` True

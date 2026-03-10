@@ -1,7 +1,10 @@
 module ReplaySpec where
 
+import Control.Exception (SomeException)
+import qualified Control.Monad.Catch as Catch
 import Control.Monad (void, when)
 import Data.Either (isLeft, isRight)
+import Data.ProtoLens (defMessage)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
 import System.Directory (getTemporaryDirectory, removeFile)
@@ -183,3 +186,39 @@ tests = describe "Workflow Replay" $ do
     case result of
       Left err -> err.message `shouldSatisfy` (not . Text.null)
       Right () -> expectationFailure "Expected replay failure"
+
+  specify "empty history replay fails" $ \TestEnv {..} -> do
+    let workflow :: W.ProvidedWorkflow (W.Workflow ())
+        workflow = W.provideWorkflow JSON "replay-empty-wf" $ pure ()
+        conf = provideCallStack $ configure () workflow baseConf
+        emptyHistory = defMessage
+    result <- Catch.try @_ @SomeException (runReplayHistory globalRuntime conf emptyHistory)
+    result `shouldSatisfy` \case
+      Left _ -> True
+      Right (Left _) -> True
+      Right (Right ()) -> False
+
+  specify "task failure fails replay" $ \TestEnv {..} -> do
+    let workflow :: W.ProvidedWorkflow (W.Workflow ())
+        workflow = W.provideWorkflow JSON "replay-task-fail-wf" $ provideCallStack $ do
+          W.sleep $ milliseconds 10
+          _ <- W.executeActivity replayActivityDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+          pure ()
+        defs = (replayActivityDef, workflow)
+        conf = provideCallStack $ configure () defs baseConf
+
+    history <- withWorker conf $ do
+      uuid <- uuidText
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+      useClient $ do
+        wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+        C.waitWorkflowResult wfHandle
+        C.fetchHistory wfHandle
+
+    let throwingWorkflow :: W.ProvidedWorkflow (W.Workflow ())
+        throwingWorkflow = W.provideWorkflow JSON "replay-task-fail-wf" $ provideCallStack $ do
+          error "deliberate task failure during replay"
+        throwingConf = provideCallStack $ configure () throwingWorkflow baseConf
+
+    result <- runReplayHistory globalRuntime throwingConf history
+    result `shouldSatisfy` isLeft
