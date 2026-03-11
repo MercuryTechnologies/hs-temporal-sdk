@@ -28,6 +28,7 @@ module Temporal.Core.Client.WorkflowService (
   listTaskQueuePartitions,
   listWorkflowExecutions,
   patchSchedule,
+  pauseActivity,
   pollActivityTaskQueue,
   pollWorkflowExecutionUpdate,
   pollWorkflowTaskQueue,
@@ -36,6 +37,7 @@ module Temporal.Core.Client.WorkflowService (
   recordActivityTaskHeartbeatById,
   registerNamespace,
   requestCancelWorkflowExecution,
+  resetActivity,
   resetStickyTaskQueue,
   resetWorkflowExecution,
   respondActivityTaskCanceled,
@@ -52,10 +54,12 @@ module Temporal.Core.Client.WorkflowService (
   signalWorkflowExecution,
   startWorkflowExecution,
   terminateWorkflowExecution,
+  unpauseActivity,
+  updateActivityOptions,
   updateNamespace,
   updateSchedule,
-  updateWorkflowExecution,
   updateWorkerBuildIdCompatibility,
+  updateWorkflowExecution,
 ) where
 
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
@@ -617,3 +621,35 @@ members are compatible with one another.
 -}
 updateWorkerBuildIdCompatibility :: Client -> UpdateWorkerBuildIdCompatibilityRequest -> IO (Either RpcError UpdateWorkerBuildIdCompatibilityResponse)
 updateWorkerBuildIdCompatibility = call @WorkflowService @"updateWorkerBuildIdCompatibility" hs_update_worker_build_id_compatibility
+
+
+foreign import ccall "hs_pause_activity" hs_pause_activity :: PrimRpcCall
+
+
+-- | Pauses an activity, preventing it from being dispatched until unpaused.
+pauseActivity :: Client -> PauseActivityRequest -> IO (Either RpcError PauseActivityResponse)
+pauseActivity = call @WorkflowService @"pauseActivity" hs_pause_activity
+
+
+foreign import ccall "hs_unpause_activity" hs_unpause_activity :: PrimRpcCall
+
+
+-- | Unpauses a previously paused activity, allowing it to be dispatched again.
+unpauseActivity :: Client -> UnpauseActivityRequest -> IO (Either RpcError UnpauseActivityResponse)
+unpauseActivity = call @WorkflowService @"unpauseActivity" hs_unpause_activity
+
+
+foreign import ccall "hs_reset_activity" hs_reset_activity :: PrimRpcCall
+
+
+-- | Resets an activity, clearing its current attempt and restarting it.
+resetActivity :: Client -> ResetActivityRequest -> IO (Either RpcError ResetActivityResponse)
+resetActivity = call @WorkflowService @"resetActivity" hs_reset_activity
+
+
+foreign import ccall "hs_update_activity_options" hs_update_activity_options :: PrimRpcCall
+
+
+-- | Updates the options of a running activity (e.g. retry policy, timeouts).
+updateActivityOptions :: Client -> UpdateActivityOptionsRequest -> IO (Either RpcError UpdateActivityOptionsResponse)
+updateActivityOptions = call @WorkflowService @"updateActivityOptions" hs_update_activity_options

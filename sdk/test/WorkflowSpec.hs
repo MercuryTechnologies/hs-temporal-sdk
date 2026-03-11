@@ -1,15 +1,20 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fconstraint-solver-iterations=20 #-}
 
 module WorkflowSpec where
 
 import Conduit
 import Control.Concurrent (threadDelay)
+import Control.Concurrent.MVar
 import Control.Exception (SomeException, bracket)
+import Control.Monad (void)
 import Control.Exception.Annotated (checkpoint)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
 import Data.Aeson (toJSON)
+import Data.Either (isRight)
 import Data.Int (Int64)
+import Data.IORef
 import Data.ProtoLens (defMessage)
 import Data.Time.Clock.System (SystemTime(..))
 import Data.Word (Word32)
@@ -25,6 +30,7 @@ import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import qualified Temporal.Activity as A
 import qualified Temporal.Client as C
+import qualified Temporal.Core.Client.WorkflowService as WS
 import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
@@ -986,3 +992,101 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
+  describe "Activity pause / unpause / reset" $ do
+    specify "pauseActivity pauses a running activity" $ \TestEnv {..} -> do
+      actStarted <- newEmptyMVar
+      actGate <- newEmptyMVar
+      let act :: A.Activity () ()
+          act = do
+            liftIO $ putMVar actStarted ()
+            liftIO $ takeMVar actGate
+          actDef = A.provideActivity defaultCodec "pausableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 60)
+          wf = W.provideWorkflow defaultCodec "pauseActWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        takeMVar actStarted
+        let wfExec = defMessage
+              & Common.workflowId .~ W.rawWorkflowId wfId
+            pauseReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "pausableAct"
+        pauseRes <- WS.pauseActivity coreClient pauseReq
+        pauseRes `shouldSatisfy` isRight
+        putMVar actGate ()
+        C.waitWorkflowResult h `shouldReturn` ()
+
+    specify "unpauseActivity unpauses a paused activity" $ \TestEnv {..} -> do
+      actStarted <- newEmptyMVar
+      actGate <- newEmptyMVar
+      let act :: A.Activity () ()
+          act = do
+            liftIO $ putMVar actStarted ()
+            liftIO $ takeMVar actGate
+          actDef = A.provideActivity defaultCodec "unpausableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 60)
+          wf = W.provideWorkflow defaultCodec "unpauseActWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        takeMVar actStarted
+        let wfExec = defMessage
+              & Common.workflowId .~ W.rawWorkflowId wfId
+            pauseReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "unpausableAct"
+        _ <- WS.pauseActivity coreClient pauseReq
+        let unpauseReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "unpausableAct"
+        unpauseRes <- WS.unpauseActivity coreClient unpauseReq
+        unpauseRes `shouldSatisfy` isRight
+        putMVar actGate ()
+        C.waitWorkflowResult h `shouldReturn` ()
+
+    specify "resetActivity resets a running activity" $ \TestEnv {..} -> do
+      attemptCount <- newIORef (0 :: Int)
+      actStarted <- newEmptyMVar
+      actGate <- newEmptyMVar
+      let act :: A.Activity () ()
+          act = do
+            n <- liftIO $ atomicModifyIORef' attemptCount (\c -> (c + 1, c + 1))
+            liftIO $ void $ tryPutMVar actStarted ()
+            if n <= 1
+              then liftIO $ takeMVar actGate
+              else pure ()
+          actDef = A.provideActivity defaultCodec "resettableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 60)
+          wf = W.provideWorkflow defaultCodec "resetActWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        takeMVar actStarted
+        let wfExec = defMessage
+              & Common.workflowId .~ W.rawWorkflowId wfId
+            resetReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.execution .~ wfExec
+              & RR.type' .~ "resettableAct"
+        resetRes <- WS.resetActivity coreClient resetReq
+        resetRes `shouldSatisfy` isRight
+        putMVar actGate ()
+        C.waitWorkflowResult h `shouldReturn` ()
+
