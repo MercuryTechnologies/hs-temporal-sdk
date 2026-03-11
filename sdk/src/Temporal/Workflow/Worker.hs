@@ -302,7 +302,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.processor
                         workflowInfo
                         initializeWorkflow
-                    liftIO $ addStackTraceHandler inst
+                    liftIO $ addBuiltinQueryHandlers inst
                     Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
 

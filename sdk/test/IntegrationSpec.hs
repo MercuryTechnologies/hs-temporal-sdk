@@ -26,7 +26,8 @@ import Control.Monad (replicateM, when)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Aeson (FromJSON, ToJSON, Value, toJSON)
+import Data.Aeson (FromJSON, ToJSON, Value (..), toJSON)
+import qualified Data.Aeson as Aeson
 import qualified Data.ByteString as BS
 import Data.Either (isLeft, isRight)
 import Data.Foldable (traverse_)
@@ -558,6 +559,18 @@ testImpls =
       , workflowWithFailingChildrenChild = do
           W.sleep $ seconds 2
       }
+
+
+builtinStackTraceQuery :: W.KnownQuery '[] Text
+builtinStackTraceQuery = W.KnownQuery "__stack_trace" defaultCodec
+
+
+builtinEnhancedStackTraceQuery :: W.KnownQuery '[] Value
+builtinEnhancedStackTraceQuery = W.KnownQuery "__enhanced_stack_trace" defaultCodec
+
+
+builtinWorkflowMetadataQuery :: W.KnownQuery '[] Value
+builtinWorkflowMetadataQuery = W.KnownQuery "__temporal_workflow_metadata" defaultCodec
 
 
 testRefs :: Refs WorkflowTests
@@ -1124,6 +1137,110 @@ needsClient = do
           C.cancel h (C.CancellationOptions mempty)
           result `shouldBe` Right "hello"
     -- specify "query and unblock" pending
+    describe "Built-in queries" $ do
+      let toMap :: Value -> Map Text Value
+          toMap v = case Aeson.fromJSON v of
+            Aeson.Success m -> m
+            Aeson.Error e -> error $ "expected JSON object: " <> e
+
+      specify "__stack_trace returns non-empty stack while workflow is blocked" $ \TestEnv {..} -> do
+        let workflow :: MyWorkflow ()
+            workflow = W.sleep (seconds 30)
+            wf = W.provideWorkflow defaultCodec "stackTraceWorkflow" workflow
+            conf = configure () wf $ baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  }
+          h <- useClient (C.start wf.reference "stackTraceTest" opts)
+          result <- C.query h builtinStackTraceQuery C.defaultQueryOptions
+          C.cancel h (C.CancellationOptions mempty)
+          case result of
+            Left _ -> expectationFailure "stack trace query was rejected"
+            Right txt -> txt `shouldSatisfy` (not . Text.null)
+
+      specify "__enhanced_stack_trace returns structured JSON with SDK info" $ \TestEnv {..} -> do
+        let workflow :: MyWorkflow ()
+            workflow = W.sleep (seconds 30)
+            wf = W.provideWorkflow defaultCodec "enhancedStackTraceWorkflow" workflow
+            conf = configure () wf $ baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  }
+          h <- useClient (C.start wf.reference "enhancedStackTraceTest" opts)
+          result <- C.query h builtinEnhancedStackTraceQuery C.defaultQueryOptions
+          C.cancel h (C.CancellationOptions mempty)
+          case result of
+            Left _ -> expectationFailure "enhanced stack trace query was rejected"
+            Right val -> do
+              let m = toMap val
+              Map.member "sdk" m `shouldBe` True
+              Map.member "stacks" m `shouldBe` True
+              Map.member "sources" m `shouldBe` True
+              let sdkMap = toMap (m Map.! "sdk")
+              Map.lookup "name" sdkMap `shouldBe` Just (String "haskell")
+
+      specify "__temporal_workflow_metadata includes handler definitions" $ \TestEnv {..} -> do
+        let echoQuery :: W.KnownQuery '[Text] Text
+            echoQuery = W.KnownQuery "testMetaQuery" defaultCodec
+            mySignal :: W.KnownSignal '[]
+            mySignal = W.KnownSignal "testMetaSignal" defaultCodec
+            workflow :: MyWorkflow ()
+            workflow = do
+              W.setQueryHandler echoQuery $ \msg -> pure msg
+              W.setSignalHandler mySignal $ pure ()
+              W.sleep (seconds 30)
+            wf = W.provideWorkflow defaultCodec "metadataWorkflow" workflow
+            conf = configure () wf $ baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  }
+          h <- useClient (C.start wf.reference "metadataTest" opts)
+          result <- C.query h builtinWorkflowMetadataQuery C.defaultQueryOptions
+          C.cancel h (C.CancellationOptions mempty)
+          case result of
+            Left _ -> expectationFailure "workflow metadata query was rejected"
+            Right val -> do
+              let m = toMap val
+                  defMap = toMap (m Map.! "definition")
+              Map.lookup "type" defMap `shouldBe` Just (String "metadataWorkflow")
+              case Map.lookup "queryDefinitions" defMap of
+                Just (Array qs) -> do
+                  let names = fmap (\q -> Map.lookup "name" (toMap q)) qs
+                  names `shouldSatisfy` elem (Just (String "testMetaQuery"))
+                _ -> expectationFailure "expected queryDefinitions array"
+              case Map.lookup "signalDefinitions" defMap of
+                Just (Array ss) -> do
+                  let names = fmap (\s -> Map.lookup "name" (toMap s)) ss
+                  names `shouldSatisfy` elem (Just (String "testMetaSignal"))
+                _ -> expectationFailure "expected signalDefinitions array"
+
+      specify "__stack_trace shows multiple stacks when workflow has concurrent branches" $ \TestEnv {..} -> do
+        let workflow :: MyWorkflow ()
+            workflow = do
+              _ <- W.race (W.sleep (seconds 30)) (W.sleep (seconds 30))
+              pure ()
+            wf = W.provideWorkflow defaultCodec "concurrentStackTraceWorkflow" workflow
+            conf = configure () wf $ baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  }
+          h <- useClient (C.start wf.reference "concurrentStackTraceTest" opts)
+          result <- C.query h builtinStackTraceQuery C.defaultQueryOptions
+          C.cancel h (C.CancellationOptions mempty)
+          case result of
+            Left _ -> expectationFailure "stack trace query was rejected"
+            Right txt -> do
+              let stacks = filter (not . Text.null) $ Text.splitOn "\n\n" txt
+              length stacks `shouldSatisfy` (>= 2)
+
     describe "Await condition" $ do
       it "signal handlers can unblock workflows" $ \TestEnv {..} -> do
         let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do

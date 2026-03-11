@@ -69,7 +69,7 @@ instance Cancel (ExternalWorkflowHandle a) where
   cancel h = ilift $ do
     inst <- ask
     s@(Sequence sVal) <- nextExternalSignalSequence
-    res <- newIVar
+    res <- newTrackedIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalSignals = HashMap.insert s res (externalSignals seqMaps)}
     addCommand
