@@ -53,6 +53,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "simpleCancelWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldThrow` (\e -> e == WorkflowExecutionCanceled)
 
@@ -68,12 +69,11 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "cancelCatchReturn" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "caught-cancel"
 
     specify "Cancel propagates via waitCancellation" $ \TestEnv {..} -> do
-      -- Haskell SDK requires explicit cancellation handling via waitCancellation.
-      -- sleep alone does not respond to cancel requests.
       let workflow :: MyWorkflow ()
           workflow = do
             _ <- (W.sleep (minutes 100) >> pure (Left ())) `W.race` (Right <$> W.waitCancellation)
@@ -83,13 +83,13 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "cancelPropagateWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldThrow` (\e -> e == WorkflowExecutionCanceled)
 
     specify "isCancelRequested returns true after cancel" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Bool
           workflow = do
-            -- waitCancellation blocks until cancel arrives, then throws
             _ <- Catch.try W.waitCancellation :: W.Workflow (Either WorkflowCancelRequested ())
             W.isCancelRequested
           wf = W.provideWorkflow defaultCodec "isCancelAfter" workflow
@@ -97,6 +97,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "isCancelAfterWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` True
 
@@ -112,6 +113,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "waitCancelBlockWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "unblocked"
 
@@ -125,6 +127,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "shieldCancelWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "shielded"
 
@@ -285,6 +288,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "nonCancellableWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "after-cancel"
 
@@ -302,6 +306,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "cancelCleanupWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "cleaned-up"
 
@@ -317,6 +322,7 @@ tests = describe "Cancellation" $ do
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         h <- useClient (C.start wf.reference "cancelFailImmWf" opts)
+        waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldThrow` isWorkflowFailed
 

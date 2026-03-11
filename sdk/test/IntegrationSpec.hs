@@ -19,6 +19,7 @@ module IntegrationSpec where
 
 import Common
 import Control.Concurrent
+import TestHelpers (waitForWorkflowStart)
 import Control.Exception
 import Control.Exception.Annotated
 import qualified Control.Exception.Annotated as Annotated
@@ -1886,6 +1887,7 @@ needsClient = do
                 }
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateWithValidator "update-with-a-validator" opts
+          liftIO $ waitForWorkflowStart h
           updateResult <- C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
@@ -2026,7 +2028,7 @@ needsClient = do
                 }
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsBeforeTheUpdate "no-update-if-workflow-throws-first" opts
-          liftIO $ threadDelay 1_000_000
+          liftIO $ waitForWorkflowStart h
           updateResult <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- Catch.try $ C.waitWorkflowResult h
           let _ = show (updateResult :: Either RpcError Int)
@@ -2054,7 +2056,7 @@ needsClient = do
                 }
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsAfterTheUpdate "yes-update-if-workflow-throws-later" opts
-          liftIO $ threadDelay 1_000_000
+          liftIO $ waitForWorkflowStart h
           updateResult <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- Catch.try $ C.waitWorkflowResult h
           let _ = show (updateResult :: Either RpcError Int)

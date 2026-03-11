@@ -263,3 +263,28 @@ defaultStartOptsWithTimeout tq d =
           , C.taskTimeout = Nothing
           }
     }
+
+
+-- | Block until the workflow's first workflow task has been processed.
+--
+-- Queries the built-in @__stack_trace@ handler, which is registered on every
+-- workflow instance at creation time. A successful response proves the worker
+-- has executed the workflow code up to its first blocking point, so all
+-- user-registered query\/update\/signal handlers are in place.
+--
+-- Retries up to @maxAttempts@ times on any exception (transport errors,
+-- "workflow not found", etc.). Each retry is a full gRPC round-trip, so
+-- there is a natural backoff without needing @threadDelay@.
+waitForWorkflowStart :: MonadIO m => C.WorkflowHandle a -> m ()
+waitForWorkflowStart h = liftIO $ go maxAttempts
+  where
+    maxAttempts :: Int
+    maxAttempts = 50
+    stackTraceQuery :: W.KnownQuery '[()] Text
+    stackTraceQuery = W.KnownQuery "__stack_trace" JSON
+    go 0 = error "waitForWorkflowStart: workflow did not become ready after retries"
+    go n = do
+      result <- try @SomeException (C.query h stackTraceQuery C.defaultQueryOptions ())
+      case result of
+        Right (Right _) -> pure ()
+        _ -> go (n - 1)

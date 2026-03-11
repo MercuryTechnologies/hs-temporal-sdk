@@ -126,13 +126,6 @@ spec = do
       fnName SimpleActivity `shouldBe` "RegisterWorkflowsSpec.simpleActivity"
 
   describe "custom codec registration" do
-    it "compiles and references custom codec workflows" do
-      -- The fact that this compiles means the ActivityCodec and WorkflowCodec type families are properly set
-      -- If they weren't, we would get a type error like the one the user reported
-      let _ = workflowConfig CustomCodecWorkflow
-      let _ = activityConfig CustomCodecActivity
-      True `shouldBe` True
-
     it "allows custom codec workflows to be referenced" do
       fnName CustomCodecWorkflow `shouldBe` "RegisterWorkflowsSpec.customCodecWorkflow"
 

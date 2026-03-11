@@ -32,6 +32,7 @@ tests = describe "Query" $ do
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
       h <- useClient (C.start wf.reference "basic-query-wf" opts)
+      waitForWorkflowStart h
       result <- C.query h echoQuery C.defaultQueryOptions "hello"
       C.cancel h (C.CancellationOptions mempty)
       result `shouldBe` Right "hello"

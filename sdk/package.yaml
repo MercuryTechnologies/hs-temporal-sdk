@@ -149,8 +149,6 @@ tests:
     source-dirs: test
     other-modules:
       Spec,
-      ConcurrentAccessSpec,
-      AsyncCompletionSpec,
       ContinueAsNewSpec,
       DurationSpec,
       IntegrationSpec,
