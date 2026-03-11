@@ -657,6 +657,19 @@ void hs_temporal_worker_complete_activity_task(struct WorkerRef *worker,
                                                struct CWorkerError **error_slot,
                                                struct CUnit **result_slot);
 
+void hs_temporal_worker_poll_nexus_task(struct WorkerRef *worker,
+                                       struct MVar *mvar,
+                                       struct Capability cap,
+                                       struct CWorkerError **error_slot,
+                                       struct CArray_u8 **result_slot);
+
+void hs_temporal_worker_complete_nexus_task(struct WorkerRef *worker,
+                                            const struct CArray_u8 *proto,
+                                            struct MVar *mvar,
+                                            struct Capability cap,
+                                            struct CWorkerError **error_slot,
+                                            struct CUnit **result_slot);
+
 void hs_temporal_worker_record_activity_heartbeat(struct WorkerRef *worker,
                                                   const struct CArray_u8 *proto,
                                                   struct CWorkerError **error_slot,
