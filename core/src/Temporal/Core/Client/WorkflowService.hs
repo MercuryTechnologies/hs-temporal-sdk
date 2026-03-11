@@ -17,6 +17,8 @@ module Temporal.Core.Client.WorkflowService (
   getSearchAttributes,
   getSystemInfo,
   getWorkerBuildIdCompatibility,
+  getWorkerTaskReachability,
+  getWorkerVersioningRules,
   getWorkflowExecutionHistory,
   getWorkflowExecutionHistoryReverse,
   listArchivedWorkflowExecutions,
@@ -54,8 +56,9 @@ module Temporal.Core.Client.WorkflowService (
   terminateWorkflowExecution,
   updateNamespace,
   updateSchedule,
-  updateWorkflowExecution,
   updateWorkerBuildIdCompatibility,
+  updateWorkerVersioningRules,
+  updateWorkflowExecution,
 ) where
 
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
@@ -617,3 +620,27 @@ members are compatible with one another.
 -}
 updateWorkerBuildIdCompatibility :: Client -> UpdateWorkerBuildIdCompatibilityRequest -> IO (Either RpcError UpdateWorkerBuildIdCompatibilityResponse)
 updateWorkerBuildIdCompatibility = call @WorkflowService @"updateWorkerBuildIdCompatibility" hs_update_worker_build_id_compatibility
+
+
+foreign import ccall "hs_get_worker_versioning_rules" hs_get_worker_versioning_rules :: PrimRpcCall
+
+
+-- | Fetches the worker versioning rules for a task queue.
+getWorkerVersioningRules :: Client -> GetWorkerVersioningRulesRequest -> IO (Either RpcError GetWorkerVersioningRulesResponse)
+getWorkerVersioningRules = call @WorkflowService @"getWorkerVersioningRules" hs_get_worker_versioning_rules
+
+
+foreign import ccall "hs_update_worker_versioning_rules" hs_update_worker_versioning_rules :: PrimRpcCall
+
+
+-- | Creates or updates worker versioning rules for a task queue.
+updateWorkerVersioningRules :: Client -> UpdateWorkerVersioningRulesRequest -> IO (Either RpcError UpdateWorkerVersioningRulesResponse)
+updateWorkerVersioningRules = call @WorkflowService @"updateWorkerVersioningRules" hs_update_worker_versioning_rules
+
+
+foreign import ccall "hs_get_worker_task_reachability" hs_get_worker_task_reachability :: PrimRpcCall
+
+
+-- | Fetches the reachability of worker task queues for given build IDs.
+getWorkerTaskReachability :: Client -> GetWorkerTaskReachabilityRequest -> IO (Either RpcError GetWorkerTaskReachabilityResponse)
+getWorkerTaskReachability = call @WorkflowService @"getWorkerTaskReachability" hs_get_worker_task_reachability
