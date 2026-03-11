@@ -23,6 +23,7 @@ module Temporal.Exception (
   NexusOperationFailed (..),
   NexusOperationCancelled (..),
   NexusOperationTimedOut (..),
+  NexusHandlerException (..),
   SignalExternalWorkflowFailed (..),
   ContinueAsNewException (..),
   AlternativeInstanceFailure (..),
@@ -366,6 +367,18 @@ data NexusOperationTimedOut = NexusOperationTimedOut
 
 
 instance Exception NexusOperationTimedOut
+
+
+-- | Errors from a Nexus handler, suitable for returning to the caller.
+data NexusHandlerException = NexusHandlerException
+  { nexusHandlerErrorType :: Text
+  , nexusHandlerErrorMessage :: Text
+  , nexusHandlerRetryable :: Bool
+  }
+  deriving stock (Show, Eq)
+
+
+instance Exception NexusHandlerException
 
 
 data SignalExternalWorkflowFailed = SignalExternalWorkflowFailed Proto.Failure
