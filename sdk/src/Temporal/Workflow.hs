@@ -136,6 +136,7 @@ module Temporal.Workflow (
   ExternalWorkflowHandle,
   getExternalWorkflowHandle,
   Info (..),
+  RootExecution (..),
   RetryPolicy (..),
   defaultRetryPolicy,
   ParentInfo (..),
