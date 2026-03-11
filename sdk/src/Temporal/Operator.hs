@@ -10,18 +10,21 @@ module Temporal.Operator where
 
 import Control.Monad.IO.Class
 import Data.Bifunctor (bimap)
+import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import Data.ProtoLens (Message (defMessage))
 import Data.Text (Text)
 import Lens.Family2
 import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
+import qualified Proto.Temporal.Api.Nexus.V1.Message as NexusProto
+import qualified Proto.Temporal.Api.Nexus.V1.Message_Fields as NexusProto
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
+import Temporal.Common (Namespace (..), TaskQueue (..))
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.OperatorService as Core
 import qualified Temporal.Exception
 import Temporal.SearchAttributes (SearchAttributeKey (..))
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow (Namespace (..))
 
 
 data IndexedValueType
@@ -97,3 +100,55 @@ addSearchAttributes c (Namespace n) newAttrs = do
       pure $ bimap Temporal.Exception.coreRpcErrorToRpcError (const ()) res
   where
     converted = rawKeys $ fmap searchAttributeTypeToProto newAttrs
+
+
+data NexusEndpoint = NexusEndpoint
+  { endpointId :: Text
+  , endpointVersion :: Int64
+  }
+  deriving stock (Eq, Show)
+
+
+-- | Create a Nexus endpoint that routes to a worker's task queue.
+createNexusEndpoint :: MonadIO m => Client -> Text -> Namespace -> TaskQueue -> m (Either Temporal.Exception.RpcError NexusEndpoint)
+createNexusEndpoint c name (Namespace ns) (TaskQueue tq) = do
+  res <-
+    liftIO $
+      Core.createNexusEndpoint
+        c
+        ( defMessage
+            & Proto.spec
+              .~ ( defMessage
+                    & NexusProto.name .~ name
+                    & NexusProto.target
+                      .~ ( defMessage
+                            & NexusProto.worker
+                              .~ ( defMessage
+                                    & NexusProto.namespace .~ ns
+                                    & NexusProto.taskQueue .~ tq
+                                 )
+                         )
+                 )
+        )
+  pure $ bimap Temporal.Exception.coreRpcErrorToRpcError extractEndpoint res
+  where
+    extractEndpoint resp =
+      let ep = resp ^. Proto.endpoint
+      in NexusEndpoint
+          { endpointId = ep ^. NexusProto.id
+          , endpointVersion = ep ^. NexusProto.version
+          }
+
+
+-- | Delete a Nexus endpoint by its ID and version.
+deleteNexusEndpoint :: MonadIO m => Client -> NexusEndpoint -> m (Either Temporal.Exception.RpcError ())
+deleteNexusEndpoint c ep = do
+  res <-
+    liftIO $
+      Core.deleteNexusEndpoint
+        c
+        ( defMessage
+            & Proto.id .~ ep.endpointId
+            & Proto.version .~ ep.endpointVersion
+        )
+  pure $ bimap Temporal.Exception.coreRpcErrorToRpcError (const ()) res
