@@ -8306,6 +8306,10 @@ rec {
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };type = [ "cdylib" "staticlib" ];
         dependencies = [
           {
+            name = "async-trait";
+            packageId = "async-trait";
+          }
+          {
             name = "ffi-convert";
             packageId = "ffi-convert";
           }

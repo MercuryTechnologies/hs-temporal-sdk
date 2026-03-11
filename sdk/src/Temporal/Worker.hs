@@ -88,6 +88,21 @@ module Temporal.Worker (
   setGracefulShutdownPeriodMillis,
   addInterceptors,
   setPayloadProcessor,
+
+  -- ** Worker tuner
+  setTuner,
+  Core.TunerConfig (..),
+  Core.SlotSupplierConfig (..),
+  Core.ResourceBasedTunerConfig (..),
+  -- ** Custom slot supplier
+  Core.CustomSlotSupplier (..),
+  Core.SlotReservationContext (..),
+  Core.SlotInfo (..),
+  Core.MarkSlotUsedContext (..),
+  Core.ReleaseSlotContext (..),
+  Core.CustomSlotSupplierHandle,
+  Core.newCustomSlotSupplierHandle,
+  Core.freeCustomSlotSupplierHandle,
   WorkflowId (..),
 ) where
 
@@ -441,6 +456,26 @@ setGracefulShutdownPeriodMillis :: Word64 -> ConfigM actEnv ()
 setGracefulShutdownPeriodMillis n = modifyCore $ \conf ->
   conf
     { Core.gracefulShutdownPeriodMillis = n
+    }
+
+
+{- | Set a tuner for the worker, controlling how task slots are allocated.
+
+When a tuner is set, the @maxOutstandingWorkflowTasks@, @maxOutstandingActivities@,
+and @maxOutstandingLocalActivities@ fields are ignored in favor of the tuner's
+slot suppliers. This enables dynamic scaling strategies like resource-based
+autoscaling with PID controllers targeting CPU and memory thresholds.
+
+Use 'Core.FixedSizeSlotSupplier' for a static number of slots, or
+'Core.ResourceBasedSlotSupplier' to scale slots based on system resource usage.
+When any slot supplier is 'Core.ResourceBasedSlotSupplier', you must also provide
+'Core.ResourceBasedTunerConfig' with target CPU and memory usage thresholds (values
+between 0 and 1).
+-}
+setTuner :: Core.TunerConfig -> ConfigM actEnv ()
+setTuner t = modifyCore $ \conf ->
+  conf
+    { Core.tuner = Just t
     }
 
 

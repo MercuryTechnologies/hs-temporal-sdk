@@ -2508,6 +2508,7 @@ dependencies = [
 name = "temporal_bridge"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "ffi-convert",
  "libc",
  "prost",
