@@ -56,3 +56,31 @@ foreign import ccall "hs_remove_search_attributes" hs_remove_search_attributes :
 
 removeSearchAttributes :: Client -> RemoveSearchAttributesRequest -> IO (Either RpcError RemoveSearchAttributesResponse)
 removeSearchAttributes = call @OperatorService @"removeSearchAttributes" hs_remove_search_attributes
+
+
+foreign import ccall "hs_create_nexus_endpoint" hs_create_nexus_endpoint :: PrimRpcCall
+
+
+createNexusEndpoint :: Client -> CreateNexusEndpointRequest -> IO (Either RpcError CreateNexusEndpointResponse)
+createNexusEndpoint = call @OperatorService @"createNexusEndpoint" hs_create_nexus_endpoint
+
+
+foreign import ccall "hs_delete_nexus_endpoint" hs_delete_nexus_endpoint :: PrimRpcCall
+
+
+deleteNexusEndpoint :: Client -> DeleteNexusEndpointRequest -> IO (Either RpcError DeleteNexusEndpointResponse)
+deleteNexusEndpoint = call @OperatorService @"deleteNexusEndpoint" hs_delete_nexus_endpoint
+
+
+foreign import ccall "hs_get_nexus_endpoint" hs_get_nexus_endpoint :: PrimRpcCall
+
+
+getNexusEndpoint :: Client -> GetNexusEndpointRequest -> IO (Either RpcError GetNexusEndpointResponse)
+getNexusEndpoint = call @OperatorService @"getNexusEndpoint" hs_get_nexus_endpoint
+
+
+foreign import ccall "hs_list_nexus_endpoints" hs_list_nexus_endpoints :: PrimRpcCall
+
+
+listNexusEndpoints :: Client -> ListNexusEndpointsRequest -> IO (Either RpcError ListNexusEndpointsResponse)
+listNexusEndpoints = call @OperatorService @"listNexusEndpoints" hs_list_nexus_endpoints

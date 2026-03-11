@@ -608,6 +608,34 @@ void hs_remove_search_attributes(struct ClientRef *client,
                                  struct CRPCError **error_slot,
                                  struct CArray_u8 **result_slot);
 
+void hs_create_nexus_endpoint(struct ClientRef *client,
+                              const struct RpcCall *c_call,
+                              struct MVar *mvar,
+                              struct Capability cap,
+                              struct CRPCError **error_slot,
+                              struct CArray_u8 **result_slot);
+
+void hs_delete_nexus_endpoint(struct ClientRef *client,
+                              const struct RpcCall *c_call,
+                              struct MVar *mvar,
+                              struct Capability cap,
+                              struct CRPCError **error_slot,
+                              struct CArray_u8 **result_slot);
+
+void hs_get_nexus_endpoint(struct ClientRef *client,
+                           const struct RpcCall *c_call,
+                           struct MVar *mvar,
+                           struct Capability cap,
+                           struct CRPCError **error_slot,
+                           struct CArray_u8 **result_slot);
+
+void hs_list_nexus_endpoints(struct ClientRef *client,
+                             const struct RpcCall *c_call,
+                             struct MVar *mvar,
+                             struct Capability cap,
+                             struct CRPCError **error_slot,
+                             struct CArray_u8 **result_slot);
+
 void hs_temporal_drop_worker_error(struct CWorkerError *err);
 
 void hs_temporal_drop_unit(struct CUnit *unit);
