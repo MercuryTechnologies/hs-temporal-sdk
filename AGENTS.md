@@ -1,79 +1,60 @@
-# AGENTS.md — Cloud Agent Build & Development Guide
+# Agent Instructions
 
-## Project Overview
+## Cursor Cloud specific instructions
 
-This is the **hs-temporal-sdk** monorepo: unofficial Haskell bindings to the
-[Temporal](https://temporal.io) durable execution platform.  It contains a Rust
-FFI bridge (`core/rust/`), protobuf bindings, the high-level Haskell SDK, and
-several supporting packages.
+This project uses **Nix flakes** for all builds and development tooling.
+The cloud agent VM has Nix installed via the Dockerfile, but the nix-daemon
+must be running for any Nix command to work.
 
-## Environment
+### Ensuring the Nix daemon is running
 
-The development environment is managed entirely through **Nix** (flakes) and
-**devenv**.  The `.cursor/Dockerfile` installs Nix in single-user mode and
-transfers store ownership to the `ubuntu` user so all `nix` commands work
-without `sudo`.
-
-### Entering the dev shell
+The `start` command in `environment.json` launches the daemon. If you get
+`error: cannot open connection to remote store 'daemon'`, run:
 
 ```bash
-# Default shell (GHC 9.10):
-nix develop --impure --accept-flake-config
-
-# Specific GHC version:
-nix develop .#ghc96  --impure --accept-flake-config
-nix develop .#ghc98  --impure --accept-flake-config
-nix develop .#ghc910 --impure --accept-flake-config
+sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+sleep 2
 ```
 
-`--impure` is **required** because the devenv modules use impure features
-(services, environment variables, caching).  `--accept-flake-config` avoids
-interactive prompts about extra substituters.
-
-If a command fails with a Nix permission error, verify that `/nix` is owned by
-the current user (`ls -la /nix`).  If not, run `sudo chown -R $(whoami) /nix`.
-
-### One-shot commands without entering the shell
+### Building
 
 ```bash
-nix develop .#ghc910 --impure --accept-flake-config --command <cmd>
+# Build the Rust bridge
+nix build .#temporal-bridge
+
+# Build all Haskell packages for a GHC version
+nix build .#hs-temporal-suite-ghc910
+
+# Build all three GHC versions (required for CI parity)
+nix build .#hs-temporal-suite-ghc96
+nix build .#hs-temporal-suite-ghc98
+nix build .#hs-temporal-suite-ghc910
 ```
 
-## Building
+### Entering a dev shell
 
-### Rust bridge (temporal-bridge)
-
-The native Rust FFI library must be built before the Haskell packages:
+For interactive cabal commands, protogen, cargo, cbindgen, etc.:
 
 ```bash
-nix build .#temporal-bridge --accept-flake-config
+nix develop .#ghc910
 ```
 
-### Haskell packages (via Cabal, inside dev shell)
+Inside the dev shell you have access to: `ghc`, `cabal`, `cargo`, `rustc`,
+`cbindgen`, `crate2nix`, `protogen`, `hpack`, `temporal` (CLI),
+`temporal-test-server`, `hlint`, `fourmolu`.
+
+### Running tests
+
+Tests require a Temporal dev server. From inside a dev shell:
 
 ```bash
-cabal update
-cabal build all
+# Start the dev server in the background
+temporal server start-dev --headless &
+sleep 3
+
+# Run the full test suite
+cabal test temporal-sdk
 ```
-
-### Nix package builds (pure, any GHC version)
-
-```bash
-nix build .#temporal-sdk-ghc910 --accept-flake-config
-nix build .#temporal-sdk-core-ghc910 --accept-flake-config
-```
-
-Replace `ghc910` with `ghc96` or `ghc98` as needed.
-
-### Full suite builds (CI parity)
-
-```bash
-nix build .#hs-temporal-suite-ghc96  --accept-flake-config
-nix build .#hs-temporal-suite-ghc98  --accept-flake-config
-nix build .#hs-temporal-suite-ghc910 --accept-flake-config
-```
-
-All three must pass before merging.
 
 ### Protobuf regeneration
 
@@ -86,97 +67,21 @@ protogen
 This regenerates `protos/src/Proto/` from upstream `.proto` files and runs
 `hpack` to update the cabal file.
 
-### Rust bridge workflow (manual, for upstream SDK updates)
-
-When updating the pinned `temporalio/sdk-core` revision:
+### Rust bridge workflow
 
 ```bash
 cd core/rust
 cargo build          # compile the bridge
 crate2nix generate   # regenerate Cargo.nix for Nix builds
-bash bindgen.sh      # regenerate temporal_bridge.h via cbindgen
+bash bindgen.sh      # regenerate temporal_bridge.h
 cd ../..
 ```
 
-The dev shell provides `cargo`, `rustc`, `cbindgen`, `crate2nix`.
+### Code style
 
-## Testing
-
-Tests require a running Temporal dev server.  Inside the dev shell:
-
-```bash
-# Start the Temporal dev server (foreground, use a separate terminal):
-devenv up
-
-# Run all tests:
-cabal test all
-
-# Run a specific test suite:
-cabal test temporal-sdk-tests
-```
-
-Some integration tests rely on the `temporal-test-server` binary, which is
-provided by the dev shell.
-
-## Project Structure
-
-```
-├── core/               # temporal-sdk-core — Rust FFI bridge + Haskell bindings
-│   └── rust/           #   Rust crate (Cargo workspace)
-├── sdk/                # temporal-sdk — high-level Haskell SDK
-├── protos/             # temporal-api-protos — generated protobuf modules
-├── codec-encryption/   # temporal-codec-encryption
-├── codec-server/       # temporal-sdk-codec-server
-├── optimal-codec/      # temporal-sdk-optimal-codec
-├── tools/              # Internal tooling (tix-to-markdown, etc.)
-├── nix/
-│   ├── devenv/         # devenv modules (haskell, temporal-bridge, services)
-│   ├── overlays/       # Nixpkgs overlays (Haskell package sets, Rust, native deps)
-│   ├── packages/       # Nix package expressions (coverage, protogen, etc.)
-│   └── utils/          # Shared Nix utilities (flake helpers, matrix, haskell utils)
-├── .cursor/
-│   ├── Dockerfile      # Cloud agent base image (Ubuntu + Nix)
-│   └── environment.json
-├── flake.nix           # Top-level flake definition
-├── cabal.project       # Cabal multi-package project file
-└── hpack-defaults.yaml # Shared hpack settings for all packages
-```
-
-## Code Style & Formatting
-
-- **Haskell formatter**: [fourmolu](https://github.com/fourmolu/fourmolu)
-  (config in `fourmolu.yaml` — 2-space indent, leading commas, leading arrows)
-- **Haskell linter**: [hlint](https://github.com/ndmitchell/hlint)
-  (config in `.hlint.yaml`)
-- **Nix formatter**: nixfmt (RFC style)
-- **Shell formatter**: shfmt
-- **Package metadata**: [hpack](https://github.com/sol/hpack) — edit
-  `package.yaml` files, not `.cabal` files directly.  Run `hpack` (or let
-  pre-commit hooks do it) to regenerate `.cabal`.
-
-All of these tools are available inside the dev shell and are configured as
-pre-commit hooks via devenv.
-
-### Haskell-specific rules
-
-- No list comprehensions — use `do` syntax or datatype-specific functions
-- No `threadDelay` in tests — use query-based readiness probes (e.g.,
-  `waitForWorkflowStart`)
-- Prefer `Map`/`HashMap`/`Vector` operations over `toList`/`fromList` conversions
-
-## Key Notes for Agents
-
-1. **Always use `--impure`** when invoking `nix develop` or shells built with
-   `devenv.lib.mkShell`.  Pure evaluation will fail.
-2. **Always pass `--accept-flake-config`** to avoid interactive prompts about
-   trusted substituters.
-3. The `cabal.project` file uses `packages: */*.cabal` — all sub-packages are
-   discovered automatically.
-4. The Rust bridge is built separately via Nix (`nix build .#temporal-bridge`).
-   It does not use `cargo build` directly in development.
-5. CI runs on [Garnix](https://garnix.io) (see `garnix.yaml`).  DevShells are
-   excluded from CI because they require `--impure`.
-6. GHC versions supported: 9.6, 9.8, 9.10 (see `nix/utils/matrix.nix`).
-   GHC 9.10 is the default.
-7. Protobuf code in `protos/` is generated — do not hand-edit those files.
-8. The `core/rust/Cargo.nix` is generated by `crate2nix` — do not hand-edit.
+- Haskell: `fourmolu` for formatting, `hlint` for linting
+- Nix: `nixfmt-rfc-style`
+- Shell: `shfmt` + `shellcheck`
+- No list comprehensions in Haskell — use `do` syntax or datatype-specific
+  functions
+- No `threadDelay` in tests — use query-based readiness probes
