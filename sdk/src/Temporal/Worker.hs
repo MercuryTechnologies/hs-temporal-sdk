@@ -49,6 +49,8 @@ module Temporal.Worker (
   -- as it allows you to ensure that changes to your workflow code do not
   -- break determinism.
   runReplayHistory,
+  runReplayHistoryProto,
+  runReplayHistoryJson,
   ReplayHistoryFailure (..),
   subscribeToEvictions,
   subscribeToEvictionsSTM,
@@ -123,6 +125,7 @@ import Temporal.Common
 import Temporal.Common.Async
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
+import qualified Data.ByteString as BS
 import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
@@ -574,6 +577,47 @@ runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (sta
   Logging.logDebug $ T.pack $ show history
   res <- liftIO $ Core.pushHistory pusher wfId (Left $ encodeMessage history)
   Logging.logDebug $ "Pushed history for workflow ID " <> T.pack (show wfId)
+  case res of
+    Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
+    Right () -> do
+      res <- atomically $ readTChan evictions
+      if evictionWasNonRecoverable res
+        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
+        else pure $ Right ()
+
+
+{- | Run a worker in replay mode from raw protobuf bytes.
+Skips the proto-lens decode\/encode round-trip — the bytes go straight to the Rust SDK.
+Use with 'Temporal.Replay.readHistoryProtobufFile' when you already have the workflow ID.
+-}
+runReplayHistoryProto :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> WorkflowId -> BS.ByteString -> m (Either ReplayHistoryFailure ())
+runReplayHistoryProto rt conf (WorkflowId wfId) protoBytes = runWorkerContext conf $ UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(worker, pusher) -> do
+  evictions <- subscribeToEvictions worker
+  let wfIdBytes = T.encodeUtf8 wfId
+  Logging.logDebug $ "Pushing proto history for workflow ID " <> wfId
+  res <- liftIO $ Core.pushHistory pusher wfIdBytes (Left protoBytes)
+  Logging.logDebug $ "Pushed proto history for workflow ID " <> wfId
+  case res of
+    Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
+    Right () -> do
+      res <- atomically $ readTChan evictions
+      if evictionWasNonRecoverable res
+        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
+        else pure $ Right ()
+
+
+{- | Run a worker in replay mode from a JSON-encoded history.
+Use this with histories exported from the Temporal UI or CLI, which use protobuf
+canonical JSON encoding. The JSON is deserialized on the Rust side, bypassing
+proto-lens's incomplete protobuf JSON support.
+-}
+runReplayHistoryJson :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> WorkflowId -> BS.ByteString -> m (Either ReplayHistoryFailure ())
+runReplayHistoryJson rt conf (WorkflowId wfId) historyJson = runWorkerContext conf $ UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(worker, pusher) -> do
+  evictions <- subscribeToEvictions worker
+  let wfIdBytes = T.encodeUtf8 wfId
+  Logging.logDebug $ "Pushing JSON history for workflow ID " <> wfId
+  res <- liftIO $ Core.pushHistoryJson pusher wfIdBytes historyJson
+  Logging.logDebug $ "Pushed JSON history for workflow ID " <> wfId
   case res of
     Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
     Right () -> do

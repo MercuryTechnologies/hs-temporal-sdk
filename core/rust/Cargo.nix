@@ -8297,7 +8297,7 @@ rec {
           "test-utilities" = [ "history_builders" ];
           "uuid" = [ "dep:uuid" ];
         };
-        resolvedDefaultFeatures = [ "history_builders" "rand" "test-utilities" "uuid" ];
+        resolvedDefaultFeatures = [ "history_builders" "rand" "serde_serialize" "test-utilities" "uuid" ];
       };
       "temporal_bridge" = rec {
         crateName = "temporal_bridge";
@@ -8351,6 +8351,7 @@ rec {
           {
             name = "temporal-sdk-core-protos";
             packageId = "temporal-sdk-core-protos";
+            features = [ "serde_serialize" ];
           }
           {
             name = "tokio";

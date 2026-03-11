@@ -2,11 +2,13 @@ module ReplaySpec where
 
 import Control.Monad (void, when)
 import Data.Either (isLeft, isRight)
+import Data.ProtoLens.Encoding (encodeMessage)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
 import System.Directory (getTemporaryDirectory, removeFile)
 import Temporal.Activity
 import qualified Temporal.Client as C
+import qualified Temporal.Core.Worker as Core
 import Temporal.Duration
 import Temporal.Payload
 import Temporal.Replay (readHistoryProtobufFile, writeHistoryProtobufFile)
@@ -183,3 +185,124 @@ tests = describe "Workflow Replay" $ do
     case result of
       Left err -> err.message `shouldSatisfy` (not . Text.null)
       Right () -> expectationFailure "Expected replay failure"
+
+  describe "Replay from raw protobuf bytes" $ do
+    specify "replays a simple workflow" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "replay-proto-wf" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+          conf = provideCallStack $ configure () workflow baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      result <- runReplayHistoryProto globalRuntime conf (WorkflowId "replay-proto") (encodeMessage history)
+      result `shouldSatisfy` isRight
+
+    specify "replays a workflow with activities" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow Int)
+          workflow = W.provideWorkflow JSON "replay-proto-act-wf" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            h <- W.startActivity replayActivityDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.wait h
+          conf = provideCallStack $ configure () (replayActivityDef, workflow) baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      result <- runReplayHistoryProto globalRuntime conf (WorkflowId "replay-proto-act") (encodeMessage history)
+      result `shouldSatisfy` isRight
+
+    specify "rejects invalid protobuf bytes" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "replay-proto-invalid-wf" $ provideCallStack $ pure ()
+          conf = provideCallStack $ configure () workflow baseConf
+      result <- runReplayHistoryProto globalRuntime conf (WorkflowId "fake-wf-id") "this is not valid protobuf"
+      result `shouldSatisfy` isLeft
+
+  describe "Replay from JSON history" $ do
+    specify "replays a simple workflow via JSON" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "replay-json-wf" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+          conf = provideCallStack $ configure () workflow baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      Right jsonBytes <- pure =<< Core.historyProtoToJson (encodeMessage history)
+      result <- runReplayHistoryJson globalRuntime conf (WorkflowId "replay-json") jsonBytes
+      result `shouldSatisfy` isRight
+
+    specify "replays a workflow with activities via JSON" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow Int)
+          workflow = W.provideWorkflow JSON "replay-json-act-wf" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            h <- W.startActivity replayActivityDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.wait h
+          conf = provideCallStack $ configure () (replayActivityDef, workflow) baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      Right jsonBytes <- pure =<< Core.historyProtoToJson (encodeMessage history)
+      result <- runReplayHistoryJson globalRuntime conf (WorkflowId "replay-json-act") jsonBytes
+      result `shouldSatisfy` isRight
+
+    specify "rejects invalid JSON" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "replay-json-invalid-wf" $ provideCallStack $ pure ()
+          conf = provideCallStack $ configure () workflow baseConf
+      result <- runReplayHistoryJson globalRuntime conf (WorkflowId "fake-wf-id") "{ definitely not valid history json }"
+      result `shouldSatisfy` isLeft
+
+    specify "rejects empty JSON object" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "replay-json-empty-wf" $ provideCallStack $ pure ()
+          conf = provideCallStack $ configure () workflow baseConf
+      result <- runReplayHistoryJson globalRuntime conf (WorkflowId "fake-wf-id") "{}"
+      result `shouldSatisfy` isLeft
+
+  describe "historyProtoToJson" $ do
+    specify "converts proto bytes to valid JSON" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow Int)
+          workflow = W.provideWorkflow JSON "replay-h2j-wf" $ provideCallStack $ do
+            W.sleep $ milliseconds 10
+            h <- W.startActivity replayActivityDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 3)
+            W.wait h
+          conf = provideCallStack $ configure () (replayActivityDef, workflow) baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      result <- Core.historyProtoToJson (encodeMessage history)
+      result `shouldSatisfy` isRight
+
+    specify "rejects garbage proto bytes" $ \_env -> do
+      result <- Core.historyProtoToJson "not valid protobuf at all"
+      result `shouldSatisfy` isLeft

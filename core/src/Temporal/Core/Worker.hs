@@ -39,6 +39,8 @@ module Temporal.Core.Worker (
   HistoryPusher,
   History,
   pushHistory,
+  pushHistoryJson,
+  historyProtoToJson,
   closeHistory,
   KnownWorkerType (..),
   -- * Resource-safe wrappers
@@ -417,6 +419,53 @@ pushHistory (HistoryPusher hp) wf p =
         rust_dropUnit
         (\errPtr -> peek errPtr >>= peekWorkerError)
         (\_ -> return ())
+
+
+foreign import ccall "hs_temporal_history_pusher_push_history_json" raw_pushHistoryJson :: Ptr HistoryPusher -> Ptr (CArray Word8) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
+
+
+-- | Push a workflow history in protobuf canonical JSON format to a replay worker.
+-- The JSON is deserialized on the Rust side, bypassing proto-lens's incomplete
+-- JSON support.
+pushHistoryJson :: HistoryPusher -> WorkflowId -> ByteString -> IO (Either WorkerError ())
+pushHistoryJson (HistoryPusher hp) wf jsonBytes =
+  withCArrayBS wf $ \wfPtr ->
+    withCArrayBS jsonBytes $ \jsonPtr ->
+      withTokioAsyncCall
+        (raw_pushHistoryJson hp wfPtr jsonPtr)
+        rust_dropWorkerError
+        rust_dropUnit
+        (\errPtr -> peek errPtr >>= peekWorkerError)
+        (\_ -> return ())
+
+
+foreign import ccall "hs_temporal_history_proto_to_json" raw_historyProtoToJson :: Ptr (CArray Word8) -> Ptr (Ptr (CArray Word8)) -> Ptr (Ptr (CArray Word8)) -> IO ()
+
+
+-- | Convert protobuf-encoded History bytes to canonical protobuf JSON.
+-- The conversion is performed on the Rust side via prost + serde.
+-- Useful for testing the JSON replay path.
+historyProtoToJson :: ByteString -> IO (Either String ByteString)
+historyProtoToJson protoBytes =
+  withCArrayBS protoBytes $ \protoPtr ->
+    alloca $ \resultSlot ->
+      alloca $ \errorSlot -> do
+        poke resultSlot nullPtr
+        poke errorSlot nullPtr
+        raw_historyProtoToJson protoPtr resultSlot errorSlot
+        errPtr <- peek errorSlot
+        if errPtr /= nullPtr
+          then do
+            arr <- peek errPtr
+            bs <- cArrayToByteString arr
+            rust_dropByteArray errPtr
+            pure $ Left $ show bs
+          else do
+            resPtr <- peek resultSlot
+            arr <- peek resPtr
+            bs <- cArrayToByteString arr
+            rust_dropByteArray resPtr
+            pure $ Right bs
 
 
 foreign import ccall "hs_temporal_history_pusher_close" raw_closeHistoryPusher :: Ptr HistoryPusher -> IO ()
