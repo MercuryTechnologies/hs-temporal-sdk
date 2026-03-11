@@ -46,6 +46,7 @@ library
   other-modules:
       Temporal.Activity.Definition
       Temporal.Activity.Worker
+      Temporal.Nexus.Worker
       Temporal.Client.Types
       Temporal.Client.AsyncActivity
       Temporal.Client.Workflow
