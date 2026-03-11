@@ -88,6 +88,14 @@ module Temporal.Worker (
   setGracefulShutdownPeriodMillis,
   addInterceptors,
   setPayloadProcessor,
+  addNexusServiceHandler,
+  Nexus.NexusServiceHandler (..),
+  Nexus.NexusOperationHandler (..),
+  NexusEndpointName (..),
+  NexusServiceName (..),
+  NexusOperationName (..),
+  NexusClient (..),
+  makeNexusClient,
 
   -- ** Worker tuner
   setTuner,
@@ -136,8 +144,10 @@ import qualified StmContainers.Map as StmMap
 import System.IO.Unsafe
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
+import qualified Temporal.Nexus.Worker as Nexus
 import Temporal.Common
 import Temporal.Common.Async
+import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
 import qualified Data.ByteString as BS
@@ -188,6 +198,7 @@ configure actEnv defs = flip execState defaultConfig . unConfigM
           , logger = \_ _ _ _ -> pure ()
           , tracerProvider = inertTracerProvider
           , payloadProcessor = PayloadProcessor pure (pure . Right)
+          , nexusServiceHandlers = []
           , ..
           }
 
@@ -502,6 +513,13 @@ setPayloadProcessor p = ConfigM $ modify' $ \conf ->
     }
 
 
+addNexusServiceHandler :: Nexus.NexusServiceHandler -> ConfigM actEnv ()
+addNexusServiceHandler svc = ConfigM $ modify' $ \conf ->
+  conf
+    { nexusServiceHandlers = svc : conf.nexusServiceHandlers
+    }
+
+
 ------------------------------------------------------------------------------------
 
 {- | A Worker is responsible for polling a Task Queue, dequeueing a Task, executing
@@ -525,6 +543,7 @@ data Worker env = forall ty.
   { workerType :: !(Core.SWorkerType ty)
   , workerWorkflowLoop :: !(Async ())
   , workerActivityLoop :: !(InactiveForReplay ty (Async ()))
+  , workerNexusLoop :: !(InactiveForReplay ty (Async ()))
   , workerActivityWorker :: !(InactiveForReplay ty (Activity.ActivityWorker env))
   , workerCore :: !(Core.Worker ty)
   , workerTracer :: !Tracer
@@ -553,6 +572,7 @@ startReplayWorker rt conf = provideCallStack $ runWorkerContext conf $ do
       workflowWorker = Workflow.WorkflowWorker {..}
       workerActivityWorker = ()
       workerActivityLoop = ()
+      workerNexusLoop = ()
       workerType = Core.SReplay
       workerTracer = makeTracer conf.tracerProvider "hs-temporal-sdk" tracerOptions
   workerWorkflowLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/workflow/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
@@ -787,6 +807,41 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
             , "taskQueue="
             , Core.taskQueue conf.coreConfig
             ]
+  workerNexusLoop <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/nexus/", Core.namespace conf.coreConfig, "/", Core.taskQueue conf.coreConfig]) $ do
+    let services = HashMap.fromList [(svc.serviceName, svc) | svc <- conf.nexusServiceHandlers]
+    if HashMap.null services
+      then Logging.logDebug "No nexus services registered, skipping nexus worker loop"
+      else do
+        Logging.logDebug "Starting nexus worker loop"
+        let nexusWorker = Nexus.NexusWorker
+              { Nexus.workerCore = workerCore
+              , Nexus.nexusServices = services
+              }
+        res <- UnliftIO.try $ Nexus.execute nexusWorker
+        case res of
+          Left (e :: SomeException) ->
+            Logging.logError $
+              T.concat
+                [ "Exiting nexus worker loop with error: "
+                , "namespace="
+                , Core.namespace conf.coreConfig
+                , " "
+                , "taskQueue="
+                , Core.taskQueue conf.coreConfig
+                , " "
+                , "error="
+                , T.pack $ show e
+                ]
+          Right _ ->
+            Logging.logInfo $
+              T.concat
+                [ "Exiting nexus worker loop normally: "
+                , "namespace="
+                , Core.namespace conf.coreConfig
+                , " "
+                , "taskQueue="
+                , Core.taskQueue conf.coreConfig
+                ]
   pure Temporal.Worker.Worker {..}
 
 
@@ -797,12 +852,13 @@ Any exceptions thrown by the workflow or activity loops will be rethrown.
 This function is generally not needed, as 'shutdown' will wait for the worker to exit.
 -}
 waitWorker :: (MonadIO m) => Temporal.Worker.Worker actEnv -> m ()
-waitWorker (Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop}) = do
+waitWorker (Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop, workerNexusLoop}) = do
   case workerType of
     Core.SReal -> do
       wfRes <- waitCatch workerWorkflowLoop
       actRes <- waitCatch workerActivityLoop
-      for_ (lefts [wfRes, actRes]) throwIO
+      nexusRes <- waitCatch workerNexusLoop
+      for_ (lefts [wfRes, actRes, nexusRes]) throwIO
     Core.SReplay -> do
       _ <- wait workerWorkflowLoop
       pure ()
@@ -856,11 +912,12 @@ pollWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActi
 
 
 waitWorkerSTM :: Temporal.Worker.Worker actEnv -> STM ()
-waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop} = do
+waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActivityLoop, workerNexusLoop} = do
   case workerType of
     Core.SReal -> do
       waitSTM workerWorkflowLoop
       waitSTM workerActivityLoop
+      waitSTM workerNexusLoop
     Core.SReplay -> waitSTM workerWorkflowLoop
 
 
