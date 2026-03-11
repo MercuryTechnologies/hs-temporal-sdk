@@ -19,7 +19,7 @@ import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
 import qualified Proto.Temporal.Api.Nexus.V1.Message as NexusProto
 import qualified Proto.Temporal.Api.Nexus.V1.Message_Fields as NexusProto
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
-import Temporal.Common (Namespace (..), TaskQueue (..))
+import Temporal.Common (Namespace (..), NexusEndpointName (..), TaskQueue (..))
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.OperatorService as Core
 import qualified Temporal.Exception
@@ -110,8 +110,8 @@ data NexusEndpoint = NexusEndpoint
 
 
 -- | Create a Nexus endpoint that routes to a worker's task queue.
-createNexusEndpoint :: MonadIO m => Client -> Text -> Namespace -> TaskQueue -> m (Either Temporal.Exception.RpcError NexusEndpoint)
-createNexusEndpoint c name (Namespace ns) (TaskQueue tq) = do
+createNexusEndpoint :: MonadIO m => Client -> NexusEndpointName -> Namespace -> TaskQueue -> m (Either Temporal.Exception.RpcError NexusEndpoint)
+createNexusEndpoint c (NexusEndpointName name) (Namespace ns) (TaskQueue tq) = do
   res <-
     liftIO $
       Core.createNexusEndpoint

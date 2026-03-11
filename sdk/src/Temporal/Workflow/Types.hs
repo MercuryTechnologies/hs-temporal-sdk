@@ -12,6 +12,7 @@ import Data.Vector (Vector)
 import Data.Word (Word32)
 import Language.Haskell.TH.Syntax (Lift)
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
+import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus as NexusProto
 import Temporal.Activity.Types
 import Temporal.Common
 import Temporal.Common.TimeoutType
@@ -307,4 +308,70 @@ defaultContinueAsNewOptions =
     , memo = mempty
     , searchAttributes = mempty
     , headers = mempty
+    }
+
+
+-- | Result from starting a Nexus operation (before it completes).
+data NexusOperationStartResult
+  = -- | The operation started asynchronously with the given operation token.
+    NexusOperationStartedAsync !Text
+  | -- | The operation completed synchronously (result comes via ResolveNexusOperation).
+    NexusOperationStartedSync
+  deriving stock (Show, Eq)
+
+
+-- | Terminal result of a Nexus operation.
+type NexusOperationResult = NexusProto.NexusOperationResult
+
+
+-- | Cancellation semantics for a Nexus operation.
+data NexusOperationCancellationType
+  = -- | Wait for the operation cancellation to complete before reporting cancellation.
+    NexusOperationWaitCancellationCompleted
+  | -- | Do not request cancellation of the operation if already scheduled.
+    NexusOperationAbandon
+  | -- | Initiate cancellation and immediately report cancellation to the workflow.
+    NexusOperationTryCancel
+  | -- | Request cancellation and wait for acknowledgement, but not completion.
+    NexusOperationWaitCancellationRequested
+  deriving stock (Show, Eq, Ord)
+
+
+nexusOperationCancellationTypeToProto :: NexusOperationCancellationType -> NexusProto.NexusOperationCancellationType
+nexusOperationCancellationTypeToProto NexusOperationWaitCancellationCompleted = NexusProto.WAIT_CANCELLATION_COMPLETED
+nexusOperationCancellationTypeToProto NexusOperationAbandon = NexusProto.ABANDON
+nexusOperationCancellationTypeToProto NexusOperationTryCancel = NexusProto.TRY_CANCEL
+nexusOperationCancellationTypeToProto NexusOperationWaitCancellationRequested = NexusProto.WAIT_CANCELLATION_REQUESTED
+
+
+-- | A handle for calling Nexus operations, bound to a specific endpoint and service.
+-- Create one via 'makeNexusClient'.
+data NexusClient = NexusClient
+  { nexusEndpoint :: !NexusEndpointName
+  , nexusService :: !NexusServiceName
+  }
+  deriving stock (Show, Eq)
+
+
+-- | Construct a 'NexusClient' bound to a Nexus endpoint and service name.
+makeNexusClient :: NexusEndpointName -> NexusServiceName -> NexusClient
+makeNexusClient = NexusClient
+
+
+-- | Options for scheduling a Nexus operation from a workflow.
+data ScheduleNexusOperationOptions = ScheduleNexusOperationOptions
+  { scheduleToCloseTimeout :: !(Maybe Duration)
+  , nexusHeaders :: !(Map Text Text)
+  , cancellationType :: !NexusOperationCancellationType
+  }
+  deriving stock (Show, Eq)
+
+
+-- | Default options for scheduling a Nexus operation.
+defaultScheduleNexusOperationOptions :: ScheduleNexusOperationOptions
+defaultScheduleNexusOperationOptions =
+  ScheduleNexusOperationOptions
+    { scheduleToCloseTimeout = Nothing
+    , nexusHeaders = mempty
+    , cancellationType = NexusOperationTryCancel
     }

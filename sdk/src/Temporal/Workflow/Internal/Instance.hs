@@ -15,6 +15,7 @@ module Temporal.Workflow.Internal.Instance (
   nextTimerSequence,
   nextActivitySequence,
   nextConditionSequence,
+  nextNexusOperationSequence,
 ) where
 
 import Control.Monad.Reader
@@ -106,3 +107,11 @@ nextConditionSequence = do
   liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
     let seq' = condition seqs
     in (seqs {condition = succ seq'}, Sequence seq')
+
+
+nextNexusOperationSequence :: InstanceM Sequence
+nextNexusOperationSequence = do
+  inst <- ask
+  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+    let seq' = nexusOperation seqs
+    in (seqs {nexusOperation = succ seq'}, Sequence seq')
