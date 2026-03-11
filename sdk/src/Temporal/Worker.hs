@@ -86,6 +86,7 @@ module Temporal.Worker (
   setGracefulShutdownPeriodMillis,
   addInterceptors,
   setPayloadProcessor,
+  BuildId (..),
   WorkflowId (..),
 ) where
 
@@ -298,8 +299,8 @@ in the Temporal UI. The buildId is used to identify the exact version of the cod
 its dependencies. In e.g. Nix, the executable path in the Nix store would be a useful
 buildId.
 -}
-setBuildId :: Text -> ConfigM actEnv ()
-setBuildId bid = modifyCore $ \conf ->
+setBuildId :: BuildId -> ConfigM actEnv ()
+setBuildId (BuildId bid) = modifyCore $ \conf ->
   conf
     { Core.buildId = bid
     }

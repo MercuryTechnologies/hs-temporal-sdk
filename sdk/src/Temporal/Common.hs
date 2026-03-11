@@ -92,6 +92,12 @@ newtype TaskQueue = TaskQueue {rawTaskQueue :: Text}
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
+-- | Identifies the exact code version running in a worker. Useful for versioned task queues.
+newtype BuildId = BuildId {rawBuildId :: Text}
+  deriving stock (Lift)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
+
+
 newtype ActivityType = ActivityType {rawActivityType :: Text}
   deriving stock (Data, Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)

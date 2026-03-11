@@ -102,13 +102,9 @@ spec = do
     it "task failure fails replay" $ const pending
 
   describe "Update handler executing activity (Py/TS)" $ do
-    it "update timeout or cancel" $ const pending
-    it "update separate handle" $ const pending
     it "updateWithStart" $ const pending
 
   describe "Worker Lifecycle (Py/TS)" $ do
-    it "worker allows heartbeating after shutdown" $ const pending
-    it "worker fails unknown namespace" $ const pending
     it "worker connection replacement" $ const pending
     it "worker exposes abort controller equivalent" $ const pending
     it "worker heartbeat management" $ const pending

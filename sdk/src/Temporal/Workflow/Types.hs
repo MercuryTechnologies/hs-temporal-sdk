@@ -23,7 +23,7 @@ import Temporal.SearchAttributes
 data Info = Info
   { historyLength :: {-# UNPACK #-} !Word32
   , attempt :: {-# UNPACK #-} !Int
-  , buildId :: !Text
+  , buildId :: !BuildId
   , continuedRunId :: !(Maybe RunId)
   , cronSchedule :: !(Maybe Text)
   , executionTimeout :: !(Maybe Duration)

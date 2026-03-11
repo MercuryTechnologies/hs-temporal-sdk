@@ -267,6 +267,31 @@ updateTests = describe "Update" $ do
         ur `shouldBe` 42
         wr `shouldBe` 42
 
+    it "startUpdate and waitUpdateResult work as separate steps" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+            updateOpts = C.UpdateOptions {updateId = "separate-handle", updateHeaders = mempty}
+        (ur, wr) <- useClient do
+          h <- C.start UpdateWithoutValidator "separate-handle-wf" opts
+          updateHandle <- C.startUpdate h testUpdate updateOpts 42
+          updateResult <- C.waitUpdateResult updateHandle
+          wfResult <- C.waitWorkflowResult h
+          pure (updateResult, wfResult)
+        ur `shouldBe` 42
+        wr `shouldBe` 42
+
+    it "startUpdate fire-and-forget does not block" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+            updateOpts = C.UpdateOptions {updateId = "fire-forget", updateHeaders = mempty}
+        wr <- useClient do
+          h <- C.start UpdateWithoutValidator "fire-forget-wf" opts
+          _ <- C.startUpdate h testUpdate updateOpts 99
+          C.waitWorkflowResult h
+        wr `shouldBe` 99
+
 
 updateInterceptorTests :: SpecWith PortNumber
 updateInterceptorTests = do
