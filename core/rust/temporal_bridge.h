@@ -517,6 +517,28 @@ void hs_update_worker_build_id_compatibility(struct ClientRef *client,
                                              struct CRPCError **error_slot,
                                              struct CArray_u8 **result_slot);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void hs_execute_multi_operation(struct ClientRef *client,
+                                const struct RpcCall *c_call,
+                                struct MVar *mvar,
+                                struct Capability cap,
+                                struct CRPCError **error_slot,
+                                struct CArray_u8 **result_slot);
+
 void hs_get_current_time(struct ClientRef *client,
                          const struct RpcCall *c_call,
                          struct MVar *mvar,
