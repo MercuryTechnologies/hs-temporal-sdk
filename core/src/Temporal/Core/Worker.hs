@@ -27,10 +27,14 @@ module Temporal.Core.Worker (
   pollWorkflowActivation,
   ActivityTask,
   pollActivityTask,
+  NexusTask,
+  pollNexusTask,
   WorkflowActivationCompletion,
   completeWorkflowActivation,
   ActivityTaskCompletion,
   completeActivityTask,
+  NexusTaskCompletion,
+  completeNexusTask,
   ActivityHeartbeat,
   recordActivityHeartbeat,
   requestWorkflowEviction,
@@ -83,6 +87,7 @@ import Foreign.Storable
 import Proto.Temporal.Api.History.V1.Message (History)
 import Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask (ActivityTask)
 import Proto.Temporal.Sdk.Core.CoreInterface (ActivityHeartbeat, ActivityTaskCompletion)
+import Proto.Temporal.Sdk.Core.Nexus.Nexus (NexusTask, NexusTaskCompletion)
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (WorkflowActivation)
 import Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion (WorkflowActivationCompletion)
 import Temporal.Core.CTypes
@@ -478,6 +483,8 @@ data WorkerConfig = WorkerConfig
   , nondeterminismAsWorkflowFail :: Bool
   , nondeterminismAsWorkflowFailForTypes :: [Text]
   , tuner :: Maybe TunerConfig
+  , maxOutstandingNexusTasks :: Maybe Word64
+  , maxConcurrentNexusTaskPolls :: Maybe Word64
   }
 
 
@@ -508,6 +515,8 @@ defaultWorkerConfig =
     , nondeterminismAsWorkflowFail = False
     , nondeterminismAsWorkflowFailForTypes = []
     , tuner = Nothing
+    , maxOutstandingNexusTasks = Nothing
+    , maxConcurrentNexusTaskPolls = Nothing
     }
 
 
@@ -653,6 +662,36 @@ completeActivityTask w p = withWorker w $ \wp ->
   withCArrayBS (encodeMessage p) $ \pPtr ->
     withTokioAsyncCall
       (raw_completeActivityTask wp pPtr)
+      rust_dropWorkerError
+      rust_dropUnit
+      (\errPtr -> peek errPtr >>= peekWorkerError)
+      (\_ -> return ())
+
+
+foreign import ccall "hs_temporal_worker_poll_nexus_task" raw_pollNexusTask :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
+
+
+pollNexusTask :: KnownWorkerType ty => Worker ty -> IO (Either WorkerError NexusTask)
+pollNexusTask w = withWorker w $ \wp ->
+  withTokioAsyncCall
+    (raw_pollNexusTask wp)
+    rust_dropWorkerError
+    rust_dropByteArray
+    (\errPtr -> peek errPtr >>= peekWorkerError)
+    (\resPtr -> do
+      arr <- peek resPtr
+      bs <- cArrayToByteString arr
+      return (decodeMessageOrDie bs))
+
+
+foreign import ccall "hs_temporal_worker_complete_nexus_task" raw_completeNexusTask :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
+
+
+completeNexusTask :: KnownWorkerType ty => Worker ty -> NexusTaskCompletion -> IO (Either WorkerError ())
+completeNexusTask w p = withWorker w $ \wp ->
+  withCArrayBS (encodeMessage p) $ \pPtr ->
+    withTokioAsyncCall
+      (raw_completeNexusTask wp pPtr)
       rust_dropWorkerError
       rust_dropUnit
       (\errPtr -> peek errPtr >>= peekWorkerError)
