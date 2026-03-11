@@ -229,6 +229,18 @@ module Temporal.Workflow (
   uuid7,
   WorkflowGenM,
 
+  -- * Nexus operations
+  -- $nexus
+  NexusClient (..),
+  makeNexusClient,
+  NexusEndpointName (..),
+  NexusServiceName (..),
+  NexusOperationName (..),
+  ScheduleNexusOperationOptions (..),
+  defaultScheduleNexusOperationOptions,
+  startNexusOperation,
+  executeNexusOperation,
+
   -- * Continue as new
   ContinueAsNewOptions (..), -- TODO, fields conflict
   defaultContinueAsNewOptions,
@@ -296,6 +308,8 @@ import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as Activi
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
 import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus as NexusProto
+import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus_Fields as NexusFields
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import RequireCallStack
@@ -506,6 +520,80 @@ executeActivity (activityRef -> k@(KnownActivity codec _name)) opts = withWorkfl
   -- gatherArgs (Proxy @(ActivityArgs activity)) codec id $ \typedPayloads -> do
   actHandle <- startActivityFromPayloads k opts typedPayloads
   Temporal.Workflow.Unsafe.Handle.wait actHandle
+
+
+-- | Schedule a Nexus operation from a workflow. Returns a 'Task' that completes
+-- with a raw 'Payload' when the operation finishes (sync or async).
+--
+-- Use 'makeNexusClient' to create a 'NexusClient' bound to an endpoint and service,
+-- then pass an 'NexusOperationName' identifying the operation within that service.
+startNexusOperation
+  :: RequireCallStack
+  => NexusClient
+  -> NexusOperationName
+  -> ScheduleNexusOperationOptions
+  -> Payload
+  -> Workflow (Task Payload)
+startNexusOperation client operationName opts input = ilift $ do
+  updateCallStack
+  inst <- ask
+  s@(Sequence nexusSeq) <- nextNexusOperationSequence
+  startVar <- newIVar
+  resultVar <- newIVar
+  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    seqMaps {nexusOperations = HashMap.insert s (NexusOperationHandles startVar resultVar) (nexusOperations seqMaps)}
+
+  encodedInput <- liftIO $ payloadProcessorEncode inst.payloadProcessor input
+  let scheduleCmd =
+        defMessage
+          & Command.seq .~ nexusSeq
+          & Command.endpoint .~ rawNexusEndpointName client.nexusEndpoint
+          & Command.service .~ rawNexusServiceName client.nexusService
+          & Command.operation .~ rawNexusOperationName operationName
+          & Command.maybe'input .~ Just (convertToProtoPayload encodedInput)
+          & Command.maybe'scheduleToCloseTimeout .~ fmap durationToProto opts.scheduleToCloseTimeout
+          & Command.nexusHeader .~ opts.nexusHeaders
+          & Command.cancellationType .~ nexusOperationCancellationTypeToProto opts.cancellationType
+      cmd = defMessage & Command.scheduleNexusOperation .~ scheduleCmd
+  addCommand cmd
+  pure $
+    Task
+      { waitAction = do
+          _ <- getIVar startVar
+          result <- getIVar resultVar
+          Workflow $ \_ -> case result ^. NexusFields.maybe'status of
+            Nothing -> pure $ Throw $ toException $ RuntimeError "Nexus operation result missing status"
+            Just (NexusProto.NexusOperationResult'Completed payload) -> do
+              decoded <- liftIO $ payloadProcessorDecode inst.payloadProcessor (convertFromProtoPayload payload)
+              pure $ case decoded of
+                Left err -> Throw $ toException $ ValueError err
+                Right val -> Done val
+            Just (NexusProto.NexusOperationResult'Failed failure) ->
+              pure $ Throw $ toException $ NexusOperationFailed (failure ^. Failure.message) Nothing
+            Just (NexusProto.NexusOperationResult'Cancelled _) ->
+              pure $ Throw $ toException NexusOperationCancelled
+            Just (NexusProto.NexusOperationResult'TimedOut _) ->
+              pure $ Throw $ toException NexusOperationTimedOut
+      , cancelAction = do
+          let cancelCmd =
+                defMessage
+                  & Command.requestCancelNexusOperation
+                    .~ (defMessage & Command.seq .~ nexusSeq)
+          ilift $ addCommand cancelCmd
+      }
+
+
+-- | Execute a Nexus operation and wait for the result.
+executeNexusOperation
+  :: RequireCallStack
+  => NexusClient
+  -> NexusOperationName
+  -> ScheduleNexusOperationOptions
+  -> Payload
+  -> Workflow Payload
+executeNexusOperation client operationName opts input = do
+  task <- startNexusOperation client operationName opts input
+  Temporal.Workflow.Unsafe.Handle.wait task
 
 
 {- | A client side handle to a single Workflow instance. It can be used to signal a workflow execution.

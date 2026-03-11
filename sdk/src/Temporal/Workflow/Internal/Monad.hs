@@ -786,6 +786,7 @@ data Sequences = Sequences
   , activity :: {-# UNPACK #-} !Word32
   , condition :: {-# UNPACK #-} !Word32
   , varId :: {-# UNPACK #-} !Word32
+  , nexusOperation :: {-# UNPACK #-} !Word32
   }
 
 
@@ -802,6 +803,12 @@ push :: a -> Reversed a -> Reversed a
 push x (Reversed xs) = Reversed (x : xs)
 
 
+data NexusOperationHandles = NexusOperationHandles
+  { nexusStartHandle :: {-# UNPACK #-} !(IVar NexusOperationStartResult)
+  , nexusResultHandle :: {-# UNPACK #-} !(IVar NexusOperationResult)
+  }
+
+
 data SequenceMaps = SequenceMaps
   { timers :: {-# UNPACK #-} !(SequenceMap (IVar ()))
   , activities :: {-# UNPACK #-} !(SequenceMap (IVar ResolveActivity))
@@ -809,6 +816,7 @@ data SequenceMaps = SequenceMaps
   , externalSignals :: {-# UNPACK #-} !(SequenceMap (IVar ResolveSignalExternalWorkflow))
   , externalCancels :: {-# UNPACK #-} !(SequenceMap (IVar ResolveRequestCancelExternalWorkflow))
   , conditionsAwaitingSignal :: {-# UNPACK #-} !(SequenceMap (IVar (), Set Sequence))
+  , nexusOperations :: {-# UNPACK #-} !(SequenceMap NexusOperationHandles)
   }
 
 

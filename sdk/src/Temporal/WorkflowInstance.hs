@@ -13,7 +13,9 @@ module Temporal.WorkflowInstance (
   nextExternalSignalSequence,
   nextTimerSequence,
   nextConditionSequence,
+  nextNexusOperationSequence,
   addBuiltinQueryHandlers,
+  addStackTraceHandler,
 ) where
 
 import Control.Applicative
@@ -61,6 +63,9 @@ import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
   ResolveChildWorkflowExecution,
   ResolveChildWorkflowExecutionStart,
   ResolveChildWorkflowExecutionStart'Status (..),
+  ResolveNexusOperation,
+  ResolveNexusOperationStart,
+  ResolveNexusOperationStart'Status (..),
   ResolveRequestCancelExternalWorkflow,
   ResolveSignalExternalWorkflow,
   SignalWorkflow,
@@ -132,10 +137,11 @@ create
           , activity = 1
           , condition = 1
           , varId = 1
+          , nexusOperation = 1
           }
     workflowTime <- newIORef $ MkSystemTime 0 0
     workflowIsReplaying <- newIORef False
-    workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty
+    workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty mempty
     workflowCommands <- newTVarIO $ Reversed []
     workflowSignalHandlers <- newIORef mempty
     workflowBufferedSignals <- newIORef mempty
@@ -654,6 +660,8 @@ data PendingJob
   | PendingJobResolveRequestCancelExternalWorkflow ResolveRequestCancelExternalWorkflow
   | PendingJobFireTimer FireTimer
   | PendingWorkflowCancellation CancelWorkflow
+  | PendingJobResolveNexusOperationStart ResolveNexusOperationStart
+  | PendingJobResolveNexusOperation ResolveNexusOperation
 
 
 data JobGroups = JobGroups
@@ -721,8 +729,8 @@ applyJobs jobs fAwait = UnliftIO.try $ do
             -- Handled in the worker.
             Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> jobGroups
             Just (WorkflowActivationJob'DoUpdate u) -> jobGroups {updateWorkflows = applyDoUpdateWorkflow u : jobGroups.updateWorkflows}
-            Just (WorkflowActivationJob'ResolveNexusOperation _) -> error "ResolveNexusOperation not yet implemented"
-            Just (WorkflowActivationJob'ResolveNexusOperationStart _) -> error "ResolveNexusOperationStart not yet implemented"
+            Just (WorkflowActivationJob'ResolveNexusOperation r) -> jobGroups {resolutions = PendingJobResolveNexusOperation r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'ResolveNexusOperationStart r) -> jobGroups {resolutions = PendingJobResolveNexusOperationStart r : jobGroups.resolutions}
             Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
         )
         ( JobGroups
@@ -848,6 +856,40 @@ applyResolutions rs = do
                     { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
                     }
                 )
+          PendingJobResolveNexusOperationStart msg -> do
+            let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+            case existingHandles of
+              Nothing -> E.throw $ RuntimeError "Nexus operation not found for start resolution"
+              Just handles -> case msg ^. Activation.maybe'status of
+                Nothing -> E.throw $ RuntimeError "Nexus operation start had no status"
+                Just (ResolveNexusOperationStart'OperationToken token) ->
+                  ( ActivationResult (Ok (NexusOperationStartedAsync token)) handles.nexusStartHandle : completions
+                  , sequenceMaps'
+                  )
+                Just (ResolveNexusOperationStart'StartedSync _) ->
+                  ( ActivationResult (Ok NexusOperationStartedSync) handles.nexusStartHandle : completions
+                  , sequenceMaps'
+                  )
+                Just (ResolveNexusOperationStart'Failed failure) ->
+                  ( ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusStartHandle
+                      : ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusResultHandle
+                      : completions
+                  , sequenceMaps'
+                      { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                      }
+                  )
+          PendingJobResolveNexusOperation msg -> do
+            let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+            case existingHandles of
+              Nothing -> E.throw $ RuntimeError "Nexus operation not found for result resolution"
+              Just handles -> case msg ^. Activation.maybe'result of
+                Nothing -> E.throw $ RuntimeError "Nexus operation resolution had no result"
+                Just result ->
+                  ( ActivationResult (Ok result) handles.nexusResultHandle : completions
+                  , sequenceMaps'
+                      { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                      }
+                  )
 
     let (newCompletions, updatedSequenceMaps) = foldl' makeCompletion ([], sequenceMaps) rs
     writeTVar inst.workflowSequenceMaps updatedSequenceMaps
