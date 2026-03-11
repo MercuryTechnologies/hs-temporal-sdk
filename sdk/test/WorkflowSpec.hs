@@ -1,9 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fconstraint-solver-iterations=20 #-}
 
 module WorkflowSpec where
 
 import Conduit
 import Control.Concurrent (threadDelay)
+import Data.Either (isRight)
 import Control.Exception (SomeException, bracket)
 import Control.Exception.Annotated (checkpoint)
 import qualified Control.Monad.Catch as Catch
@@ -23,8 +25,12 @@ import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as WFInfo
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
+import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
+import RequireCallStack (provideCallStack)
 import qualified Temporal.Activity as A
 import qualified Temporal.Client as C
+import qualified Temporal.Core.Client.WorkflowService as WS
 import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
@@ -986,3 +992,54 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
+  describe "Update with start (executeMultiOperation)" $ do
+    specify "executeMultiOperation atomically starts workflow and sends update" $ \TestEnv {..} -> do
+      let uwsUpdate :: W.KnownUpdate '[Int] Int SomeException
+          uwsUpdate = W.KnownUpdate defaultCodec "uws-update"
+          workflow :: W.Workflow Int
+          workflow = provideCallStack do
+            stateVar <- W.newStateVar (0 :: Int)
+            let handleUpdate arg = do
+                  W.modifyStateVar stateVar (+ arg)
+                  W.readStateVar stateVar
+            W.setUpdateHandler uwsUpdate handleUpdate Nothing
+            W.waitCondition $ do
+              x <- W.readStateVar stateVar
+              pure $ x > 0
+            W.readStateVar stateVar
+          wf = W.provideWorkflow defaultCodec "uwsWorkflow" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        wfId <- uuidText
+        let tqProto = defMessage & TQ.name .~ W.rawTaskQueue taskQueue
+            wfType = defMessage & Common.name .~ "uwsWorkflow"
+            startReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.workflowId .~ wfId
+              & RR.workflowType .~ wfType
+              & RR.taskQueue .~ tqProto
+            argPayload = defMessage
+              & Common.metadata .~ Map.fromList [("encoding", "json/plain"), ("messageType", "Int")]
+              & Common.data' .~ "42"
+            argPayloads = defMessage & Common.payloads .~ [argPayload]
+            updateInput = defMessage
+              & Update.name .~ ("uws-update" :: Text)
+              & Update.args .~ argPayloads
+            updateMeta = defMessage
+              & Update.updateId .~ ("uws-update-1" :: Text)
+            updateReqProto = defMessage
+              & Update.input .~ updateInput
+              & Update.meta .~ updateMeta
+            updateReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.workflowExecution .~ (defMessage & Common.workflowId .~ wfId)
+              & RR.request .~ updateReqProto
+            startOp = defMessage & RR.startWorkflow .~ startReq
+            updateOp = defMessage & RR.updateWorkflow .~ updateReq
+            multiReq = defMessage
+              & RR.namespace .~ "default"
+              & RR.operations .~ [startOp, updateOp]
+        multiRes <- WS.executeMultiOperation coreClient multiReq
+        multiRes `shouldSatisfy` isRight
+

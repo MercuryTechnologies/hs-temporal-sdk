@@ -13,6 +13,7 @@ module Temporal.Core.Client.WorkflowService (
   describeSchedule,
   describeTaskQueue,
   describeWorkflowExecution,
+  executeMultiOperation,
   getClusterInfo,
   getSearchAttributes,
   getSystemInfo,
@@ -54,8 +55,8 @@ module Temporal.Core.Client.WorkflowService (
   terminateWorkflowExecution,
   updateNamespace,
   updateSchedule,
-  updateWorkflowExecution,
   updateWorkerBuildIdCompatibility,
+  updateWorkflowExecution,
 ) where
 
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse
@@ -617,3 +618,11 @@ members are compatible with one another.
 -}
 updateWorkerBuildIdCompatibility :: Client -> UpdateWorkerBuildIdCompatibilityRequest -> IO (Either RpcError UpdateWorkerBuildIdCompatibilityResponse)
 updateWorkerBuildIdCompatibility = call @WorkflowService @"updateWorkerBuildIdCompatibility" hs_update_worker_build_id_compatibility
+
+
+foreign import ccall "hs_execute_multi_operation" hs_execute_multi_operation :: PrimRpcCall
+
+
+-- | Executes multiple operations atomically (e.g. update-with-start).
+executeMultiOperation :: Client -> ExecuteMultiOperationRequest -> IO (Either RpcError ExecuteMultiOperationResponse)
+executeMultiOperation = call @WorkflowService @"executeMultiOperation" hs_execute_multi_operation
