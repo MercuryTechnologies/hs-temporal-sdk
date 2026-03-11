@@ -71,6 +71,9 @@ data StartActivityOptions = StartActivityOptions
   , headers :: Map Text Payload
   , disableEagerExecution :: Bool
   -- ^ If true, will disable eager activity execution. Eager activity execution is an optimization on some servers that sends activities back to the same worker as the calling workflow if they can run there. This setting is experimental and may be removed in a future release.
+  , summary :: Maybe Text
+  -- ^ Short-form text describing this activity execution. Appears as user metadata
+  -- in the Temporal UI on the associated history event. Limited to 400 bytes.
   }
   deriving stock (Show, Lift)
 
@@ -122,6 +125,7 @@ Default options for starting an activity. Takes a 'StartActivityTimeoutOption'
   , cancellationType = 'ActivityCancellationTryCancel'
   , headers = 'mempty'
   , disableEagerExecution = 'False'
+  , summary = 'Nothing'
   }
 @
 -}
@@ -137,6 +141,7 @@ defaultStartActivityOptions t =
     , cancellationType = ActivityCancellationTryCancel
     , headers = mempty
     , disableEagerExecution = False
+    , summary = Nothing
     }
 
 
@@ -220,6 +225,12 @@ data StartChildWorkflowOptions = StartChildWorkflowOptions
   , workflowIdReusePolicy :: WorkflowIdReusePolicy
   , workflowId :: Maybe WorkflowId
   , taskQueue :: Maybe TaskQueue
+  , staticSummary :: Maybe Text
+  -- ^ Short-form text describing this child workflow. Appears as user metadata
+  -- in the Temporal UI on the associated history event. Limited to 400 bytes.
+  , staticDetails :: Maybe Text
+  -- ^ Long-form text with details about this child workflow. Appears as user metadata
+  -- in the Temporal UI. Limited to 20000 bytes.
   }
   deriving stock (Show, Lift)
 
@@ -245,6 +256,8 @@ Default options for starting a child workflow.
   , workflowIdReusePolicy = 'WorkflowIdReusePolicyUnspecified'
   , workflowId = 'Nothing'
   , taskQueue = 'Nothing'
+  , staticSummary = 'Nothing'
+  , staticDetails = 'Nothing'
   }
 @
 -}
@@ -267,6 +280,8 @@ defaultChildWorkflowOptions =
     , workflowIdReusePolicy = WorkflowIdReusePolicyUnspecified
     , workflowId = Nothing
     , taskQueue = Nothing
+    , staticSummary = Nothing
+    , staticDetails = Nothing
     }
 
 
