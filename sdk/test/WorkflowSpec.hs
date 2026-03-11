@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fconstraint-solver-iterations=20 #-}
 
 module WorkflowSpec where
 
@@ -10,6 +11,7 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
 import Data.Aeson (toJSON)
 import Data.Int (Int64)
+import Data.Maybe (isJust)
 import Data.ProtoLens (defMessage)
 import Data.Time.Clock.System (SystemTime(..))
 import Data.Word (Word32)
@@ -19,6 +21,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
+import qualified Proto.Temporal.Api.Sdk.V1.UserMetadata_Fields as UM
 import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as WFInfo
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
@@ -986,3 +989,57 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
+  describe "User Metadata" $ do
+    specify "workflow start with user metadata runs successfully" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Text
+          workflow = pure "meta-ok"
+          wf = W.provideWorkflow defaultCodec "userMetaWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = (defaultStartOptsWithTimeout taskQueue (seconds 60))
+              { C.staticSummary = Just "wf-summary"
+              , C.staticDetails = Just "wf-details"
+              }
+        useClient (C.execute wf.reference "userMetaWf" opts) `shouldReturn` "meta-ok"
+
+    specify "activity command carries user metadata summary" $ \TestEnv {..} -> do
+      let act :: A.Activity () ()
+          act = pure ()
+          actDef = A.provideActivity defaultCodec "metaAct2" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions (W.StartToClose $ seconds 30))
+              { W.summary = Just "my-activity-summary" }
+          wf = W.provideWorkflow defaultCodec "actMetaWf" workflow
+          conf = configure () (wf, actDef) $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        C.waitWorkflowResult h `shouldReturn` ()
+
+        history <- C.fetchHistory h
+        let events = history ^. History.events
+            actScheduledEvents = filter (\e -> isJust (e ^. History.maybe'activityTaskScheduledEventAttributes)) events
+            actMeta = fmap (\e -> e ^. History.userMetadata . UM.summary . Common.data') actScheduledEvents
+        actMeta `shouldSatisfy` any (== "\"my-activity-summary\"")
+
+    specify "timer command carries user metadata summary" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow ()
+          workflow = do
+            W.sleepWithSummary (seconds 1) "my-timer-summary"
+          wf = W.provideWorkflow defaultCodec "timerMetaWf" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        wfId <- W.WorkflowId <$> uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+        h <- useClient (C.start wf.reference wfId opts)
+        C.waitWorkflowResult h `shouldReturn` ()
+
+        history <- C.fetchHistory h
+        let events = history ^. History.events
+            timerStartedEvents = filter (\e -> isJust (e ^. History.maybe'timerStartedEventAttributes)) events
+            timerMeta = fmap (\e -> e ^. History.userMetadata . UM.summary . Common.data') timerStartedEvents
+        timerMeta `shouldSatisfy` any (== "\"my-timer-summary\"")
