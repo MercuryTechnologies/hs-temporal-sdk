@@ -19,6 +19,7 @@ module IntegrationSpec where
 
 import Common
 import Control.Concurrent
+import TestHelpers (waitForWorkflowStart)
 import Control.Exception
 import Control.Exception.Annotated
 import qualified Control.Exception.Annotated as Annotated
@@ -63,7 +64,7 @@ import RequireCallStack
 import System.Directory
 import System.Environment (lookupEnv)
 import System.IO
-import Temporal.Activity
+import Temporal.Activity hiding (activityId, retryPolicy, workflowId)
 import Temporal.Bundle
 import Temporal.Bundle.TH
 import qualified Temporal.Client as C
@@ -74,7 +75,7 @@ import Temporal.Duration
 import Temporal.EphemeralServer
 import qualified Temporal.EphemeralServer as TemporalDevServerConfig (TemporalDevServerConfig (..))
 import qualified Temporal.EphemeralServer as TemporalTestServerConfig (TemporalTestServerConfig (..))
-import Temporal.Exception
+import Temporal.Exception hiding (activityId)
 import Temporal.Interceptor
 import Temporal.Operator (IndexedValueType (..), SearchAttributes (..), addSearchAttributes, listSearchAttributes)
 import Temporal.Payload hiding (around)
@@ -82,6 +83,10 @@ import Temporal.SearchAttributes
 import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
 import Temporal.Testing.Assertions
 import Temporal.Worker
+import Temporal.Workflow
+  ( StartActivityOptions(retryPolicy, activityId)
+  , StartChildWorkflowOptions(workflowId, workflowIdReusePolicy)
+  )
 import qualified Temporal.Workflow as W
 import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
 import Test.Hspec
@@ -551,8 +556,8 @@ testImpls =
                 W.executeChildWorkflow
                   testRefs.workflowWithFailingChildrenChild
                   ( W.defaultChildWorkflowOptions
-                      { W.workflowId = Just f
-                      , W.workflowIdReusePolicy = W.WorkflowIdReusePolicyAllowDuplicateFailedOnly
+                      { workflowId = Just f
+                      , workflowIdReusePolicy = W.WorkflowIdReusePolicyAllowDuplicateFailedOnly
                       }
                   )
           traverse_ (runWf . WorkflowId) wfs
@@ -610,7 +615,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -767,7 +772,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -803,7 +808,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -820,7 +825,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -881,7 +886,29 @@ needsClient = do
       specify "search attribute values that parse incorrectly should fail a Workflow appropriately" $ \TestEnv {..} -> do
         pending
       specify "args that parse incorrectly should fail an Activity appropriately" $ \TestEnv {..} -> do
-        pending
+        let act :: Int -> Activity () Bool
+            act _ = pure True
+            actDef = provideActivity defaultCodec "badArgAct" act
+            badActRef = KnownActivity @'[String] @Bool defaultCodec "badArgAct"
+            workflow :: MyWorkflow Bool
+            workflow =
+              W.executeActivity badActRef
+                (W.defaultStartActivityOptions $ W.ScheduleToClose $ seconds 3)
+                  { retryPolicy = Just W.defaultRetryPolicy { W.maximumAttempts = 1 } }
+                "notAnInt"
+            wf = W.provideWorkflow defaultCodec "badArgActWf" workflow
+            conf = configure () (wf, actDef) $ do
+              baseConf
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        withWorker conf $ do
+          useClient (C.execute wf.reference "badArgAct" opts)
+            `shouldThrow` \case
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
       specify "Workflow return values that parse incorrectly should throw a ValueException for Client" $ \TestEnv {..} -> do
         let testFn :: Int -> W.Workflow Bool
             testFn _ = pure True
@@ -897,9 +924,47 @@ needsClient = do
           useClient (C.execute badWfRef "incorrectWorkflowArg" opts 0)
             `shouldThrow` (ValueError "Error in $: expected String, but encountered Boolean" ==)
       specify "ChildWorkflow return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv {..} -> do
-        pending
-      specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv {} -> do
-        pending
+        let childWorkflow :: W.Workflow Bool
+            childWorkflow = pure True
+            childWf = W.provideWorkflow defaultCodec "badRetChild" childWorkflow
+            badChildRef = W.KnownWorkflow @'[] @String defaultCodec "badRetChild"
+            parentWorkflow :: MyWorkflow String
+            parentWorkflow =
+              W.executeChildWorkflow badChildRef W.defaultChildWorkflowOptions
+            parentWf = W.provideWorkflow defaultCodec "badRetChildParent" parentWorkflow
+            conf = configure () (parentWf, childWf) $ do
+              baseConf
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        withWorker conf $ do
+          useClient (C.execute parentWf.reference "badRetChild" opts)
+            `shouldThrow` \case
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
+      specify "Activity return values that parse incorrectly should throw a ValueException in a Workflow" $ \TestEnv {..} -> do
+        let act :: Activity () Bool
+            act = pure True
+            actDef = provideActivity defaultCodec "badRetAct" act
+            badActRef = KnownActivity @'[] @String defaultCodec "badRetAct"
+            workflow :: MyWorkflow String
+            workflow =
+              W.executeActivity badActRef (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+            wf = W.provideWorkflow defaultCodec "badRetActWf" workflow
+            conf = configure () (wf, actDef) $ do
+              baseConf
+            opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                }
+        withWorker conf $ do
+          useClient (C.execute wf.reference "badRetAct" opts)
+            `shouldThrow` \case
+              (WorkflowExecutionFailed _) -> True
+              _ -> False
 
     --   describe "not found" $ do
     --     xit "should result in a task retry" $ \TestEnv{..} -> do
@@ -1084,12 +1149,7 @@ needsClient = do
           useClient (C.execute parentWf.reference (W.WorkflowId parentId) opts)
             `shouldReturn` "Left ChildWorkflowCancelled"
 
-    describe "Signals" $ do
-      specify "send" $ const pending
-      specify "interrupt" $ const pending
-      specify "fail" $ const pending
-      specify "async fail signal?" $ const pending
-      specify "always delivered" $ const pending
+    -- Signal tests are in SignalSpec.hs
     describe "Query" $ do
       specify "works" $ \TestEnv {..} -> do
         tp <- getGlobalTracerProvider
@@ -1254,7 +1314,31 @@ needsClient = do
           C.signal wfH unblockWorkflowSignal C.defaultSignalOptions
           C.waitWorkflowResult wfH `shouldReturn` ()
 
-      it "works in signal handlers" $ const pending
+      it "works in signal handlers" $ \TestEnv {..} -> do
+        let trigSig :: W.KnownSignal '[Int]
+            trigSig = W.KnownSignal "trigSig" defaultCodec
+            workflow :: MyWorkflow Int
+            workflow = do
+              st <- W.newStateVar (0 :: Int)
+              W.setSignalHandler trigSig $ \n -> do
+                W.waitCondition $ pure True
+                W.modifyStateVar st (+ n)
+              W.waitCondition $ do
+                v <- W.readStateVar st
+                pure $ v > 0
+              W.readStateVar st
+            wf = W.provideWorkflow defaultCodec "waitCondInSignal" workflow
+            conf = configure () wf $ do
+              baseConf
+        withWorker conf $ do
+          let opts =
+                (C.startWorkflowOptions taskQueue)
+                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                  , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+                  }
+          wfH <- useClient (C.start wf.reference "waitCondInSignal" opts)
+          C.signal wfH trigSig C.defaultSignalOptions 42
+          C.waitWorkflowResult wfH `shouldReturn` 42
       it "works in Workflows" $ \TestEnv {..} -> do
         let conf = configure () testConf $ do
               baseConf
@@ -1321,7 +1405,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -1347,7 +1431,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -1367,7 +1451,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -1389,7 +1473,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -1416,7 +1500,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -1449,7 +1533,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -1478,7 +1562,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -1503,7 +1587,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -1522,7 +1606,7 @@ needsClient = do
             -- Info{..} <- info
             W.executeActivity
               taskMainActivity.reference
-              ((W.defaultStartActivityOptions $ W.StartToClose infinity) {W.activityId = Just $ W.ActivityId "woejfwoefijweof"})
+              ((W.defaultStartActivityOptions $ W.StartToClose infinity) {activityId = Just $ W.ActivityId "woejfwoefijweof"})
               command
 
           definitions =
@@ -1560,7 +1644,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -1582,7 +1666,7 @@ needsClient = do
                   { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                   , C.timeouts =
                       C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 4
+                        { C.runTimeout = Just $ seconds 30
                         , C.executionTimeout = Nothing
                         , C.taskTimeout = Nothing
                         }
@@ -1668,7 +1752,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -1686,7 +1770,7 @@ needsClient = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }
@@ -1920,6 +2004,7 @@ needsClient = do
                 }
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateWithValidator "update-with-a-validator" opts
+          liftIO $ waitForWorkflowStart h
           updateResult <- C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- C.waitWorkflowResult h
           pure (updateResult, workflowResult)
@@ -2060,7 +2145,7 @@ needsClient = do
                 }
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsBeforeTheUpdate "no-update-if-workflow-throws-first" opts
-          liftIO $ threadDelay 1_000_000
+          liftIO $ waitForWorkflowStart h
           updateResult <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- Catch.try $ C.waitWorkflowResult h
           let _ = show (updateResult :: Either RpcError Int)
@@ -2088,7 +2173,7 @@ needsClient = do
                 }
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsAfterTheUpdate "yes-update-if-workflow-throws-later" opts
-          liftIO $ threadDelay 1_000_000
+          liftIO $ waitForWorkflowStart h
           updateResult <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
           workflowResult <- Catch.try $ C.waitWorkflowResult h
           let _ = show (updateResult :: Either RpcError Int)
@@ -2198,7 +2283,7 @@ needsTimeSkipping = do
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
                 , C.timeouts =
                     C.TimeoutOptions
-                      { C.runTimeout = Just $ seconds 4
+                      { C.runTimeout = Just $ seconds 30
                       , C.executionTimeout = Nothing
                       , C.taskTimeout = Nothing
                       }

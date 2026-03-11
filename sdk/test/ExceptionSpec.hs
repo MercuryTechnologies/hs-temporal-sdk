@@ -3,6 +3,7 @@ module ExceptionSpec where
 import Data.ProtoLens
 import Data.ProtoLens.Field (field)
 import Lens.Family2
+import Proto.Temporal.Api.Failure.V1.Message ()
 import qualified Temporal.Core.Client as Core
 import Temporal.Exception (
   RPCStatusCode (..),

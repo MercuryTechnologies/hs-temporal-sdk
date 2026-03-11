@@ -776,7 +776,8 @@ startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArg
   originalTime <- time
   ilift $ do
     inst <- ask
-    let ps = fmap convertToProtoPayload typedPayloads
+    encodedPayloads <- processorEncodePayloads inst.payloadProcessor typedPayloads
+    let ps = fmap convertToProtoPayload encodedPayloads
     s@(Sequence actSeq) <- nextActivitySequence
     resultSlot <- newTrackedIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
@@ -810,11 +811,14 @@ startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArg
             Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
               Nothing -> error "Activity result missing status"
               Just (ActivityResult.ActivityResolution'Completed success) -> do
-                result <- liftIO $ decode codec $ convertFromProtoPayload $ success ^. ActivityResult.result
-                case result of
-                  -- TODO handle properly
-                  Left err -> error $ "Failed to decode activity result: " <> show err
-                  Right val -> pure $ Done val
+                decodedPayload <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload $ success ^. ActivityResult.result
+                case decodedPayload of
+                  Left err -> pure $ Throw $ toException $ ValueError err
+                  Right payload -> do
+                    result <- liftIO $ decode codec payload
+                    case result of
+                      Left err -> pure $ Throw $ toException $ ValueError err
+                      Right val -> pure $ Done val
               Just (ActivityResult.ActivityResolution'Failed failure_) ->
                 let failure = failure_ ^. ActivityResult.failure
                 in pure $

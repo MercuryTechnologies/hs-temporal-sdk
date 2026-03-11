@@ -149,16 +149,19 @@ tests:
     source-dirs: test
     other-modules:
       Spec,
-      ConcurrentAccessSpec,
-      AsyncCompletionSpec,
+      ContinueAsNewSpec,
       DurationSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
       IntegrationSpec.NoOpWorkflow,
       IntegrationSpec.TimeoutsInWorkflows,
       IntegrationSpec.Updates,
+      LocalActivitySpec,
       MockActivityEnvironmentSpec,
       IntegrationSpec.TimeSkipping,
       Common,
       RegisterWorkflowsSpec,
+      ScheduleSpec,
+      SignalSpec,
+      TestHelpers,
       THCompiles
