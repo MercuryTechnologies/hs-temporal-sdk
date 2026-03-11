@@ -1,9 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fconstraint-solver-iterations=20 #-}
 
 module WorkflowSpec where
 
 import Conduit
 import Control.Concurrent (threadDelay)
+import Data.Either (isRight)
 import Control.Exception (SomeException, bracket)
 import Control.Exception.Annotated (checkpoint)
 import qualified Control.Monad.Catch as Catch
@@ -23,8 +25,10 @@ import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as WFInfo
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
 import qualified Temporal.Activity as A
 import qualified Temporal.Client as C
+import qualified Temporal.Core.Client.WorkflowService as WS
 import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
@@ -723,6 +727,32 @@ tests = do
         let opts = defaultStartOpts taskQueue
         useClient (C.execute wf.reference "buildIdInfoWf" opts) `shouldReturn` "my-build-abc"
 
+  describe "RPC bindings" $ do
+    specify "describeTaskQueue returns info for task queue with worker" $ \TestEnv {..} -> do
+      let workflow :: W.Workflow Int
+          workflow = pure 42
+          wf = W.provideWorkflow defaultCodec "buildIdDescribeWf" workflow
+          conf = configure () wf $ do
+            baseConf
+            setBuildId "describe-build-xyz"
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "buildIdDescribe" opts) `shouldReturn` 42
+        let tqProto = defMessage & TQ.name .~ W.rawTaskQueue taskQueue
+            descReq =
+              defMessage
+                & RR.namespace .~ "default"
+                & RR.taskQueue .~ tqProto
+        descRes <- WS.describeTaskQueue coreClient descReq
+        descRes `shouldSatisfy` isRight
+
+    specify "listWorkerDeployments returns successfully" $ \TestEnv {..} -> do
+      let listReq =
+            defMessage
+              & RR.namespace .~ "default"
+      listRes <- WS.listWorkerDeployments coreClient listReq
+      listRes `shouldSatisfy` isRight
+
   describe "Memo operations (Py/TS: memo access)" $ do
     specify "getMemoValues returns initial memos (Py: test_workflow_memo)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow (Map Text Payload)
@@ -986,3 +1016,4 @@ tests = do
       _ <- useClient (C.start wf.reference "shutdownCancelsAct" opts)
       shutdown worker
       pure ()
+
