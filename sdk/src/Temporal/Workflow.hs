@@ -394,7 +394,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
       intercept = inst.outboundInterceptor.scheduleActivity
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
-    resultSlot <- newIVar
+    resultSlot <- newTrackedIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
 
@@ -546,7 +546,7 @@ signalWorkflow
 signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkflowArgs @(SignalArgs ref) @(Task ()) signalCodec $ \ps -> do
   ilift $ do
     updateCallStack
-    resVar <- newIVar
+    resVar <- newTrackedIVar
     inst <- ask
     s <- nextExternalSignalSequence
     args <- processorEncodePayloads inst.payloadProcessor ps
@@ -610,9 +610,9 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
         memo <- processorEncodePayloads inst.payloadProcessor opts'.initialMemo
 
         s@(Sequence wfSeq) <- nextChildWorkflowSequence
-        startSlot <- newIVar
-        resultSlot <- newIVar
-        firstExecutionRunId <- newIVar
+        startSlot <- newTrackedIVar
+        resultSlot <- newTrackedIVar
+        firstExecutionRunId <- newTrackedIVar
         i <- readIORef inst.workflowInstanceInfo
         searchAttrs <- liftIO $ searchAttributesToProto opts'.searchAttributes
         let childWorkflowOptions =
@@ -778,7 +778,7 @@ startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArg
     inst <- ask
     let ps = fmap convertToProtoPayload typedPayloads
     s@(Sequence actSeq) <- nextActivitySequence
-    resultSlot <- newIVar
+    resultSlot <- newTrackedIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
     -- TODO, seems like `attempt` and `originalScheduledTime`
@@ -1338,7 +1338,7 @@ createTimer ts = provideCallStack $ ilift $ do
                       & Command.startToFireTimeout .~ durationToProto ts'
                    )
       Logging.logDebug "Add command: sleep"
-      res <- newIVar
+      res <- newTrackedIVar
       atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
         seqMaps {timers = HashMap.insert s res seqMaps.timers}
       addCommand cmd
@@ -1502,7 +1502,7 @@ waitCondition c@(Condition m) = do
     go touchedVars = do
       blockedVar <- ilift $ do
         inst <- ask
-        res <- newIVar
+        res <- newTrackedIVar
         conditionSeq <- nextConditionSequence
         atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
           seqMaps

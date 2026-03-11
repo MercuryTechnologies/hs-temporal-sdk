@@ -21,7 +21,7 @@ import Data.Text (Text)
 import Data.Time.Clock.System (SystemTime)
 import Data.Vault.Strict
 import Data.Vector (Vector)
-import Data.Word (Word32)
+import Data.Word (Word32, Word64)
 import GHC.Stack
 import GHC.TypeLits
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
@@ -453,8 +453,17 @@ data IVarContents a
   | IVarEmpty JobList
 
 
--- | A synchronisation point. It either contains a value, or a list of computations waiting for the value.
-newtype IVar a = IVar {ivarRef :: IORef (IVarContents a)}
+{- | A synchronisation point. It either contains a value, or a list of
+computations waiting for the value.
+
+When 'ivarId' is non-zero, the runtime tracks the call stack at the
+point this IVar blocks so that @__stack_trace@ and
+@__enhanced_stack_trace@ queries can report concurrent stacks.
+-}
+data IVar a = IVar
+  { ivarId :: {-# UNPACK #-} !Word64
+  , ivarRef :: {-# UNPACK #-} !(IORef (IVarContents a))
+  }
 
 
 {- | The contents of a full IVar.  We have to distinguish exceptions
@@ -473,29 +482,68 @@ data ResultVal a
 newIVar :: MonadIO m => m (IVar a)
 newIVar = do
   ivarRef <- newIORef $ IVarEmpty JobNil
+  pure IVar {ivarId = 0, ..}
+
+
+-- | Allocate an IVar with a unique id drawn from the per-instance counter.
+-- Tracked IVars have their blocking call stacks recorded so that built-in
+-- queries can report all concurrent stacks.
+newTrackedIVar :: InstanceM (IVar a)
+newTrackedIVar = do
+  inst <- ask
+  ivarId <- liftIO $ atomicModifyIORefCAS inst.workflowIVarCounter (\n -> let !n' = n + 1 in (n', n'))
+  ivarRef <- newIORef $ IVarEmpty JobNil
   pure IVar {..}
 
 
 getIVar :: IVar a -> Workflow a
-getIVar i@(IVar {ivarRef = !ref}) = Workflow $ \env -> do
+getIVar i@(IVar {ivarId = vid, ivarRef = !ref}) = Workflow $ \env -> do
   e <- readIORef ref
   case e of
-    IVarFull (Ok a) -> pure $ Done a
-    IVarFull (ThrowWorkflow e') -> liftIO $ raiseFromIVar env i e'
-    IVarFull (ThrowInternal e') -> throwIO e'
-    IVarEmpty _ -> pure $ Blocked i (Return i)
+    IVarFull (Ok a) -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      pure $ Done a
+    IVarFull (ThrowWorkflow e') -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      liftIO $ raiseFromIVar env i e'
+    IVarFull (ThrowInternal e') -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      throwIO e'
+    IVarEmpty _ -> do
+      when (vid /= 0) $ recordBlockedStack vid
+      pure $ Blocked i (Return i)
 
 
 -- Just a specialised version of getIVar, for efficiency in <*>
 getIVarApply :: IVar (a -> b) -> a -> Workflow b
-getIVarApply i@IVar {ivarRef = !ref} a = Workflow $ \env -> do
+getIVarApply i@IVar {ivarId = vid, ivarRef = !ref} a = Workflow $ \env -> do
   e <- readIORef ref
   case e of
-    IVarFull (Ok f) -> return (Done (f a))
-    IVarFull (ThrowWorkflow e') -> liftIO $ raiseFromIVar env i e'
-    IVarFull (ThrowInternal e') -> throwIO e'
-    IVarEmpty _ ->
+    IVarFull (Ok f) -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      return (Done (f a))
+    IVarFull (ThrowWorkflow e') -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      liftIO $ raiseFromIVar env i e'
+    IVarFull (ThrowInternal e') -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      throwIO e'
+    IVarEmpty _ -> do
+      when (vid /= 0) $ recordBlockedStack vid
       return (Blocked i (Cont (getIVarApply i a)))
+
+
+recordBlockedStack :: Word64 -> InstanceM ()
+recordBlockedStack vid = do
+  inst <- ask
+  cs <- readIORef inst.workflowCallStack
+  modifyIORef' inst.workflowBlockedStacks $ HashMap.insert vid cs
+
+
+removeBlockedStack :: Word64 -> InstanceM ()
+removeBlockedStack vid = do
+  inst <- ask
+  modifyIORef' inst.workflowBlockedStacks $ HashMap.delete vid
 
 
 putIVar :: IVar a -> ResultVal a -> ContinuationEnv -> IO ()
@@ -706,6 +754,8 @@ data WorkflowInstance = WorkflowInstance
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
   , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
+  , workflowIVarCounter :: {-# UNPACK #-} !(IORef Word64)
+  , workflowBlockedStacks :: {-# UNPACK #-} !(IORef (HashMap Word64 CallStack))
   , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())

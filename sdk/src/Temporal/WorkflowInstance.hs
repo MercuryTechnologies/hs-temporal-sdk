@@ -13,7 +13,7 @@ module Temporal.WorkflowInstance (
   nextExternalSignalSequence,
   nextTimerSequence,
   nextConditionSequence,
-  addStackTraceHandler,
+  addBuiltinQueryHandlers,
 ) where
 
 import Control.Applicative
@@ -22,24 +22,29 @@ import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 
+import qualified Data.Aeson as Aeson
 
 #if __GLASGOW_HASKELL__ < 910
 import Data.Foldable (foldl')
 #endif
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
+import Data.Maybe (mapMaybe)
 import Data.Monoid (Endo (..))
 import Data.ProtoLens
 import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import Data.Version (showVersion)
 import Data.Time.Clock.System (SystemTime (..))
 import Data.Vault.Strict (Vault)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
-import GHC.Stack (HasCallStack, emptyCallStack)
+import GHC.Stack (HasCallStack, emptyCallStack, getCallStack)
+import qualified GHC.Stack
 import Lens.Family2
+import Paths_temporal_sdk (version)
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (
@@ -135,6 +140,8 @@ create
     workflowSignalHandlers <- newIORef mempty
     workflowBufferedSignals <- newIORef mempty
     workflowCallStack <- newIORef emptyCallStack
+    workflowIVarCounter <- newIORef 1
+    workflowBlockedStacks <- newIORef mempty
     workflowQueryHandlers <- newIORef mempty
     workflowUpdateHandlers <- newIORef mempty
     workflowInstanceInfo <- newIORef info
@@ -228,17 +235,93 @@ handleQueriesAfterCompletion = forever $ do
       flushCommands
 
 
-{- | This is a special query handler that is added to every workflow instance.
+isBuiltinQuery :: Text.Text -> Bool
+isBuiltinQuery name =
+  "__stack_trace" == name
+    || "__enhanced_stack_trace" == name
+    || "__temporal_workflow_metadata" == name
+    || "__temporal_" `Text.isPrefixOf` name
 
-It allows the Temporal UI to query the current call stack to see what is currently happening
-in the workflow.
+
+{- | Register built-in query handlers on a workflow instance.
+
+These are the special queries that all Temporal SDKs provide:
+
+  * @__stack_trace@ — returns a human-readable call stack (used by the Temporal UI)
+  * @__enhanced_stack_trace@ — returns structured stack trace with SDK info
+  * @__temporal_workflow_metadata@ — returns the workflow type and registered handler definitions
 -}
-addStackTraceHandler :: WorkflowInstance -> IO ()
-addStackTraceHandler inst = do
-  let specialHandler _ _ _ = do
-        cs <- readIORef inst.workflowCallStack
-        Right <$> Temporal.Payload.encode JSON (Text.pack $ Temporal.Exception.prettyCallStack cs)
-  modifyIORef' inst.workflowQueryHandlers (HashMap.insert (Just "__stack_trace") specialHandler)
+addBuiltinQueryHandlers :: WorkflowInstance -> IO ()
+addBuiltinQueryHandlers inst = do
+  modifyIORef' inst.workflowQueryHandlers $ \handlers ->
+    HashMap.insert (Just "__stack_trace") stackTraceHandler
+      . HashMap.insert (Just "__enhanced_stack_trace") enhancedStackTraceHandler
+      . HashMap.insert (Just "__temporal_workflow_metadata") workflowMetadataHandler
+      $ handlers
+  where
+    stackTraceHandler _ _ _ = do
+      stacks <- readIORef inst.workflowBlockedStacks
+      formatted <- case HashMap.elems stacks of
+        [] -> do
+          cs <- readIORef inst.workflowCallStack
+          pure $ Text.pack $ Temporal.Exception.prettyCallStack cs
+        css ->
+          pure $ Text.intercalate "\n\n" $ fmap (Text.pack . Temporal.Exception.prettyCallStack) css
+      Right <$> Temporal.Payload.encode JSON formatted
+
+    enhancedStackTraceHandler _ _ _ = do
+      blockedStacks <- readIORef inst.workflowBlockedStacks
+      css <- case HashMap.elems blockedStacks of
+        [] -> do
+          cs <- readIORef inst.workflowCallStack
+          pure [cs]
+        xs -> pure xs
+      let stacksJson = fmap (\cs -> Aeson.object ["locations" Aeson..= fmap stackFrameToJSON (getCallStack cs)]) css
+          stackObj =
+            Aeson.object
+              [ "sdk" Aeson..= Aeson.object ["name" Aeson..= ("haskell" :: Text.Text), "version" Aeson..= sdkVersion]
+              , "stacks" Aeson..= stacksJson
+              , "sources" Aeson..= Aeson.object []
+              ]
+      Right <$> Temporal.Payload.encode JSON stackObj
+
+    stackFrameToJSON (fnName, srcLoc) =
+      Aeson.object
+        [ "file_path" Aeson..= GHC.Stack.srcLocFile srcLoc
+        , "function_name" Aeson..= fnName
+        , "line" Aeson..= GHC.Stack.srcLocStartLine srcLoc
+        , "column" Aeson..= GHC.Stack.srcLocStartCol srcLoc
+        , "internal_code" Aeson..= False
+        ]
+
+    workflowMetadataHandler _ _ _ = do
+      wfInfo <- readIORef inst.workflowInstanceInfo
+      queryHandlers <- readIORef inst.workflowQueryHandlers
+      signalHandlers <- readIORef inst.workflowSignalHandlers
+      updateHandlers <- readIORef inst.workflowUpdateHandlers
+      let queryDefs = handlerDefsFromKeys queryHandlers
+          signalDefs = handlerDefsFromKeys signalHandlers
+          updateDefs = handlerDefsFromKeys updateHandlers
+          metadataObj =
+            Aeson.object
+              [ "definition"
+                  Aeson..= Aeson.object
+                    [ "type" Aeson..= rawWorkflowType wfInfo.workflowType
+                    , "queryDefinitions" Aeson..= queryDefs
+                    , "signalDefinitions" Aeson..= signalDefs
+                    , "updateDefinitions" Aeson..= updateDefs
+                    ]
+              ]
+      Right <$> Temporal.Payload.encode JSON metadataObj
+
+    handlerDefsFromKeys :: HashMap.HashMap (Maybe Text.Text) v -> [Aeson.Value]
+    handlerDefsFromKeys m =
+      mapMaybe
+        (\k -> fmap (\name -> Aeson.object ["name" Aeson..= name]) k)
+        (HashMap.keys m)
+
+    sdkVersion :: Text.Text
+    sdkVersion = Text.pack (showVersion version)
 
 
 -- This should never raise an exception, but instead catch all exceptions
@@ -361,19 +444,23 @@ applyQueryWorkflow queryWorkflow = do
           , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
           , handleQueryWorkflowInfo = instInfo
           }
-  res <- liftIO $ inst.inboundInterceptor.handleQuery baseInput $ \input -> do
-    let handlerOrDefault =
-          HashMap.lookup (Just input.handleQueryInputType) handles
-            <|> HashMap.lookup Nothing handles
-    case handlerOrDefault of
-      Nothing -> do
-        pure $ Left $ toException $ QueryNotFound $ Text.unpack input.handleQueryInputType
-      Just h ->
-        liftIO $
-          h
-            input.handleQueryId
-            input.handleQueryInputArgs
-            input.handleQueryInputHeaders
+      lookupHandler input =
+        let handlerOrDefault =
+              HashMap.lookup (Just input.handleQueryInputType) handles
+                <|> HashMap.lookup Nothing handles
+        in case handlerOrDefault of
+            Nothing -> do
+              pure $ Left $ toException $ QueryNotFound $ Text.unpack input.handleQueryInputType
+            Just h ->
+              liftIO $
+                h
+                  input.handleQueryId
+                  input.handleQueryInputArgs
+                  input.handleQueryInputHeaders
+  res <-
+    if isBuiltinQuery (queryWorkflow ^. Activation.queryType)
+      then liftIO $ lookupHandler baseInput
+      else liftIO $ inst.inboundInterceptor.handleQuery baseInput lookupHandler
   cmd <- case res of
     Left err ->
       -- TODO, more useful error message
