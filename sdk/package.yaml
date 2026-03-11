@@ -163,5 +163,6 @@ tests:
       RegisterWorkflowsSpec,
       ScheduleSpec,
       SignalSpec,
+      NexusSpec,
       TestHelpers,
       THCompiles
