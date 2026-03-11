@@ -84,6 +84,9 @@ module Temporal.Client (
   -- * Workflow existence
   checkWorkflowExecutionExists,
 
+  -- * Workflow metadata
+  describeWorkflow,
+
   -- * Common types
   WorkflowIdConflictPolicy (..),
 ) where
@@ -132,6 +135,7 @@ import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   CountWorkflowExecutionsRequest,
   CountWorkflowExecutionsResponse,
+  DescribeWorkflowExecutionResponse,
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
   ListClosedWorkflowExecutionsRequest,
@@ -1241,3 +1245,26 @@ checkWorkflowExecutionExists wfRef wfId = do
         Core.RpcError status _ _ | fromIntegral status == fromEnum StatusNotFound -> pure False
         _ -> throwIO $ coreRpcErrorToRpcError err
       Right _ -> pure True
+
+
+{- | Describe a workflow execution, returning full metadata from the Temporal server.
+
+The response includes workflow execution info (status, type, timestamps, etc.)
+and execution config.
+-}
+describeWorkflow :: (MonadIO m, HasWorkflowClient m) => WorkflowId -> m DescribeWorkflowExecutionResponse
+describeWorkflow wfId = do
+  c <- askWorkflowClient
+  liftIO $ do
+    let req =
+          defMessage
+            & field @"namespace" .~ rawNamespace c.clientConfig.namespace
+            & field @"execution"
+              .~ ( defMessage
+                    & field @"workflowId" .~ rawWorkflowId wfId
+                    & field @"runId" .~ ""
+                 )
+    res <- Temporal.Core.Client.WorkflowService.describeWorkflowExecution c.clientCore req
+    case res of
+      Left err -> throwIO $ coreRpcErrorToRpcError err
+      Right r -> pure r

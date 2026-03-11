@@ -2,8 +2,13 @@ module QuerySpec where
 
 import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
+import Data.ProtoLens (defMessage)
+import qualified Proto.Temporal.Api.Common.V1.Message_Fields as CommonF
+import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RRF
+import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as WfF
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Lens.Family2
 import RequireCallStack (provideCallStack)
 import qualified Temporal.Client as C
 import Temporal.Duration
@@ -254,3 +259,18 @@ tests = describe "Query" $ do
       r2 `shouldBe` Right 42
       C.signal h sig C.defaultSignalOptions
       C.waitWorkflowResult h `shouldReturn` ()
+
+  specify "describeWorkflow returns workflow metadata" $ \TestEnv {..} -> do
+    let workflow :: MyWorkflow Text
+        workflow = pure "described"
+        wf = W.provideWorkflow defaultCodec "describeWf" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      wfId <- W.WorkflowId <$> uuidText
+      let opts = defaultStartOpts taskQueue
+      h <- useClient (C.start wf.reference wfId opts)
+      _ <- C.waitWorkflowResult h
+      desc <- useClient (C.describeWorkflow wfId)
+      let wfType :: Text
+          wfType = desc ^. RRF.workflowExecutionInfo . WfF.type' . CommonF.name
+      wfType `shouldSatisfy` (not . Text.null)
