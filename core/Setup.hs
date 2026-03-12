@@ -16,18 +16,17 @@ import Distribution.Simple.Program.Find (
  )
 import Distribution.Simple.Setup
 import Distribution.Simple.Utils (
-  IODataMode (IODataModeBinary),
   info,
   installExecutableFile,
-  maybeExit,
   notice,
-  rawSystemStdInOut,
  )
 import Distribution.System (OS (..), buildOS)
 import Distribution.Verbosity (Verbosity)
 import qualified Distribution.Verbosity as Verbosity
 import System.Directory (doesFileExist, getCurrentDirectory, getModificationTime)
+import System.Exit (ExitCode (..), exitWith)
 import System.FilePath ((</>))
+import System.Process (CreateProcess (..), createProcess, proc, waitForProcess)
 
 #if MIN_VERSION_Cabal(3,14,0)
 import Distribution.Utils.Path (coerceSymbolicPath, getSymbolicPath)
@@ -144,10 +143,14 @@ execCargo verbosity command args = do
   cargoPath <- findProgramOnSearchPath Verbosity.silent defaultProgramSearchPath "cargo"
   dir <- getCurrentDirectory
   let cargoExec = maybe "cargo" fst cargoPath
-      workingDir = Just (dir </> rsFolder)
-      thirdOf3 (_, _, c) = c
-  maybeExit . fmap thirdOf3 $
-    rawSystemStdInOut verbosity cargoExec (command : args) workingDir Nothing Nothing IODataModeBinary
+      allArgs = command : args
+      cp = (proc cargoExec allArgs) {cwd = Just (dir </> rsFolder)}
+  notice verbosity $ "Running: cargo " ++ unwords allArgs
+  (_, _, _, ph) <- createProcess cp
+  ec <- waitForProcess ph
+  case ec of
+    ExitSuccess -> pure ()
+    _ -> exitWith ec
 
 
 rsBuild :: Verbosity -> IO ()
