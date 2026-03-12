@@ -681,6 +681,18 @@ void hs_temporal_history_pusher_push_history(struct HistoryPusher *history_pushe
                                              struct CWorkerError **error_slot,
                                              struct CUnit **result_slot);
 
+void hs_temporal_history_pusher_push_history_json(struct HistoryPusher *history_pusher,
+                                                  const struct CArray_u8 *workflow_id,
+                                                  const struct CArray_u8 *history_json,
+                                                  struct MVar *mvar,
+                                                  struct Capability cap,
+                                                  struct CWorkerError **error_slot,
+                                                  struct CUnit **result_slot);
+
+void hs_temporal_history_proto_to_json(const struct CArray_u8 *history_proto,
+                                      struct CArray_u8 **result_slot,
+                                      struct CArray_u8 **error_slot);
+
 void hs_temporal_history_pusher_close(struct HistoryPusher *history_pusher);
 
 void hs_temporal_history_pusher_drop(struct HistoryPusher *history_pusher);

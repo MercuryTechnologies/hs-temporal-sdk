@@ -161,6 +161,7 @@ tests:
       IntegrationSpec.TimeSkipping,
       Common,
       RegisterWorkflowsSpec,
+      ReplaySpec,
       ScheduleSpec,
       SignalSpec,
       TestHelpers,

@@ -733,6 +733,28 @@ impl HistoryPusher {
             code: WorkerErrorCode::InvalidProto,
             message: format!("Invalid proto: {}", err),
         });
+        self.send_history(workflow_id, history, hs)
+    }
+
+    fn push_history_json(
+        &self,
+        workflow_id: &str,
+        history_json: &[u8],
+        hs: HsCallback<CUnit, CWorkerError>,
+    ) {
+        let history = serde_json::from_slice::<History>(history_json).map_err(|err| WorkerError {
+            code: WorkerErrorCode::InvalidProto,
+            message: format!("Invalid history JSON: {}", err),
+        });
+        self.send_history(workflow_id, history, hs)
+    }
+
+    fn send_history(
+        &self,
+        workflow_id: &str,
+        history: Result<History, WorkerError>,
+        hs: HsCallback<CUnit, CWorkerError>,
+    ) {
         let wfid = workflow_id.to_string();
         let tx = if let Some(tx) = self.tx.as_ref() {
             Ok(tx.clone())
@@ -742,7 +764,6 @@ impl HistoryPusher {
                 message: "Replay worker is no longer accepting new histories".to_string(),
             })
         };
-        // We accept this doesn't have logging/tracing
         self.runtime.future_result_into_hs(hs, async move {
             let history = history.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?;
             let tx = tx.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?;
@@ -796,6 +817,78 @@ pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
             result_slot,
         },
     )
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_history_pusher_push_history_json(
+    history_pusher: *mut HistoryPusher,
+    workflow_id: *const CArray<u8>,
+    history_json: *const CArray<u8>,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CWorkerError,
+    result_slot: *mut *mut CUnit,
+) {
+    let history_pusher = unsafe { &mut *history_pusher };
+    let workflow_id: &CArray<u8> = unsafe { CArray::raw_borrow(workflow_id).unwrap() };
+    let workflow_id = workflow_id.as_rust().unwrap().clone();
+    let workflow_id: &str = unsafe { str::from_utf8_unchecked(&workflow_id) };
+    let history_json: &CArray<u8> = unsafe { CArray::raw_borrow(history_json).unwrap() };
+    let history_json: &[u8] = &history_json.as_rust().unwrap().clone();
+    history_pusher.push_history_json(
+        workflow_id,
+        history_json,
+        HsCallback {
+            mvar,
+            cap,
+            error_slot,
+            result_slot,
+        },
+    )
+}
+
+/// Convert a protobuf-encoded History to canonical protobuf JSON.
+/// Useful for testing the JSON replay path.
+///
+/// # Safety
+///
+/// `history_proto` must be a valid pointer to a CArray<u8> containing protobuf bytes.
+/// `result_slot` and `error_slot` must be valid pointers to output slots.
+/// On success, `*result_slot` is set to a heap-allocated CArray<u8> containing JSON bytes.
+/// On failure, `*error_slot` is set to a heap-allocated CArray<u8> containing an error message.
+/// The caller must free the returned CArray via `hs_temporal_drop_byte_array`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_history_proto_to_json(
+    history_proto: *const CArray<u8>,
+    result_slot: *mut *mut CArray<u8>,
+    error_slot: *mut *mut CArray<u8>,
+) {
+    let history_proto: &CArray<u8> = unsafe { CArray::raw_borrow(history_proto).unwrap() };
+    let history_proto_bytes: Vec<u8> = history_proto.as_rust().unwrap().clone();
+
+    match History::decode(history_proto_bytes.as_slice()) {
+        Ok(history) => match serde_json::to_vec(&history) {
+            Ok(json_bytes) => unsafe {
+                *result_slot = CArray::c_repr_of(json_bytes)
+                    .unwrap()
+                    .into_raw_pointer_mut();
+            },
+            Err(err) => unsafe {
+                *error_slot = CArray::c_repr_of(format!("JSON serialization failed: {}", err).into_bytes())
+                    .unwrap()
+                    .into_raw_pointer_mut();
+            },
+        },
+        Err(err) => unsafe {
+            *error_slot = CArray::c_repr_of(format!("Proto decode failed: {}", err).into_bytes())
+                .unwrap()
+                .into_raw_pointer_mut();
+        },
+    }
 }
 
 // TODO: [publish-crate]
