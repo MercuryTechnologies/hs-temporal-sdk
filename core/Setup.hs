@@ -16,16 +16,15 @@ import Distribution.Simple.Program.Find (
  )
 import Distribution.Simple.Setup
 import Distribution.Simple.Utils (
-  info,
   installExecutableFile,
   notice,
  )
 import Distribution.System (OS (..), buildOS)
 import Distribution.Verbosity (Verbosity)
 import qualified Distribution.Verbosity as Verbosity
-import System.Directory (doesFileExist, getCurrentDirectory, getModificationTime, listDirectory)
+import System.Directory (doesFileExist, getCurrentDirectory, getModificationTime)
 import System.Exit (ExitCode (..), exitWith)
-import System.FilePath ((</>), takeExtension)
+import System.FilePath ((</>))
 import System.Process (CreateProcess (..), createProcess, proc, waitForProcess)
 
 #if MIN_VERSION_Cabal(3,14,0)
@@ -71,22 +70,6 @@ rustLibPath :: String -> FilePath
 rustLibPath ext = rsFolder </> "target" </> "release" </> libFileName ext
 
 
--- | Discover Rust/Cargo files that affect the build output.
--- Includes crate config (.toml, .lock, .rs) from the crate root
--- and all .rs source files under rust/src/.
-getRustSources :: IO [FilePath]
-getRustSources = do
-  rootEntries <- listDirectory rsFolder
-  srcEntries <- listDirectory (rsFolder </> "src")
-  let crateFiles = filter isCrateFile rootEntries
-      srcFiles = filter (\f -> takeExtension f == ".rs") srcEntries
-  pure $
-    fmap (rsFolder </>) crateFiles
-      ++ fmap (\f -> rsFolder </> "src" </> f) srcFiles
-  where
-    isCrateFile f = takeExtension f `elem` [".toml", ".lock", ".rs"]
-
-
 --------------------------------------------------------------------------------
 -- Hooks
 --------------------------------------------------------------------------------
@@ -107,8 +90,7 @@ main = defaultMainWithHooks hooks
             pure lbi
         , buildHook = \pkgDescr lbi userHooks flags -> do
             withInternalLibLBI lbi $ do
-              let verb = fromFlag $ buildVerbosity flags
-              changed <- rsBuildIfStale verb
+              changed <- rsBuildChanged (fromFlag $ buildVerbosity flags)
               when changed $
                 copyStaticLibToBuildDir lbi
             buildHook simpleUserHooks pkgDescr lbi userHooks flags
@@ -163,44 +145,22 @@ rsClean :: Verbosity -> IO ()
 rsClean verb = execCargo verb "clean" []
 
 
--- | Run @cargo build@ only when tracked Rust sources are newer than the
--- compiled static library. Returns 'True' if a build was triggered.
-rsBuildIfStale :: Verbosity -> IO Bool
-rsBuildIfStale verb = do
-  stale <- isRustOutputStale
-  if stale
-    then do
-      notice verb "Rust sources changed, rebuilding temporal_bridge..."
-      rsBuild verb
-      pure True
-    else do
-      info verb "Rust library up to date, skipping cargo build"
-      pure False
-
-
--- | 'True' when any tracked source is newer than the static library output,
--- or the output does not yet exist.
-isRustOutputStale :: IO Bool
-isRustOutputStale = do
+-- | Run @cargo build@ and report whether the output artifact changed.
+-- Cargo handles its own staleness detection; we just diff the archive
+-- mtime before and after to know if a re-copy is needed.
+rsBuildChanged :: Verbosity -> IO Bool
+rsBuildChanged verb = do
   let outputPath = rustLibPath staticLibExt
-  outputExists <- doesFileExist outputPath
-  if not outputExists
-    then pure True
-    else do
-      outputTime <- getModificationTime outputPath
-      sources <- getRustSources
-      anySourceNewer outputTime sources
+  mtimeBefore <- getMtime outputPath
+  rsBuild verb
+  mtimeAfter <- getMtime outputPath
+  pure (mtimeBefore /= mtimeAfter)
   where
-    anySourceNewer _ [] = pure False
-    anySourceNewer ref (src : rest) = do
-      exists <- doesFileExist src
-      if not exists
-        then anySourceNewer ref rest
-        else do
-          srcTime <- getModificationTime src
-          if srcTime > ref
-            then pure True
-            else anySourceNewer ref rest
+    getMtime path = do
+      exists <- doesFileExist path
+      if exists
+        then Just <$> getModificationTime path
+        else pure Nothing
 
 
 --------------------------------------------------------------------------------
