@@ -23,9 +23,9 @@ import Distribution.Simple.Utils (
 import Distribution.System (OS (..), buildOS)
 import Distribution.Verbosity (Verbosity)
 import qualified Distribution.Verbosity as Verbosity
-import System.Directory (doesFileExist, getCurrentDirectory, getModificationTime)
+import System.Directory (doesFileExist, getCurrentDirectory, getModificationTime, listDirectory)
 import System.Exit (ExitCode (..), exitWith)
-import System.FilePath ((</>))
+import System.FilePath ((</>), takeExtension)
 import System.Process (CreateProcess (..), createProcess, proc, waitForProcess)
 
 #if MIN_VERSION_Cabal(3,14,0)
@@ -71,18 +71,20 @@ rustLibPath :: String -> FilePath
 rustLibPath ext = rsFolder </> "target" </> "release" </> libFileName ext
 
 
--- Keep in sync with extra-source-files in package.yaml.
-rustSources :: [FilePath]
-rustSources =
-  [ rsFolder </> "Cargo.toml"
-  , rsFolder </> "Cargo.lock"
-  , rsFolder </> "src" </> "lib.rs"
-  , rsFolder </> "src" </> "client.rs"
-  , rsFolder </> "src" </> "ephemeral_server.rs"
-  , rsFolder </> "src" </> "rpc.rs"
-  , rsFolder </> "src" </> "runtime.rs"
-  , rsFolder </> "src" </> "worker.rs"
-  ]
+-- | Discover Rust/Cargo files that affect the build output.
+-- Includes crate config (.toml, .lock, .rs) from the crate root
+-- and all .rs source files under rust/src/.
+getRustSources :: IO [FilePath]
+getRustSources = do
+  rootEntries <- listDirectory rsFolder
+  srcEntries <- listDirectory (rsFolder </> "src")
+  let crateFiles = filter isCrateFile rootEntries
+      srcFiles = filter (\f -> takeExtension f == ".rs") srcEntries
+  pure $
+    fmap (rsFolder </>) crateFiles
+      ++ fmap (\f -> rsFolder </> "src" </> f) srcFiles
+  where
+    isCrateFile f = takeExtension f `elem` [".toml", ".lock", ".rs"]
 
 
 --------------------------------------------------------------------------------
@@ -186,7 +188,8 @@ isRustOutputStale = do
     then pure True
     else do
       outputTime <- getModificationTime outputPath
-      anySourceNewer outputTime rustSources
+      sources <- getRustSources
+      anySourceNewer outputTime sources
   where
     anySourceNewer _ [] = pure False
     anySourceNewer ref (src : rest) = do
