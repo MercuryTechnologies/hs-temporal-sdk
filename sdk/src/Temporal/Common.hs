@@ -52,6 +52,12 @@ newtype UpdateId = UpdateId {rawUpdateId :: Text}
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
 
 
+-- | An Event ID refers to a specific event in a workflow's history
+newtype EventId = EventId {rawEventId :: Int}
+  deriving stock (Lift)
+  deriving newtype (Eq, Ord, Read, Show, Num, ToJSON, FromJSON)
+
+
 -- | A Namespace is a unit of isolation within the Temporal Platform
 newtype Namespace = Namespace {rawNamespace :: Text}
   deriving stock (Lift)

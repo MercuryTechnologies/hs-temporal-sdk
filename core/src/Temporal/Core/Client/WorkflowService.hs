@@ -8,6 +8,7 @@ module Temporal.Core.Client.WorkflowService (
   countWorkflowExecutions,
   createSchedule,
   deleteSchedule,
+  deleteWorkflowExecution,
   deprecateNamespace,
   describeNamespace,
   describeSchedule,
@@ -578,6 +579,19 @@ execution instance.
 -}
 terminateWorkflowExecution :: Client -> TerminateWorkflowExecutionRequest -> IO (Either RpcError TerminateWorkflowExecutionResponse)
 terminateWorkflowExecution = call @WorkflowService @"terminateWorkflowExecution" hs_terminate_workflow_execution
+
+
+foreign import ccall "hs_delete_workflow_execution" hs_delete_workflow_execution :: PrimRpcCall
+
+
+{- |
+Deletes a closed workflow execution from storage.
+
+This permanently removes the workflow execution history and all associated data.
+This operation is irreversible and should be used with caution.
+-}
+deleteWorkflowExecution :: Client -> DeleteWorkflowExecutionRequest -> IO (Either RpcError DeleteWorkflowExecutionResponse)
+deleteWorkflowExecution = call @WorkflowService @"deleteWorkflowExecution" hs_delete_workflow_execution
 
 
 foreign import ccall "hs_update_namespace" hs_update_namespace :: PrimRpcCall

@@ -7,6 +7,7 @@ import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import Language.Haskell.TH.Syntax (Lift)
+import qualified Proto.Temporal.Api.Workflow.V1.Message as Workflow
 import Temporal.Common
 import Temporal.Core.Client (Client)
 import Temporal.Duration
@@ -225,6 +226,79 @@ data QueryRejected = QueryRejected
   { status :: WorkflowExecutionStatus
   }
   deriving stock (Read, Show, Eq, Ord)
+
+
+{- | Determines what events should be reapplied after a reset.
+
+When a workflow is reset, events that occurred after the reset point can optionally
+be reapplied to maintain continuity.
+-}
+data ResetReapplyType
+  = -- | Reapply only signal events
+    ResetReapplySignal
+  | -- | Do not reapply any events
+    ResetReapplyNone
+  | -- | Reapply all eligible events (signals, updates, etc.)
+    ResetReapplyAllEligible
+  deriving stock (Read, Show, Eq, Ord)
+
+
+{- | Specific event types to exclude from reapplication during reset.
+
+Use this to fine-tune which events should not be reapplied even if the
+ResetReapplyType would normally include them.
+-}
+data ResetReapplyExcludeType
+  = ResetReapplyExcludeSignal
+  | ResetReapplyExcludeUpdate
+  | ResetReapplyExcludeNexus
+  | ResetReapplyExcludeCancelRequest
+  deriving stock (Read, Show, Eq, Ord)
+
+
+{- | Options for resetting a workflow execution to a previous point.
+
+Resetting allows you to "replay" a workflow from a specific point, which is useful
+for recovering from bad deployments or other issues.
+-}
+data ResetOptions = ResetOptions
+  { resetReason :: Text
+  -- ^ Explanation for why the workflow is being reset
+  , resetToWorkflowTaskFinishEventId :: EventId
+  -- ^ The event ID of the WorkflowTaskCompleted event to reset to.
+  -- The workflow will be reset to the state immediately after this task completed.
+  , resetReapplyType :: ResetReapplyType
+  -- ^ Determines what events should be reapplied after the reset.
+  -- Defaults to 'ResetReapplySignal'.
+  , resetReapplyExcludeTypes :: [ResetReapplyExcludeType]
+  -- ^ Specific event types to exclude from reapplication.
+  -- Defaults to an empty list (no exclusions).
+  }
+  deriving stock (Read, Show, Eq, Ord)
+
+
+{- | Description of a workflow execution's current state.
+
+This provides detailed information about a running or completed workflow,
+including its configuration, current status, and any pending operations.
+-}
+data WorkflowExecutionDescription = WorkflowExecutionDescription
+  { workflowExecutionInfo :: Workflow.WorkflowExecutionInfo
+  -- ^ Core execution information (status, start/close times, type, task queue, etc.)
+  , executionConfig :: Maybe Workflow.WorkflowExecutionConfig
+  -- ^ The workflow's configuration (timeouts, task queue, retry policy, etc.)
+  , pendingActivities :: Vector Workflow.PendingActivityInfo
+  -- ^ Activities that are currently scheduled or running
+  , pendingChildren :: Vector Workflow.PendingChildExecutionInfo
+  -- ^ Child workflows that are currently running
+  , pendingWorkflowTask :: Maybe Workflow.PendingWorkflowTaskInfo
+  -- ^ Information about a pending workflow task, if any
+  , callbacks :: Vector Workflow.CallbackInfo
+  -- ^ Registered callbacks for this workflow
+  , pendingNexusOperations :: Vector Workflow.PendingNexusOperationInfo
+  -- ^ Pending Nexus operations
+  }
+  deriving stock (Show, Eq)
 
 
 data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
