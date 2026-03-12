@@ -46,6 +46,7 @@ module Temporal.Client (
   ResetReapplyExcludeType (..),
   EventId (..),
   resetWorkflowExecution,
+  deleteWorkflowExecution,
 
   -- * Querying Workflows
   QueryOptions (..),
@@ -930,6 +931,37 @@ describeWorkflowExecution h = do
       defMessage
         & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
         & RR.execution
+          .~ ( defMessage
+                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
+                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
+             )
+
+
+{- | Permanently delete a closed workflow execution from storage.
+
+This operation removes the workflow execution history and all associated data from storage.
+This is irreversible and should be used with caution. The workflow must be closed (completed,
+failed, terminated, etc.) before it can be deleted.
+
+Note: This operation requires appropriate permissions and may not be available in all
+Temporal deployments.
+-}
+deleteWorkflowExecution :: (MonadIO m) => WorkflowHandle a -> m ()
+deleteWorkflowExecution h =
+  void do
+    res <-
+      liftIO $
+        WS.deleteWorkflowExecution
+          h.workflowHandleClient.clientCore
+          msg
+    case res of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right _ -> pure ()
+  where
+    msg =
+      defMessage
+        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
+        & RR.workflowExecution
           .~ ( defMessage
                 & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
                 & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
