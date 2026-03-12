@@ -2,5 +2,5 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "install": "nix build .#temporal-bridge --no-link; nix develop .#ghc910 --impure --command true; echo 'Nix store warmed'"
+  "install": "nix build .#temporal-bridge --no-link --accept-flake-config && nix develop .#ghc910 --impure --accept-flake-config --command true && echo 'Nix store warmed'"
 }

@@ -24,8 +24,8 @@ RUN id -u ubuntu &>/dev/null || useradd -m -s /bin/bash ubuntu
 RUN usermod -aG sudo ubuntu \
     && echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu
 
-# Install Nix — root-only mode (no daemon needed in containers).
-# See: https://github.com/DeterminateSystems/nix-installer#in-a-container
+# Install Nix in single-user mode (no daemon, suitable for containers).
+# The installer must run as root with --init none (no systemd/launchd).
 RUN curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
     sh -s -- install linux \
       --no-confirm \
@@ -41,10 +41,11 @@ ENV PATH="/nix/var/nix/profiles/default/bin:${PATH}"
 # Verify nix works at build time
 RUN nix run nixpkgs#hello
 
-# With --init none, nix is root-only. The ubuntu user runs nix via sudo.
-# Set up a wrapper so `nix` just works from the ubuntu user's shell.
-RUN printf '#!/bin/bash\nexec sudo /nix/var/nix/profiles/default/bin/nix "$@"\n' \
-    > /usr/local/bin/nix && chmod +x /usr/local/bin/nix
+# Transfer /nix ownership to ubuntu so nix works without sudo.
+# In single-user container environments this is the standard approach:
+# the db lock, store, and profiles all need to be writable by the
+# user that invokes nix, and there is no daemon to mediate access.
+RUN chown -R ubuntu:ubuntu /nix
 
 USER ubuntu
 WORKDIR /home/ubuntu
