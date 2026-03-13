@@ -145,11 +145,13 @@ tests:
       - require-callstack
       - hs-opentelemetry-sdk
       - resourcet
+      - vector
     main: Main.hs
     source-dirs: test
     other-modules:
       Spec,
       ContinueAsNewSpec,
+      DiagnosticsSpec,
       DurationSpec,
       IntegrationSpec,
       IntegrationSpec.HangingWorkflow,
