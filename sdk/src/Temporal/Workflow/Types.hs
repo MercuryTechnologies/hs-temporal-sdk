@@ -286,6 +286,69 @@ defaultChildWorkflowOptions =
     }
 
 
+data StartLocalActivityOptions = StartLocalActivityOptions
+  { activityId :: Maybe ActivityId
+  , scheduleToCloseTimeout :: Maybe Duration
+  -- ^ Indicates how long the caller is willing to wait for local activity completion. Limits how
+  -- long retries will be attempted. When not specified defaults to the workflow execution
+  -- timeout (which may be unset).
+  , scheduleToStartTimeout :: Maybe Duration
+  -- ^ Limits time the local activity can idle internally before being executed. That can happen if
+  -- the worker is currently at max concurrent local activity executions. This timeout is always
+  -- non retryable as all a retry would achieve is to put it back into the same queue. Defaults
+  -- to `schedule_to_close_timeout` if not specified and that is set. Must be <=
+  -- `schedule_to_close_timeout` when set, otherwise, it will be clamped down.
+  , startToCloseTimeout :: Maybe Duration
+  -- ^ Maximum time the local activity is allowed to execute after the task is dispatched. This
+  -- timeout is always retryable. Either or both of `schedule_to_close_timeout` and this must be
+  -- specified. If set, this must be <= `schedule_to_close_timeout`, otherwise, it will be
+  -- clamped down.
+  , retryPolicy :: Maybe RetryPolicy
+  -- ^ Specify a retry policy for the local activity. By default local activities will be retried
+  -- indefinitely.
+  , localRetryThreshold :: Maybe Duration
+  -- ^ If the activity is retrying and backoff would exceed this value, lang will be told to
+  -- schedule a timer and retry the activity after. Otherwise, backoff will happen internally in
+  -- core. Defaults to 1 minute.
+  , cancellationType :: ActivityCancellationType
+  -- ^ Defines how the workflow will wait (or not) for cancellation of the activity to be
+  -- confirmed. Lang should default this to `WAIT_CANCELLATION_COMPLETED`, even though proto
+  -- will default to `TRY_CANCEL` automatically.
+  , headers :: Map Text Payload
+  }
+  deriving stock (Show, Lift)
+
+
+{- |
+Default options for starting a local activity.
+
+@
+'StartLocalActivityOptions'
+  { activityId = 'Nothing'
+  , scheduleToCloseTimeout = 'Nothing'
+  , scheduleToStartTimeout = 'Nothing'
+  , startToCloseTimeout = 'Nothing'
+  , retryPolicy = 'Nothing'
+  , localRetryThreshold = 'Nothing'
+  , cancellationType = 'ActivityCancellationWaitCancellationCompleted'
+  , headers = 'mempty'
+  }
+@
+-}
+defaultStartLocalActivityOptions :: StartLocalActivityOptions
+defaultStartLocalActivityOptions =
+  StartLocalActivityOptions
+    { activityId = Nothing
+    , scheduleToCloseTimeout = Nothing
+    , scheduleToStartTimeout = Nothing
+    , startToCloseTimeout = Nothing
+    , retryPolicy = Nothing
+    , localRetryThreshold = Nothing
+    , cancellationType = ActivityCancellationWaitCancellationCompleted
+    , headers = mempty
+    }
+
+
 data ContinueAsNewOptions = ContinueAsNewOptions
   { taskQueue :: Maybe TaskQueue
   , runTimeout :: Maybe Duration
