@@ -65,6 +65,41 @@ nix build .#temporal-sdk-core-ghc910 --accept-flake-config
 
 Replace `ghc910` with `ghc96` or `ghc98` as needed.
 
+### Full suite builds (CI parity)
+
+```bash
+nix build .#hs-temporal-suite-ghc96  --accept-flake-config
+nix build .#hs-temporal-suite-ghc98  --accept-flake-config
+nix build .#hs-temporal-suite-ghc910 --accept-flake-config
+```
+
+All three must pass before merging.
+
+### Protobuf regeneration
+
+From inside a dev shell:
+
+```bash
+protogen
+```
+
+This regenerates `protos/src/Proto/` from upstream `.proto` files and runs
+`hpack` to update the cabal file.
+
+### Rust bridge workflow (manual, for upstream SDK updates)
+
+When updating the pinned `temporalio/sdk-core` revision:
+
+```bash
+cd core/rust
+cargo build          # compile the bridge
+crate2nix generate   # regenerate Cargo.nix for Nix builds
+bash bindgen.sh      # regenerate temporal_bridge.h via cbindgen
+cd ../..
+```
+
+The dev shell provides `cargo`, `rustc`, `cbindgen`, `crate2nix`.
+
 ## Testing
 
 Tests require a running Temporal dev server.  Inside the dev shell:
@@ -121,6 +156,13 @@ provided by the dev shell.
 
 All of these tools are available inside the dev shell and are configured as
 pre-commit hooks via devenv.
+
+### Haskell-specific rules
+
+- No list comprehensions — use `do` syntax or datatype-specific functions
+- No `threadDelay` in tests — use query-based readiness probes (e.g.,
+  `waitForWorkflowStart`)
+- Prefer `Map`/`HashMap`/`Vector` operations over `toList`/`fromList` conversions
 
 ## Key Notes for Agents
 
