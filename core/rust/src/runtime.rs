@@ -6,15 +6,15 @@ use std::net::SocketAddr;
 use std::os::raw::c_int;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
-use temporal_sdk_core::telemetry::{
-    build_otlp_metric_exporter, construct_filter_string, start_prometheus_metric_exporter,
-};
-use temporal_sdk_core::{CoreRuntime, TokioRuntimeBuilder};
-use temporal_sdk_core_api::telemetry::metrics::{CoreMeter, NoOpCoreMeter};
-use temporal_sdk_core_api::telemetry::{
+use temporalio_common::telemetry::metrics::{CoreMeter, NoOpCoreMeter};
+use temporalio_common::telemetry::{
     CoreTelemetry, Logger, OtelCollectorOptionsBuilder, PrometheusExporterOptionsBuilder,
     TelemetryOptions, TelemetryOptionsBuilder,
 };
+use temporalio_sdk_core::telemetry::{
+    build_otlp_metric_exporter, construct_filter_string, start_prometheus_metric_exporter,
+};
+use temporalio_sdk_core::{CoreRuntime, RuntimeOptionsBuilder, TokioRuntimeBuilder};
 use tracing::Level;
 
 pub struct RuntimeRef {
@@ -32,7 +32,11 @@ fn init_runtime(
     late_telemetry_options: HsTelemetryOptions,
     try_put_mvar: extern "C" fn(capability: Capability, mvar: *mut MVar) -> (),
 ) -> Box<RuntimeRef> {
-    let mut runtime = CoreRuntime::new(telemetry_config, TokioRuntimeBuilder::default()).unwrap();
+    let runtime_options = RuntimeOptionsBuilder::default()
+        .telemetry_options(telemetry_config)
+        .build()
+        .unwrap();
+    let mut runtime = CoreRuntime::new(runtime_options, TokioRuntimeBuilder::default()).unwrap();
 
     let _guard = runtime.tokio_handle().enter();
     let core_meter: Arc<dyn CoreMeter> = match late_telemetry_options {
