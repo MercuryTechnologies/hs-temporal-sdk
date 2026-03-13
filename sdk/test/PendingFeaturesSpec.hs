@@ -111,5 +111,4 @@ spec = do
     it "worker heartbeat management" $ const pending
 
   describe "Query Advanced (Py/TS)" $ do
-    it "default query handler for unknown queries (no API)" $ const pending
     it "query workflow metadata" $ const pending
