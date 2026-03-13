@@ -165,4 +165,5 @@ tests:
       ScheduleSpec,
       SignalSpec,
       TestHelpers,
-      THCompiles
+      THCompiles,
+      WorkerTunerSpec

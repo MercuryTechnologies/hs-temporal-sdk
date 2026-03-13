@@ -12,7 +12,7 @@ cabal.project.local
 cabal.project.local~
 debug/
 target/
-result
+result*
 .direnv/
 .DS_Store
 core/rust/build.rs

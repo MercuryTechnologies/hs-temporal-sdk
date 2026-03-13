@@ -2,13 +2,21 @@ use ffi_convert::{AsRust, CArray, CDrop, CDropError, CReprOf, RawBorrow, RawPoin
 use libc::c_char;
 use prost::Message;
 use std::collections::{HashMap, HashSet};
+use std::marker::PhantomData;
 use std::str;
 use std::sync::Arc;
 use std::time::Duration;
 use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
-use temporal_sdk_core_api::Worker;
+use temporal_sdk_core::{
+    ResourceBasedSlotsOptionsBuilder, ResourceSlotOptions,
+    SlotSupplierOptions, TunerHolderOptionsBuilder,
+};
 use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
-use temporal_sdk_core_api::worker::{PollerBehavior, WorkerVersioningStrategy};
+use temporal_sdk_core_api::worker::{
+    PollerBehavior, SlotKind, SlotInfoTrait, SlotMarkUsedContext, SlotReleaseContext,
+    SlotReservationContext, SlotSupplier, SlotSupplierPermit, WorkerVersioningStrategy,
+};
+use temporal_sdk_core_api::Worker;
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
 use temporal_sdk_core_protos::temporal::api::history::v1::History;
@@ -22,6 +30,319 @@ use serde::{Deserialize, Serialize};
 pub struct WorkerRef {
     worker: Option<Arc<temporal_sdk_core::Worker>>,
     runtime: runtime::Runtime,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(tag = "type")]
+pub enum SlotSupplierConfig {
+    #[serde(rename = "fixed_size")]
+    FixedSize { slots: usize },
+    #[serde(rename = "resource_based")]
+    ResourceBased {
+        minimum_slots: Option<usize>,
+        maximum_slots: Option<usize>,
+        ramp_throttle_ms: Option<u64>,
+    },
+    #[serde(rename = "custom")]
+    Custom { handle: u64 },
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ResourceBasedTunerConfig {
+    pub target_memory_usage: f64,
+    pub target_cpu_usage: f64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct TunerConfig {
+    pub workflow_slot_supplier: Option<SlotSupplierConfig>,
+    pub activity_slot_supplier: Option<SlotSupplierConfig>,
+    pub local_activity_slot_supplier: Option<SlotSupplierConfig>,
+    pub resource_based_tuner_options: Option<ResourceBasedTunerConfig>,
+}
+
+impl TunerConfig {
+    fn build_tuner_holder(self) -> Result<Box<dyn temporal_sdk_core_api::worker::WorkerTuner + Send + Sync>, WorkerError> {
+        let resource_opts = self.resource_based_tuner_options.as_ref().map(|rbt| {
+            ResourceBasedSlotsOptionsBuilder::default()
+                .target_mem_usage(rbt.target_memory_usage)
+                .target_cpu_usage(rbt.target_cpu_usage)
+                .build()
+                .expect("resource based slot options should not fail with just targets set")
+        });
+
+        let any_resource_based = matches!(self.workflow_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }))
+            || matches!(self.activity_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }))
+            || matches!(self.local_activity_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }));
+
+        if any_resource_based && resource_opts.is_none() {
+            return Err(WorkerError {
+                code: WorkerErrorCode::InvalidWorkerConfig,
+                message: "resource_based_tuner_options must be set when any slot supplier is resource_based".to_string(),
+            });
+        }
+
+        let mut builder = TunerHolderOptionsBuilder::default();
+
+        if let Some(ref opts) = resource_opts {
+            builder.resource_based_options(opts.clone());
+        }
+
+        if let Some(ref ss) = self.workflow_slot_supplier {
+            builder.workflow_slot_options(to_slot_supplier_options(ss)?);
+        }
+        if let Some(ref ss) = self.activity_slot_supplier {
+            builder.activity_slot_options(to_slot_supplier_options(ss)?);
+        }
+        if let Some(ref ss) = self.local_activity_slot_supplier {
+            builder.local_activity_slot_options(to_slot_supplier_options(ss)?);
+        }
+
+        let tuner = builder.build_tuner_holder().map_err(|err| WorkerError {
+            code: WorkerErrorCode::InvalidWorkerConfig,
+            message: format!("Failed building tuner: {}", err),
+        })?;
+
+        Ok(Box::new(tuner))
+    }
+}
+
+fn to_slot_supplier_options<SK: SlotKind + Send + Sync + 'static>(
+    config: &SlotSupplierConfig,
+) -> Result<SlotSupplierOptions<SK>, WorkerError>
+where
+    SK::Info: SlotInfoTrait,
+{
+    match config {
+        SlotSupplierConfig::FixedSize { slots } => {
+            Ok(SlotSupplierOptions::FixedSize { slots: *slots })
+        }
+        SlotSupplierConfig::ResourceBased {
+            minimum_slots,
+            maximum_slots,
+            ramp_throttle_ms,
+        } => Ok(SlotSupplierOptions::ResourceBased(
+            ResourceSlotOptions::new(
+                minimum_slots.unwrap_or(1),
+                maximum_slots.unwrap_or(10_000),
+                Duration::from_millis(ramp_throttle_ms.unwrap_or(50)),
+            ),
+        )),
+        SlotSupplierConfig::Custom { handle } => {
+            let inner_ptr = *handle as *const HaskellSlotSupplierInner;
+            let inner = unsafe { &*inner_ptr };
+            let supplier: HaskellSlotSupplier<SK> = HaskellSlotSupplier {
+                inner: Arc::new(HaskellSlotSupplierInner {
+                    reserve_fn: inner.reserve_fn,
+                    try_reserve_fn: inner.try_reserve_fn,
+                    mark_used_fn: inner.mark_used_fn,
+                    release_fn: inner.release_fn,
+                }),
+                _phantom: PhantomData,
+            };
+            Ok(SlotSupplierOptions::Custom(Arc::new(supplier)))
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Custom (Haskell-supplied) SlotSupplier
+// ---------------------------------------------------------------------------
+
+/// Callback signatures that Haskell exports.
+///
+/// `reserve_slot`: called from async context. Haskell must fork a thread, do its work,
+///   then call `hs_temporal_slot_reserve_complete(completion)` when ready.
+///   `ctx_ptr`/`ctx_len` point to a JSON-encoded `SerializedSlotReservationContext`.
+///   Haskell MUST copy the bytes before the callback returns (Rust frees them afterward).
+///
+/// `try_reserve_slot`: synchronous. Returns 1 if a slot was granted, 0 otherwise.
+///
+/// `mark_slot_used` / `release_slot`: fire-and-forget notifications with JSON-encoded info.
+type ReserveSlotFn = unsafe extern "C" fn(ctx_ptr: *const u8, ctx_len: usize, completion: *mut SlotReserveCompletion);
+type TryReserveSlotFn = unsafe extern "C" fn(ctx_ptr: *const u8, ctx_len: usize) -> i32;
+type MarkSlotUsedFn = unsafe extern "C" fn(info_ptr: *const u8, info_len: usize);
+type ReleaseSlotFn = unsafe extern "C" fn(info_ptr: *const u8, info_len: usize);
+
+pub struct SlotReserveCompletion {
+    sender: Option<tokio::sync::oneshot::Sender<()>>,
+}
+
+pub struct HaskellSlotSupplierInner {
+    reserve_fn: ReserveSlotFn,
+    try_reserve_fn: TryReserveSlotFn,
+    mark_used_fn: MarkSlotUsedFn,
+    release_fn: ReleaseSlotFn,
+}
+
+unsafe impl Send for HaskellSlotSupplierInner {}
+unsafe impl Sync for HaskellSlotSupplierInner {}
+
+struct HaskellSlotSupplier<SK: SlotKind> {
+    inner: Arc<HaskellSlotSupplierInner>,
+    _phantom: PhantomData<SK>,
+}
+
+unsafe impl<SK: SlotKind> Send for HaskellSlotSupplier<SK> {}
+unsafe impl<SK: SlotKind> Sync for HaskellSlotSupplier<SK> {}
+
+#[derive(Serialize)]
+struct SerializedSlotReservationContext {
+    task_queue: String,
+    worker_identity: String,
+    num_issued_slots: usize,
+    is_sticky: bool,
+}
+
+impl SerializedSlotReservationContext {
+    fn from_ctx(ctx: &dyn SlotReservationContext) -> Self {
+        Self {
+            task_queue: ctx.task_queue().to_string(),
+            worker_identity: ctx.worker_identity().to_string(),
+            num_issued_slots: ctx.num_issued_slots(),
+            is_sticky: ctx.is_sticky(),
+        }
+    }
+}
+
+#[derive(Serialize)]
+#[serde(tag = "type")]
+enum SerializedSlotInfo {
+    #[serde(rename = "workflow")]
+    Workflow { workflow_type: String, is_sticky: bool },
+    #[serde(rename = "activity")]
+    Activity { activity_type: String },
+    #[serde(rename = "local_activity")]
+    LocalActivity { activity_type: String },
+    #[serde(rename = "nexus")]
+    Nexus { service: String, operation: String },
+}
+
+impl SerializedSlotInfo {
+    fn from_info(info: temporal_sdk_core_api::worker::SlotInfo<'_>) -> Self {
+        match info {
+            temporal_sdk_core_api::worker::SlotInfo::Workflow(i) => Self::Workflow {
+                workflow_type: i.workflow_type.clone(),
+                is_sticky: i.is_sticky,
+            },
+            temporal_sdk_core_api::worker::SlotInfo::Activity(i) => Self::Activity {
+                activity_type: i.activity_type.clone(),
+            },
+            temporal_sdk_core_api::worker::SlotInfo::LocalActivity(i) => Self::LocalActivity {
+                activity_type: i.activity_type.clone(),
+            },
+            temporal_sdk_core_api::worker::SlotInfo::Nexus(i) => Self::Nexus {
+                service: i.service.clone(),
+                operation: i.operation.clone(),
+            },
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct SerializedMarkUsedContext {
+    slot_info: SerializedSlotInfo,
+}
+
+#[derive(Serialize)]
+struct SerializedReleaseContext {
+    slot_info: Option<SerializedSlotInfo>,
+}
+
+#[async_trait::async_trait]
+impl<SK: SlotKind + 'static> SlotSupplier for HaskellSlotSupplier<SK>
+where
+    SK::Info: SlotInfoTrait,
+{
+    type SlotKind = SK;
+
+    async fn reserve_slot(&self, ctx: &dyn SlotReservationContext) -> SlotSupplierPermit {
+        let json = serde_json::to_vec(&SerializedSlotReservationContext::from_ctx(ctx))
+            .expect("serialization should not fail");
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        let completion = Box::into_raw(Box::new(SlotReserveCompletion { sender: Some(tx) }));
+
+        unsafe { (self.inner.reserve_fn)(json.as_ptr(), json.len(), completion) };
+        // json is alive until this point; Haskell must have copied the bytes synchronously.
+
+        let _ = rx.await;
+        SlotSupplierPermit::default()
+    }
+
+    fn try_reserve_slot(&self, ctx: &dyn SlotReservationContext) -> Option<SlotSupplierPermit> {
+        let json = serde_json::to_vec(&SerializedSlotReservationContext::from_ctx(ctx))
+            .expect("serialization should not fail");
+        let result = unsafe { (self.inner.try_reserve_fn)(json.as_ptr(), json.len()) };
+        if result != 0 {
+            Some(SlotSupplierPermit::default())
+        } else {
+            None
+        }
+    }
+
+    fn mark_slot_used(&self, ctx: &dyn SlotMarkUsedContext<SlotKind = SK>) {
+        let info = SerializedSlotInfo::from_info(ctx.info().downcast());
+        let json = serde_json::to_vec(&SerializedMarkUsedContext { slot_info: info })
+            .expect("serialization should not fail");
+        unsafe { (self.inner.mark_used_fn)(json.as_ptr(), json.len()) };
+    }
+
+    fn release_slot(&self, ctx: &dyn SlotReleaseContext<SlotKind = SK>) {
+        let info = ctx.info().map(|i| SerializedSlotInfo::from_info(i.downcast()));
+        let json = serde_json::to_vec(&SerializedReleaseContext { slot_info: info })
+            .expect("serialization should not fail");
+        unsafe { (self.inner.release_fn)(json.as_ptr(), json.len()) };
+    }
+}
+
+/// Create a custom slot supplier handle from Haskell-supplied callback function pointers.
+/// Returns a raw pointer that must be freed with `hs_temporal_drop_custom_slot_supplier`.
+///
+/// # Safety
+///
+/// Haskell FFI bridge invariants. All function pointers must remain valid for the
+/// lifetime of the returned handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_new_custom_slot_supplier(
+    reserve_fn: ReserveSlotFn,
+    try_reserve_fn: TryReserveSlotFn,
+    mark_used_fn: MarkSlotUsedFn,
+    release_fn: ReleaseSlotFn,
+) -> *mut HaskellSlotSupplierInner {
+    Box::into_raw(Box::new(HaskellSlotSupplierInner {
+        reserve_fn,
+        try_reserve_fn,
+        mark_used_fn,
+        release_fn,
+    }))
+}
+
+/// Free a custom slot supplier handle.
+///
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_drop_custom_slot_supplier(
+    handle: *mut HaskellSlotSupplierInner,
+) {
+    unsafe { drop(Box::from_raw(handle)) };
+}
+
+/// Called from Haskell when a `reserve_slot` request has been fulfilled.
+/// Takes ownership of the completion handle.
+///
+/// # Safety
+///
+/// Haskell FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_slot_reserve_complete(
+    completion: *mut SlotReserveCompletion,
+) {
+    let mut completion = unsafe { Box::from_raw(completion) };
+    if let Some(sender) = completion.sender.take() {
+        let _ = sender.send(());
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -46,13 +367,15 @@ pub struct WorkerConfig {
     graceful_shutdown_period_millis: u64,
     nondeterminism_as_workflow_fail: bool,
     nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    tuner: Option<TunerConfig>,
 }
 
 impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
     type Error = WorkerError;
 
     fn try_from(conf: WorkerConfig) -> Result<Self, WorkerError> {
-        temporal_sdk_core::WorkerConfigBuilder::default()
+        let mut builder = temporal_sdk_core::WorkerConfigBuilder::default();
+        builder
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
             .versioning_strategy(WorkerVersioningStrategy::None {
@@ -60,9 +383,6 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             })
             .client_identity_override(conf.identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
-            .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
-            .max_outstanding_activities(conf.max_outstanding_activities)
-            .max_outstanding_local_activities(conf.max_outstanding_local_activities)
             .workflow_task_poller_behavior(PollerBehavior::SimpleMaximum(
                 conf.max_concurrent_workflow_task_polls,
             ))
@@ -82,9 +402,6 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             ))
             .max_worker_activities_per_second(conf.max_activities_per_second)
             .max_task_queue_activities_per_second(conf.max_task_queue_activities_per_second)
-            // Even though grace period is optional, if it is not set then the
-            // auto-cancel-activity behavior of shutdown will not occur, so we
-            // always set it even if 0.
             .graceful_shutdown_period(Duration::from_millis(conf.graceful_shutdown_period_millis))
             .workflow_failure_errors(if conf.nondeterminism_as_workflow_fail {
                 HashSet::from([WorkflowErrorType::Nondeterminism])
@@ -101,12 +418,25 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
                         )
                     })
                     .collect::<HashMap<String, HashSet<WorkflowErrorType>>>(),
-            )
-            .build()
-            .map_err(|err| WorkerError {
-                code: WorkerErrorCode::InvalidWorkerConfig,
-                message: format!("{}", err),
-            })
+            );
+
+        match conf.tuner {
+            Some(tuner_config) => {
+                let tuner = tuner_config.build_tuner_holder()?;
+                builder.tuner(Arc::from(tuner));
+            }
+            None => {
+                builder
+                    .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
+                    .max_outstanding_activities(conf.max_outstanding_activities)
+                    .max_outstanding_local_activities(conf.max_outstanding_local_activities);
+            }
+        }
+
+        builder.build().map_err(|err| WorkerError {
+            code: WorkerErrorCode::InvalidWorkerConfig,
+            message: format!("{}", err),
+        })
     }
 }
 
