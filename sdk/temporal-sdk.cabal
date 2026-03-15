@@ -25,6 +25,7 @@ library
       Temporal.Client.Namespace
       Temporal.Client.Schedule
       Temporal.Client.TestService
+      Temporal.Client.VisibilityQuery
       Temporal.Common.Logging
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
@@ -152,7 +153,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, MockActivityEnvironmentSpec, IntegrationSpec.TimeSkipping, Common, RegisterWorkflowsSpec, THCompiles
+      Spec, ConcurrentAccessSpec, AsyncCompletionSpec, DurationSpec, ExceptionSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, MockActivityEnvironmentSpec, IntegrationSpec.TimeSkipping, Common, RegisterWorkflowsSpec, THCompiles, VisibilityQuerySpec
   hs-source-dirs:
       test
   default-extensions:
