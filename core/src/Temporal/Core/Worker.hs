@@ -43,12 +43,15 @@ module Temporal.Core.Worker (
   historyProtoToJson,
   closeHistory,
   KnownWorkerType (..),
+
   -- * Resource-safe wrappers
   bracketWorker,
+
   -- * Worker tuner configuration
   TunerConfig (..),
   SlotSupplierConfig (..),
   ResourceBasedTunerConfig (..),
+
   -- * Custom slot supplier
   CustomSlotSupplier (..),
   SlotReservationContext (..),
@@ -229,14 +232,15 @@ instance FromJSON ReleaseSlotContext where
 -- Custom slot supplier
 -- ---------------------------------------------------------------------------
 
--- | User-provided callbacks for a custom slot supplier.
---
--- @reserveSlot@ blocks until a slot is available. Called from Rust async context;
--- the implementation may block freely (it runs in a forked Haskell thread).
---
--- @tryReserveSlot@ must return immediately. Returns 'True' if a slot was granted.
---
--- @markSlotUsed@ and @releaseSlot@ are fire-and-forget notifications.
+{- | User-provided callbacks for a custom slot supplier.
+
+@reserveSlot@ blocks until a slot is available. Called from Rust async context;
+the implementation may block freely (it runs in a forked Haskell thread).
+
+@tryReserveSlot@ must return immediately. Returns 'True' if a slot was granted.
+
+@markSlotUsed@ and @releaseSlot@ are fire-and-forget notifications.
+-}
 data CustomSlotSupplier = CustomSlotSupplier
   { reserveSlot :: SlotReservationContext -> IO ()
   , tryReserveSlot :: SlotReservationContext -> IO Bool
@@ -245,8 +249,9 @@ data CustomSlotSupplier = CustomSlotSupplier
   }
 
 
--- | Opaque handle to a Rust-side custom slot supplier.
--- Must be freed with 'freeCustomSlotSupplierHandle' when no longer needed.
+{- | Opaque handle to a Rust-side custom slot supplier.
+Must be freed with 'freeCustomSlotSupplierHandle' when no longer needed.
+-}
 data CustomSlotSupplierHandle = CustomSlotSupplierHandle
   { unCustomSlotSupplierHandle :: !(Ptr CustomSlotSupplierHandle)
   , customSlotSupplierCleanup :: !(IO ())
@@ -274,8 +279,14 @@ foreign import ccall "hs_temporal_slot_reserve_complete"
 -- Callback types matching the Rust function pointer signatures.
 -- ctx_ptr and ctx_len borrow JSON bytes that MUST be copied before returning.
 type ReserveSlotCallback = Ptr Word8 -> CSize -> Ptr () -> IO ()
+
+
 type TryReserveSlotCallback = Ptr Word8 -> CSize -> IO CInt
+
+
 type MarkSlotUsedCallback = Ptr Word8 -> CSize -> IO ()
+
+
 type ReleaseSlotCallback = Ptr Word8 -> CSize -> IO ()
 
 
@@ -283,18 +294,22 @@ type ReleaseSlotCallback = Ptr Word8 -> CSize -> IO ()
 foreign import ccall "wrapper"
   mkReserveSlotFunPtr :: ReserveSlotCallback -> IO (FunPtr ReserveSlotCallback)
 
+
 foreign import ccall "wrapper"
   mkTryReserveSlotFunPtr :: TryReserveSlotCallback -> IO (FunPtr TryReserveSlotCallback)
 
+
 foreign import ccall "wrapper"
   mkMarkSlotUsedFunPtr :: MarkSlotUsedCallback -> IO (FunPtr MarkSlotUsedCallback)
+
 
 foreign import ccall "wrapper"
   mkReleaseSlotFunPtr :: ReleaseSlotCallback -> IO (FunPtr ReleaseSlotCallback)
 
 
--- | Decode a JSON payload from a Rust-owned (ptr, len) borrow.
--- Copies the bytes immediately so the pointer can be freed by Rust after return.
+{- | Decode a JSON payload from a Rust-owned (ptr, len) borrow.
+Copies the bytes immediately so the pointer can be freed by Rust after return.
+-}
 unsafeDecodeJSON :: FromJSON a => Ptr Word8 -> CSize -> IO a
 unsafeDecodeJSON ptr len = do
   bs <- BS.packCStringLen (castPtr ptr, fromIntegral len)
@@ -303,9 +318,10 @@ unsafeDecodeJSON ptr len = do
     Right v -> pure v
 
 
--- | Create a Rust-side custom slot supplier handle backed by Haskell callbacks.
--- The returned handle can be embedded in a 'SlotSupplierConfig' via
--- 'CustomSlotSupplierConfig'. Free with 'freeCustomSlotSupplierHandle'.
+{- | Create a Rust-side custom slot supplier handle backed by Haskell callbacks.
+The returned handle can be embedded in a 'SlotSupplierConfig' via
+'CustomSlotSupplierConfig'. Free with 'freeCustomSlotSupplierHandle'.
+-}
 newCustomSlotSupplierHandle :: CustomSlotSupplier -> IO CustomSlotSupplierHandle
 newCustomSlotSupplierHandle css = do
   stablePtr <- newStablePtr css
@@ -456,58 +472,172 @@ instance FromJSON TunerConfig where
       <*> o .:? "resource_based_tuner_options"
 
 
+-- | Per-worker configuration options.
 data WorkerConfig = WorkerConfig
   { namespace :: Text
+  -- ^ The Temporal service namespace this worker is bound to.
   , taskQueue :: Text
-  , buildId :: Text
-  , identityOverride :: Maybe Text
+  -- ^ The task queue this worker will poll from; this task queue name
+  -- applies to both workflow and activity polling.
+  , clientIdentityOverride :: Maybe Text
+  -- ^ A human-readable string that can identify this worker.
+  --
+  -- If set, overrides the identity set (if any) on the client used by this
+  -- worker.
   , maxCachedWorkflows :: Word64
-  , maxOutstandingWorkflowTasks :: Word64
-  , maxOutstandingActivities :: Word64
-  , maxOutstandingLocalActivities :: Word64
-  , maxConcurrentWorkflowTaskPolls :: Word64
-  , nonstickyToStickyPollRatio :: Float
-  , maxConcurrentActivityTaskPolls :: Word64
-  , noRemoteActivities :: Bool
-  , stickyQueueScheduleToStartTimeoutMillis :: Word64
-  , maxHeartbeatThrottleIntervalMillis :: Word64
-  , defaultHeartbeatThrottleIntervalMillis :: Word64
-  , maxActivitiesPerSecond :: Maybe Double
-  , maxTaskQueueActivitiesPerSecond :: Maybe Double
-  , gracefulShutdownPeriodMillis :: Word64
-  , nondeterminismAsWorkflowFail :: Bool
-  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  -- ^ If set nonzero, workflows will be cached and sticky task queues will
+  -- be used, meaning that history updates are applied incrementally to
+  -- suspended instances of workflow execution.
+  --
+  -- Workflows are evicted according to a least-recently-used policy once the
+  -- cache maximum has been reached.
+  --
+  -- Workflows may also be explicitly evicted at any time, or as a result of
+  -- errors or failures.
   , tuner :: Maybe TunerConfig
+  -- ^ Set a 'TunerConfig' for this worker; mutually exclusive with
+  -- @maxOutstanding*@ fields.
+  , maxConcurrentWorkflowTaskPolls :: Word64
+  -- ^ Legacy maximum concurrent workflow task poller configuration field, in
+  -- the future this will be replaced with a proper @PollerBehavior@ enum
+  -- bridge type that allows us to provide an appropriate polling behavior
+  -- based on the upstream SDK.
+  --
+  -- This will eventually be replaced with a @workflowTaskPollerBehavior@
+  -- configuration field of (eventual) type @PollerBehavior@.
+  , maxConcurrentActivityTaskPolls :: Word64
+  -- ^ Legacy maximum concurrent activity task poller configuration field, in
+  -- the future this will be replaced with a proper @PollerBehavior@ enum
+  -- bridge type that allows us to provide an appropriate polling behavior
+  -- based on the upstream SDK.
+  --
+  -- This will eventually be replaced with a @activityTaskPollerBehavior@
+  -- configuration field of (eventual) type @PollerBehavior@.
+  , nonstickyToStickyPollRatio :: Float
+  -- ^ (max workflow task polls * this number) = the number of max pollers
+  -- that will be allowed for the nonsticky queue when sticky tasks are
+  -- enabled.
+  , stickyQueueScheduleToStartTimeoutMillis :: Word64
+  -- ^ How long a workflow task is allowed to sit on the sticky queue before it is timed out and moved to the
+  -- non-sticky queue where it may be picked up by any worker.
+  , maxHeartbeatThrottleIntervalMillis :: Word64
+  -- ^ Longest interval for throttling activity heartbeat, in milliseconds.
+  , defaultHeartbeatThrottleIntervalMillis :: Word64
+  -- ^ Default interval for throttling activity heartbeats in case an
+  -- activity's heartbeat timeout is not set, in milliseconds.
+  --
+  -- When the timeout *is* set, throttling is set to 80% of that value.
+  , maxTaskQueueActivitiesPerSecond :: Maybe Double
+  -- ^ Sets the maximum number of activities per second the task queue will
+  -- dispatch, controlled server-side.
+  --
+  -- Note that this only takes effect upon an activity poll request.
+  --
+  -- If multiple workers on the same queue have different values set, they
+  -- will thrash with the last poller winning.
+  --
+  -- Setting this to a nonzero value will also disable eager activity
+  -- execution.
+  , maxWorkerActivitiesPerSecond :: Maybe Double
+  -- ^ Limits the number of activities per second that this worker will
+  -- process.
+  --
+  -- The worker will not poll for new activities if by doing so it might
+  -- receive and execute an activity which would cause it to exceed this
+  -- limit.
+  --
+  -- Negative, zero, or NaN values will cause building the options to fail.
+  , ignoreEvictsOnShutdown :: Bool
+  -- ^ If set `False` (default), shutdown will not finish until all pending
+  -- evictions have been issued and replied to.
+  --
+  -- If set 'True', shutdown will be considered complete when the only
+  -- remaining work is pending evictions.
+  --
+  -- This flag is useful during tests to avoid needing to deal with lots of
+  -- uninteresting evictions during shutdown.
+  --
+  -- Alternatively, if a lang implementation finds it easy to clean up during
+  -- shutdown, setting this true saves some back-and-forth.
+  , gracefulShutdownPeriodMillis :: Word64
+  -- ^ The grace period, in milliseconds, that the core worker will afford
+  -- any running workflows & activities after shutdown has been initiated.
+  , localTimeoutBufferForActivitiesMillis :: Word64
+  -- ^ The amount of time core will wait before timing out activities using
+  -- its own local timers after one of them elapses, in milliseconds.
+  --
+  -- This is to avoid racing with server's own tracking of the timeout.
+  , nondeterminismAsWorkflowFail :: Bool
+  -- ^ Whether nondeterministic workflows will trigger a workflow failure.
+  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  -- ^ A list of workflow types for whom workflow failures will be considered
+  -- to be nondeterminism errors.
+  , maxOutstandingWorkflowTasks :: Word64
+  -- ^ The maximum number of workflow tasks that will ever be given to this
+  -- worker concurrently.
+  --
+  -- Mutually exclusive with 'tuner'.
+  , maxOutstandingActivities :: Word64
+  -- ^ The maximum number of activity tasks that will ever be given to this
+  -- worker concurrently.
+  --
+  -- Mutually exclusive with 'tuner'.
+  , maxOutstandingLocalActivities :: Word64
+  -- ^ The maximum number of local activity tasks that will ever be given to
+  -- this worker concurrently.
+  --
+  -- Mutually exclusive with 'tuner'.
+  , noRemoteActivities :: Bool
+  -- ^ If set to true this worker will only handle workflow tasks and local activities, it will not
+  -- poll for activity tasks.
+  --
+  -- **NOTE**: This has been deprecated and will be removed in a future SDK release.
+  , buildId :: Text
+  -- ^ Legacy build identifier string, in the future this will be replaced
+  -- with a proper @WorkerVersioningStrategy@ bridge type that allows us to
+  -- select one of the versioning strategies provided by the upstream SDK.
+  --
+  -- This will eventually be replaced with a @versioningStrategy@
+  -- configuration field.
   }
 
 
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''WorkerConfig
 
 
+{- | Sensible defaults for 'WorkerConfig'; where possible they should reflect
+the default values specified by the [Rust SDK](https://github.com/temporalio/sdk-core/blob/master/crates/sdk-core/src/worker/mod.rs).
+
+*NOTE*: 'maxOutstandingWorkflowTasks', 'maxOutstandingActivity', and
+'maxOutstandingLocalActivities' default to @1000@ in lieu of there being
+a sensible default provided upstream.
+-}
 defaultWorkerConfig :: WorkerConfig
 defaultWorkerConfig =
   WorkerConfig
     { namespace = "default"
     , taskQueue = "default"
-    , buildId = ""
-    , identityOverride = Nothing
-    , maxCachedWorkflows = 100000
-    , maxOutstandingWorkflowTasks = 1000
-    , maxOutstandingActivities = 1000
-    , maxOutstandingLocalActivities = 1000
+    , clientIdentityOverride = Nothing
+    , maxCachedWorkflows = 0
+    , tuner = Nothing
     , maxConcurrentWorkflowTaskPolls = 5
-    , nonstickyToStickyPollRatio = 0.85
     , maxConcurrentActivityTaskPolls = 5
-    , noRemoteActivities = False
-    , stickyQueueScheduleToStartTimeoutMillis = 60000
-    , maxHeartbeatThrottleIntervalMillis = 300000
-    , defaultHeartbeatThrottleIntervalMillis = 300000
-    , maxActivitiesPerSecond = Nothing
+    , nonstickyToStickyPollRatio = 0.2
+    , stickyQueueScheduleToStartTimeoutMillis = 10_000
+    , maxHeartbeatThrottleIntervalMillis = 60_000
+    , defaultHeartbeatThrottleIntervalMillis = 30_000
     , maxTaskQueueActivitiesPerSecond = Nothing
+    , maxWorkerActivitiesPerSecond = Nothing
+    , ignoreEvictsOnShutdown = False
     , gracefulShutdownPeriodMillis = 0
+    , localTimeoutBufferForActivitiesMillis = 5_000
     , nondeterminismAsWorkflowFail = False
     , nondeterminismAsWorkflowFailForTypes = []
-    , tuner = Nothing
+    , maxOutstandingWorkflowTasks = 1_000
+    , maxOutstandingActivities = 1_000
+    , maxOutstandingLocalActivities = 1_000
+    , noRemoteActivities = False
+    , buildId = ""
     }
 
 
@@ -565,10 +695,11 @@ data WorkerAlreadyClosed = WorkerAlreadyClosed
 instance Exception WorkerAlreadyClosed
 
 
--- | Explicitly close a worker.
---
--- Explicitly close a worker, freeing its resources immediately.
--- After calling this, the worker must not be used again.
+{- | Explicitly close a worker.
+
+Explicitly close a worker, freeing its resources immediately.
+After calling this, the worker must not be used again.
+-}
 closeWorker :: Worker ty -> IO ()
 closeWorker (Worker w _ _ _) = mask_ $ do
   wp <- liftIO $ atomicModifyIORefCAS w $ \wp -> (throw WorkerAlreadyClosed, wp)
@@ -609,10 +740,11 @@ pollWorkflowActivation w = withWorker w $ \wp ->
     rust_dropWorkerError
     rust_dropByteArray
     (\errPtr -> peek errPtr >>= peekWorkerError)
-    (\resPtr -> do
-      arr <- peek resPtr
-      bs <- cArrayToByteString arr
-      return (decodeMessageOrDie bs))
+    ( \resPtr -> do
+        arr <- peek resPtr
+        bs <- cArrayToByteString arr
+        return (decodeMessageOrDie bs)
+    )
 
 
 foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
@@ -625,10 +757,11 @@ pollActivityTask w = withWorker w $ \wp ->
     rust_dropWorkerError
     rust_dropByteArray
     (\errPtr -> peek errPtr >>= peekWorkerError)
-    (\resPtr -> do
-      arr <- peek resPtr
-      bs <- cArrayToByteString arr
-      return (decodeMessageOrDie bs))
+    ( \resPtr -> do
+        arr <- peek resPtr
+        bs <- cArrayToByteString arr
+        return (decodeMessageOrDie bs)
+    )
 
 
 foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -734,9 +867,10 @@ pushHistory (HistoryPusher hp) wf p =
 foreign import ccall "hs_temporal_history_pusher_push_history_json" raw_pushHistoryJson :: Ptr HistoryPusher -> Ptr (CArray Word8) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
 
 
--- | Push a workflow history in protobuf canonical JSON format to a replay worker.
--- The JSON is deserialized on the Rust side, bypassing proto-lens's incomplete
--- JSON support.
+{- | Push a workflow history in protobuf canonical JSON format to a replay worker.
+The JSON is deserialized on the Rust side, bypassing proto-lens's incomplete
+JSON support.
+-}
 pushHistoryJson :: HistoryPusher -> WorkflowId -> ByteString -> IO (Either WorkerError ())
 pushHistoryJson (HistoryPusher hp) wf jsonBytes =
   withCArrayBS wf $ \wfPtr ->
@@ -752,9 +886,10 @@ pushHistoryJson (HistoryPusher hp) wf jsonBytes =
 foreign import ccall "hs_temporal_history_proto_to_json" raw_historyProtoToJson :: Ptr (CArray Word8) -> Ptr (Ptr (CArray Word8)) -> Ptr (Ptr (CArray Word8)) -> IO ()
 
 
--- | Convert protobuf-encoded History bytes to canonical protobuf JSON.
--- The conversion is performed on the Rust side via prost + serde.
--- Useful for testing the JSON replay path.
+{- | Convert protobuf-encoded History bytes to canonical protobuf JSON.
+The conversion is performed on the Rust side via prost + serde.
+Useful for testing the JSON replay path.
+-}
 historyProtoToJson :: ByteString -> IO (Either String ByteString)
 historyProtoToJson protoBytes =
   withCArrayBS protoBytes $ \protoPtr ->
@@ -786,16 +921,17 @@ closeHistory (HistoryPusher hp) =
   raw_closeHistoryPusher hp
 
 
--- | Bracket-style wrapper for Worker that ensures proper cleanup.
---
--- Example:
---
--- @
--- result <- newWorker client workerConfig
--- case result of
---   Left err -> error $ show err
---   Right worker -> bracketWorker worker $ \\w -> do
---     ...
--- @
+{- | Bracket-style wrapper for Worker that ensures proper cleanup.
+
+Example:
+
+@
+result <- newWorker client workerConfig
+case result of
+  Left err -> error $ show err
+  Right worker -> bracketWorker worker $ \\w -> do
+    ...
+@
+-}
 bracketWorker :: Worker ty -> (Worker ty -> IO a) -> IO a
 bracketWorker worker = UnliftIO.bracket (return worker) closeWorker
