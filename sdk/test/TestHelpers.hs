@@ -187,6 +187,7 @@ mkBaseConf interceptors = do
     ( do
         setNamespace $ W.Namespace "default"
         setTaskQueue taskQueue
+        -- setIgnoreEvictsOnShutdown True
         addInterceptors interceptors
         setLogger $ defaultOutput stdout
     , taskQueue

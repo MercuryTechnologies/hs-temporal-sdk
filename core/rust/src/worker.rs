@@ -8,15 +8,15 @@ use std::sync::Arc;
 use std::time::Duration;
 use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
 use temporal_sdk_core::{
-    ResourceBasedSlotsOptionsBuilder, ResourceSlotOptions,
-    SlotSupplierOptions, TunerHolderOptionsBuilder,
-};
-use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
-use temporal_sdk_core_api::worker::{
-    PollerBehavior, SlotKind, SlotInfoTrait, SlotMarkUsedContext, SlotReleaseContext,
-    SlotReservationContext, SlotSupplier, SlotSupplierPermit, WorkerVersioningStrategy,
+    ResourceBasedSlotsOptionsBuilder, ResourceSlotOptions, SlotSupplierOptions,
+    TunerHolderOptionsBuilder,
 };
 use temporal_sdk_core_api::Worker;
+use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
+use temporal_sdk_core_api::worker::{
+    PollerBehavior, SlotInfoTrait, SlotKind, SlotMarkUsedContext, SlotReleaseContext,
+    SlotReservationContext, SlotSupplier, SlotSupplierPermit, WorkerVersioningStrategy,
+};
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
 use temporal_sdk_core_protos::temporal::api::history::v1::History;
@@ -62,7 +62,10 @@ pub struct TunerConfig {
 }
 
 impl TunerConfig {
-    fn build_tuner_holder(self) -> Result<Box<dyn temporal_sdk_core_api::worker::WorkerTuner + Send + Sync>, WorkerError> {
+    fn build_tuner_holder(
+        self,
+    ) -> Result<Box<dyn temporal_sdk_core_api::worker::WorkerTuner + Send + Sync>, WorkerError>
+    {
         let resource_opts = self.resource_based_tuner_options.as_ref().map(|rbt| {
             ResourceBasedSlotsOptionsBuilder::default()
                 .target_mem_usage(rbt.target_memory_usage)
@@ -71,9 +74,16 @@ impl TunerConfig {
                 .expect("resource based slot options should not fail with just targets set")
         });
 
-        let any_resource_based = matches!(self.workflow_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }))
-            || matches!(self.activity_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }))
-            || matches!(self.local_activity_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }));
+        let any_resource_based = matches!(
+            self.workflow_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        ) || matches!(
+            self.activity_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        ) || matches!(
+            self.local_activity_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        );
 
         if any_resource_based && resource_opts.is_none() {
             return Err(WorkerError {
@@ -159,7 +169,11 @@ where
 /// `try_reserve_slot`: synchronous. Returns 1 if a slot was granted, 0 otherwise.
 ///
 /// `mark_slot_used` / `release_slot`: fire-and-forget notifications with JSON-encoded info.
-type ReserveSlotFn = unsafe extern "C" fn(ctx_ptr: *const u8, ctx_len: usize, completion: *mut SlotReserveCompletion);
+type ReserveSlotFn = unsafe extern "C" fn(
+    ctx_ptr: *const u8,
+    ctx_len: usize,
+    completion: *mut SlotReserveCompletion,
+);
 type TryReserveSlotFn = unsafe extern "C" fn(ctx_ptr: *const u8, ctx_len: usize) -> i32;
 type MarkSlotUsedFn = unsafe extern "C" fn(info_ptr: *const u8, info_len: usize);
 type ReleaseSlotFn = unsafe extern "C" fn(info_ptr: *const u8, info_len: usize);
@@ -209,7 +223,10 @@ impl SerializedSlotReservationContext {
 #[serde(tag = "type")]
 enum SerializedSlotInfo {
     #[serde(rename = "workflow")]
-    Workflow { workflow_type: String, is_sticky: bool },
+    Workflow {
+        workflow_type: String,
+        is_sticky: bool,
+    },
     #[serde(rename = "activity")]
     Activity { activity_type: String },
     #[serde(rename = "local_activity")]
@@ -288,7 +305,9 @@ where
     }
 
     fn release_slot(&self, ctx: &dyn SlotReleaseContext<SlotKind = SK>) {
-        let info = ctx.info().map(|i| SerializedSlotInfo::from_info(i.downcast()));
+        let info = ctx
+            .info()
+            .map(|i| SerializedSlotInfo::from_info(i.downcast()));
         let json = serde_json::to_vec(&SerializedReleaseContext { slot_info: info })
             .expect("serialization should not fail");
         unsafe { (self.inner.release_fn)(json.as_ptr(), json.len()) };
@@ -336,38 +355,130 @@ pub unsafe extern "C" fn hs_temporal_drop_custom_slot_supplier(
 ///
 /// Haskell FFI bridge invariants.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn hs_temporal_slot_reserve_complete(
-    completion: *mut SlotReserveCompletion,
-) {
+pub unsafe extern "C" fn hs_temporal_slot_reserve_complete(completion: *mut SlotReserveCompletion) {
     let mut completion = unsafe { Box::from_raw(completion) };
     if let Some(sender) = completion.sender.take() {
         let _ = sender.send(());
     }
 }
 
+/// Per-worker configuration options.
+///
+/// This struct should mirror the configuration we want to expose from [temporal::sdk_core::worker::WorkerConfig] in a
+/// way that can be cleanly passed across the C FFI from Haskell.
+///
+/// Where possible, we'll try to adhere to the naming conventions used in the Rust SDK, and most of the field comments
+/// have been copied verbatim from the upstream [temporal::sdk_core::worker::WorkerConfig] fields.
 #[derive(Serialize, Deserialize)]
 pub struct WorkerConfig {
+    /// The Temporal service namespace this worker is bound to.
     namespace: String,
+    /// The task queue this worker will poll from; this task queue name applies to both workflow and activity polling.
     task_queue: String,
-    build_id: String,
-    identity_override: Option<String>,
+    /// A human-readable string that can identify this worker.
+    ///
+    /// If set, overrides the identity set (if any) on the client used by this worker.
+    client_identity_override: Option<String>,
+    /// If set nonzero, workflows will be cached and sticky task queues will be used, meaning that history updates are
+    /// applied incrementally to suspended instances of workflow execution.
+    ///
+    /// Workflows are evicted according to a least-recently-used policy once the cache maximum has been reached.
+    ///
+    /// Workflows may also be explicitly evicted at any time, or as a result of errors or failures.
     max_cached_workflows: usize,
-    max_outstanding_workflow_tasks: usize,
-    max_outstanding_activities: usize,
-    max_outstanding_local_activities: usize,
-    max_concurrent_workflow_task_polls: usize,
-    nonsticky_to_sticky_poll_ratio: f32,
-    max_concurrent_activity_task_polls: usize,
-    no_remote_activities: bool,
-    sticky_queue_schedule_to_start_timeout_millis: u64,
-    max_heartbeat_throttle_interval_millis: u64,
-    default_heartbeat_throttle_interval_millis: u64,
-    max_activities_per_second: Option<f64>,
-    max_task_queue_activities_per_second: Option<f64>,
-    graceful_shutdown_period_millis: u64,
-    nondeterminism_as_workflow_fail: bool,
-    nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    /// Set a [crate::WorkerTuner] for this worker by way of our [TunerConfig] FFI bridge type.
+    ///
+    /// Either this or at least one of the `max_outstanding_*` fields must be set.
     tuner: Option<TunerConfig>,
+    /// Legacy maximum concurrent workflow task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `workflow_task_poller_behavior` configuration field.
+    max_concurrent_workflow_task_polls: usize,
+    /// Legacy maximum concurrent activity task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with an `activity_task_poller_behavior` configuration field.
+    max_concurrent_activity_task_polls: usize,
+    /// (max workflow task polls * this number) = the number of max pollers that will be allowed for
+    /// the nonsticky queue when sticky tasks are enabled.
+    ///
+    /// Because we only support [PollerBehavior::SimpleMaximum] currently, this applies if sticky tasks are enabled.
+    nonsticky_to_sticky_poll_ratio: f32,
+    /// How long a workflow task is allowed to sit on the sticky queue before it is timed out and moved to the
+    /// non-sticky queue where it may be picked up by any worker.
+    sticky_queue_schedule_to_start_timeout_millis: u64,
+    /// Longest interval for throttling activity heartbeat, in milliseconds.
+    max_heartbeat_throttle_interval_millis: u64,
+    /// Default interval for throttling activity heartbeats in case an activity's heartbeat timeout is not set, in
+    /// milliseconds.
+    ///
+    /// When the timeout *is* set, throttling is set to 80% of that value.
+    default_heartbeat_throttle_interval_millis: u64,
+    /// Sets the maximum number of activities per second the task queue will dispatch, controlled server-side.
+    ///
+    /// Note that this only takes effect upon an activity poll request.
+    ///
+    /// If multiple workers on the same queue have different values set, they will thrash with the last poller winning.
+    ///
+    /// Setting this to a nonzero value will also disable eager activity execution.
+    max_task_queue_activities_per_second: Option<f64>,
+    /// Limits the number of activities per second that this worker will process.
+    ///
+    /// The worker will not poll for new activities if by doing so it might receive and execute an activity which would
+    /// cause it to exceed this limit.
+    ///
+    /// Negative, zero, or NaN values will cause building the options to fail.
+    max_worker_activities_per_second: Option<f64>,
+    /// If set `false` (default), shutdown will not finish until all pending evictions have been issued and replied to.
+    ///
+    /// If set `true` shutdown will be considered complete when the only remaining work is pending evictions.
+    ///
+    /// This flag is useful during tests to avoid needing to deal with lots of uninteresting evictions during shutdown.
+    ///
+    /// Alternatively, if a lang implementation finds it easy to clean up during shutdown, setting this true saves some
+    /// back-and-forth.
+    ignore_evicts_on_shutdown: bool,
+    /// The grace period, in milliseconds, that the core worker will afford any running workflows & activities after
+    /// shutdown has been initiated.
+    graceful_shutdown_period_millis: u64,
+    /// The amount of time core will wait before timing out activities using its own local timers after one of them
+    /// elapses, in milliseconds.
+    ///
+    /// This is to avoid racing with server's own tracking of the timeout.
+    local_timeout_buffer_for_activities_millis: u64,
+    /// Whether nondeterministic workflows will trigger a workflow failure.
+    nondeterminism_as_workflow_fail: bool,
+    /// A list of workflow types for whom workflow failures will be considered to be nondeterminism errors.
+    nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    /// The maximum allowed number of workflow tasks that will ever be given to this worker at one time.
+    ///
+    /// Note that one workflow task may require multiple activations - so the WFT counts as "outstanding" until all
+    /// activations it requires have been completed. Must be at least 2 if `max_cached_workflows` is > 0, or is an
+    /// error.
+    ///
+    /// Mutually exclusive with `tuner`.
+    max_outstanding_workflow_tasks: usize,
+    /// The maximum number of activity tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`.
+    max_outstanding_activities: usize,
+    /// The maximum number of local activity tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`.
+    max_outstanding_local_activities: usize,
+    /// If set to true this worker will only handle workflow tasks and local activities, it will not poll for activity
+    /// tasks.
+    ///
+    /// *NOTE*: This has been deprecated and will be removed in a future SDK release.
+    no_remote_activities: bool,
+    /// Legacy build identifier string, in the future this will be replaced with a proper [WorkerVersioningStrategy]
+    /// enum bridge type that allows us to select one of the versioning strategies provided by the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `versioning_strategy` configuration field.
+    build_id: String,
 }
 
 impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
@@ -381,7 +492,7 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             .versioning_strategy(WorkerVersioningStrategy::None {
                 build_id: conf.build_id,
             })
-            .client_identity_override(conf.identity_override)
+            .client_identity_override(conf.client_identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
             .workflow_task_poller_behavior(PollerBehavior::SimpleMaximum(
                 conf.max_concurrent_workflow_task_polls,
@@ -400,9 +511,13 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             .default_heartbeat_throttle_interval(Duration::from_millis(
                 conf.default_heartbeat_throttle_interval_millis,
             ))
-            .max_worker_activities_per_second(conf.max_activities_per_second)
+            .max_worker_activities_per_second(conf.max_worker_activities_per_second)
             .max_task_queue_activities_per_second(conf.max_task_queue_activities_per_second)
             .graceful_shutdown_period(Duration::from_millis(conf.graceful_shutdown_period_millis))
+            .ignore_evicts_on_shutdown(conf.ignore_evicts_on_shutdown)
+            .local_timeout_buffer_for_activities(Duration::from_millis(
+                conf.local_timeout_buffer_for_activities_millis,
+            ))
             .workflow_failure_errors(if conf.nondeterminism_as_workflow_fail {
                 HashSet::from([WorkflowErrorType::Nondeterminism])
             } else {
@@ -442,7 +557,11 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
 
 macro_rules! enter_sync {
     ($runtime:expr) => {
-        let _trace_guard = $runtime.core.telemetry().trace_subscriber().map(|s| tracing::subscriber::set_default(s));
+        let _trace_guard = $runtime
+            .core
+            .telemetry()
+            .trace_subscriber()
+            .map(|s| tracing::subscriber::set_default(s));
         let _guard = $runtime.core.tokio_handle().enter();
     };
 }
@@ -1208,9 +1327,10 @@ pub unsafe extern "C" fn hs_temporal_history_proto_to_json(
                     .into_raw_pointer_mut();
             },
             Err(err) => unsafe {
-                *error_slot = CArray::c_repr_of(format!("JSON serialization failed: {}", err).into_bytes())
-                    .unwrap()
-                    .into_raw_pointer_mut();
+                *error_slot =
+                    CArray::c_repr_of(format!("JSON serialization failed: {}", err).into_bytes())
+                        .unwrap()
+                        .into_raw_pointer_mut();
             },
         },
         Err(err) => unsafe {

@@ -71,7 +71,7 @@ module Temporal.Worker (
   setNamespace,
   setTaskQueue,
   setBuildId,
-  setIdentity,
+  setClientIdentity,
   setMaxCachedWorkflows,
   setMaxOutstandingWorkflowTasks,
   setMaxOutstandingActivities,
@@ -83,7 +83,8 @@ module Temporal.Worker (
   setStickyQueueScheduleToStartTimeoutMillis,
   setMaxHeartbeatThrottleIntervalMillis,
   setDefaultHeartbeatThrottleIntervalMillis,
-  setMaxActivitiesPerSecond,
+  setMaxWorkerActivitiesPerSecond,
+  setIgnoreEvictsOnShutdown,
   setMaxTaskQueueActivitiesPerSecond,
   setGracefulShutdownPeriodMillis,
   addInterceptors,
@@ -94,6 +95,7 @@ module Temporal.Worker (
   Core.TunerConfig (..),
   Core.SlotSupplierConfig (..),
   Core.ResourceBasedTunerConfig (..),
+
   -- ** Custom slot supplier
   Core.CustomSlotSupplier (..),
   Core.SlotReservationContext (..),
@@ -112,6 +114,7 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
+import qualified Data.ByteString as BS
 import Data.Either (lefts)
 import Data.Foldable
 import Data.HashMap.Strict (HashMap)
@@ -140,7 +143,6 @@ import Temporal.Common
 import Temporal.Common.Async
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
-import qualified Data.ByteString as BS
 import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
@@ -323,10 +325,10 @@ setBuildId bid = modifyCore $ \conf ->
     }
 
 
-setIdentity :: Text -> ConfigM actEnv ()
-setIdentity ident = modifyCore $ \conf ->
+setClientIdentity :: Text -> ConfigM actEnv ()
+setClientIdentity ident = modifyCore $ \conf ->
   conf
-    { Core.identityOverride = Just ident
+    { Core.clientIdentityOverride = Just ident
     }
 
 
@@ -427,10 +429,29 @@ would cause it to exceed this limit. Must be a positive number.
 
 If unset, no rate limiting will be applied to Worker's Activities. (tctl task-queue describe will display the absence of a limit as 100,000.)
 -}
-setMaxActivitiesPerSecond :: Double -> ConfigM actEnv ()
-setMaxActivitiesPerSecond n = modifyCore $ \conf ->
+setMaxWorkerActivitiesPerSecond :: Double -> ConfigM actEnv ()
+setMaxWorkerActivitiesPerSecond n = modifyCore $ \conf ->
   conf
-    { Core.maxActivitiesPerSecond = Just n
+    { Core.maxWorkerActivitiesPerSecond = Just n
+    }
+
+
+{- | If set `False` (default), shutdown will not finish until all pending
+evictions have been issued and replied to.
+
+If set 'True', shutdown will be considered complete when the only
+remaining work is pending evictions.
+
+This flag is useful during tests to avoid needing to deal with lots of
+uninteresting evictions during shutdown.
+
+Alternatively, if a lang implementation finds it easy to clean up during
+shutdown, setting this true saves some back-and-forth.
+-}
+setIgnoreEvictsOnShutdown :: Bool -> ConfigM actEnv ()
+setIgnoreEvictsOnShutdown b = modifyCore $ \conf ->
+  conf
+    { Core.ignoreEvictsOnShutdown = b
     }
 
 
@@ -456,6 +477,18 @@ setGracefulShutdownPeriodMillis :: Word64 -> ConfigM actEnv ()
 setGracefulShutdownPeriodMillis n = modifyCore $ \conf ->
   conf
     { Core.gracefulShutdownPeriodMillis = n
+    }
+
+
+{- | The amount of time core will wait before timing out activities using its
+own local timers after one of them elapses, in milliseconds.
+
+This is to avoid racing with server's own tracking of the timeout.
+-}
+setLocalTimeoutBufferForActivitiesMillis :: Word64 -> ConfigM actEnv ()
+setLocalTimeoutBufferForActivitiesMillis n = modifyCore $ \conf ->
+  conf
+    { Core.localTimeoutBufferForActivitiesMillis = n
     }
 
 
