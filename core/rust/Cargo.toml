@@ -12,7 +12,7 @@ crate-type = ["cdylib", "staticlib"]
 temporal-client = { git = "https://github.com/temporalio/sdk-core", rev = "6bed63efebaece3c8f21b89caec49e178ce94d96" }
 temporal-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "6bed63efebaece3c8f21b89caec49e178ce94d96", features = ["ephemeral-server"] }
 temporal-sdk-core-api = { git = "https://github.com/temporalio/sdk-core", rev = "6bed63efebaece3c8f21b89caec49e178ce94d96" }
-temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "6bed63efebaece3c8f21b89caec49e178ce94d96", features = ["serde_serialize"] }
+temporal-sdk-core-protos = { git = "https://github.com/temporalio/sdk-core", rev = "a5e8f7f1317d821c8c10bd60f6234108c9da1a76", features = ["serde_serialize"] }
 rustfsm = { git = "https://github.com/temporalio/sdk-core", rev = "6bed63efebaece3c8f21b89caec49e178ce94d96" }
 tokio = "~1.50"
 tokio-stream = "~0.1"
