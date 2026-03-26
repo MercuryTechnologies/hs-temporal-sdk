@@ -1,12 +1,15 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Temporal.Client.Types where
 
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Int (Int32)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)
+import GHC.Generics (Generic)
 import Language.Haskell.TH.Syntax (Lift)
 import Temporal.Common
 import Temporal.Core.Client (Client)
@@ -169,7 +172,13 @@ data Priority = Priority
   -- 2. Weights attached to the workflow\/activity (this field)
   -- 3. Server default of @1.0@
   }
-  deriving stock (Show, Eq, Lift)
+  deriving stock (Show, Eq, Generic, Lift)
+
+
+instance ToJSON Priority
+
+
+instance FromJSON Priority
 
 
 {- | Construct a 'Priority' from just the numeric key, leaving fairness
