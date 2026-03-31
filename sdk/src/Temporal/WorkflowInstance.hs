@@ -16,7 +16,6 @@ module Temporal.WorkflowInstance (
   nextConditionSequence,
   nextNexusOperationSequence,
   addBuiltinQueryHandlers,
-  addStackTraceHandler,
 ) where
 
 import Control.Applicative
@@ -24,8 +23,8 @@ import qualified Control.Exception as E
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
-
 import qualified Data.Aeson as Aeson
+
 
 #if __GLASGOW_HASKELL__ < 910
 import Data.Foldable (foldl')
@@ -39,11 +38,11 @@ import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Data.Version (showVersion)
 import Data.Time.Clock.System (SystemTime (..))
 import Data.Vault.Strict (Vault)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
+import Data.Version (showVersion)
 import GHC.Stack (HasCallStack, emptyCallStack, getCallStack)
 import qualified GHC.Stack
 import Lens.Family2
@@ -324,7 +323,7 @@ addBuiltinQueryHandlers inst = do
     handlerDefsFromKeys :: HashMap.HashMap (Maybe Text.Text) v -> [Aeson.Value]
     handlerDefsFromKeys m =
       mapMaybe
-        (\k -> fmap (\name -> Aeson.object ["name" Aeson..= name]) k)
+        (fmap (\name -> Aeson.object ["name" Aeson..= name]))
         (HashMap.keys m)
 
     sdkVersion :: Text.Text
