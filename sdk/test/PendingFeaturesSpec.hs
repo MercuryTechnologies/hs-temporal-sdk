@@ -5,14 +5,7 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  describe "Nexus (Py/TS)" $ do
-    it "nexus handler registration" $ const pending
-    it "nexus operation start" $ const pending
-    it "nexus operation complete" $ const pending
-    it "nexus operation cancel" $ const pending
-    it "nexus workflow caller" $ const pending
-    it "nexus workflow cancellation" $ const pending
-    it "nexus link converter" $ const pending
+
 
   describe "GRPC Connection (TS)" $ do
     it "native connection with custom options" $ const pending

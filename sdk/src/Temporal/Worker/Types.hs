@@ -11,6 +11,7 @@ import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.HashMap.Strict (HashMap)
 import Data.Text (Text)
+import qualified Temporal.Nexus.Worker as Nexus
 import OpenTelemetry.Trace.Core
 import Temporal.Activity.Definition (ActivityDefinition)
 import Temporal.Activity.Worker (ActivityWorker)
@@ -39,6 +40,7 @@ data WorkerConfig activityEnv = WorkerConfig
   -- Worker-internal traces for debugging purposes.
   , logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   , payloadProcessor :: PayloadProcessor
+  , nexusServiceHandlers :: [Nexus.NexusServiceHandler]
   }
 
 

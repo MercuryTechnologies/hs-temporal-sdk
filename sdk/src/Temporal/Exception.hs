@@ -19,6 +19,11 @@ module Temporal.Exception (
   WorkflowAlreadyStarted (..),
   ChildWorkflowFailed (..),
   ChildWorkflowCancelled (..),
+  NexusOperationStartFailed (..),
+  NexusOperationFailed (..),
+  NexusOperationCancelled (..),
+  NexusOperationTimedOut (..),
+  NexusHandlerException (..),
   SignalExternalWorkflowFailed (..),
   ContinueAsNewException (..),
   AlternativeInstanceFailure (..),
@@ -327,6 +332,53 @@ data ChildWorkflowCancelled = ChildWorkflowCancelled
 -- } deriving (Show)
 
 instance Exception ChildWorkflowCancelled
+
+
+-- | Thrown when a Nexus operation fails to start (e.g. handler error during start).
+newtype NexusOperationStartFailed = NexusOperationStartFailed Text
+  deriving stock (Show, Eq)
+
+
+instance Exception NexusOperationStartFailed
+
+
+-- | Thrown when a Nexus operation fails after starting.
+data NexusOperationFailed = NexusOperationFailed
+  { nexusFailureMessage :: Text
+  , nexusOperationId :: Maybe Text
+  }
+  deriving stock (Show, Eq)
+
+
+instance Exception NexusOperationFailed
+
+
+-- | Thrown when a Nexus operation is cancelled.
+data NexusOperationCancelled = NexusOperationCancelled
+  deriving stock (Show, Eq)
+
+
+instance Exception NexusOperationCancelled
+
+
+-- | Thrown when a Nexus operation times out.
+data NexusOperationTimedOut = NexusOperationTimedOut
+  deriving stock (Show, Eq)
+
+
+instance Exception NexusOperationTimedOut
+
+
+-- | Errors from a Nexus handler, suitable for returning to the caller.
+data NexusHandlerException = NexusHandlerException
+  { nexusHandlerErrorType :: Text
+  , nexusHandlerErrorMessage :: Text
+  , nexusHandlerRetryable :: Bool
+  }
+  deriving stock (Show, Eq)
+
+
+instance Exception NexusHandlerException
 
 
 data SignalExternalWorkflowFailed = SignalExternalWorkflowFailed Proto.Failure

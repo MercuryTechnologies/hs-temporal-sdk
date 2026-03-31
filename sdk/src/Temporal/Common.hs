@@ -92,6 +92,24 @@ newtype TaskQueue = TaskQueue {rawTaskQueue :: Text}
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
 
 
+-- | A Nexus Endpoint name, as configured via the Operator Service.
+newtype NexusEndpointName = NexusEndpointName {rawNexusEndpointName :: Text}
+  deriving stock (Data, Lift)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+
+
+-- | A Nexus Service name identifying a group of related operations.
+newtype NexusServiceName = NexusServiceName {rawNexusServiceName :: Text}
+  deriving stock (Data, Lift)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+
+
+-- | A Nexus Operation name within a service.
+newtype NexusOperationName = NexusOperationName {rawNexusOperationName :: Text}
+  deriving stock (Data, Lift)
+  deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, FromJSON)
+
+
 newtype ActivityType = ActivityType {rawActivityType :: Text}
   deriving stock (Data, Lift)
   deriving newtype (Eq, Ord, Show, Hashable, IsString, ToJSON, ToJSONKey, FromJSON, FromJSONKey)
