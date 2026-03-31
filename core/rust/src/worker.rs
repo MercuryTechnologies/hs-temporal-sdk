@@ -368,12 +368,9 @@ pub struct WorkerConfig {
     graceful_shutdown_period_millis: u64,
     nondeterminism_as_workflow_fail: bool,
     nondeterminism_as_workflow_fail_for_types: Vec<String>,
-<<<<<<< HEAD
     tuner: Option<TunerConfig>,
-=======
     max_outstanding_nexus_tasks: Option<usize>,
     max_concurrent_nexus_task_polls: Option<usize>,
->>>>>>> 8b815e9 (feat(core): add Nexus task polling and completion FFI bindings)
 }
 
 impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
@@ -424,8 +421,14 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
                         )
                     })
                     .collect::<HashMap<String, HashSet<WorkflowErrorType>>>(),
-<<<<<<< HEAD
-            );
+            )
+            .nexus_task_poller_behavior(PollerBehavior::SimpleMaximum(
+                conf.max_concurrent_nexus_task_polls.unwrap_or(5),
+            ));
+
+        if let Some(max) = conf.max_outstanding_nexus_tasks {
+            builder.max_outstanding_nexus_tasks(max);
+        }
 
         match conf.tuner {
             Some(tuner_config) => {
@@ -444,20 +447,6 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             code: WorkerErrorCode::InvalidWorkerConfig,
             message: format!("{}", err),
         })
-=======
-            )
-            .nexus_task_poller_behavior(PollerBehavior::SimpleMaximum(
-                conf.max_concurrent_nexus_task_polls.unwrap_or(5),
-            ));
-        if let Some(max) = conf.max_outstanding_nexus_tasks {
-            builder.max_outstanding_nexus_tasks(max);
-        }
-        builder.build()
-            .map_err(|err| WorkerError {
-                code: WorkerErrorCode::InvalidWorkerConfig,
-                message: format!("{}", err),
-            })
->>>>>>> 8b815e9 (feat(core): add Nexus task polling and completion FFI bindings)
     }
 }
 
