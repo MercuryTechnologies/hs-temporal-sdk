@@ -19,6 +19,7 @@ use temporal_sdk_core_api::worker::{
 use temporal_sdk_core_api::Worker;
 use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
+use temporal_sdk_core_protos::coresdk::nexus::NexusTaskCompletion;
 use temporal_sdk_core_protos::temporal::api::history::v1::History;
 use tokio::sync::mpsc::{Sender, channel};
 use tokio_stream::wrappers::ReceiverStream;
@@ -367,7 +368,12 @@ pub struct WorkerConfig {
     graceful_shutdown_period_millis: u64,
     nondeterminism_as_workflow_fail: bool,
     nondeterminism_as_workflow_fail_for_types: Vec<String>,
+<<<<<<< HEAD
     tuner: Option<TunerConfig>,
+=======
+    max_outstanding_nexus_tasks: Option<usize>,
+    max_concurrent_nexus_task_polls: Option<usize>,
+>>>>>>> 8b815e9 (feat(core): add Nexus task polling and completion FFI bindings)
 }
 
 impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
@@ -418,6 +424,7 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
                         )
                     })
                     .collect::<HashMap<String, HashSet<WorkflowErrorType>>>(),
+<<<<<<< HEAD
             );
 
         match conf.tuner {
@@ -437,6 +444,20 @@ impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
             code: WorkerErrorCode::InvalidWorkerConfig,
             message: format!("{}", err),
         })
+=======
+            )
+            .nexus_task_poller_behavior(PollerBehavior::SimpleMaximum(
+                conf.max_concurrent_nexus_task_polls.unwrap_or(5),
+            ));
+        if let Some(max) = conf.max_outstanding_nexus_tasks {
+            builder.max_outstanding_nexus_tasks(max);
+        }
+        builder.build()
+            .map_err(|err| WorkerError {
+                code: WorkerErrorCode::InvalidWorkerConfig,
+                message: format!("{}", err),
+            })
+>>>>>>> 8b815e9 (feat(core): add Nexus task polling and completion FFI bindings)
     }
 }
 
@@ -774,6 +795,50 @@ impl WorkerRef {
         })
     }
 
+    fn poll_nexus_task(&self, hs: HsCallback<CArray<u8>, CWorkerError>) {
+        let worker = self.worker.as_ref().unwrap().clone();
+        self.runtime.future_result_into_hs(hs, async move {
+            let bytes = match worker.poll_nexus_task().await {
+                Ok(task) => Ok(task.encode_to_vec()),
+                Err(PollError::ShutDown) => Err(WorkerError {
+                    code: WorkerErrorCode::PollShutdownError,
+                    message: "Poll shutdown error".to_string(),
+                }),
+                Err(err) => Err(WorkerError {
+                    code: WorkerErrorCode::PollFailure,
+                    message: format!("Poll failure: {}", err),
+                }),
+            };
+            Ok(CArray::c_repr_of(bytes.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?)
+                .unwrap())
+        })
+    }
+
+    fn complete_nexus_task(&self, hs: HsCallback<CUnit, CWorkerError>, proto: &[u8]) {
+        let worker = self.worker.as_ref().unwrap().clone();
+        let completion = NexusTaskCompletion::decode(proto);
+        self.runtime.future_result_into_hs(hs, async move {
+            let completion = completion.map_err(|err| {
+                CWorkerError::c_repr_of(WorkerError {
+                    code: WorkerErrorCode::InvalidProto,
+                    message: format!("Invalid proto: {}", err),
+                })
+                .unwrap()
+            })?;
+            worker
+                .complete_nexus_task(completion)
+                .await
+                .map_err(|err| {
+                    CWorkerError::c_repr_of(WorkerError {
+                        code: WorkerErrorCode::CompletionFailure,
+                        message: format!("{}", err),
+                    })
+                    .unwrap()
+                })?;
+            Ok(CUnit {})
+        })
+    }
+
     fn record_activity_heartbeat(&self, proto: &[u8]) -> Result<(), WorkerError> {
         enter_sync!(self.runtime);
         let heartbeat = ActivityHeartbeat::decode(proto).map_err(|err| WorkerError {
@@ -954,6 +1019,53 @@ pub unsafe extern "C" fn hs_temporal_worker_complete_activity_task(
         result_slot,
     };
     worker.complete_activity_task(hs, proto)
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_worker_poll_nexus_task(
+    worker: *mut WorkerRef,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CWorkerError,
+    result_slot: *mut *mut CArray<u8>,
+) {
+    let worker = unsafe { &*worker };
+    let hs = HsCallback {
+        mvar,
+        cap,
+        error_slot,
+        result_slot,
+    };
+    worker.poll_nexus_task(hs)
+}
+
+// TODO: [publish-crate]
+/// # Safety
+///
+/// Haskell <-> Tokio FFI bridge invariants.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn hs_temporal_worker_complete_nexus_task(
+    worker: *mut WorkerRef,
+    proto: *const CArray<u8>,
+    mvar: *mut MVar,
+    cap: Capability,
+    error_slot: *mut *mut CWorkerError,
+    result_slot: *mut *mut CUnit,
+) {
+    let worker = unsafe { &*worker };
+    let proto: &CArray<u8> = unsafe { CArray::raw_borrow(proto).unwrap() };
+    let proto: &[u8] = &proto.as_rust().unwrap().clone();
+    let hs = HsCallback {
+        mvar,
+        cap,
+        error_slot,
+        result_slot,
+    };
+    worker.complete_nexus_task(hs, proto)
 }
 
 // TODO: [publish-crate]
