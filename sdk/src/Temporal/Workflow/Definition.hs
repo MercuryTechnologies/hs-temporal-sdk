@@ -99,16 +99,16 @@ data ProvidedWorkflow f = ProvidedWorkflow
   }
 
 
-data ProvidedUpdate f error = ProvidedUpdate
+data ProvidedUpdate f err = ProvidedUpdate
   { updateDefinition :: WorkflowUpdateDefinition
-  , updateReference :: KnownUpdate (ArgsOf f) (ResultOf Workflow f) error
+  , updateReference :: KnownUpdate (ArgsOf f) (ResultOf Workflow f) err
   }
 
 
 instance VarArgs (ArgsOf f) => UpdateRef (ProvidedUpdate f) where
   type UpdateArgs (ProvidedUpdate f) = ArgsOf f
   type UpdateResult (ProvidedUpdate f) = ResultOf Workflow f
-  updateRef :: ProvidedUpdate f error -> KnownUpdate (UpdateArgs (ProvidedUpdate f)) (UpdateResult (ProvidedUpdate f)) error
+  updateRef :: ProvidedUpdate f err -> KnownUpdate (UpdateArgs (ProvidedUpdate f)) (UpdateResult (ProvidedUpdate f)) err
   updateRef = updateReference
 
 
@@ -173,14 +173,14 @@ provideWorkflow codec name f =
 
 -- TODO: Support a validator
 provideUpdate
-  :: forall codec f error
+  :: forall codec f err
    . ( f ~ (ArgsOf f :->: Workflow (ResultOf Workflow f))
      , FunctionSupportsCodec codec (ArgsOf f) (ResultOf Workflow f)
      )
   => codec
   -> Text
   -> f
-  -> ProvidedUpdate f error
+  -> ProvidedUpdate f err
 provideUpdate codec name f =
   provideCallStack $
     ProvidedUpdate

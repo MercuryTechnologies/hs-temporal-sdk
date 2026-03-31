@@ -8,7 +8,7 @@ import Temporal.Payload
 {- | A 'KnownUpdate' is a handle that contains all the information needed to start a
 Update either as a child workflow or as a top-level workflow via a 'Client'.
 -}
-data KnownUpdate (args :: [Type]) (result :: Type) error = forall codec.
+data KnownUpdate (args :: [Type]) (result :: Type) err = forall codec.
   ( FunctionSupportsCodec codec args result
   ) =>
   KnownUpdate
@@ -20,7 +20,7 @@ data KnownUpdate (args :: [Type]) (result :: Type) error = forall codec.
 class UpdateRef update where
   type UpdateArgs update :: [Type]
   type UpdateResult update :: Type
-  updateRef :: update error -> KnownUpdate (UpdateArgs update) (UpdateResult update) error
+  updateRef :: update err -> KnownUpdate (UpdateArgs update) (UpdateResult update) err
 
 
 instance UpdateRef (KnownUpdate args result) where

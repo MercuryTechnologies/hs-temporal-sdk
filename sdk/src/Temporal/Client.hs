@@ -1061,7 +1061,7 @@ data UpdateOptions = UpdateOptions
 startUpdateFromPayloads
   :: (MonadIO m, HasWorkflowClient m)
   => WorkflowHandle a
-  -> KnownUpdate args result error
+  -> KnownUpdate args result err
   -> UpdateOptions
   -> V.Vector UnencodedPayload
   -> m (UpdateHandle result)
@@ -1154,10 +1154,10 @@ throws an UpdateFailed exception if an update's validator fails.
 This can be used to "fire-and-forget" an Update by discarding the handle.
 -}
 startUpdate
-  :: forall m args result a error
+  :: forall m args result a err
    . (MonadIO m, HasWorkflowClient m)
   => WorkflowHandle a
-  -> KnownUpdate args result error
+  -> KnownUpdate args result err
   -> UpdateOptions
   -> args
     :->: m (UpdateHandle result)
@@ -1214,10 +1214,10 @@ This function will block until the update completes, and will return the result 
 or throw an exception if the update or its validator failed.
 -}
 executeUpdate
-  :: forall m args result a error
+  :: forall m args result a err
    . (MonadIO m, HasWorkflowClient m)
   => WorkflowHandle a
-  -> KnownUpdate args result error
+  -> KnownUpdate args result err
   -> UpdateOptions
   -> args
     :->: m result
