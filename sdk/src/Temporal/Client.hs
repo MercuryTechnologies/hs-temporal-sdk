@@ -33,6 +33,7 @@ module Temporal.Client (
   startWorkflowOptions,
   Temporal.Client.start,
   startFromPayloads,
+  startFromPayloadsForNexus,
   WorkflowHandle (..),
   execute,
   waitWorkflowResult,
@@ -143,6 +144,7 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   QueryWorkflowRequest,
   QueryWorkflowResponse,
   ScanWorkflowExecutionsRequest,
+  StartWorkflowExecutionRequest,
   UpdateWorkflowExecutionRequest,
   UpdateWorkflowExecutionResponse,
  )
@@ -572,7 +574,23 @@ startFromPayloads
   -> StartWorkflowOptions
   -> V.Vector UnencodedPayload
   -> m (WorkflowHandle result)
-startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
+startFromPayloads k wfId opts payloads = startFromPayloadsImpl k wfId opts payloads id
+
+
+{- | Internal: start a workflow with an extra proto request modifier.
+Used by 'startFromPayloads' (with 'id') and by
+'startFromPayloadsForNexus' (with callback/link fields).
+-}
+startFromPayloadsImpl
+  :: forall args result m
+   . (MonadIO m, HasWorkflowClient m)
+  => KnownWorkflow args result
+  -> WorkflowId
+  -> StartWorkflowOptions
+  -> V.Vector UnencodedPayload
+  -> (StartWorkflowExecutionRequest -> StartWorkflowExecutionRequest)
+  -> m (WorkflowHandle result)
+startFromPayloadsImpl k@(KnownWorkflow codec _) wfId opts payloads modifyReq = do
   c <- askWorkflowClient
   ps <- liftIO $ sequence payloads
   wfH <- liftIO $ Temporal.Client.Types.start c.clientConfig.interceptors (WorkflowType $ knownWorkflowName k) wfId opts ps $ \wfName wfId' opts' payloads' -> do
@@ -583,47 +601,48 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
     memo' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.memo
     let tq = rawTaskQueue opts'.taskQueue
         req =
-          defMessage
-            & WF.namespace .~ rawNamespace c.clientConfig.namespace
-            & WF.workflowId .~ rawWorkflowId wfId'
-            & WF.workflowType
-              .~ (defMessage & Common.name .~ rawWorkflowType wfName)
-            & WF.taskQueue
-              .~ ( defMessage
-                    & Common.name .~ tq
-                    & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-                 )
-            & WF.input
-              .~ (defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads''))
-            & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
-            & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
-            & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
-            & WF.identity .~ Core.identity (Core.clientConfig c.clientCore)
-            & WF.requestId .~ UUID.toText reqId
-            & WF.workflowIdReusePolicy
-              .~ workflowIdReusePolicyToProto
-                (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
-            & WF.workflowIdConflictPolicy
-              .~ workflowIdConflictPolicyToProto
-                (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.workflowIdConflictPolicy)
-            & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
-            & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
-            & WF.memo .~ convertToProtoMemo memo'
-            & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
-            --     TODO Not sure how to use these yet
-            & WF.header .~ headerToProto (fmap convertToProtoPayload hdrs)
-            & WF.requestEagerExecution .~ opts'.requestEagerExecution
-            {-
-              These values will be available as ContinuedFailure and LastCompletionResult in the
-              WorkflowExecutionStarted event and through SDKs. The are currently only used by the
-              server itself (for the schedules feature) and are not intended to be exposed in
-              StartWorkflowExecution.
+          modifyReq $
+            defMessage
+              & WF.namespace .~ rawNamespace c.clientConfig.namespace
+              & WF.workflowId .~ rawWorkflowId wfId'
+              & WF.workflowType
+                .~ (defMessage & Common.name .~ rawWorkflowType wfName)
+              & WF.taskQueue
+                .~ ( defMessage
+                      & Common.name .~ tq
+                      & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
+                   )
+              & WF.input
+                .~ (defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads''))
+              & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
+              & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
+              & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
+              & WF.identity .~ Core.identity (Core.clientConfig c.clientCore)
+              & WF.requestId .~ UUID.toText reqId
+              & WF.workflowIdReusePolicy
+                .~ workflowIdReusePolicyToProto
+                  (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
+              & WF.workflowIdConflictPolicy
+                .~ workflowIdConflictPolicyToProto
+                  (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.workflowIdConflictPolicy)
+              & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
+              & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
+              & WF.memo .~ convertToProtoMemo memo'
+              & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
+              --     TODO Not sure how to use these yet
+              & WF.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+              & WF.requestEagerExecution .~ opts'.requestEagerExecution
+              {-
+                These values will be available as ContinuedFailure and LastCompletionResult in the
+                WorkflowExecutionStarted event and through SDKs. The are currently only used by the
+                server itself (for the schedules feature) and are not intended to be exposed in
+                StartWorkflowExecution.
 
-              WF.continuedFailure
-              WF.lastCompletionResult
-            -}
-            & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
-            & WF.maybe'priority .~ fmap priorityToProto opts'.priority
+                WF.continuedFailure
+                WF.lastCompletionResult
+              -}
+              & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
+              & WF.maybe'priority .~ fmap priorityToProto opts'.priority
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
@@ -645,6 +664,28 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             result <- decode codec =<< either (throwIO . ValueError) pure =<< payloadProcessorDecode c.clientConfig.payloadProcessor b
             either (throwIO . ValueError) pure result
       }
+
+
+{- | Like 'startFromPayloads' but sets Nexus-specific fields (completion callbacks
+and workflow links) on the proto request. These fields are only relevant for
+workflows started from Nexus operation handlers and should not be part of the
+public 'StartWorkflowOptions' API.
+-}
+startFromPayloadsForNexus
+  :: forall args result m
+   . (MonadIO m, HasWorkflowClient m)
+  => KnownWorkflow args result
+  -> WorkflowId
+  -> StartWorkflowOptions
+  -> V.Vector UnencodedPayload
+  -> V.Vector NexusCompletionCallback
+  -> V.Vector WorkflowLink
+  -> m (WorkflowHandle result)
+startFromPayloadsForNexus k wfId opts payloads callbacks links =
+  startFromPayloadsImpl k wfId opts payloads $ \req ->
+    req
+      & WF.vec'completionCallbacks .~ V.map completionCallbackToProto callbacks
+      & WF.vec'links .~ V.map workflowLinkToProto links
 
 
 {- | Begin a new Workflow Execution.
@@ -1256,3 +1297,24 @@ priorityToProto p =
     & Common.priorityKey .~ p.priorityKey
     & Common.fairnessKey .~ p.fairnessKey
     & Common.fairnessWeight .~ p.fairnessWeight
+
+
+completionCallbackToProto :: NexusCompletionCallback -> CommonMsg.Callback
+completionCallbackToProto cb =
+  defMessage
+    & Common.nexus
+      .~ ( defMessage
+            & Common.url .~ cb.callbackUrl
+            & Common.header .~ cb.callbackHeaders
+         )
+
+
+workflowLinkToProto :: WorkflowLink -> CommonMsg.Link
+workflowLinkToProto wl =
+  defMessage
+    & Common.workflowEvent
+      .~ ( defMessage
+            & Common.namespace .~ wl.linkNamespace
+            & Common.workflowId .~ wl.linkWorkflowId
+            & Common.runId .~ wl.linkRunId
+         )

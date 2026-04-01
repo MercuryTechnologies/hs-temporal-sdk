@@ -29,24 +29,24 @@ import Temporal.Activity
 import Temporal.Bundle
 import Temporal.Bundle.TH
 import qualified Temporal.Client as C
-import Temporal.Workflow (TaskQueue (..))
 import Temporal.Core.Client hiding (RpcError)
+import Temporal.Core.Worker (
+  CustomSlotSupplier (..),
+  MarkSlotUsedContext (..),
+  ReleaseSlotContext (..),
+  ResourceBasedTunerConfig (..),
+  SlotSupplierConfig (..),
+  TunerConfig (..),
+  freeCustomSlotSupplierHandle,
+  newCustomSlotSupplierHandle,
+ )
 import qualified Temporal.Core.Worker as Core
-import Temporal.Core.Worker
-  ( CustomSlotSupplier (..)
-  , MarkSlotUsedContext (..)
-  , ReleaseSlotContext (..)
-  , ResourceBasedTunerConfig (..)
-  , SlotSupplierConfig (..)
-  , TunerConfig (..)
-  , newCustomSlotSupplierHandle
-  , freeCustomSlotSupplierHandle
-  )
 import Temporal.Duration
 import Temporal.EphemeralServer
 import qualified Temporal.EphemeralServer as TemporalDevServerConfig (TemporalDevServerConfig (..))
 import Temporal.Payload
 import Temporal.Worker
+import Temporal.Workflow (TaskQueue (..))
 import qualified Temporal.Workflow as W
 import Test.Hspec
 

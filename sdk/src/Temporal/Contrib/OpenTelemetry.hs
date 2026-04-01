@@ -23,6 +23,7 @@ import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 import qualified Data.Vault.Strict as Vault
 import Data.Word (Word32)
 import GHC.IO (unsafePerformIO)
@@ -37,6 +38,7 @@ import qualified Temporal.Client.Types as C
 import Temporal.Common
 import Temporal.Duration
 import Temporal.Interceptor
+import Temporal.Nexus.Types (NexusCancelInput (..))
 import Temporal.Payload (Payload (..))
 import Temporal.Workflow ()
 import Temporal.Workflow.Types
@@ -82,6 +84,32 @@ headersPropagator =
             Map.insert "traceparent" (Payload traceParentHeader mempty) $
               Map.insert "tracestate" (Payload traceStateHeader mempty) hs
     }
+
+
+-- | Propagator for Nexus headers, which are 'Map Text Text' (not 'Map Text Payload').
+nexusHeadersPropagator :: Propagator Ctxt.Context (Map.Map T.Text T.Text) (Map.Map T.Text T.Text)
+nexusHeadersPropagator =
+  Propagator
+    { propagatorNames = ["tracecontext"]
+    , extractor = \hs c -> do
+        let traceParentHeader = TE.encodeUtf8 <$> Map.lookup "traceparent" hs
+            traceStateHeader = TE.encodeUtf8 <$> Map.lookup "tracestate" hs
+            mspanContext = decodeSpanContext traceParentHeader traceStateHeader
+        pure $! case mspanContext of
+          Nothing -> c
+          Just s -> Ctxt.insertSpan (wrapSpanContext (s {isRemote = True})) c
+    , injector = \c hs -> case Ctxt.lookupSpan c of
+        Nothing -> pure hs
+        Just s -> do
+          (traceParentHeader, traceStateHeader) <- encodeSpanContext s
+          pure $
+            Map.insert "traceparent" (safeDecodeUtf8 traceParentHeader) $
+              Map.insert "tracestate" (safeDecodeUtf8 traceStateHeader) hs
+    }
+  where
+    safeDecodeUtf8 bs = case TE.decodeUtf8' bs of
+      Right t -> t
+      Left _ -> TE.decodeLatin1 bs
 
 
 tracerKey :: Vault.Key Tracer
@@ -292,6 +320,25 @@ makeOpenTelemetryInterceptor = do
                   ctxt <- getContext
                   hdrs <- inject headersPropagator ctxt headers
                   next wfName $ StartChildWorkflowOptions {headers = hdrs, ..}
+            , scheduleNexusOperation = \input next -> do
+                let svcName = rawNexusServiceName input.scheduleNexusInputService
+                    opName = rawNexusOperationName input.scheduleNexusInputOperation
+                    epName = rawNexusEndpointName input.scheduleNexusInputEndpoint
+                    spanArgs =
+                      defaultSpanArguments
+                        { kind = Client
+                        , attributes =
+                            HashMap.fromList
+                              [ ("temporal.nexus.service", toAttribute svcName)
+                              , ("temporal.nexus.operation", toAttribute opName)
+                              , ("temporal.nexus.endpoint", toAttribute epName)
+                              ]
+                        }
+                inSpan'' tracer ("StartNexusOperation:" <> svcName <> "/" <> opName) spanArgs $ \_ -> do
+                  ctxt <- getContext
+                  let currentHeaders = input.scheduleNexusInputOptions.nexusHeaders
+                  hdrs <- inject nexusHeadersPropagator ctxt currentHeaders
+                  next $ input {scheduleNexusInputOptions = input.scheduleNexusInputOptions {nexusHeaders = hdrs}}
             }
       , activityInboundInterceptors =
           ActivityInboundInterceptor
@@ -366,5 +413,40 @@ makeOpenTelemetryInterceptor = do
             }
       , -- Not really anything to do here since new cron jobs should be in their own context
         scheduleClientInterceptors = mempty
+      , nexusInboundInterceptors =
+          NexusInboundInterceptor
+            { handleStartOperation = \input ctx next -> do
+                let svcName = rawNexusServiceName ctx.nexusCtxServiceName
+                    opName = rawNexusOperationName ctx.nexusCtxOperationName
+                    spanArgs =
+                      defaultSpanArguments
+                        { kind = Server
+                        , attributes =
+                            HashMap.fromList
+                              [ ("temporal.nexus.service", toAttribute svcName)
+                              , ("temporal.nexus.operation", toAttribute opName)
+                              ]
+                        }
+                ctxt <- extract nexusHeadersPropagator ctx.nexusCtxHeaders Ctxt.empty
+                _ <- attachContext ctxt
+                inSpan'' tracer ("RunStartNexusOperationHandler:" <> svcName <> "/" <> opName) spanArgs $ \_ ->
+                  next input
+            , handleCancelOperation = \input ctx next -> do
+                let svcName = rawNexusServiceName ctx.nexusCtxServiceName
+                    opName = rawNexusOperationName ctx.nexusCtxOperationName
+                    spanArgs =
+                      defaultSpanArguments
+                        { kind = Server
+                        , attributes =
+                            HashMap.fromList
+                              [ ("temporal.nexus.service", toAttribute svcName)
+                              , ("temporal.nexus.operation", toAttribute opName)
+                              ]
+                        }
+                ctxt <- extract nexusHeadersPropagator input.cancelInputHeaders Ctxt.empty
+                _ <- attachContext ctxt
+                inSpan'' tracer ("RunCancelNexusOperationHandler:" <> svcName <> "/" <> opName) spanArgs $ \_ ->
+                  next input
+            }
       , interceptorVault = Vault.insert tracerKey tracer mempty
       }

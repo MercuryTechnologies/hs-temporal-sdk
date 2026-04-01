@@ -9,13 +9,15 @@ import Temporal.Duration
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.Worker
-import Temporal.Workflow (ContinueAsNewOptions(memo))
+import Temporal.Workflow (ContinueAsNewOptions (memo))
 import qualified Temporal.Workflow as W
 import Test.Hspec
 import TestHelpers
 
+
 spec :: Spec
 spec = withTestServer_ tests
+
 
 tests :: SpecWith TestEnv
 tests = describe "ContinueAsNew" $ do
@@ -135,8 +137,10 @@ tests = describe "ContinueAsNew" $ do
 
     withWorker conf $ do
       let memoVal = encodeJSON ("remember-me" :: Text)
-          opts = (defaultStartOptsWithTimeout taskQueue (seconds 10))
-            { C.memo = Map.fromList [("key1", memoVal)] }
+          opts =
+            (defaultStartOptsWithTimeout taskQueue (seconds 10))
+              { C.memo = Map.fromList [("key1", memoVal)]
+              }
       result <- useClient (C.execute wf.reference "can-keeps-memo" opts 2)
       Map.member "key1" result `shouldBe` True
 
@@ -146,7 +150,7 @@ tests = describe "ContinueAsNew" $ do
           | n <= 0 = W.getMemoValues
           | otherwise = do
               let newMemo = Map.fromList [("newkey", encodeJSON ("newval" :: Text))]
-                  canOpts = W.defaultContinueAsNewOptions { memo = newMemo }
+                  canOpts = W.defaultContinueAsNewOptions {memo = newMemo}
               W.continueAsNew wf.reference canOpts (n - 1)
         wf = W.provideWorkflow defaultCodec "canSetMemo" workflow
         conf = configure () wf $ do baseConf

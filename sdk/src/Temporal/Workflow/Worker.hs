@@ -244,11 +244,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                       rootWf <- initializeWorkflow ^. Activation.maybe'rootWorkflow
                       let rWfId = rootWf ^. CommonProto.workflowId
                           rRunId = rootWf ^. CommonProto.runId
-                      if Text.null rWfId then Nothing
-                      else Just RootExecution
-                        { rootWorkflowId = WorkflowId rWfId
-                        , rootRunId = RunId rRunId
-                        }
+                      if Text.null rWfId
+                        then Nothing
+                        else
+                          Just
+                            RootExecution
+                              { rootWorkflowId = WorkflowId rWfId
+                              , rootRunId = RunId rRunId
+                              }
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength

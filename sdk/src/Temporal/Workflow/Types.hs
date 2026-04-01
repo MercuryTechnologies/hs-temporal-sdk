@@ -360,8 +360,9 @@ nexusOperationCancellationTypeToProto NexusOperationTryCancel = NexusProto.TRY_C
 nexusOperationCancellationTypeToProto NexusOperationWaitCancellationRequested = NexusProto.WAIT_CANCELLATION_REQUESTED
 
 
--- | A handle for calling Nexus operations, bound to a specific endpoint and service.
--- Create one via 'makeNexusClient'.
+{- | A handle for calling Nexus operations, bound to a specific endpoint and service.
+Create one via 'makeNexusClient'.
+-}
 data NexusClient = NexusClient
   { nexusEndpoint :: !NexusEndpointName
   , nexusService :: !NexusServiceName
@@ -377,17 +378,35 @@ makeNexusClient = NexusClient
 -- | Options for scheduling a Nexus operation from a workflow.
 data ScheduleNexusOperationOptions = ScheduleNexusOperationOptions
   { scheduleToCloseTimeout :: !(Maybe Duration)
+  -- ^ End-to-end timeout for the operation. Optional; defaults to the maximum
+  -- allowed by the Temporal server.
+  , scheduleToStartTimeout :: !(Maybe Duration)
+  -- ^ How long the operation may wait before the handler picks it up.
+  -- If the operation has not started within this window, a timeout error
+  -- with type SCHEDULE_TO_START is raised. Optional; defaults to no timeout.
+  -- TODO: Wire to proto after bumping sdk-core past 5560b4a0 to >= 76f5c9e
+  -- (fields 9 & 10 on ScheduleNexusOperation). See #356.
+  , startToCloseTimeout :: !(Maybe Duration)
+  -- ^ How long an async operation may take to complete after it has started.
+  -- Only applies to async operations. Optional; defaults to no timeout.
+  -- TODO: Same as 'scheduleToStartTimeout' — see #356.
   , nexusHeaders :: !(Map Text Text)
   , cancellationType :: !NexusOperationCancellationType
   }
   deriving stock (Show, Eq)
 
 
--- | Default options for scheduling a Nexus operation.
+{- | Default options for scheduling a Nexus operation.
+
+Defaults 'cancellationType' to 'NexusOperationWaitCancellationCompleted',
+matching the TypeScript and Go SDK defaults.
+-}
 defaultScheduleNexusOperationOptions :: ScheduleNexusOperationOptions
 defaultScheduleNexusOperationOptions =
   ScheduleNexusOperationOptions
     { scheduleToCloseTimeout = Nothing
+    , scheduleToStartTimeout = Nothing
+    , startToCloseTimeout = Nothing
     , nexusHeaders = mempty
-    , cancellationType = NexusOperationTryCancel
+    , cancellationType = NexusOperationWaitCancellationCompleted
     }

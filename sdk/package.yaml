@@ -44,6 +44,7 @@ dependencies:
 - hs-opentelemetry-api
 - hs-opentelemetry-propagator-w3c
 - base64
+- http-types
 - zlib
 - network
 - split
@@ -88,6 +89,7 @@ library:
   - Temporal.Activity.Definition
   - Temporal.Activity.Worker
   - Temporal.Client.Types
+  - Temporal.Nexus.Types
   - Temporal.Client.AsyncActivity
   - Temporal.Client.Workflow
   - Temporal.Common
@@ -163,6 +165,7 @@ tests:
       RegisterWorkflowsSpec,
       ReplaySpec,
       ScheduleSpec,
+      NexusSpec,
       SignalSpec,
       TestHelpers,
       THCompiles,

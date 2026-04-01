@@ -19,7 +19,6 @@ module IntegrationSpec where
 
 import Common
 import Control.Concurrent
-import TestHelpers (waitForWorkflowStart)
 import Control.Exception
 import Control.Exception.Annotated
 import qualified Control.Exception.Annotated as Annotated
@@ -83,13 +82,14 @@ import Temporal.SearchAttributes
 import Temporal.TH (ActivityFn, WorkflowFn, discoverDefinitions)
 import Temporal.Testing.Assertions
 import Temporal.Worker
-import Temporal.Workflow
-  ( StartActivityOptions(retryPolicy, activityId)
-  , StartChildWorkflowOptions(workflowId, workflowIdReusePolicy)
-  )
+import Temporal.Workflow (
+  StartActivityOptions (activityId, retryPolicy),
+  StartChildWorkflowOptions (workflowId, workflowIdReusePolicy),
+ )
 import qualified Temporal.Workflow as W
 import Temporal.Workflow.Unsafe (performUnsafeNonDeterministicIO)
 import Test.Hspec
+import TestHelpers (waitForWorkflowStart)
 
 
 temporalBundle
@@ -892,9 +892,11 @@ needsClient = do
             badActRef = KnownActivity @'[String] @Bool defaultCodec "badArgAct"
             workflow :: MyWorkflow Bool
             workflow =
-              W.executeActivity badActRef
+              W.executeActivity
+                badActRef
                 (W.defaultStartActivityOptions $ W.ScheduleToClose $ seconds 3)
-                  { retryPolicy = Just W.defaultRetryPolicy { W.maximumAttempts = 1 } }
+                  { retryPolicy = Just W.defaultRetryPolicy {W.maximumAttempts = 1}
+                  }
                 "notAnInt"
             wf = W.provideWorkflow defaultCodec "badArgActWf" workflow
             conf = configure () (wf, actDef) $ do

@@ -31,6 +31,7 @@ library
       Temporal.EphemeralServer
       Temporal.Exception
       Temporal.Interceptor
+      Temporal.Nexus
       Temporal.Nexus.Worker
       Temporal.Operator
       Temporal.Payload
@@ -48,6 +49,7 @@ library
       Temporal.Activity.Definition
       Temporal.Activity.Worker
       Temporal.Client.Types
+      Temporal.Nexus.Types
       Temporal.Client.AsyncActivity
       Temporal.Client.Workflow
       Temporal.Common
@@ -117,6 +119,7 @@ library
     , hashable
     , hs-opentelemetry-api
     , hs-opentelemetry-propagator-w3c
+    , http-types
     , lens-family
     , list-t
     , monad-logger
@@ -158,7 +161,7 @@ test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Spec, ContinueAsNewSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, LocalActivitySpec, MockActivityEnvironmentSpec, IntegrationSpec.TimeSkipping, Common, RegisterWorkflowsSpec, ReplaySpec, ScheduleSpec, SignalSpec, TestHelpers, THCompiles, WorkerTunerSpec
+      Spec, ContinueAsNewSpec, DurationSpec, IntegrationSpec, IntegrationSpec.HangingWorkflow, IntegrationSpec.NoOpWorkflow, IntegrationSpec.TimeoutsInWorkflows, IntegrationSpec.Updates, LocalActivitySpec, MockActivityEnvironmentSpec, IntegrationSpec.TimeSkipping, Common, RegisterWorkflowsSpec, ReplaySpec, ScheduleSpec, NexusSpec, SignalSpec, TestHelpers, THCompiles, WorkerTunerSpec
   hs-source-dirs:
       test
   default-extensions:
@@ -213,6 +216,7 @@ test-suite temporal-sdk-tests
     , hspec
     , hspec-api
     , hspec-hedgehog
+    , http-types
     , lens-family
     , list-t
     , monad-logger

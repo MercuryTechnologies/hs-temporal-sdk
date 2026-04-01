@@ -50,7 +50,7 @@ timeSkippingTests =
               conf = configure () wf $ do baseConf
           withWorker conf $ do
             let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            useClient (C.execute wf.reference "tsBasic" opts) `shouldReturn` ()
+            useClient (C.execute wf . reference "tsBasic" opts) `shouldReturn` ()
 
         it "should skip over sleeps in a workflow" $ \TestEnv {..} -> do
           let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do baseConf

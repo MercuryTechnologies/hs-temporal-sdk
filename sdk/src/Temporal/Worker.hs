@@ -102,6 +102,7 @@ module Temporal.Worker (
   Core.TunerConfig (..),
   Core.SlotSupplierConfig (..),
   Core.ResourceBasedTunerConfig (..),
+
   -- ** Custom slot supplier
   Core.CustomSlotSupplier (..),
   Core.SlotReservationContext (..),
@@ -120,6 +121,7 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
+import qualified Data.ByteString as BS
 import Data.Either (lefts)
 import Data.Foldable
 import Data.HashMap.Strict (HashMap)
@@ -144,21 +146,22 @@ import qualified StmContainers.Map as StmMap
 import System.IO.Unsafe
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
-import qualified Temporal.Nexus.Worker as Nexus
+import Temporal.Client.Types (WorkflowClient (..))
+import qualified Temporal.Client.Types as CT
 import Temporal.Common
 import Temporal.Common.Async
-import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
-import qualified Data.ByteString as BS
 import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Interceptor
+import qualified Temporal.Nexus.Worker as Nexus
 import Temporal.Payload (PayloadProcessor (..))
 import Temporal.Runtime
 import Temporal.Worker.Types
 import Temporal.Workflow.Definition
+import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Workflow.Worker as Workflow
 import UnliftIO
 
@@ -513,7 +516,7 @@ setPayloadProcessor p = ConfigM $ modify' $ \conf ->
     }
 
 
-addNexusServiceHandler :: Nexus.NexusServiceHandler -> ConfigM actEnv ()
+addNexusServiceHandler :: Nexus.NexusServiceHandler actEnv -> ConfigM actEnv ()
 addNexusServiceHandler svc = ConfigM $ modify' $ \conf ->
   conf
     { nexusServiceHandlers = svc : conf.nexusServiceHandlers
@@ -813,10 +816,29 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       then Logging.logDebug "No nexus services registered, skipping nexus worker loop"
       else do
         Logging.logDebug "Starting nexus worker loop"
-        let nexusWorker = Nexus.NexusWorker
-              { Nexus.workerCore = workerCore
-              , Nexus.nexusServices = services
-              }
+        let nexusWfClient =
+              WorkflowClient
+                { clientCore = client
+                , clientConfig =
+                    CT.WorkflowClientConfig
+                      { CT.namespace = Namespace (Core.namespace conf.coreConfig)
+                      , CT.interceptors = conf.interceptorConfig.clientInterceptors
+                      , CT.payloadProcessor = conf.payloadProcessor
+                      , CT.enableTimeSkipping = False
+                      }
+                }
+            nexusWorker =
+              Nexus.NexusWorker
+                { Nexus.workerCore = workerCore
+                , Nexus.nexusServices = services
+                , Nexus.payloadProcessor = conf.payloadProcessor
+                , Nexus.workflowClient = nexusWfClient
+                , Nexus.inboundInterceptor = conf.interceptorConfig.nexusInboundInterceptors
+                , Nexus.workerNamespace = Namespace (Core.namespace conf.coreConfig)
+                , Nexus.workerTaskQueue = TaskQueue (Core.taskQueue conf.coreConfig)
+                , Nexus.workerLogger = conf.logger
+                , Nexus.workerEnv = conf.actEnv
+                }
         res <- UnliftIO.try $ Nexus.execute nexusWorker
         case res of
           Left (e :: SomeException) ->

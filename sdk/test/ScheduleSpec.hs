@@ -5,7 +5,7 @@ import Control.Concurrent (threadDelay)
 import Control.Monad (unless)
 import qualified Data.Vector as V
 import qualified Temporal.Client as C
-import Temporal.Client.Schedule (ScheduleSpec(interval), SchedulePolicies(overlapPolicy))
+import Temporal.Client.Schedule (SchedulePolicies (overlapPolicy), ScheduleSpec (interval))
 import qualified Temporal.Client.Schedule as Sched
 import Temporal.Duration
 import Temporal.Worker (configure)

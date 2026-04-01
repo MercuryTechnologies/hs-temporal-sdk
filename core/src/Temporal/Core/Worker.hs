@@ -47,12 +47,15 @@ module Temporal.Core.Worker (
   historyProtoToJson,
   closeHistory,
   KnownWorkerType (..),
+
   -- * Resource-safe wrappers
   bracketWorker,
+
   -- * Worker tuner configuration
   TunerConfig (..),
   SlotSupplierConfig (..),
   ResourceBasedTunerConfig (..),
+
   -- * Custom slot supplier
   CustomSlotSupplier (..),
   SlotReservationContext (..),
@@ -234,14 +237,15 @@ instance FromJSON ReleaseSlotContext where
 -- Custom slot supplier
 -- ---------------------------------------------------------------------------
 
--- | User-provided callbacks for a custom slot supplier.
---
--- @reserveSlot@ blocks until a slot is available. Called from Rust async context;
--- the implementation may block freely (it runs in a forked Haskell thread).
---
--- @tryReserveSlot@ must return immediately. Returns 'True' if a slot was granted.
---
--- @markSlotUsed@ and @releaseSlot@ are fire-and-forget notifications.
+{- | User-provided callbacks for a custom slot supplier.
+
+@reserveSlot@ blocks until a slot is available. Called from Rust async context;
+the implementation may block freely (it runs in a forked Haskell thread).
+
+@tryReserveSlot@ must return immediately. Returns 'True' if a slot was granted.
+
+@markSlotUsed@ and @releaseSlot@ are fire-and-forget notifications.
+-}
 data CustomSlotSupplier = CustomSlotSupplier
   { reserveSlot :: SlotReservationContext -> IO ()
   , tryReserveSlot :: SlotReservationContext -> IO Bool
@@ -250,8 +254,9 @@ data CustomSlotSupplier = CustomSlotSupplier
   }
 
 
--- | Opaque handle to a Rust-side custom slot supplier.
--- Must be freed with 'freeCustomSlotSupplierHandle' when no longer needed.
+{- | Opaque handle to a Rust-side custom slot supplier.
+Must be freed with 'freeCustomSlotSupplierHandle' when no longer needed.
+-}
 data CustomSlotSupplierHandle = CustomSlotSupplierHandle
   { unCustomSlotSupplierHandle :: !(Ptr CustomSlotSupplierHandle)
   , customSlotSupplierCleanup :: !(IO ())
@@ -279,8 +284,14 @@ foreign import ccall "hs_temporal_slot_reserve_complete"
 -- Callback types matching the Rust function pointer signatures.
 -- ctx_ptr and ctx_len borrow JSON bytes that MUST be copied before returning.
 type ReserveSlotCallback = Ptr Word8 -> CSize -> Ptr () -> IO ()
+
+
 type TryReserveSlotCallback = Ptr Word8 -> CSize -> IO CInt
+
+
 type MarkSlotUsedCallback = Ptr Word8 -> CSize -> IO ()
+
+
 type ReleaseSlotCallback = Ptr Word8 -> CSize -> IO ()
 
 
@@ -288,18 +299,22 @@ type ReleaseSlotCallback = Ptr Word8 -> CSize -> IO ()
 foreign import ccall "wrapper"
   mkReserveSlotFunPtr :: ReserveSlotCallback -> IO (FunPtr ReserveSlotCallback)
 
+
 foreign import ccall "wrapper"
   mkTryReserveSlotFunPtr :: TryReserveSlotCallback -> IO (FunPtr TryReserveSlotCallback)
 
+
 foreign import ccall "wrapper"
   mkMarkSlotUsedFunPtr :: MarkSlotUsedCallback -> IO (FunPtr MarkSlotUsedCallback)
+
 
 foreign import ccall "wrapper"
   mkReleaseSlotFunPtr :: ReleaseSlotCallback -> IO (FunPtr ReleaseSlotCallback)
 
 
--- | Decode a JSON payload from a Rust-owned (ptr, len) borrow.
--- Copies the bytes immediately so the pointer can be freed by Rust after return.
+{- | Decode a JSON payload from a Rust-owned (ptr, len) borrow.
+Copies the bytes immediately so the pointer can be freed by Rust after return.
+-}
 unsafeDecodeJSON :: FromJSON a => Ptr Word8 -> CSize -> IO a
 unsafeDecodeJSON ptr len = do
   bs <- BS.packCStringLen (castPtr ptr, fromIntegral len)
@@ -308,9 +323,10 @@ unsafeDecodeJSON ptr len = do
     Right v -> pure v
 
 
--- | Create a Rust-side custom slot supplier handle backed by Haskell callbacks.
--- The returned handle can be embedded in a 'SlotSupplierConfig' via
--- 'CustomSlotSupplierConfig'. Free with 'freeCustomSlotSupplierHandle'.
+{- | Create a Rust-side custom slot supplier handle backed by Haskell callbacks.
+The returned handle can be embedded in a 'SlotSupplierConfig' via
+'CustomSlotSupplierConfig'. Free with 'freeCustomSlotSupplierHandle'.
+-}
 newCustomSlotSupplierHandle :: CustomSlotSupplier -> IO CustomSlotSupplierHandle
 newCustomSlotSupplierHandle css = do
   stablePtr <- newStablePtr css
@@ -574,10 +590,11 @@ data WorkerAlreadyClosed = WorkerAlreadyClosed
 instance Exception WorkerAlreadyClosed
 
 
--- | Explicitly close a worker.
---
--- Explicitly close a worker, freeing its resources immediately.
--- After calling this, the worker must not be used again.
+{- | Explicitly close a worker.
+
+Explicitly close a worker, freeing its resources immediately.
+After calling this, the worker must not be used again.
+-}
 closeWorker :: Worker ty -> IO ()
 closeWorker (Worker w _ _ _) = mask_ $ do
   wp <- liftIO $ atomicModifyIORefCAS w $ \wp -> (throw WorkerAlreadyClosed, wp)
@@ -618,10 +635,11 @@ pollWorkflowActivation w = withWorker w $ \wp ->
     rust_dropWorkerError
     rust_dropByteArray
     (\errPtr -> peek errPtr >>= peekWorkerError)
-    (\resPtr -> do
-      arr <- peek resPtr
-      bs <- cArrayToByteString arr
-      return (decodeMessageOrDie bs))
+    ( \resPtr -> do
+        arr <- peek resPtr
+        bs <- cArrayToByteString arr
+        return (decodeMessageOrDie bs)
+    )
 
 
 foreign import ccall "hs_temporal_worker_poll_activity_task" raw_pollActivityTask :: Ptr (Worker ty) -> TokioCall CWorkerError (CArray Word8)
@@ -634,10 +652,11 @@ pollActivityTask w = withWorker w $ \wp ->
     rust_dropWorkerError
     rust_dropByteArray
     (\errPtr -> peek errPtr >>= peekWorkerError)
-    (\resPtr -> do
-      arr <- peek resPtr
-      bs <- cArrayToByteString arr
-      return (decodeMessageOrDie bs))
+    ( \resPtr -> do
+        arr <- peek resPtr
+        bs <- cArrayToByteString arr
+        return (decodeMessageOrDie bs)
+    )
 
 
 foreign import ccall "hs_temporal_worker_complete_workflow_activation" raw_completeWorkflowActivation :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -678,10 +697,11 @@ pollNexusTask w = withWorker w $ \wp ->
     rust_dropWorkerError
     rust_dropByteArray
     (\errPtr -> peek errPtr >>= peekWorkerError)
-    (\resPtr -> do
-      arr <- peek resPtr
-      bs <- cArrayToByteString arr
-      return (decodeMessageOrDie bs))
+    ( \resPtr -> do
+        arr <- peek resPtr
+        bs <- cArrayToByteString arr
+        return (decodeMessageOrDie bs)
+    )
 
 
 foreign import ccall "hs_temporal_worker_complete_nexus_task" raw_completeNexusTask :: Ptr (Worker ty) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
@@ -773,9 +793,10 @@ pushHistory (HistoryPusher hp) wf p =
 foreign import ccall "hs_temporal_history_pusher_push_history_json" raw_pushHistoryJson :: Ptr HistoryPusher -> Ptr (CArray Word8) -> Ptr (CArray Word8) -> TokioCall CWorkerError CUnit
 
 
--- | Push a workflow history in protobuf canonical JSON format to a replay worker.
--- The JSON is deserialized on the Rust side, bypassing proto-lens's incomplete
--- JSON support.
+{- | Push a workflow history in protobuf canonical JSON format to a replay worker.
+The JSON is deserialized on the Rust side, bypassing proto-lens's incomplete
+JSON support.
+-}
 pushHistoryJson :: HistoryPusher -> WorkflowId -> ByteString -> IO (Either WorkerError ())
 pushHistoryJson (HistoryPusher hp) wf jsonBytes =
   withCArrayBS wf $ \wfPtr ->
@@ -791,9 +812,10 @@ pushHistoryJson (HistoryPusher hp) wf jsonBytes =
 foreign import ccall "hs_temporal_history_proto_to_json" raw_historyProtoToJson :: Ptr (CArray Word8) -> Ptr (Ptr (CArray Word8)) -> Ptr (Ptr (CArray Word8)) -> IO ()
 
 
--- | Convert protobuf-encoded History bytes to canonical protobuf JSON.
--- The conversion is performed on the Rust side via prost + serde.
--- Useful for testing the JSON replay path.
+{- | Convert protobuf-encoded History bytes to canonical protobuf JSON.
+The conversion is performed on the Rust side via prost + serde.
+Useful for testing the JSON replay path.
+-}
 historyProtoToJson :: ByteString -> IO (Either String ByteString)
 historyProtoToJson protoBytes =
   withCArrayBS protoBytes $ \protoPtr ->
@@ -825,16 +847,17 @@ closeHistory (HistoryPusher hp) =
   raw_closeHistoryPusher hp
 
 
--- | Bracket-style wrapper for Worker that ensures proper cleanup.
---
--- Example:
---
--- @
--- result <- newWorker client workerConfig
--- case result of
---   Left err -> error $ show err
---   Right worker -> bracketWorker worker $ \\w -> do
---     ...
--- @
+{- | Bracket-style wrapper for Worker that ensures proper cleanup.
+
+Example:
+
+@
+result <- newWorker client workerConfig
+case result of
+  Left err -> error $ show err
+  Right worker -> bracketWorker worker $ \\w -> do
+    ...
+@
+-}
 bracketWorker :: Worker ty -> (Worker ty -> IO a) -> IO a
 bracketWorker worker = UnliftIO.bracket (return worker) closeWorker

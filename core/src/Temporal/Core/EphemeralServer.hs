@@ -118,10 +118,11 @@ startDevServer r c = withRuntime r $ \rp -> useAsCString (BL.toStrict (encode c)
   withTokioAsyncCall
     (raw_startDevServer rp cstr)
     rust_dropByteArray
-    (\_ -> pure ())  -- Server pointer doesn't need freeing here (managed by Rust)
-    (\errPtr -> do
-      arr <- peek errPtr
-      cArrayToByteString arr)
+    (\_ -> pure ()) -- Server pointer doesn't need freeing here (managed by Rust)
+    ( \errPtr -> do
+        arr <- peek errPtr
+        cArrayToByteString arr
+    )
     (\srvPtr -> pure $ EphemeralServer srvPtr)
 
 
@@ -134,9 +135,10 @@ shutdownEphemeralServer (EphemeralServer ep) =
     (raw_shutdownEphemeralServer ep)
     rust_dropByteArray
     rust_dropUnit
-    (\errPtr -> do
-      arr <- peek errPtr
-      cArrayToByteString arr)
+    ( \errPtr -> do
+        arr <- peek errPtr
+        cArrayToByteString arr
+    )
     (\_ -> return ())
 
 
@@ -165,8 +167,9 @@ startTestServer r conf = withRuntime r $ \rp -> useAsCString (BL.toStrict $ enco
   withTokioAsyncCall
     (raw_startTestServer rp cstr)
     rust_dropByteArray
-    (\_ -> pure ())  -- Server pointer doesn't need freeing here (managed by Rust)
-    (\errPtr -> do
-      arr <- peek errPtr
-      cArrayToByteString arr)
+    (\_ -> pure ()) -- Server pointer doesn't need freeing here (managed by Rust)
+    ( \errPtr -> do
+        arr <- peek errPtr
+        cArrayToByteString arr
+    )
     (\srvPtr -> pure $ EphemeralServer srvPtr)

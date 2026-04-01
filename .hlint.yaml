@@ -62,6 +62,7 @@
 - ignore: {name: "Use newtype instead of data"}
 - ignore: {name: "Use tuple-section"}
 - ignore: {name: "Use list comprehension"}
+- ignore: {name: "Use ?~"}
 - ignore:
     name: "Unused LANGUAGE pragma"
     within: [

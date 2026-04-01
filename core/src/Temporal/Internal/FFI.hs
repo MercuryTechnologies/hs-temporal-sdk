@@ -45,8 +45,9 @@ withCArrayText txt f = Text.withCStringLen txt $ \(bytes, len) ->
   Marshal.with (CArray (castPtr bytes) (fromIntegral len)) f
 
 
--- | Peek the result from a Tokio slot. Returns the raw pointer or Nothing.
--- The caller is responsible for freeing the pointer using the appropriate drop function.
+{- | Peek the result from a Tokio slot. Returns the raw pointer or Nothing.
+The caller is responsible for freeing the pointer using the appropriate drop function.
+-}
 peekTokioResult :: TokioSlot a -> IO (Maybe (Ptr a))
 peekTokioResult slot = do
   inner <- peek slot
@@ -78,34 +79,38 @@ for automatic memory management and exception safety.
 makeTokioAsyncCall
   :: TokioCall err res
   -> IO (Either (Ptr err) (Ptr res))
-makeTokioAsyncCall call = bracket
-  (do
-    errorSlot <- malloc
-    resultSlot <- malloc
-    poke errorSlot nullPtr
-    poke resultSlot nullPtr
-    return (errorSlot, resultSlot))
-  (\(errorSlot, resultSlot) -> do
-    free errorSlot
-    free resultSlot)
-  (\(errorSlot, resultSlot) -> uninterruptibleMask $ \restore -> do
-    mvar <- newEmptyMVar
-    sp <- newStablePtrPrimMVar mvar
-    (cap, _) <- threadCapability =<< myThreadId
-    call sp cap errorSlot resultSlot
+makeTokioAsyncCall call =
+  bracket
+    ( do
+        errorSlot <- malloc
+        resultSlot <- malloc
+        poke errorSlot nullPtr
+        poke resultSlot nullPtr
+        return (errorSlot, resultSlot)
+    )
+    ( \(errorSlot, resultSlot) -> do
+        free errorSlot
+        free resultSlot
+    )
+    ( \(errorSlot, resultSlot) -> uninterruptibleMask $ \restore -> do
+        mvar <- newEmptyMVar
+        sp <- newStablePtrPrimMVar mvar
+        (cap, _) <- threadCapability =<< myThreadId
+        call sp cap errorSlot resultSlot
 
-    -- Wait for completion
-    () <- restore (takeMVar mvar)
+        -- Wait for completion
+        () <- restore (takeMVar mvar)
 
-    -- Read results before slots are freed
-    errPtr <- peek errorSlot
-    if errPtr /= nullPtr
-      then return (Left errPtr)
-      else do
-        resPtr <- peek resultSlot
-        if resPtr /= nullPtr
-          then return (Right resPtr)
-          else error "Both error and result are null from Tokio call")
+        -- Read results before slots are freed
+        errPtr <- peek errorSlot
+        if errPtr /= nullPtr
+          then return (Left errPtr)
+          else do
+            resPtr <- peek resultSlot
+            if resPtr /= nullPtr
+              then return (Right resPtr)
+              else error "Both error and result are null from Tokio call"
+    )
 
 
 {- | Exception-safe wrapper for Tokio async calls.
@@ -122,10 +127,14 @@ Parameters:
 -}
 withTokioAsyncCall
   :: TokioCall err res
-  -> (Ptr err -> IO ())  -- ^ Free error
-  -> (Ptr res -> IO ())  -- ^ Free result
-  -> (Ptr err -> IO e)   -- ^ Process error
-  -> (Ptr res -> IO a)   -- ^ Process result
+  -> (Ptr err -> IO ())
+  -- ^ Free error
+  -> (Ptr res -> IO ())
+  -- ^ Free result
+  -> (Ptr err -> IO e)
+  -- ^ Process error
+  -> (Ptr res -> IO a)
+  -- ^ Process result
   -> IO (Either e a)
 withTokioAsyncCall call freeErr freeRes processErr processRes =
   mask $ \restore ->
@@ -146,23 +155,24 @@ withTokioAsyncCall call freeErr freeRes processErr processRes =
             when (errPtr /= nullPtr) (freeErr errPtr)
             when (resPtr /= nullPtr) (freeRes resPtr)
 
-      (do
-        -- Allow interruption during the wait
-        restore (takeMVar mvar)
+      ( do
+          -- Allow interruption during the wait
+          restore (takeMVar mvar)
 
-        -- Now process the result, masked
-        errPtr <- peek errorSlot
-        if errPtr /= nullPtr
-          then do
-            result <- processErr errPtr
-            freeErr errPtr
-            return (Left result)
-          else do
-            resPtr <- peek resultSlot
-            if resPtr /= nullPtr
-              then do
-                result <- processRes resPtr
-                freeRes resPtr
-                return (Right result)
-              else error "Both error and result are null from Tokio call"
-        ) `onException` spawnCleanupThread
+          -- Now process the result, masked
+          errPtr <- peek errorSlot
+          if errPtr /= nullPtr
+            then do
+              result <- processErr errPtr
+              freeErr errPtr
+              return (Left result)
+            else do
+              resPtr <- peek resultSlot
+              if resPtr /= nullPtr
+                then do
+                  result <- processRes resPtr
+                  freeRes resPtr
+                  return (Right result)
+                else error "Both error and result are null from Tokio call"
+        )
+        `onException` spawnCleanupThread

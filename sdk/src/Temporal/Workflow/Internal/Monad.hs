@@ -844,6 +844,23 @@ bindTask :: Task a -> (a -> Workflow b) -> Task b
 bindTask (Task wait' cancel') f = Task (wait' >>= f) cancel'
 
 
+-- | A handle to a scheduled Nexus operation, exposing metadata about the
+-- operation in addition to the ability to wait for completion or cancel.
+--
+-- Returned by 'Temporal.Workflow.startNexusOperation'. Use 'Wait' and
+-- 'Cancel' instances (or 'nexusHandleTask') to interact with the operation.
+data NexusOperationHandle output = NexusOperationHandle
+  { nexusHandleTask :: !(Task output)
+  , nexusHandleEndpoint :: !NexusEndpointName
+  , nexusHandleService :: !NexusServiceName
+  , nexusHandleOperation :: !NexusOperationName
+  }
+
+
+instance Functor NexusOperationHandle where
+  fmap f h = h {nexusHandleTask = fmap f h.nexusHandleTask}
+
+
 {- | Handle representing an external Workflow Execution.
 
 This handle can only be cancelled and signalled.
@@ -965,10 +982,20 @@ data ActivityInput = ActivityInput
   }
 
 
+data ScheduleNexusOperationInput = ScheduleNexusOperationInput
+  { scheduleNexusInputEndpoint :: !NexusEndpointName
+  , scheduleNexusInputService :: !NexusServiceName
+  , scheduleNexusInputOperation :: !NexusOperationName
+  , scheduleNexusInputPayload :: !(Maybe Payload)
+  , scheduleNexusInputOptions :: !ScheduleNexusOperationOptions
+  }
+
+
 data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
   { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task Payload)) -> IO (Task Payload)
   , startChildWorkflowExecution :: Text -> StartChildWorkflowOptions -> (Text -> StartChildWorkflowOptions -> IO (ChildWorkflowHandle Payload)) -> IO (ChildWorkflowHandle Payload)
   , continueAsNew :: forall a. Text -> ContinueAsNewOptions -> (Text -> ContinueAsNewOptions -> IO a) -> IO a
+  , scheduleNexusOperation :: ScheduleNexusOperationInput -> (ScheduleNexusOperationInput -> IO (Task Payload)) -> IO (Task Payload)
   }
 
 
@@ -978,6 +1005,7 @@ instance Semigroup WorkflowOutboundInterceptor where
       { scheduleActivity = \input cont -> scheduleActivity l input $ \input' -> scheduleActivity r input' cont
       , startChildWorkflowExecution = \t input cont -> startChildWorkflowExecution l t input $ \t' input' -> startChildWorkflowExecution r t' input' cont
       , continueAsNew = \n input cont -> continueAsNew l n input $ \n' input' -> continueAsNew r n' input' cont
+      , scheduleNexusOperation = \input cont -> scheduleNexusOperation l input $ \input' -> scheduleNexusOperation r input' cont
       }
 
 
@@ -987,6 +1015,7 @@ instance Monoid WorkflowOutboundInterceptor where
       { scheduleActivity = \input cont -> cont input
       , startChildWorkflowExecution = \t input cont -> cont t input
       , continueAsNew = \n input cont -> cont n input
+      , scheduleNexusOperation = \input cont -> cont input
       }
 
 

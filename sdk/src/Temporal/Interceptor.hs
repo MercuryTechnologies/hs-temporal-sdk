@@ -66,10 +66,19 @@ module Temporal.Interceptor (
   ScheduleClientInterceptors (..),
   StartWorkflowOptions (..),
   interceptorConvertChildWorkflowHandle,
+
+  -- * Nexus interceptors
+  NexusInboundInterceptor (..),
+  NexusOperationContext (..),
+  ScheduleNexusOperationInput (..),
 ) where
 
+import Data.Map.Strict (Map)
+import Data.Text (Text)
 import Data.Vault.Strict
 import Temporal.Client.Types
+import Temporal.Common
+import Temporal.Nexus.Types (NexusCancelInput (..), NexusStartInput (..), NexusStartResult (..))
 import Temporal.Payload
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -112,16 +121,18 @@ data Interceptors env = Interceptors
   , activityOutboundInterceptors :: !(ActivityOutboundInterceptor env)
   , clientInterceptors :: {-# UNPACK #-} !ClientInterceptors
   , scheduleClientInterceptors :: {-# UNPACK #-} !ScheduleClientInterceptors
+  , nexusInboundInterceptors :: {-# UNPACK #-} !NexusInboundInterceptor
   , interceptorVault :: {-# UNPACK #-} !Vault
   }
 
 
 instance Semigroup (Interceptors env) where
-  Interceptors a b c d e f g <> Interceptors a' b' c' d' e' f' g' = Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e') (f <> f') (g <> g')
+  Interceptors a b c d e f g h <> Interceptors a' b' c' d' e' f' g' h' =
+    Interceptors (a <> a') (b <> b') (c <> c') (d <> d') (e <> e') (f <> f') (g <> g') (h <> h')
 
 
 instance Monoid (Interceptors env) where
-  mempty = Interceptors mempty mempty mempty mempty mempty mempty mempty
+  mempty = Interceptors mempty mempty mempty mempty mempty mempty mempty mempty
 
 
 data ScheduleClientInterceptors = ScheduleClientInterceptors
@@ -143,4 +154,47 @@ instance Monoid ScheduleClientInterceptors where
   mempty =
     ScheduleClientInterceptors
       { scheduleWorkflowAction = \opts _ -> return opts
+      }
+
+
+-- | Context provided to Nexus interceptors, identifying the service and operation.
+data NexusOperationContext = NexusOperationContext
+  { nexusCtxServiceName :: !NexusServiceName
+  , nexusCtxOperationName :: !NexusOperationName
+  , nexusCtxHeaders :: !(Map Text Text)
+  }
+
+
+-- | Interceptor for Nexus operation handlers (worker inbound).
+data NexusInboundInterceptor = NexusInboundInterceptor
+  { handleStartOperation
+      :: NexusStartInput
+      -> NexusOperationContext
+      -> (NexusStartInput -> IO NexusStartResult)
+      -> IO NexusStartResult
+  , handleCancelOperation
+      :: NexusCancelInput
+      -> NexusOperationContext
+      -> (NexusCancelInput -> IO ())
+      -> IO ()
+  }
+
+
+instance Semigroup NexusInboundInterceptor where
+  l <> r =
+    NexusInboundInterceptor
+      { handleStartOperation = \input ctx next ->
+          l.handleStartOperation input ctx $ \input' ->
+            r.handleStartOperation input' ctx next
+      , handleCancelOperation = \input ctx next ->
+          l.handleCancelOperation input ctx $ \input' ->
+            r.handleCancelOperation input' ctx next
+      }
+
+
+instance Monoid NexusInboundInterceptor where
+  mempty =
+    NexusInboundInterceptor
+      { handleStartOperation = \input _ctx next -> next input
+      , handleCancelOperation = \input _ctx next -> next input
       }

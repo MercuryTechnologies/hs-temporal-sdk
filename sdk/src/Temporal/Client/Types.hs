@@ -9,6 +9,7 @@ import Data.Int (Int32)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Vector (Vector)
+import qualified Data.Vector as V
 import GHC.Generics (Generic)
 import Language.Haskell.TH.Syntax (Lift)
 import Temporal.Common
@@ -16,6 +17,27 @@ import Temporal.Core.Client (Client)
 import Temporal.Duration
 import Temporal.Payload
 import Temporal.SearchAttributes
+
+
+{- | A completion callback for Nexus-backed workflow starts.
+Temporal calls this URL when the workflow completes.
+-}
+data NexusCompletionCallback = NexusCompletionCallback
+  { callbackUrl :: !Text
+  , callbackHeaders :: !(Map Text Text)
+  }
+  deriving stock (Show, Eq, Lift)
+
+
+{- | A link to attach to a workflow start request (e.g. back-link to caller).
+Uses the Temporal link proto format.
+-}
+data WorkflowLink = WorkflowLink
+  { linkNamespace :: !Text
+  , linkWorkflowId :: !Text
+  , linkRunId :: !Text
+  }
+  deriving stock (Show, Eq, Lift)
 
 
 -- | Configuration parameters for starting a workflow execution.

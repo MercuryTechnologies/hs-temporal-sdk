@@ -1,12 +1,12 @@
 module LocalActivitySpec where
 
 import qualified Control.Monad.Catch as Catch
-import Temporal.Activity hiding (retryPolicy)
+import Temporal.Activity hiding (retryPolicy, startToCloseTimeout)
 import qualified Temporal.Client as C
 import Temporal.Duration
 import Temporal.Exception
 import Temporal.Worker (configure)
-import Temporal.Workflow (StartLocalActivityOptions(retryPolicy))
+import Temporal.Workflow (StartLocalActivityOptions (retryPolicy, startToCloseTimeout))
 import qualified Temporal.Workflow as W
 import Test.Hspec
 import TestHelpers
@@ -24,7 +24,7 @@ tests = describe "Local Activities" $ do
         actDef = provideActivity defaultCodec "localBasicAct" act
         opts =
           W.defaultStartLocalActivityOptions
-            { W.startToCloseTimeout = Just $ seconds 5
+            { startToCloseTimeout = Just $ seconds 5
             }
         workflow :: MyWorkflow Int
         workflow = do
@@ -43,7 +43,7 @@ tests = describe "Local Activities" $ do
         actDef = provideActivity defaultCodec "localAddAct" act
         opts =
           W.defaultStartLocalActivityOptions
-            { W.startToCloseTimeout = Just $ seconds 5
+            { startToCloseTimeout = Just $ seconds 5
             }
         workflow :: MyWorkflow Int
         workflow = do
@@ -62,7 +62,7 @@ tests = describe "Local Activities" $ do
         actDef = provideActivity defaultCodec "localFailingAct" act
         opts =
           W.defaultStartLocalActivityOptions
-            { W.startToCloseTimeout = Just $ seconds 3
+            { startToCloseTimeout = Just $ seconds 3
             , retryPolicy = Just $ W.defaultRetryPolicy {W.maximumAttempts = 1}
             }
         workflow :: MyWorkflow ()
@@ -88,7 +88,7 @@ tests = describe "Local Activities" $ do
         actDef = provideActivity defaultCodec "localRetryAct" act
         opts =
           W.defaultStartLocalActivityOptions
-            { W.startToCloseTimeout = Just $ seconds 10
+            { startToCloseTimeout = Just $ seconds 10
             , retryPolicy =
                 Just $
                   W.defaultRetryPolicy
@@ -113,7 +113,7 @@ tests = describe "Local Activities" $ do
         actDef = provideActivity defaultCodec "localCancelAct" act
         opts =
           W.defaultStartLocalActivityOptions
-            { W.startToCloseTimeout = Just $ seconds 5
+            { startToCloseTimeout = Just $ seconds 5
             }
         workflow :: MyWorkflow Int
         workflow = do

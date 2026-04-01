@@ -3,13 +3,13 @@ module SignalSpec where
 import Data.Text (Text)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
-import Test.Hspec
-import TestHelpers
 import qualified Temporal.Client as C
 import Temporal.Duration
 import Temporal.Exception
-import qualified Temporal.Workflow as W
 import Temporal.Worker
+import qualified Temporal.Workflow as W
+import Test.Hspec
+import TestHelpers
 
 
 spec :: Spec
@@ -272,10 +272,11 @@ tests = describe "Signals" $ do
         wf = W.provideWorkflow defaultCodec "signalWithStartConflictWf" workflow
         conf = configure () wf $ do baseConf
     withWorker conf $ do
-      let opts = (C.startWorkflowOptions taskQueue)
-            { C.workflowIdConflictPolicy = Just C.WorkflowIdConflictPolicyUseExisting
-            , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
-            }
+      let opts =
+            (C.startWorkflowOptions taskQueue)
+              { C.workflowIdConflictPolicy = Just C.WorkflowIdConflictPolicyUseExisting
+              , C.timeouts = C.TimeoutOptions {C.runTimeout = Just (seconds 10), C.executionTimeout = Nothing, C.taskTimeout = Nothing}
+              }
       wfId <- W.WorkflowId <$> uuidText
       h1 <- useClient (C.start wf.reference wfId opts)
       _ <- useClient (C.signalWithStart wf.reference wfId opts sig 55)

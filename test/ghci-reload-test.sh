@@ -23,14 +23,15 @@ echo "Running full temporal-sdk test suite before and after reload"
 echo ""
 
 # Check if expect is installed
-if ! command -v expect &> /dev/null; then
-    echo "ERROR: 'expect' is not installed"
-    echo "Install it with: brew install expect (macOS) or apt-get install expect (Linux)"
-    exit 1
+if ! command -v expect &>/dev/null; then
+	echo "ERROR: 'expect' is not installed"
+	echo "Install it with: brew install expect (macOS) or apt-get install expect (Linux)"
+	exit 1
 fi
 
 # Create the expect script
-EXPECT_SCRIPT=$(cat <<EOF
+EXPECT_SCRIPT=$(
+	cat <<EOF
 #!/usr/bin/expect -f
 
 set timeout 60
@@ -109,7 +110,7 @@ EOF
 
 # Write the expect script to a temp file
 TEMP_EXPECT="/tmp/ghci-reload-test-$$.exp"
-echo "$EXPECT_SCRIPT" > "$TEMP_EXPECT"
+echo "$EXPECT_SCRIPT" >"$TEMP_EXPECT"
 chmod +x "$TEMP_EXPECT"
 
 # Run the expect script from the project root
@@ -118,23 +119,22 @@ echo "Running automated GHCi test..."
 echo ""
 
 if "$TEMP_EXPECT"; then
-    echo ""
-    echo "========================================"
-    echo "SUCCESS: GHCi reload test passed!"
-    echo "Full temporal-sdk test suite ran"
-    echo "successfully before and after reload."
-    echo "The fix is working correctly."
-    echo "========================================"
-    rm "$TEMP_EXPECT"
-    exit 0
+	echo ""
+	echo "========================================"
+	echo "SUCCESS: GHCi reload test passed!"
+	echo "Full temporal-sdk test suite ran"
+	echo "successfully before and after reload."
+	echo "The fix is working correctly."
+	echo "========================================"
+	rm "$TEMP_EXPECT"
+	exit 0
 else
-    EXIT_CODE=$?
-    echo ""
-    echo "========================================"
-    echo "FAILURE: GHCi reload test failed!"
-    echo "Exit code: $EXIT_CODE"
-    echo "========================================"
-    rm "$TEMP_EXPECT"
-    exit $EXIT_CODE
+	EXIT_CODE=$?
+	echo ""
+	echo "========================================"
+	echo "FAILURE: GHCi reload test failed!"
+	echo "Exit code: $EXIT_CODE"
+	echo "========================================"
+	rm "$TEMP_EXPECT"
+	exit $EXIT_CODE
 fi
-

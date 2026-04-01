@@ -5,8 +5,6 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-
-
   describe "GRPC Connection (TS)" $ do
     it "native connection with custom options" $ const pending
     it "connection headers" $ const pending

@@ -82,8 +82,9 @@ mkDuration s ns = case normalize s (fromIntegral ns) of
   (# s', ns' #) -> Duration s' ns'
 
 
--- | Renders per the protobuf JSON mapping: optional @-@ prefix, integer
--- seconds, 0\/3\/6\/9 fractional digits as needed, then @s@.
+{- | Renders per the protobuf JSON mapping: optional @-@ prefix, integer
+seconds, 0\/3\/6\/9 fractional digits as needed, then @s@.
+-}
 instance ToJSON Duration where
   toJSON d = String $ renderDuration d
 
@@ -111,8 +112,9 @@ instance FromJSON Duration where
   parseJSON = withText "Duration" parseDuration
 
 
--- | Parse a protobuf-style duration string: @\<decimal\>s@.
--- Accepts any number of fractional digits (including none).
+{- | Parse a protobuf-style duration string: @\<decimal\>s@.
+Accepts any number of fractional digits (including none).
+-}
 parseDuration :: T.Text -> Parser Duration
 parseDuration t = case T.unsnoc t of
   Just (body, 's') -> case parseDurationBody body of
@@ -261,9 +263,10 @@ infinity :: Duration
 infinity = Duration ((2 :: Int64) ^ (32 :: Int64)) 0
 
 
--- | Convert a protocol buffer duration to a 'Duration'.
--- Normalizes the result to ensure seconds and nanoseconds have matching signs
--- and nanoseconds are in @[-999_999_999, 999_999_999]@.
+{- | Convert a protocol buffer duration to a 'Duration'.
+Normalizes the result to ensure seconds and nanoseconds have matching signs
+and nanoseconds are in @[-999_999_999, 999_999_999]@.
+-}
 durationFromProto :: Duration.Duration -> Duration
 durationFromProto d =
   mkDuration (d ^. Duration.seconds) (d ^. Duration.nanos)

@@ -58,6 +58,20 @@ instance Cancel (Task a) where
     t.cancelAction
 
 
+instance Wait (NexusOperationHandle a) where
+  type WaitResult (NexusOperationHandle a) = Workflow a
+  wait h = do
+    updateCallStackW
+    h.nexusHandleTask.waitAction
+
+
+instance Cancel (NexusOperationHandle a) where
+  type CancelResult (NexusOperationHandle a) = Workflow ()
+  cancel h = do
+    updateCallStackW
+    h.nexusHandleTask.cancelAction
+
+
 {- | Returns an action that can be used to await cancellation of an external workflow.
 
 Throws 'CancelExternalWorkflowFailed' if the cancellation request failed.

@@ -5,8 +5,8 @@ import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.IO.Class (liftIO)
 import Data.Text (Text)
-import qualified Temporal.Client as C
 import Temporal.Activity
+import qualified Temporal.Client as C
 import Temporal.Duration
 import Temporal.Exception
 import Temporal.Payload
@@ -52,7 +52,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "simpleCancelWf" opts)
+        h <- useClient (C.start wf . reference "simpleCancelWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldThrow` (\e -> e == WorkflowExecutionCanceled)
@@ -68,7 +68,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "cancelCatchReturn" opts)
+        h <- useClient (C.start wf . reference "cancelCatchReturn" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "caught-cancel"
@@ -82,7 +82,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "cancelPropagateWf" opts)
+        h <- useClient (C.start wf . reference "cancelPropagateWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldThrow` (\e -> e == WorkflowExecutionCanceled)
@@ -96,7 +96,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "isCancelAfterWf" opts)
+        h <- useClient (C.start wf . reference "isCancelAfterWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` True
@@ -112,7 +112,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "waitCancelBlockWf" opts)
+        h <- useClient (C.start wf . reference "waitCancelBlockWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "unblocked"
@@ -126,7 +126,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "shieldCancelWf" opts)
+        h <- useClient (C.start wf . reference "shieldCancelWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "shielded"
@@ -139,7 +139,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        useClient (C.execute wf.reference "isCancelRequestedFalse" opts)
+        useClient (C.execute wf . reference "isCancelRequestedFalse" opts)
           `shouldReturn` False
 
   describe "Activity cancellation" $ do
@@ -151,9 +151,11 @@ tests = describe "Cancellation" $ do
           testActivityAct = provideActivity defaultCodec "immediateCancelResponse" testActivity
           workflow :: MyWorkflow Int
           workflow = do
-            h <- W.startActivity
-              testActivityAct.reference
-              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+            h <-
+              W.startActivity
+                testActivityAct
+                . reference
+                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
             W.cancel (h :: W.Task Int)
             W.wait h `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
           wf = W.provideWorkflow defaultCodec "activityCancellation" workflow
@@ -162,13 +164,14 @@ tests = describe "Cancellation" $ do
         let opts =
               (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                , C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ seconds 4
-                    , C.executionTimeout = Nothing
-                    , C.taskTimeout = Nothing
-                    }
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 4
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
                 }
-        useClient (C.execute wf.reference "immediateActivityCancellation" opts)
+        useClient (C.execute wf . reference "immediateActivityCancellation" opts)
           `shouldReturn` 1
 
     specify "Activity cancellation on heartbeat" $ \TestEnv {..} -> do
@@ -180,10 +183,13 @@ tests = describe "Cancellation" $ do
           testActivityAct = provideActivity defaultCodec "heartbeatCancelActivity" testActivity
           workflow :: MyWorkflow Int
           workflow = do
-            h <- W.startActivity
-              testActivityAct.reference
-              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
-                { W.heartbeatTimeout = Just $ seconds 1 }
+            h <-
+              W.startActivity
+                testActivityAct
+                . reference
+                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+                    { W.heartbeatTimeout = Just $ seconds 1
+                    }
             W.sleep $ nanoseconds 1
             W.cancel (h :: W.Task Int)
             W.wait h `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
@@ -193,13 +199,14 @@ tests = describe "Cancellation" $ do
         let opts =
               (C.startWorkflowOptions taskQueue)
                 { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                , C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ seconds 10
-                    , C.executionTimeout = Nothing
-                    , C.taskTimeout = Nothing
-                    }
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 10
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
                 }
-        useClient (C.execute wf.reference "activityCancelHeartbeat" opts)
+        useClient (C.execute wf . reference "activityCancelHeartbeat" opts)
           `shouldReturn` 1
 
   describe "Child workflow cancellation" $ do
@@ -209,16 +216,18 @@ tests = describe "Cancellation" $ do
           childWf = W.provideWorkflow defaultCodec "cancelChildImmediate" cancelTest
           parentWorkflow :: MyWorkflow String
           parentWorkflow = do
-            childWorkflow <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
+            childWorkflow <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
             W.cancelChildWorkflowExecution childWorkflow
             result <- Catch.try $ W.waitChildWorkflowResult childWorkflow
             pure $ show (result :: Either SomeException ())
           parentWf = W.provideWorkflow defaultCodec "cancelChildImmediateParent" parentWorkflow
           conf = configure () (childWf, parentWf) $ do baseConf
       withWorker conf $ do
-        let opts = (C.startWorkflowOptions taskQueue)
-              { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate }
-        useClient (C.execute parentWf.reference "cancelChildImm" opts)
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                }
+        useClient (C.execute parentWf . reference "cancelChildImm" opts)
           `shouldReturn` "Left ChildWorkflowCancelled"
 
   describe "Race cancellation" $ do
@@ -237,7 +246,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-        useClient (C.execute wf.reference "raceLoserCancel" opts)
+        useClient (C.execute wf . reference "raceLoserCancel" opts)
           `shouldReturn` Left True
 
     specify "Nested cancellation propagation through race (TS: nestedCancellation)" $ \TestEnv {..} -> do
@@ -251,7 +260,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-        useClient (C.execute wf.reference "nestedCancelProp" opts)
+        useClient (C.execute wf . reference "nestedCancelProp" opts)
           `shouldReturn` 1
 
     specify "Multiple concurrent tasks cancelled via race (Py: cancel multi)" $ \TestEnv {..} -> do
@@ -272,7 +281,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-        useClient (C.execute wf.reference "cancelMulti" opts)
+        useClient (C.execute wf . reference "cancelMulti" opts)
           `shouldReturn` 1
 
   describe "Workflow-internal cancellation patterns" $ do
@@ -287,7 +296,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "nonCancellableWf" opts)
+        h <- useClient (C.start wf . reference "nonCancellableWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "after-cancel"
@@ -305,7 +314,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "cancelCleanupWf" opts)
+        h <- useClient (C.start wf . reference "cancelCleanupWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldReturn` "cleaned-up"
@@ -321,7 +330,7 @@ tests = describe "Cancellation" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        h <- useClient (C.start wf.reference "cancelFailImmWf" opts)
+        h <- useClient (C.start wf . reference "cancelFailImmWf" opts)
         waitForWorkflowStart h
         C.cancel h (C.CancellationOptions mempty)
         C.waitWorkflowResult h `shouldThrow` isWorkflowFailed
@@ -337,7 +346,7 @@ tests = describe "Cancellation" $ do
           parentWorkflow :: MyWorkflow Text
           parentWorkflow = do
             let childOpts = childOptsWithId childWfId
-            h <- W.startChildWorkflow childWf.reference childOpts
+            h <- W.startChildWorkflow childWf . reference childOpts
             _ <- W.waitChildWorkflowStart h
             extHandle <- W.getExternalWorkflowHandle childWfId Nothing
             waiter <- W.cancel extHandle
@@ -350,7 +359,7 @@ tests = describe "Cancellation" $ do
           conf = configure () (childWf, parentWf) $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-        useClient (C.execute parentWf.reference "ext-cancel-parent" opts)
+        useClient (C.execute parentWf . reference "ext-cancel-parent" opts)
           `shouldReturn` "cancelled"
 
     specify "signal external workflow" $ \TestEnv {..} -> do
@@ -367,7 +376,7 @@ tests = describe "Cancellation" $ do
           parentWorkflow :: MyWorkflow Int
           parentWorkflow = do
             let childOpts = childOptsWithId childWfId
-            h <- W.startChildWorkflow childWf.reference childOpts
+            h <- W.startChildWorkflow childWf . reference childOpts
             _ <- W.waitChildWorkflowStart h
             extHandle <- W.getExternalWorkflowHandle childWfId Nothing
             _ <- W.wait =<< W.signal extHandle sig 42
@@ -376,5 +385,5 @@ tests = describe "Cancellation" $ do
           conf = configure () (childWf, parentWf) $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-        useClient (C.execute parentWf.reference "ext-signal-parent" opts)
+        useClient (C.execute parentWf . reference "ext-signal-parent" opts)
           `shouldReturn` 42

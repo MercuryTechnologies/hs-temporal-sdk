@@ -10,6 +10,7 @@ module Temporal.Operator where
 
 import Control.Monad.IO.Class
 import Data.Bifunctor (bimap)
+import Data.Foldable (toList)
 import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import Data.ProtoLens (Message (defMessage))
@@ -152,3 +153,31 @@ deleteNexusEndpoint c ep = do
             & Proto.version .~ ep.endpointVersion
         )
   pure $ bimap Temporal.Exception.coreRpcErrorToRpcError (const ()) res
+
+
+data NexusEndpointInfo = NexusEndpointInfo
+  { nexusEndpointInfoId :: Text
+  , nexusEndpointInfoVersion :: Int64
+  , nexusEndpointInfoName :: Text
+  }
+  deriving stock (Eq, Show)
+
+
+-- | List all Nexus endpoints in the cluster.
+listNexusEndpoints :: MonadIO m => Client -> m (Either Temporal.Exception.RpcError [NexusEndpointInfo])
+listNexusEndpoints c = do
+  res <-
+    liftIO $
+      Core.listNexusEndpoints
+        c
+        defMessage
+  pure $ bimap Temporal.Exception.coreRpcErrorToRpcError extractEndpoints res
+  where
+    extractEndpoints resp =
+      fmap extractOne $ toList $ resp ^. Proto.vec'endpoints
+    extractOne ep =
+      NexusEndpointInfo
+        { nexusEndpointInfoId = ep ^. NexusProto.id
+        , nexusEndpointInfoVersion = ep ^. NexusProto.version
+        , nexusEndpointInfoName = ep ^. (NexusProto.spec . NexusProto.name)
+        }

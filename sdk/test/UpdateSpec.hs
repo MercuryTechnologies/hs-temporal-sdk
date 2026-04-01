@@ -46,22 +46,24 @@ updateTests = describe "Update" $ do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "startUpdate-rejects", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "startUpdate-rejects", updateHeaders = mempty}
         ( useClient do
             h <- C.start UpdateWithValidator "startUpdate-rejects" opts
             C.startUpdate h testUpdate updateOpts (-12)
-          ) `shouldThrow` \case
+          )
+          `shouldThrow` \case
             UpdateFailure _ -> True
 
     it "propagates validation exceptions" $ \TestEnv {..} -> do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "startUpdate-throws", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "startUpdate-throws", updateHeaders = mempty}
         ( useClient do
             h <- C.start UpdateWithValidator "startUpdate-throws" opts
             C.startUpdate h testUpdate updateOpts 5
-          ) `shouldThrow` \case
+          )
+          `shouldThrow` \case
             UpdateFailure _ -> True
 
   describe "executeUpdate" $ do
@@ -69,7 +71,7 @@ updateTests = describe "Update" $ do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "update-no-val", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "update-no-val", updateHeaders = mempty}
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateWithoutValidator "update-no-val" opts
           ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -82,7 +84,7 @@ updateTests = describe "Update" $ do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "update-with-val", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "update-with-val", updateHeaders = mempty}
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateWithValidator "update-with-val" opts
           ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -95,33 +97,36 @@ updateTests = describe "Update" $ do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "update-rejects", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "update-rejects", updateHeaders = mempty}
         ( useClient do
             h <- C.start UpdateWithValidator "update-rejects" opts
             C.executeUpdate h testUpdate updateOpts (-12)
-          ) `shouldThrow` \case
+          )
+          `shouldThrow` \case
             UpdateFailure _ -> True
 
     it "propagates validator exceptions" $ \TestEnv {..} -> do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "update-val-throws", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "update-val-throws", updateHeaders = mempty}
         ( useClient do
             h <- C.start UpdateWithValidator "update-val-throws" opts
             C.executeUpdate h testUpdate updateOpts 5
-          ) `shouldThrow` \case
+          )
+          `shouldThrow` \case
             UpdateFailure _ -> True
 
     it "propagates update handler exceptions" $ \TestEnv {..} -> do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "update-handler-throws", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "update-handler-throws", updateHeaders = mempty}
         ( useClient do
             h <- C.start UpdateThatThrows "update-handler-throws" opts
             C.executeUpdate h testUpdate updateOpts 5
-          ) `shouldThrow` \case
+          )
+          `shouldThrow` \case
             UpdateFailure _ -> True
 
     it "bad args fail" $ \TestEnv {..} -> do
@@ -136,19 +141,20 @@ updateTests = describe "Update" $ do
           badUpdateRef = W.KnownUpdate @'[String] @String defaultCodec "test-update"
           conf = configure () wfRef $ do baseConf
           opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-          updateOpts = C.UpdateOptions { updateId = "bad-args", updateHeaders = mempty }
+          updateOpts = C.UpdateOptions {updateId = "bad-args", updateHeaders = mempty}
       withWorker conf $ do
         ( useClient do
             h <- C.start wfRef "bad-args" opts
             C.executeUpdate h badUpdateRef updateOpts "ruhroh"
-          ) `shouldThrow` \case
+          )
+          `shouldThrow` \case
             UpdateFailure _ -> True
 
     it "works with suspend (sleep in update)" $ \TestEnv {..} -> do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "update-suspends", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "update-suspends", updateHeaders = mempty}
         (updateResult, workflowResult) <- useClient do
           h <- C.start UpdateThatSleeps "update-suspends" opts
           ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -161,7 +167,7 @@ updateTests = describe "Update" $ do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "wf-throws-first", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "wf-throws-first", updateHeaders = mempty}
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsBeforeTheUpdate "wf-throws-first" opts
           wr <- Catch.try $ C.waitWorkflowResult h
@@ -180,7 +186,7 @@ updateTests = describe "Update" $ do
       let conf = updateConf baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-            updateOpts = C.UpdateOptions { updateId = "wf-throws-later", updateHeaders = mempty }
+            updateOpts = C.UpdateOptions {updateId = "wf-throws-later", updateHeaders = mempty}
         (eUpdateResult, eWorkflowResult) <- useClient do
           h <- C.start WorkflowThatThrowsAfterTheUpdate "wf-throws-later" opts
           ur <- Catch.try $ C.executeUpdate h testUpdate updateOpts 12
@@ -215,13 +221,12 @@ updateTests = describe "Update" $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
         result <- (Catch.try :: IO a -> IO (Either SomeException a)) $ useClient do
           h <- C.start UpdateWithoutValidator "update-after-complete" opts
-          _ <- C.executeUpdate h testUpdate (C.UpdateOptions { updateId = "first", updateHeaders = mempty }) 1
+          _ <- C.executeUpdate h testUpdate (C.UpdateOptions {updateId = "first", updateHeaders = mempty}) 1
           _ <- C.waitWorkflowResult h
-          C.executeUpdate h testUpdate (C.UpdateOptions { updateId = "after-complete", updateHeaders = mempty }) 2
+          C.executeUpdate h testUpdate (C.UpdateOptions {updateId = "after-complete", updateHeaders = mempty}) 2
         result `shouldSatisfy` \case
           Left _ -> True
           Right _ -> False
-
 
   describe "Update advanced" $ do
     it "two sequential updates accumulate state" $ \TestEnv {..} -> do
@@ -245,13 +250,18 @@ updateTests = describe "Update" $ do
           workflow :: MyWorkflow Int
           workflow = do
             st <- W.newStateVar (0 :: Int)
-            W.setUpdateHandler updateDef (\n -> do
-              result <- W.executeActivity actDef.reference
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
-                n
-              W.writeStateVar st result
-              pure result
-              ) Nothing
+            W.setUpdateHandler
+              updateDef
+              ( \n -> do
+                  result <-
+                    W.executeActivity actDef
+                      . reference
+                        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+                        n
+                  W.writeStateVar st result
+                  pure result
+              )
+              Nothing
             W.waitCondition $ (/= 0) <$> W.readStateVar st
             W.readStateVar st
           wf = W.provideWorkflow defaultCodec "updateWithActivity" workflow
@@ -260,7 +270,7 @@ updateTests = describe "Update" $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
             updateOpts = C.UpdateOptions {updateId = "act-update", updateHeaders = mempty}
         (ur, wr) <- useClient do
-          h <- C.start wf.reference "updateWithActivityWf" opts
+          h <- C.start wf . reference "updateWithActivityWf" opts
           updateResult <- C.executeUpdate h updateDef updateOpts 41
           wfResult <- C.waitWorkflowResult h
           pure (updateResult, wfResult)
@@ -298,7 +308,7 @@ updateInterceptorTests = do
         let conf = updateConf baseConf
         withWorker conf $ do
           let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-              updateOpts = C.UpdateOptions { updateId = "interceptors-called", updateHeaders = mempty }
+              updateOpts = C.UpdateOptions {updateId = "interceptors-called", updateHeaders = mempty}
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "interceptors-called" opts
             ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -319,16 +329,16 @@ updateInterceptorTests = do
             { workflowInboundInterceptors =
                 mempty
                   { handleUpdate = \input next -> do
-                      performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input.handleUpdateInputArgs
+                      performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input . handleUpdateInputArgs
                       next input
                   , validateUpdate = \input next -> do
-                      writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
+                      writeIORef validateUpdateArgs $ Just input . handleUpdateInputArgs
                       next input
                   }
             , clientInterceptors =
                 mempty
                   { updateWorkflow = \input next -> do
-                      writeIORef updateWorkflowArgs $ Just input.updateWorkflowArgs
+                      writeIORef updateWorkflowArgs $ Just input . updateWorkflowArgs
                       next input
                   }
             }
@@ -337,7 +347,7 @@ updateInterceptorTests = do
         let conf = updateConf baseConf
         withWorker conf $ do
           let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-              updateOpts = C.UpdateOptions { updateId = "interceptors-args", updateHeaders = mempty }
+              updateOpts = C.UpdateOptions {updateId = "interceptors-args", updateHeaders = mempty}
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "interceptors-args" opts
             ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -358,7 +368,7 @@ updateInterceptorTests = do
             { workflowInboundInterceptors =
                 mempty
                   { handleUpdate = \input next -> do
-                      let metadata = payloadMetadata $ V.head input.handleUpdateInputArgs
+                      let metadata = payloadMetadata $ V.head input . handleUpdateInputArgs
                       next $ input {handleUpdateInputArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
                   }
             }
@@ -367,7 +377,7 @@ updateInterceptorTests = do
         let conf = updateConf baseConf
         withWorker conf $ do
           let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-              updateOpts = C.UpdateOptions { updateId = "modify-args", updateHeaders = mempty }
+              updateOpts = C.UpdateOptions {updateId = "modify-args", updateHeaders = mempty}
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "modify-args" opts
             ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -382,7 +392,7 @@ updateInterceptorTests = do
             { clientInterceptors =
                 mempty
                   { updateWorkflow = \input next -> do
-                      let metadata = payloadMetadata $ V.head input.updateWorkflowArgs
+                      let metadata = payloadMetadata $ V.head input . updateWorkflowArgs
                       next $ input {updateWorkflowArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
                   }
             }
@@ -391,7 +401,7 @@ updateInterceptorTests = do
         let conf = updateConf baseConf
         withWorker conf $ do
           let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-              updateOpts = C.UpdateOptions { updateId = "modify-client-args", updateHeaders = mempty }
+              updateOpts = C.UpdateOptions {updateId = "modify-client-args", updateHeaders = mempty}
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "modify-client-args" opts
             ur <- C.executeUpdate h testUpdate updateOpts 12
@@ -446,7 +456,7 @@ updateInterceptorTests = do
         let conf = updateConf baseConf
         withWorker conf $ do
           let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-              updateOpts = C.UpdateOptions { updateId = "interceptor-order", updateHeaders = mempty }
+              updateOpts = C.UpdateOptions {updateId = "interceptor-order", updateHeaders = mempty}
           (updateResult, workflowResult) <- useClient do
             h <- C.start UpdateWithValidator "interceptor-order" opts
             ur <- C.executeUpdate h testUpdate updateOpts 12
