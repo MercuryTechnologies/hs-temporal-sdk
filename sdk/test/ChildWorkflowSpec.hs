@@ -29,13 +29,13 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "isEvenChild" child
         parent :: MyWorkflow Bool
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions 2
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions 2
           W.waitChildWorkflowResult ch
         parentWf = W.provideWorkflow defaultCodec "invokeChild" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "childInvoke" opts)
+      useClient (C.execute parentWf.reference "childInvoke" opts)
         `shouldReturn` True
 
   specify "child workflow with different args" $ \TestEnv {..} -> do
@@ -44,13 +44,13 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "argChild" child
         parent :: MyWorkflow Text
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions 3 "item"
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions 3 "item"
           W.waitChildWorkflowResult ch
         parentWf = W.provideWorkflow defaultCodec "argParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "childArgs" opts)
+      useClient (C.execute parentWf.reference "childArgs" opts)
         `shouldReturn` "item x3"
 
   specify "child workflow failure propagates to parent" $ \TestEnv {..} -> do
@@ -59,13 +59,13 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "failChild" child
         parent :: MyWorkflow ()
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
           W.waitChildWorkflowResult ch
         parentWf = W.provideWorkflow defaultCodec "failParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "childFail" opts)
+      useClient (C.execute parentWf.reference "childFail" opts)
         `shouldThrow` \case
           WorkflowExecutionFailed _ -> True
           _ -> False
@@ -76,7 +76,7 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "cancelChild" child
         parent :: MyWorkflow String
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
           W.cancelChildWorkflowExecution ch
           result <- Catch.try $ W.waitChildWorkflowResult ch
           pure $ show (result :: Either SomeException ())
@@ -84,7 +84,7 @@ tests = describe "Child Workflows" $ do
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "cancelChildImm" opts)
+      useClient (C.execute parentWf.reference "cancelChildImm" opts)
         `shouldReturn` "Left ChildWorkflowCancelled"
 
   specify "cancel child workflow after start" $ \TestEnv {..} -> do
@@ -93,7 +93,7 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "cancelAfterStartChild" child
         parent :: MyWorkflow String
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
           W.waitChildWorkflowStart ch
           W.cancelChildWorkflowExecution ch
           result <- Catch.try $ W.waitChildWorkflowResult ch
@@ -102,7 +102,7 @@ tests = describe "Child Workflows" $ do
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "cancelChildAfterStart" opts)
+      useClient (C.execute parentWf.reference "cancelChildAfterStart" opts)
         `shouldReturn` "Left ChildWorkflowCancelled"
 
   specify "multiple child workflows" $ \TestEnv {..} -> do
@@ -111,9 +111,9 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "squareChild" child
         parent :: MyWorkflow [Int]
         parent = do
-          h1 <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions 2
-          h2 <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions 3
-          h3 <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions 4
+          h1 <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions 2
+          h2 <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions 3
+          h3 <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions 4
           r1 <- W.waitChildWorkflowResult h1
           r2 <- W.waitChildWorkflowResult h2
           r3 <- W.waitChildWorkflowResult h3
@@ -122,7 +122,7 @@ tests = describe "Child Workflows" $ do
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "multiChild" opts)
+      useClient (C.execute parentWf.reference "multiChild" opts)
         `shouldReturn` [4, 9, 16]
 
   specify "nested child workflows" $ \TestEnv {..} -> do
@@ -131,18 +131,18 @@ tests = describe "Child Workflows" $ do
         grandchildWf = W.provideWorkflow defaultCodec "grandchild" grandchild
         child :: MyWorkflow Int
         child = do
-          ch <- W.startChildWorkflow grandchildWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow grandchildWf.reference W.defaultChildWorkflowOptions
           W.waitChildWorkflowResult ch
         childWf = W.provideWorkflow defaultCodec "middleChild" child
         parent :: MyWorkflow Int
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
           W.waitChildWorkflowResult ch
         parentWf = W.provideWorkflow defaultCodec "nestedParent" parent
         conf = configure () (grandchildWf, childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "nestedChild" opts)
+      useClient (C.execute parentWf.reference "nestedChild" opts)
         `shouldReturn` 42
 
   specify "child workflow with custom ID reuse policy" $ \TestEnv {..} -> do
@@ -157,12 +157,12 @@ tests = describe "Child Workflows" $ do
                   { workflowId = Just $ W.WorkflowId childId
                   , workflowIdReusePolicy = W.WorkflowIdReusePolicyAllowDuplicateFailedOnly
                   }
-          W.executeChildWorkflow childWf . reference opts
+          W.executeChildWorkflow childWf.reference opts
         parentWf = W.provideWorkflow defaultCodec "reuseParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "childReuse" opts)
+      useClient (C.execute parentWf.reference "childReuse" opts)
         `shouldReturn` ()
 
   specify "executeChildWorkflow convenience" $ \TestEnv {..} -> do
@@ -170,12 +170,12 @@ tests = describe "Child Workflows" $ do
         child = pure 99
         childWf = W.provideWorkflow defaultCodec "execChild" child
         parent :: MyWorkflow Int
-        parent = W.executeChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+        parent = W.executeChildWorkflow childWf.reference W.defaultChildWorkflowOptions
         parentWf = W.provideWorkflow defaultCodec "execParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "execChild" opts)
+      useClient (C.execute parentWf.reference "execChild" opts)
         `shouldReturn` 99
 
   specify "child workflow timeout (TS: child-workflow-timeout)" $ \TestEnv {..} -> do
@@ -193,13 +193,13 @@ tests = describe "Child Workflows" $ do
                         , W.taskTimeout = Nothing
                         }
                   }
-          result <- Catch.try $ W.executeChildWorkflow childWf . reference childOpts
+          result <- Catch.try $ W.executeChildWorkflow childWf.reference childOpts
           pure $ show (result :: Either SomeException ())
         parentWf = W.provideWorkflow defaultCodec "childTimeoutParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
-      result <- useClient (C.execute parentWf . reference "childTimeout" opts)
+      result <- useClient (C.execute parentWf.reference "childTimeout" opts)
       result `shouldSatisfy` \s -> "Left" `elem` words s
 
   specify "child workflow start fail / already started (Py/TS: child-workflow-start-fail)" $ \TestEnv {..} -> do
@@ -213,9 +213,9 @@ tests = describe "Child Workflows" $ do
                   { workflowId = Just "fixed-child-id-for-dup"
                   , workflowIdReusePolicy = W.WorkflowIdReusePolicyRejectDuplicate
                   }
-          h1 <- W.startChildWorkflow childWf . reference childOpts
+          h1 <- W.startChildWorkflow childWf.reference childOpts
           W.waitChildWorkflowStart h1
-          h2 <- W.startChildWorkflow childWf . reference childOpts
+          h2 <- W.startChildWorkflow childWf.reference childOpts
           result <- Catch.try @_ @SomeException $ W.waitChildWorkflowStart h2
           case result of
             Left _ -> pure True
@@ -224,7 +224,7 @@ tests = describe "Child Workflows" $ do
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
-      useClient (C.execute parentWf . reference "childStartFail" opts)
+      useClient (C.execute parentWf.reference "childStartFail" opts)
         `shouldReturn` True
 
   specify "signal child workflow (Py/TS: child-workflow-signals)" $ \TestEnv {..} -> do
@@ -239,7 +239,7 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "childSigChild" child
         parent :: MyWorkflow Int
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
           W.waitChildWorkflowStart ch
           _ <- W.signal ch childSignal 42
           W.waitChildWorkflowResult ch
@@ -247,7 +247,7 @@ tests = describe "Child Workflows" $ do
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
-      useClient (C.execute parentWf . reference "childSig" opts)
+      useClient (C.execute parentWf.reference "childSig" opts)
         `shouldReturn` 42
 
   specify "cancel child workflow (TS: child-workflow-cancel)" $ \TestEnv {..} -> do
@@ -256,7 +256,7 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "cancelChild" child
         parent :: MyWorkflow Bool
         parent = do
-          ch <- W.startChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          ch <- W.startChildWorkflow childWf.reference W.defaultChildWorkflowOptions
           W.waitChildWorkflowStart ch
           W.cancelChildWorkflowExecution ch
           result <- Catch.try @_ @SomeException $ W.waitChildWorkflowResult ch
@@ -267,7 +267,7 @@ tests = describe "Child Workflows" $ do
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
-      useClient (C.execute parentWf . reference "cancelChild" opts)
+      useClient (C.execute parentWf.reference "cancelChild" opts)
         `shouldReturn` True
 
   specify "child workflow returns complex result (TS: child-workflow-result)" $ \TestEnv {..} -> do
@@ -275,12 +275,12 @@ tests = describe "Child Workflows" $ do
         child = pure ("hello", 42)
         childWf = W.provideWorkflow defaultCodec "childResult" child
         parent :: MyWorkflow (Text, Int)
-        parent = W.executeChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+        parent = W.executeChildWorkflow childWf.reference W.defaultChildWorkflowOptions
         parentWf = W.provideWorkflow defaultCodec "childResultParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "childResult" opts)
+      useClient (C.execute parentWf.reference "childResult" opts)
         `shouldReturn` ("hello", 42)
 
   specify "child workflow in different task queue (TS: child-workflow-task-queue)" $ \TestEnv {..} -> do
@@ -289,12 +289,12 @@ tests = describe "Child Workflows" $ do
         childWf = W.provideWorkflow defaultCodec "childTaskQueueChild" child
         parent :: MyWorkflow Text
         parent =
-          W.executeChildWorkflow childWf . reference W.defaultChildWorkflowOptions
+          W.executeChildWorkflow childWf.reference W.defaultChildWorkflowOptions
         parentWf = W.provideWorkflow defaultCodec "childTaskQueueParent" parent
         conf = configure () (childWf, parentWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-      useClient (C.execute parentWf . reference "childTaskQueue" opts)
+      useClient (C.execute parentWf.reference "childTaskQueue" opts)
         `shouldReturn` "from-child"
 
   specify "nested child workflows (TS: nested children)" $ \TestEnv {..} -> do
@@ -302,13 +302,13 @@ tests = describe "Child Workflows" $ do
         leaf = pure 1
         leafWf = W.provideWorkflow defaultCodec "nestedLeaf" leaf
         mid :: MyWorkflow Int
-        mid = W.executeChildWorkflow leafWf . reference W.defaultChildWorkflowOptions
+        mid = W.executeChildWorkflow leafWf.reference W.defaultChildWorkflowOptions
         midWf = W.provideWorkflow defaultCodec "nestedMid" mid
         root :: MyWorkflow Int
-        root = W.executeChildWorkflow midWf . reference W.defaultChildWorkflowOptions
+        root = W.executeChildWorkflow midWf.reference W.defaultChildWorkflowOptions
         rootWf = W.provideWorkflow defaultCodec "nestedRoot" root
         conf = configure () (leafWf, midWf, rootWf) $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
-      useClient (C.execute rootWf . reference "nestedChildren" opts)
+      useClient (C.execute rootWf.reference "nestedChildren" opts)
         `shouldReturn` 1

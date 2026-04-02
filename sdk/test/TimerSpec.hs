@@ -31,7 +31,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "sleep" opts) `shouldReturn` True
+        useClient (C.execute wf.reference "sleep" opts) `shouldReturn` True
 
     specify "multiple sleeps accumulate time" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Int
@@ -48,7 +48,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "multiSleep" opts) `shouldReturn` 2
+        useClient (C.execute wf.reference "multiSleep" opts) `shouldReturn` 2
 
     specify "zero-duration sleep still advances activation" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Bool
@@ -61,7 +61,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "zeroSleep" opts) `shouldReturn` True
+        useClient (C.execute wf.reference "zeroSleep" opts) `shouldReturn` True
 
   describe "Timer" $ do
     specify "timer fires and returns" $ \TestEnv {..} -> do
@@ -76,7 +76,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "timer" opts) `shouldReturn` True
+        useClient (C.execute wf.reference "timer" opts) `shouldReturn` True
 
     specify "timer cancel immediately" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Bool
@@ -89,7 +89,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        useClient (C.execute wf . reference "timerCancelImm" opts) `shouldReturn` True
+        useClient (C.execute wf.reference "timerCancelImm" opts) `shouldReturn` True
 
     specify "timer cancel with delay" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Bool
@@ -103,7 +103,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
-        useClient (C.execute wf . reference "timerCancelDelay" opts) `shouldReturn` True
+        useClient (C.execute wf.reference "timerCancelDelay" opts) `shouldReturn` True
 
     specify "multiple timers" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Int
@@ -117,7 +117,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "multiTimer" opts) `shouldReturn` 2
+        useClient (C.execute wf.reference "multiTimer" opts) `shouldReturn` 2
 
   describe "Deterministic Time" $ do
     specify "time is deterministic within activation" $ \TestEnv {..} -> do
@@ -132,7 +132,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        (t1, t2, t3) <- useClient (C.execute wf . reference "detTime" opts)
+        (t1, t2, t3) <- useClient (C.execute wf.reference "detTime" opts)
         t1 `shouldBe` t2
         t3 `shouldSatisfy` (> t2)
 
@@ -149,7 +149,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "raceLeft" opts) `shouldReturn` Right True
+        useClient (C.execute wf.reference "raceLeft" opts) `shouldReturn` Right True
 
     specify "race returns first to complete (both block)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow (Either Bool Bool)
@@ -163,7 +163,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "raceBoth" opts) `shouldReturn` Right True
+        useClient (C.execute wf.reference "raceBoth" opts) `shouldReturn` Right True
 
     specify "race throws when either side throws" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow (Either Bool Bool)
@@ -177,7 +177,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "raceThrow" opts)
+        useClient (C.execute wf.reference "raceThrow" opts)
           `shouldThrow` \case
             WorkflowExecutionFailed _ -> True
             _ -> False
@@ -189,7 +189,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "raceIgnore" opts) `shouldReturn` Left True
+        useClient (C.execute wf.reference "raceIgnore" opts) `shouldReturn` Left True
 
     specify "concurrently_ runs both to completion" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow ()
@@ -200,7 +200,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "concurrently" opts) `shouldReturn` ()
+        useClient (C.execute wf.reference "concurrently" opts) `shouldReturn` ()
 
   describe "Trailing Timer (Py/TS equivalent)" $ do
     specify "timer created but never awaited - workflow still completes" $ \TestEnv {..} -> do
@@ -212,7 +212,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "timerNeverAwaited" opts) `shouldReturn` 7
+        useClient (C.execute wf.reference "timerNeverAwaited" opts) `shouldReturn` 7
 
   describe "Timer edge cases (Py/TS equivalents)" $ do
     specify "zero duration sleep completes immediately (Py: test_timer_immediate)" $ \TestEnv {..} -> do
@@ -224,7 +224,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "timerImmediate" opts) `shouldReturn` "immediate"
+        useClient (C.execute wf.reference "timerImmediate" opts) `shouldReturn` "immediate"
 
     specify "sequential timers complete in order (Py: test_timer_sequence)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow [Int]
@@ -241,7 +241,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "timerSequence" opts) `shouldReturn` [1, 2, 3]
+        useClient (C.execute wf.reference "timerSequence" opts) `shouldReturn` [1, 2, 3]
 
     specify "race between two timers - shorter wins (TS: timer race)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow (Either Text Text)
@@ -251,7 +251,7 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-        useClient (C.execute wf . reference "timerRace" opts) `shouldReturn` Left "fast"
+        useClient (C.execute wf.reference "timerRace" opts) `shouldReturn` Left "fast"
 
     specify "timer in catch handler works (TS: timer-in-handler)" $ \TestEnv {..} -> do
       let workflow :: MyWorkflow Text
@@ -266,4 +266,4 @@ tests = describe "Timers and Sleep" $ do
           conf = configure () wf $ do baseConf
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
-        useClient (C.execute wf . reference "timerInCatch" opts) `shouldReturn` "recovered"
+        useClient (C.execute wf.reference "timerInCatch" opts) `shouldReturn` "recovered"

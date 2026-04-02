@@ -254,8 +254,8 @@ updateTests = describe "Update" $ do
               updateDef
               ( \n -> do
                   result <-
-                    W.executeActivity actDef
-                      . reference
+                    W.executeActivity actDef.reference
+                      
                         (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
                         n
                   W.writeStateVar st result
@@ -270,7 +270,7 @@ updateTests = describe "Update" $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
             updateOpts = C.UpdateOptions {updateId = "act-update", updateHeaders = mempty}
         (ur, wr) <- useClient do
-          h <- C.start wf . reference "updateWithActivityWf" opts
+          h <- C.start wf.reference "updateWithActivityWf" opts
           updateResult <- C.executeUpdate h updateDef updateOpts 41
           wfResult <- C.waitWorkflowResult h
           pure (updateResult, wfResult)
@@ -329,16 +329,16 @@ updateInterceptorTests = do
             { workflowInboundInterceptors =
                 mempty
                   { handleUpdate = \input next -> do
-                      performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input . handleUpdateInputArgs
+                      performUnsafeNonDeterministicIO $ writeIORef handleUpdateArgs $ Just input.handleUpdateInputArgs
                       next input
                   , validateUpdate = \input next -> do
-                      writeIORef validateUpdateArgs $ Just input . handleUpdateInputArgs
+                      writeIORef validateUpdateArgs $ Just input.handleUpdateInputArgs
                       next input
                   }
             , clientInterceptors =
                 mempty
                   { updateWorkflow = \input next -> do
-                      writeIORef updateWorkflowArgs $ Just input . updateWorkflowArgs
+                      writeIORef updateWorkflowArgs $ Just input.updateWorkflowArgs
                       next input
                   }
             }
@@ -368,7 +368,7 @@ updateInterceptorTests = do
             { workflowInboundInterceptors =
                 mempty
                   { handleUpdate = \input next -> do
-                      let metadata = payloadMetadata $ V.head input . handleUpdateInputArgs
+                      let metadata = payloadMetadata $ V.head input.handleUpdateInputArgs
                       next $ input {handleUpdateInputArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
                   }
             }
@@ -392,7 +392,7 @@ updateInterceptorTests = do
             { clientInterceptors =
                 mempty
                   { updateWorkflow = \input next -> do
-                      let metadata = payloadMetadata $ V.head input . updateWorkflowArgs
+                      let metadata = payloadMetadata $ V.head input.updateWorkflowArgs
                       next $ input {updateWorkflowArgs = V.singleton Payload {payloadData = "24", payloadMetadata = metadata}}
                   }
             }

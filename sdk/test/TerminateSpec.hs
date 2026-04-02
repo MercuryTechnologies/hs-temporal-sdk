@@ -32,8 +32,8 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         useClient $ do
-          _ <- C.start wf . reference "term-no-ids" opts
-          h <- C.getHandle wf . reference "term-no-ids" Nothing Nothing
+          _ <- C.start wf.reference "term-no-ids" opts
+          h <- C.getHandle wf.reference "term-no-ids" Nothing Nothing
           C.terminate
             h {C.workflowHandleRunId = Nothing, C.workflowHandleFirstExecutionRunId = Nothing}
             C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
@@ -44,8 +44,8 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         useClient $ do
-          h <- C.start wf . reference "term-good-run" opts
-          h' <- C.getHandle wf . reference "term-good-run" h . workflowHandleRunId Nothing
+          h <- C.start wf.reference "term-good-run" opts
+          h' <- C.getHandle wf.reference "term-good-run" h.workflowHandleRunId Nothing
           C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
 
     it "throws with non-matching runId" $ \TestEnv {..} -> do
@@ -53,8 +53,8 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         ( useClient $ do
-            _ <- C.start wf . reference "term-bad-run" opts
-            h' <- C.getHandle wf . reference "term-bad-run" (Just "bad-run-id") Nothing
+            _ <- C.start wf.reference "term-bad-run" opts
+            h' <- C.getHandle wf.reference "term-bad-run" (Just "bad-run-id") Nothing
             C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
           )
           `shouldThrow` \(RpcError {}) -> True
@@ -65,10 +65,10 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         useClient $ do
-          h <- C.start wf . reference "term-good-first" opts
+          h <- C.start wf.reference "term-good-first" opts
           h' <-
-            C.getHandle wf . reference "term-good-first" Nothing $
-              Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h . workflowHandleFirstExecutionRunId}
+            C.getHandle wf.reference "term-good-first" Nothing $
+              Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h.workflowHandleFirstExecutionRunId}
           C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
 
     it "throws with non-matching firstExecutionRunId" $ \TestEnv {..} -> do
@@ -76,9 +76,9 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         ( useClient $ do
-            _ <- C.start wf . reference "term-bad-first" opts
+            _ <- C.start wf.reference "term-bad-first" opts
             h' <-
-              C.getHandle wf . reference "term-bad-first" Nothing $
+              C.getHandle wf.reference "term-bad-first" Nothing $
                 Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"}
             C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
           )
@@ -90,10 +90,10 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         useClient $ do
-          h <- C.start wf . reference "term-both-good" opts
+          h <- C.start wf.reference "term-both-good" opts
           h' <-
-            C.getHandle wf . reference "term-both-good" h . workflowHandleRunId $
-              Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h . workflowHandleFirstExecutionRunId}
+            C.getHandle wf.reference "term-both-good" h.workflowHandleRunId $
+              Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h.workflowHandleFirstExecutionRunId}
           C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
 
     it "throws when runId doesn't match" $ \TestEnv {..} -> do
@@ -102,10 +102,10 @@ tests = describe "Terminate" $ do
         let opts = defaultStartOpts taskQueue
         useClient
           ( do
-              h <- C.start wf . reference "term-bad-run-both" opts
+              h <- C.start wf.reference "term-bad-run-both" opts
               h' <-
-                C.getHandle wf . reference "term-bad-run-both" (Just "bad-run-id") $
-                  Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h . workflowHandleFirstExecutionRunId}
+                C.getHandle wf.reference "term-bad-run-both" (Just "bad-run-id") $
+                  Just C.GetHandleOptions {C.firstExecutionRunId = Just $ fromJust h.workflowHandleFirstExecutionRunId}
               C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
           )
           `shouldThrow` \(RpcError {}) -> True
@@ -115,12 +115,12 @@ tests = describe "Terminate" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         ( useClient $ do
-            h <- C.start wf . reference "term-bad-first-both" opts
+            h <- C.start wf.reference "term-bad-first-both" opts
             h' <-
-              C.getHandle wf
-                . reference
+              C.getHandle wf.reference
+                
                   "term-bad-first-both"
-                  (Just $ fromJust h . workflowHandleRunId)
+                  (Just $ fromJust h.workflowHandleRunId)
                   (Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"})
             C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
           )
