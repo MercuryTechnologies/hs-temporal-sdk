@@ -601,7 +601,7 @@ startFromPayloadsImpl k@(KnownWorkflow codec _) wfId opts payloads modifyReq = d
     hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.headers
     memo' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.memo
     let tq = rawTaskQueue opts'.taskQueue
-        ns = fromMaybe c.clientConfig.namespace opts'.namespaceOverride
+        ns = c.clientConfig.namespace
         req =
           modifyReq $
             defMessage
@@ -739,7 +739,7 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
     hdrs <- processorEncodePayloads processor opts'.signalWithStartOptions.headers
     memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
     let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
-        ns = fromMaybe c.clientConfig.namespace opts'.signalWithStartOptions.namespaceOverride
+        ns = c.clientConfig.namespace
         msg =
           defMessage
             & RR.namespace .~ rawNamespace ns

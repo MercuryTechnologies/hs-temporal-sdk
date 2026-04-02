@@ -117,13 +117,6 @@ data StartWorkflowOptions = StartWorkflowOptions
   --
   -- 'Nothing' (the default) inherits from the calling workflow, or uses the
   -- server default (typically @3@ with a 1–5 range).
-  , namespaceOverride :: Maybe Namespace
-  -- ^ Override the namespace for this workflow start request. When 'Nothing',
-  -- the 'WorkflowClient' default namespace is used. When 'Just', the workflow
-  -- is started in the specified namespace instead.
-  --
-  -- This is useful when a single client needs to dispatch workflows to
-  -- multiple namespaces (e.g. during a namespace migration).
   }
   deriving stock (Show, Eq, Lift)
 
@@ -254,7 +247,6 @@ startWorkflowOptions tq =
     , requestEagerExecution = False
     , workflowStartDelay = Nothing
     , priority = Nothing
-    , namespaceOverride = Nothing
     }
 
 
