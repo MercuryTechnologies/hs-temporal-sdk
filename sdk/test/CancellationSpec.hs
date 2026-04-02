@@ -154,8 +154,7 @@ tests = describe "Cancellation" $ do
             h <-
               W.startActivity
                 testActivityAct.reference
-                
-                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
             W.cancel (h :: W.Task Int)
             W.wait h `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
           wf = W.provideWorkflow defaultCodec "activityCancellation" workflow
@@ -186,10 +185,9 @@ tests = describe "Cancellation" $ do
             h <-
               W.startActivity
                 testActivityAct.reference
-                
-                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
-                    { W.heartbeatTimeout = Just $ seconds 1
-                    }
+                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+                  { W.heartbeatTimeout = Just $ seconds 1
+                  }
             W.sleep $ nanoseconds 1
             W.cancel (h :: W.Task Int)
             W.wait h `Catch.catch` \(_ :: ActivityCancelled) -> pure 1

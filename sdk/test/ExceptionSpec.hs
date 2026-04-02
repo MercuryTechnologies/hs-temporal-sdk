@@ -34,7 +34,7 @@ spec = do
         `shouldBe` [ RpcErrorWorkflowExecutionAlreadyStarted $
                       defMessage
                         & field @"startRequestId"
-                        .~ "3f7d236b-fcda-4482-a02d-834c225e5e91"
+                          .~ "3f7d236b-fcda-4482-a02d-834c225e5e91"
                         & field @"runId"
-                        .~ "0195f782-4076-7e1f-8d9f-6567e745033e"
+                          .~ "0195f782-4076-7e1f-8d9f-6567e745033e"
                    ]

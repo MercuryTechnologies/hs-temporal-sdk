@@ -117,11 +117,11 @@ tests = describe "Terminate" $ do
         ( useClient $ do
             h <- C.start wf.reference "term-bad-first-both" opts
             h' <-
-              C.getHandle wf.reference
-                
-                  "term-bad-first-both"
-                  (Just $ fromJust h.workflowHandleRunId)
-                  (Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"})
+              C.getHandle
+                wf.reference
+                "term-bad-first-both"
+                (Just $ fromJust h.workflowHandleRunId)
+                (Just C.GetHandleOptions {C.firstExecutionRunId = Just "bad-first-execution-run-id"})
             C.terminate h' C.TerminationOptions {terminationReason = "testing", terminationDetails = []}
           )
           `shouldThrow` \(RpcError {}) -> True

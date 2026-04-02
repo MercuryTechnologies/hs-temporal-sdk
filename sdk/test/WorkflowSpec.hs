@@ -1004,11 +1004,11 @@ tests = do
           actDef = A.provideActivity defaultCodec "longRunningAct" act
           workflow :: MyWorkflow ()
           workflow =
-            W.executeActivity actDef.reference
-              
-                (W.defaultStartActivityOptions $ W.StartToClose $ seconds 30)
-                  { W.heartbeatTimeout = Just $ seconds 5
-                  }
+            W.executeActivity
+              actDef.reference
+              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 30)
+                { W.heartbeatTimeout = Just $ seconds 5
+                }
           wf = W.provideWorkflow defaultCodec "shutdownCancelsActWf" workflow
           conf = configure () (wf, actDef) $ do
             baseConf

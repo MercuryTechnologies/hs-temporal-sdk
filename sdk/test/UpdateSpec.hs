@@ -254,10 +254,10 @@ updateTests = describe "Update" $ do
               updateDef
               ( \n -> do
                   result <-
-                    W.executeActivity actDef.reference
-                      
-                        (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
-                        n
+                    W.executeActivity
+                      actDef.reference
+                      (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+                      n
                   W.writeStateVar st result
                   pure result
               )
