@@ -117,6 +117,13 @@ data StartWorkflowOptions = StartWorkflowOptions
   --
   -- 'Nothing' (the default) inherits from the calling workflow, or uses the
   -- server default (typically @3@ with a 1–5 range).
+  , namespaceOverride :: Maybe Namespace
+  -- ^ Override the namespace for this workflow start request. When 'Nothing',
+  -- the 'WorkflowClient' default namespace is used. When 'Just', the workflow
+  -- is started in the specified namespace instead.
+  --
+  -- This is useful when a single client needs to dispatch workflows to
+  -- multiple namespaces (e.g. during a namespace migration).
   }
   deriving stock (Show, Eq, Lift)
 
@@ -247,6 +254,7 @@ startWorkflowOptions tq =
     , requestEagerExecution = False
     , workflowStartDelay = Nothing
     , priority = Nothing
+    , namespaceOverride = Nothing
     }
 
 
@@ -287,6 +295,14 @@ data WorkflowClient = WorkflowClient
   { clientCore :: {-# UNPACK #-} !Client
   , clientConfig :: {-# UNPACK #-} !WorkflowClientConfig
   }
+
+
+{- | Derive a 'WorkflowClient' that targets a different namespace while
+reusing the same underlying gRPC connection. Useful when a single
+connection needs to dispatch workflows to multiple namespaces.
+-}
+withNamespace :: Namespace -> WorkflowClient -> WorkflowClient
+withNamespace ns wc = wc {clientConfig = wc.clientConfig {namespace = ns}}
 
 
 data WorkflowHandle a = WorkflowHandle

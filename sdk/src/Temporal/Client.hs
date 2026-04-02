@@ -23,6 +23,7 @@ module Temporal.Client (
   -- * Workflow Client
   WorkflowClient (..),
   workflowClient,
+  withNamespace,
   WorkflowClientConfig (..),
   mkWorkflowClientConfig,
   HasWorkflowClient (..),
@@ -600,10 +601,11 @@ startFromPayloadsImpl k@(KnownWorkflow codec _) wfId opts payloads modifyReq = d
     hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.headers
     memo' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.memo
     let tq = rawTaskQueue opts'.taskQueue
+        ns = fromMaybe c.clientConfig.namespace opts'.namespaceOverride
         req =
           modifyReq $
             defMessage
-              & WF.namespace .~ rawNamespace c.clientConfig.namespace
+              & WF.namespace .~ rawNamespace ns
               & WF.workflowId .~ rawWorkflowId wfId'
               & WF.workflowType
                 .~ (defMessage & Common.name .~ rawWorkflowType wfName)
@@ -737,9 +739,10 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
     hdrs <- processorEncodePayloads processor opts'.signalWithStartOptions.headers
     memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
     let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
+        ns = fromMaybe c.clientConfig.namespace opts'.signalWithStartOptions.namespaceOverride
         msg =
           defMessage
-            & RR.namespace .~ rawNamespace c.clientConfig.namespace
+            & RR.namespace .~ rawNamespace ns
             & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
             & RR.workflowType
               .~ (defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType)
