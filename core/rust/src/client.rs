@@ -156,7 +156,7 @@ impl From<&RpcCall> for TemporalCall {
                 let req_array = rpc_call.req;
                 let rust_vec = (*req_array).as_rust();
                 rust_vec.unwrap_or_else(|e| {
-                    eprintln!("Failed to convert RPC request: {:?}", e);
+                    eprintln!("Failed to convert Temporal client RPC request: {:?}", e);
                     vec![]
                 }).clone()
             },
@@ -210,7 +210,7 @@ pub fn connect_client(
             let opts = opts_result.map_err(|e| {
                 let err_message = format!("Invalid client options: {}", e).into_bytes();
                 CArray::c_repr_of(err_message).unwrap_or_else(|conv_err| {
-                    eprintln!("Failed to convert error message: {:?}", conv_err);
+                    eprintln!("Failed to convert Temporal client error message: {:?}", conv_err);
                     CArray { data_ptr: std::ptr::null_mut(), size: 0 }
                 })
             })?;
@@ -227,7 +227,7 @@ pub fn connect_client(
                 Err(e) => {
                     let err_message = e.to_string().into_bytes();
                     Err(CArray::c_repr_of(err_message).unwrap_or_else(|conv_err| {
-                        eprintln!("Failed to convert error message: {:?}", conv_err);
+                        eprintln!("Failed to convert Temporal client error message: {:?}", conv_err);
                         CArray { data_ptr: std::ptr::null_mut(), size: 0 }
                     }))
                 }
@@ -253,10 +253,9 @@ pub unsafe extern "C" fn hs_temporal_connect_client(
     let config: ClientConfig = match serde_json::from_slice(config_json.to_bytes()) {
         Ok(cfg) => cfg,
         Err(e) => {
-            eprintln!("Failed to parse client config: {}", e);
             let err_message = format!("Failed to parse client config: {}", e).into_bytes();
             let err_array = CArray::c_repr_of(err_message).unwrap_or_else(|conv_err| {
-                eprintln!("Failed to convert error message: {:?}", conv_err);
+                eprintln!("Failed to convert Temporal client error message: {:?}", conv_err);
                 CArray { data_ptr: std::ptr::null_mut(), size: 0 }
             });
             unsafe {
@@ -331,7 +330,7 @@ impl From<String> for CRPCError {
             details: vec![],
         })
         .unwrap_or_else(|e| {
-            eprintln!("Failed to convert RPC error '{}': {:?}", err, e);
+            eprintln!("Failed to convert Temporal client RPC error '{}': {:?}", err, e);
             CRPCError {
                 code: 0,
                 message: std::ptr::null(),
@@ -349,7 +348,7 @@ impl From<String> for CRPCError {
 pub unsafe extern "C" fn hs_temporal_drop_rpc_error(error: *mut CRPCError) {
     unsafe {
         if let Err(e) = CRPCError::drop_raw_pointer(error) {
-            eprintln!("Failed to drop RPC error: {:?}", e);
+            eprintln!("Failed failed to drop Temporal client RPC error pointer: {:?}", e);
         }
     }
 }
@@ -364,14 +363,13 @@ where
     match res {
         Ok(resp) => Ok(resp.get_ref().encode_to_vec()),
         Err(err) => {
-            eprintln!("Error: {:?}", err);
             Err(CRPCError::c_repr_of(RPCError {
                 code: err.code() as u32,
                 message: err.message().to_owned(),
                 details: err.details().into(),
             })
             .unwrap_or_else(|e| {
-                eprintln!("Failed to convert RPC error: {:?}", e);
+                eprintln!("Failed to convert Temporal client RPC error: {:?}", e);
                 CRPCError {
                     code: err.code() as u32,
                     message: std::ptr::null(),

@@ -34,7 +34,7 @@ macro_rules! to_c_worker_error {
         let code_val = $code;
         let err_val = $err;
         CWorkerError::c_repr_of(err_val).unwrap_or_else(|e| {
-            eprintln!("Failed to convert worker error: {:?}", e);
+            eprintln!("Failed to convert Temporal worker error: {:?}", e);
             CWorkerError {
                 code: code_val,
                 message: std::ptr::null(),
@@ -605,7 +605,7 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
     let client_ref = match unsafe { client.as_ref() } {
         Some(c) => c,
         None => {
-            eprintln!("FATAL: client pointer is null");
+            eprintln!("FATAL: Temporal worker client pointer is null");
             unsafe {
                 *result_slot = std::ptr::null_mut();
                 *error_slot = std::ptr::null_mut();
@@ -617,7 +617,6 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
     let config_json = match unsafe { CArray::raw_borrow(config) } {
         Ok(json) => json,
         Err(e) => {
-            eprintln!("Failed to borrow config: {:?}", e);
             let worker_error = WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,
                 message: format!("Failed to borrow config: {:?}", e),
@@ -625,7 +624,7 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
             unsafe {
                 *error_slot = CWorkerError::c_repr_of(worker_error)
                     .unwrap_or_else(|e| {
-                        eprintln!("Failed to convert worker error: {:?}", e);
+                        eprintln!("Failed to convert Temporal worker error: {:?}", e);
                         CWorkerError { code: WorkerErrorCode::InvalidWorkerConfig, message: std::ptr::null() }
                     })
                     .into_raw_pointer_mut();
@@ -638,7 +637,6 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
     let config_vec = match config_json.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert config: {:?}", e);
             let worker_error = WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,
                 message: format!("Failed to convert config: {:?}", e),
@@ -646,7 +644,7 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
             unsafe {
                 *error_slot = CWorkerError::c_repr_of(worker_error)
                     .unwrap_or_else(|e| {
-                        eprintln!("Failed to convert worker error: {:?}", e);
+                        eprintln!("Failed to convert Temporal worker error: {:?}", e);
                         CWorkerError { code: WorkerErrorCode::InvalidWorkerConfig, message: std::ptr::null() }
                     })
                     .into_raw_pointer_mut();
@@ -671,11 +669,10 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
                     unsafe { *result_slot = Box::into_raw(Box::new(worker_ref)) };
                 }
                 Err(worker_error) => {
-                    eprintln!("Error: {:?}", worker_error);
                     unsafe {
                         *error_slot = CWorkerError::c_repr_of(worker_error)
                             .unwrap_or_else(|e| {
-                                eprintln!("Failed to convert worker error: {:?}", e);
+                                eprintln!("Failed to convert Temporal worker error: {:?}", e);
                                 CWorkerError { code: WorkerErrorCode::InitWorkerFailed, message: std::ptr::null() }
                             })
                             .into_raw_pointer_mut()
@@ -684,11 +681,10 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
             }
         }
         Err(worker_error) => {
-            eprintln!("Error: {:?}", worker_error);
             unsafe {
                 *error_slot = CWorkerError::c_repr_of(worker_error)
                     .unwrap_or_else(|e| {
-                        eprintln!("Failed to convert worker error: {:?}", e);
+                        eprintln!("Failed to convert Temporal worker error: {:?}", e);
                         CWorkerError { code: WorkerErrorCode::InvalidWorkerConfig, message: std::ptr::null() }
                     })
                     .into_raw_pointer_mut()
@@ -734,7 +730,7 @@ pub unsafe extern "C" fn hs_temporal_new_replay_worker(
     let runtime_ref = match unsafe { runtime.as_ref() } {
         Some(r) => r,
         None => {
-            eprintln!("FATAL: runtime pointer is null");
+            eprintln!("FATAL: Temporal replay worker runtime pointer is null");
             unsafe {
                 *worker_slot = std::ptr::null_mut();
                 *history_slot = std::ptr::null_mut();
@@ -747,7 +743,6 @@ pub unsafe extern "C" fn hs_temporal_new_replay_worker(
     let config_json = match unsafe { CArray::raw_borrow(config) } {
         Ok(json) => json,
         Err(e) => {
-            eprintln!("Failed to borrow config: {:?}", e);
             let worker_error = WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,
                 message: format!("Failed to borrow config: {:?}", e),
@@ -763,7 +758,6 @@ pub unsafe extern "C" fn hs_temporal_new_replay_worker(
     let config_vec = match config_json.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert config: {:?}", e);
             let worker_error = WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,
                 message: format!("Failed to convert config: {:?}", e),
@@ -811,7 +805,6 @@ impl WorkerRef {
         let worker = match self.worker.as_ref() {
             Some(w) => w.clone(),
             None => {
-                eprintln!("Worker is None, returning error");
                 let error = to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -837,7 +830,6 @@ impl WorkerRef {
             };
             let c_bytes = bytes.map_err(|err| to_c_worker_error!(err, err.code))?;
             CArray::c_repr_of(c_bytes).map_err(|e| {
-                eprintln!("Failed to convert bytes to CArray: {:?}", e);
                 to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -853,7 +845,6 @@ impl WorkerRef {
         let worker = match self.worker.as_ref() {
             Some(w) => w.clone(),
             None => {
-                eprintln!("Worker is None, returning error");
                 let error = to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -879,7 +870,6 @@ impl WorkerRef {
             };
             let c_bytes = bytes.map_err(|err| to_c_worker_error!(err, err.code))?;
             CArray::c_repr_of(c_bytes).map_err(|e| {
-                eprintln!("Failed to convert bytes to CArray: {:?}", e);
                 to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -899,7 +889,6 @@ impl WorkerRef {
         let worker = match self.worker.as_ref() {
             Some(w) => w.clone(),
             None => {
-                eprintln!("Worker is None, returning error");
                 let error = to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -942,7 +931,6 @@ impl WorkerRef {
         let worker = match self.worker.as_ref() {
             Some(w) => w.clone(),
             None => {
-                eprintln!("Worker is None, returning error");
                 let error = to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -1047,7 +1035,7 @@ impl WorkerRef {
         if let Some(worker) = self.worker.as_ref() {
             worker.request_workflow_eviction(run_id);
         } else {
-            eprintln!("Worker is None, cannot request workflow eviction");
+            eprintln!("Temporal worker is None, cannot request workflow eviction");
         }
     }
 
@@ -1056,7 +1044,7 @@ impl WorkerRef {
             let worker = worker.clone();
             worker.initiate_shutdown();
         } else {
-            eprintln!("Worker is None, cannot initiate shutdown");
+            eprintln!("Temporal worker is None, cannot initiate shutdown");
         }
     }
 
@@ -1066,7 +1054,6 @@ impl WorkerRef {
         let worker_arc = match self.worker.take() {
             Some(w) => w,
             None => {
-                eprintln!("Worker is None, returning error");
                 let error = to_c_worker_error!(
                     WorkerError {
                         code: WorkerErrorCode::SDKError,
@@ -1124,12 +1111,11 @@ pub unsafe extern "C" fn hs_temporal_validate_worker(
     let w = match worker.worker.as_ref() {
         Some(w) => w.clone(),
         None => {
-            eprintln!("Worker is None, returning error");
             let error = CWorkerValidationError::c_repr_of(FormattedError {
                 message: "Worker has been finalized".to_string(),
             })
             .unwrap_or_else(|e| {
-                eprintln!("Failed to convert validation error: {:?}", e);
+                eprintln!("Failed to convert Temporal worker validation error: {:?}", e);
                 CWorkerValidationError {
                     message: std::ptr::null(),
                 }
@@ -1146,7 +1132,7 @@ pub unsafe extern "C" fn hs_temporal_validate_worker(
                 message: format!("{}", err),
             })
             .unwrap_or_else(|e| {
-                eprintln!("Failed to convert validation error: {:?}", e);
+                eprintln!("Failed to convert Temporal worker validation error: {:?}", e);
                 CWorkerValidationError {
                     message: std::ptr::null(),
                 }
@@ -1216,7 +1202,6 @@ pub unsafe extern "C" fn hs_temporal_worker_complete_workflow_activation(
     let proto_array = match unsafe { CArray::raw_borrow(proto) } {
         Ok(arr) => arr,
         Err(e) => {
-            eprintln!("Failed to borrow proto: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1235,7 +1220,6 @@ pub unsafe extern "C" fn hs_temporal_worker_complete_workflow_activation(
     let proto_vec = match proto_array.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert proto: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1277,7 +1261,6 @@ pub unsafe extern "C" fn hs_temporal_worker_complete_activity_task(
     let proto_array = match unsafe { CArray::raw_borrow(proto) } {
         Ok(arr) => arr,
         Err(e) => {
-            eprintln!("Failed to borrow proto: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1296,7 +1279,6 @@ pub unsafe extern "C" fn hs_temporal_worker_complete_activity_task(
     let proto_vec = match proto_array.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert proto: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1383,7 +1365,6 @@ pub unsafe extern "C" fn hs_temporal_worker_record_activity_heartbeat(
     let proto_array = match unsafe { CArray::raw_borrow(proto) } {
         Ok(arr) => arr,
         Err(e) => {
-            eprintln!("Failed to borrow proto: {:?}", e);
             let err = to_c_worker_error!(
                 WorkerError {
                     code: WorkerErrorCode::InvalidProto,
@@ -1401,7 +1382,6 @@ pub unsafe extern "C" fn hs_temporal_worker_record_activity_heartbeat(
     let proto_vec = match proto_array.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert proto: {:?}", e);
             let err = to_c_worker_error!(
                 WorkerError {
                     code: WorkerErrorCode::InvalidProto,
@@ -1445,21 +1425,21 @@ pub unsafe extern "C" fn hs_temporal_worker_request_workflow_eviction(
     let run_id_array = match unsafe { CArray::raw_borrow(run_id) } {
         Ok(arr) => arr,
         Err(e) => {
-            eprintln!("Failed to borrow run_id: {:?}", e);
+            eprintln!("Failed to borrow Temporal run_id: {:?}", e);
             return;
         }
     };
     let run_id_vec = match run_id_array.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert run_id: {:?}", e);
+            eprintln!("Failed to convert Temporal run_id: {:?}", e);
             return;
         }
     };
     let run_id_str = match str::from_utf8(&run_id_vec) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("Failed to convert run_id to UTF-8: {}", e);
+            eprintln!("Failed to convert Temporal run_id to UTF-8: {}", e);
             return;
         }
     };
@@ -1601,7 +1581,6 @@ pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
     let wf_id_array = match unsafe { CArray::raw_borrow(workflow_id) } {
         Ok(arr) => arr,
         Err(e) => {
-            eprintln!("Failed to borrow workflow_id: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1620,7 +1599,6 @@ pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
     let wf_id_vec = match wf_id_array.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert workflow_id: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1639,7 +1617,6 @@ pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
     let wf_id_str = match str::from_utf8(&wf_id_vec) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("Failed to convert workflow_id to UTF-8: {}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1659,7 +1636,6 @@ pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
     let history_array = match unsafe { CArray::raw_borrow(history_proto) } {
         Ok(arr) => arr,
         Err(e) => {
-            eprintln!("Failed to borrow history_proto: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
@@ -1678,7 +1654,6 @@ pub unsafe extern "C" fn hs_temporal_history_pusher_push_history(
     let history_vec = match history_array.as_rust() {
         Ok(v) => v.clone(),
         Err(e) => {
-            eprintln!("Failed to convert history_proto: {:?}", e);
             unsafe {
                 *error_slot = to_c_worker_error!(
                     WorkerError {
