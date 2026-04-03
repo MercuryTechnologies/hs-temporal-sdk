@@ -322,7 +322,6 @@ where
     match res {
         Ok(resp) => Ok(resp.get_ref().encode_to_vec()),
         Err(err) => {
-            eprintln!("Error: {:?}", err);
             Err(CRPCError::c_repr_of(RPCError {
                 code: err.code() as u32,
                 message: err.message().to_owned(),

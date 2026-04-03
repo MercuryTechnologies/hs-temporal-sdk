@@ -604,7 +604,6 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
                     unsafe { *result_slot = Box::into_raw(Box::new(worker_ref)) };
                 }
                 Err(worker_error) => {
-                    eprintln!("Error: {:?}", worker_error);
                     unsafe {
                         *error_slot = CWorkerError::c_repr_of(worker_error)
                             .unwrap()
@@ -614,7 +613,6 @@ pub unsafe extern "C" fn hs_temporal_new_worker(
             }
         }
         Err(worker_error) => {
-            eprintln!("Error: {:?}", worker_error);
             unsafe {
                 *error_slot = CWorkerError::c_repr_of(worker_error)
                     .unwrap()
