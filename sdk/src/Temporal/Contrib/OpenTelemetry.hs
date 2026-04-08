@@ -21,15 +21,19 @@ import Control.Monad.Catch
 import Control.Monad.IO.Class
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int
+import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Vault.Strict as Vault
 import Data.Word (Word32)
 import GHC.IO (unsafePerformIO)
+import OpenTelemetry.Propagator.W3CBaggage (decodeBaggage, encodeBaggage) 
+import OpenTelemetry.Context (Context)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator
-import OpenTelemetry.Propagator.W3CTraceContext
+import OpenTelemetry.Propagator.W3CTraceContext (decodeSpanContext, encodeSpanContext)
 import OpenTelemetry.Trace.Core
 import Temporal.Activity.Types
 -- TODO rework WorkflowExitVariant to not expose internals
@@ -45,13 +49,13 @@ import Prelude hiding (span)
 
 
 -- | "_tracer-data"
-defaultHeaderKey :: T.Text
+defaultHeaderKey :: Text
 defaultHeaderKey = "_tracer-data"
 
 
 data OpenTelemetryInterceptorOptions = OpenTelemetryInterceptorOptions
   { tracerProvider :: Maybe TracerProvider
-  , headerKey :: T.Text
+  , headerKey :: Text
   }
 
 
@@ -63,7 +67,7 @@ defaultOpenTelemetryInterceptorOptions =
     }
 
 
-headersPropagator :: Propagator Ctxt.Context (Map.Map T.Text Payload) (Map.Map T.Text Payload)
+headersPropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersPropagator =
   Propagator
     { propagatorNames = ["tracecontext"]
@@ -78,11 +82,27 @@ headersPropagator =
         Nothing -> pure hs
         Just s -> do
           (traceParentHeader, traceStateHeader) <- encodeSpanContext s
-          pure $
-            Map.insert "traceparent" (Payload traceParentHeader mempty) $
-              Map.insert "tracestate" (Payload traceStateHeader mempty) hs
+          pure
+            . Map.insert "traceparent" (Payload traceParentHeader mempty)
+            . Map.insert "tracestate" (Payload traceStateHeader mempty)
+            $ hs
     }
 
+headersBaggagePropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
+headersBaggagePropagator =
+  Propagator
+    { propagatorNames = ["baggage"]
+    , extractor = \headers ctxt ->
+        let payload = payloadData <$> Map.lookup "baggage" headers
+        in pure $! case payload >>= decodeBaggage of
+          Nothing -> ctxt
+          Just baggage -> Ctxt.insertBaggage baggage ctxt
+    , injector = \ctxt headers -> pure $! case Ctxt.lookupBaggage ctxt of
+        Nothing -> headers
+        Just baggage ->
+          let payload = Payload (encodeBaggage baggage) mempty
+          in Map.insert "baggage" payload headers
+    }
 
 tracerKey :: Vault.Key Tracer
 tracerKey = unsafePerformIO Vault.newKey
