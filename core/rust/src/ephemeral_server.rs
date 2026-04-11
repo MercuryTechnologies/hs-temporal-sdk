@@ -102,13 +102,57 @@ pub unsafe extern "C" fn hs_temporal_start_dev_server(
     error_slot: *mut *mut CArray<u8>,
     result_slot: *mut *mut EphemeralServerRef,
 ) {
-    let runtime_ref = unsafe { runtime.as_ref().unwrap() };
+    let runtime_ref = match unsafe { runtime.as_ref() } {
+        Some(r) => r,
+        None => {
+            eprintln!("FATAL: runtime pointer is null");
+            unsafe {
+                *error_slot = std::ptr::null_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            return;
+        }
+    };
     let runtime = &runtime_ref.runtime;
-    let mut de = serde_json::Deserializer::from_str(unsafe {
-        std::str::from_utf8_unchecked(CStr::from_ptr(json_string).to_bytes())
-    });
-    let conf =
-        TemporalDevServerConfigDef::deserialize(&mut de).expect("Failed to deserialize config");
+
+    let json_bytes = unsafe { CStr::from_ptr(json_string).to_bytes() };
+    let json_str = match std::str::from_utf8(json_bytes) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("Failed to parse JSON string as UTF-8: {}", e);
+            let err_msg = format!("Failed to parse JSON string as UTF-8: {}", e).into_bytes();
+            let err_array = CArray::c_repr_of(err_msg).unwrap_or_else(|e| {
+                eprintln!("Failed to convert error message: {:?}", e);
+                CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+            });
+            unsafe {
+                *error_slot = err_array.into_raw_pointer_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            runtime.put_mvar(cap, mvar);
+            return;
+        }
+    };
+
+    let mut de = serde_json::Deserializer::from_str(json_str);
+    let conf = match TemporalDevServerConfigDef::deserialize(&mut de) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to deserialize config: {}", e);
+            let err_msg = format!("Failed to deserialize config: {}", e).into_bytes();
+            let err_array = CArray::c_repr_of(err_msg).unwrap_or_else(|e| {
+                eprintln!("Failed to convert error message: {:?}", e);
+                CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+            });
+            unsafe {
+                *error_slot = err_array.into_raw_pointer_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            runtime.put_mvar(cap, mvar);
+            return;
+        }
+    };
+
     let hs: HsCallback<EphemeralServerRef, CArray<u8>> = HsCallback {
         cap,
         mvar,
@@ -124,7 +168,10 @@ pub unsafe extern "C" fn hs_temporal_start_dev_server(
             }),
             Err(e) => Err(
                 CArray::c_repr_of(format!("Failed to start server: {}", e).into_bytes())
-                    .expect("Failed to convert error to CArray"),
+                    .unwrap_or_else(|e| {
+                        eprintln!("Failed to convert error to CArray: {:?}", e);
+                        CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+                    }),
             ),
         }
     })
@@ -153,11 +200,20 @@ pub unsafe extern "C" fn hs_temporal_shutdown_ephemeral_server(
     server_ref.runtime.future_result_into_hs(hs, async move {
         let result = server.shutdown().await;
         match result {
-            Ok(()) => Ok(CUnit::c_repr_of(Unit {}).unwrap()),
+            Ok(()) => CUnit::c_repr_of(Unit {}).map_err(|e| {
+                eprintln!("Failed to convert CUnit: {:?}", e);
+                CArray::c_repr_of(b"Failed to convert result".to_vec()).unwrap_or_else(|e| {
+                    eprintln!("Failed to convert error message: {:?}", e);
+                    CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+                })
+            }),
             Err(e) => Err(CArray::c_repr_of(
                 format!("Failed to shutdown server: {}", e).into_bytes(),
             )
-            .expect("Failed to convert error to CArray")),
+            .unwrap_or_else(|e| {
+                eprintln!("Failed to convert error to CArray: {:?}", e);
+                CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+            })),
         }
     })
 }
@@ -188,12 +244,57 @@ pub unsafe extern "C" fn hs_temporal_start_test_server(
     error_slot: *mut *mut CArray<u8>,
     result_slot: *mut *mut EphemeralServerRef,
 ) {
-    let runtime_ref = unsafe { runtime.as_ref().unwrap() };
+    let runtime_ref = match unsafe { runtime.as_ref() } {
+        Some(r) => r,
+        None => {
+            eprintln!("FATAL: runtime pointer is null");
+            unsafe {
+                *error_slot = std::ptr::null_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            return;
+        }
+    };
     let runtime = &runtime_ref.runtime;
-    let mut de = serde_json::Deserializer::from_str(unsafe {
-        std::str::from_utf8_unchecked(CStr::from_ptr(json_string).to_bytes())
-    });
-    let conf = TestServerConfigDef::deserialize(&mut de).expect("Failed to deserialize config");
+
+    let json_bytes = unsafe { CStr::from_ptr(json_string).to_bytes() };
+    let json_str = match std::str::from_utf8(json_bytes) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("Failed to parse JSON string as UTF-8: {}", e);
+            let err_msg = format!("Failed to parse JSON string as UTF-8: {}", e).into_bytes();
+            let err_array = CArray::c_repr_of(err_msg).unwrap_or_else(|e| {
+                eprintln!("Failed to convert error message: {:?}", e);
+                CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+            });
+            unsafe {
+                *error_slot = err_array.into_raw_pointer_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            runtime.put_mvar(cap, mvar);
+            return;
+        }
+    };
+
+    let mut de = serde_json::Deserializer::from_str(json_str);
+    let conf = match TestServerConfigDef::deserialize(&mut de) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to deserialize config: {}", e);
+            let err_msg = format!("Failed to deserialize config: {}", e).into_bytes();
+            let err_array = CArray::c_repr_of(err_msg).unwrap_or_else(|e| {
+                eprintln!("Failed to convert error message: {:?}", e);
+                CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+            });
+            unsafe {
+                *error_slot = err_array.into_raw_pointer_mut();
+                *result_slot = std::ptr::null_mut();
+            }
+            runtime.put_mvar(cap, mvar);
+            return;
+        }
+    };
+
     let hs: HsCallback<EphemeralServerRef, CArray<u8>> = HsCallback {
         cap,
         mvar,
@@ -209,7 +310,10 @@ pub unsafe extern "C" fn hs_temporal_start_test_server(
             }),
             Err(e) => Err(
                 CArray::c_repr_of(format!("Failed to start server: {}", e).into_bytes())
-                    .expect("Failed to convert error to CArray"),
+                    .unwrap_or_else(|e| {
+                        eprintln!("Failed to convert error to CArray: {:?}", e);
+                        CArray { data_ptr: std::ptr::null_mut(), size: 0 }
+                    }),
             ),
         }
     })
