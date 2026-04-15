@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::ffi::CStr;
 use std::str::{FromStr, from_utf8_unchecked};
 use std::time::Duration;
-use temporal_client::{
+use temporalio_client::{
     ClientOptions, ClientOptionsBuilder, ClientOptionsBuilderError, ConfiguredClient, RetryClient,
     RetryConfig, TemporalServiceClient, TlsConfig,
 };
@@ -60,7 +60,7 @@ fn client_config_to_options(
             domain: tls_config.domain,
             client_tls_config: match (tls_config.client_cert, tls_config.client_private_key) {
                 (Some(client_cert), Some(client_private_key)) => {
-                    Some(temporal_client::ClientTlsConfig {
+                    Some(temporalio_client::ClientTlsConfig {
                         client_cert,
                         client_private_key,
                     })
