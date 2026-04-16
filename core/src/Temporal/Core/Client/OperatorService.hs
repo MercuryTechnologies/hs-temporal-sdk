@@ -6,7 +6,6 @@ module Temporal.Core.Client.OperatorService where
 import Proto.Temporal.Api.Operatorservice.V1.RequestResponse
 import Proto.Temporal.Api.Operatorservice.V1.Service
 import Temporal.Core.Client
-import Temporal.Internal.FFI
 
 
 foreign import ccall "hs_add_or_update_remote_cluster" hs_add_or_update_remote_cluster :: PrimRpcCall

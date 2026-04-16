@@ -6,21 +6,21 @@ use std::marker::PhantomData;
 use std::str;
 use std::sync::Arc;
 use std::time::Duration;
-use temporal_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
-use temporal_sdk_core::{
-    ResourceBasedSlotsOptionsBuilder, ResourceSlotOptions,
-    SlotSupplierOptions, TunerHolderOptionsBuilder,
-};
-use temporal_sdk_core_api::errors::{PollError, WorkflowErrorType};
-use temporal_sdk_core_api::worker::{
+use temporalio_common::Worker;
+use temporalio_common::errors::{PollError, WorkflowErrorType};
+use temporalio_common::protos::coresdk::workflow_completion::WorkflowActivationCompletion;
+use temporalio_common::protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
+use temporalio_common::protos::coresdk::nexus::NexusTaskCompletion;
+use temporalio_common::protos::temporal::api::history::v1::History;
+use temporalio_common::worker::{
     PollerBehavior, SlotKind, SlotInfoTrait, SlotMarkUsedContext, SlotReleaseContext,
     SlotReservationContext, SlotSupplier, SlotSupplierPermit, WorkerVersioningStrategy,
 };
-use temporal_sdk_core_api::Worker;
-use temporal_sdk_core_protos::coresdk::workflow_completion::WorkflowActivationCompletion;
-use temporal_sdk_core_protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
-use temporal_sdk_core_protos::coresdk::nexus::NexusTaskCompletion;
-use temporal_sdk_core_protos::temporal::api::history::v1::History;
+use temporalio_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
+use temporalio_sdk_core::{
+    ResourceBasedSlotsOptionsBuilder, ResourceSlotOptions,
+    SlotSupplierOptions, TunerHolderOptionsBuilder,
+};
 use tokio::sync::mpsc::{Sender, channel};
 use tokio_stream::wrappers::ReceiverStream;
 
@@ -29,7 +29,7 @@ use crate::runtime::{self, Capability, HsCallback, MVar};
 use serde::{Deserialize, Serialize};
 
 pub struct WorkerRef {
-    worker: Option<Arc<temporal_sdk_core::Worker>>,
+    worker: Option<Arc<temporalio_sdk_core::Worker>>,
     runtime: runtime::Runtime,
 }
 
@@ -63,7 +63,7 @@ pub struct TunerConfig {
 }
 
 impl TunerConfig {
-    fn build_tuner_holder(self) -> Result<Box<dyn temporal_sdk_core_api::worker::WorkerTuner + Send + Sync>, WorkerError> {
+    fn build_tuner_holder(self) -> Result<Box<dyn temporalio_common::worker::WorkerTuner + Send + Sync>, WorkerError> {
         let resource_opts = self.resource_based_tuner_options.as_ref().map(|rbt| {
             ResourceBasedSlotsOptionsBuilder::default()
                 .target_mem_usage(rbt.target_memory_usage)
@@ -220,19 +220,19 @@ enum SerializedSlotInfo {
 }
 
 impl SerializedSlotInfo {
-    fn from_info(info: temporal_sdk_core_api::worker::SlotInfo<'_>) -> Self {
+    fn from_info(info: temporalio_common::worker::SlotInfo<'_>) -> Self {
         match info {
-            temporal_sdk_core_api::worker::SlotInfo::Workflow(i) => Self::Workflow {
+            temporalio_common::worker::SlotInfo::Workflow(i) => Self::Workflow {
                 workflow_type: i.workflow_type.clone(),
                 is_sticky: i.is_sticky,
             },
-            temporal_sdk_core_api::worker::SlotInfo::Activity(i) => Self::Activity {
+            temporalio_common::worker::SlotInfo::Activity(i) => Self::Activity {
                 activity_type: i.activity_type.clone(),
             },
-            temporal_sdk_core_api::worker::SlotInfo::LocalActivity(i) => Self::LocalActivity {
+            temporalio_common::worker::SlotInfo::LocalActivity(i) => Self::LocalActivity {
                 activity_type: i.activity_type.clone(),
             },
-            temporal_sdk_core_api::worker::SlotInfo::Nexus(i) => Self::Nexus {
+            temporalio_common::worker::SlotInfo::Nexus(i) => Self::Nexus {
                 service: i.service.clone(),
                 operation: i.operation.clone(),
             },
@@ -373,11 +373,11 @@ pub struct WorkerConfig {
     max_concurrent_nexus_task_polls: Option<usize>,
 }
 
-impl TryFrom<WorkerConfig> for temporal_sdk_core::WorkerConfig {
+impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
     type Error = WorkerError;
 
     fn try_from(conf: WorkerConfig) -> Result<Self, WorkerError> {
-        let mut builder = temporal_sdk_core::WorkerConfigBuilder::default();
+        let mut builder = temporalio_sdk_core::WorkerConfigBuilder::default();
         builder
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
@@ -551,8 +551,8 @@ pub unsafe extern "C" fn hs_temporal_drop_unit(unit: *mut CUnit) {
 
 fn new_worker(client: &client::ClientRef, config: WorkerConfig) -> Result<WorkerRef, WorkerError> {
     enter_sync!(&client.runtime);
-    let config: temporal_sdk_core::WorkerConfig = config.try_into()?;
-    let worker = temporal_sdk_core::init_worker(
+    let config: temporalio_sdk_core::WorkerConfig = config.try_into()?;
+    let worker = temporalio_sdk_core::init_worker(
         &client.runtime.core,
         config,
         client.retry_client.clone().into_inner(),
@@ -627,11 +627,11 @@ fn new_replay_worker(
     config: WorkerConfig,
 ) -> Result<(WorkerRef, HistoryPusher), WorkerError> {
     enter_sync!(runtime_ref.runtime);
-    let config: temporal_sdk_core::WorkerConfig = config.try_into()?;
+    let config: temporalio_sdk_core::WorkerConfig = config.try_into()?;
     let (history_pusher, stream) = HistoryPusher::new(runtime_ref.runtime.clone());
     let worker = WorkerRef {
         worker: Some(Arc::new(
-            temporal_sdk_core::init_replay_worker(ReplayWorkerInput::new(config, stream)).map_err(
+            temporalio_sdk_core::init_replay_worker(ReplayWorkerInput::new(config, stream)).map_err(
                 |err| WorkerError {
                     code: WorkerErrorCode::InitReplayWorkerFailed,
                     message: format!("Failed creating replay worker: {}", err),
