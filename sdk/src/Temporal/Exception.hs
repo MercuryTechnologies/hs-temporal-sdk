@@ -37,6 +37,9 @@ module Temporal.Exception (
   CompleteAsync (..),
   ActivityCancelReason (..),
 
+  -- * Worker exceptions
+  ActivityShutdownTimeout (..),
+
   -- * Annotations for errors
   NonRetryableError (..),
   annotateNonRetryableError,
@@ -498,6 +501,24 @@ data ActivityCancelReason
 instance Exception ActivityCancelReason where
   toException = asyncExceptionToException
   fromException = asyncExceptionFromException
+
+
+{- | Thrown from the worker shutdown path when one or more activity threads fail to
+terminate within the configured fatal shutdown period after being sent 'WorkerShutdown'.
+The payload lists the labels of the threads that were still alive when the worker
+abandoned the wait.
+
+A common cause is user activity code swallowing async exceptions (e.g. a bare
+@catch \@SomeException@ without rethrowing) or blocking in a non-interruptible
+way (@uninterruptibleMask@, non-interruptible FFI calls).
+-}
+newtype ActivityShutdownTimeout = ActivityShutdownTimeout
+  { unterminatedThreadLabels :: [String]
+  }
+  deriving stock (Show)
+
+
+instance Exception ActivityShutdownTimeout
 
 
 applicationFailureToException :: (Exception e, ToApplicationFailure e) => e -> SomeException

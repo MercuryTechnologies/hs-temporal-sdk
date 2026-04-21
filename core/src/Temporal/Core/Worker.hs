@@ -480,6 +480,7 @@ data WorkerConfig = WorkerConfig
   , maxActivitiesPerSecond :: Maybe Double
   , maxTaskQueueActivitiesPerSecond :: Maybe Double
   , gracefulShutdownPeriodMillis :: Word64
+  , fatalShutdownPeriodMillis :: Maybe Word64
   , nondeterminismAsWorkflowFail :: Bool
   , nondeterminismAsWorkflowFailForTypes :: [Text]
   , tuner :: Maybe TunerConfig
@@ -512,6 +513,7 @@ defaultWorkerConfig =
     , maxActivitiesPerSecond = Nothing
     , maxTaskQueueActivitiesPerSecond = Nothing
     , gracefulShutdownPeriodMillis = 0
+    , fatalShutdownPeriodMillis = Nothing
     , nondeterminismAsWorkflowFail = False
     , nondeterminismAsWorkflowFailForTypes = []
     , tuner = Nothing

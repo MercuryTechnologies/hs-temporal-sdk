@@ -86,6 +86,7 @@ module Temporal.Worker (
   setMaxActivitiesPerSecond,
   setMaxTaskQueueActivitiesPerSecond,
   setGracefulShutdownPeriodMillis,
+  setFatalShutdownPeriodMillis,
   addInterceptors,
   setPayloadProcessor,
   addNexusServiceHandler,
@@ -467,6 +468,24 @@ setGracefulShutdownPeriodMillis :: Word64 -> ConfigM actEnv ()
 setGracefulShutdownPeriodMillis n = modifyCore $ \conf ->
   conf
     { Core.gracefulShutdownPeriodMillis = n
+    }
+
+
+{- | Optional deadline after which an activity thread that failed to respect
+'WorkerShutdown' is abandoned by the shutdown coordinator.
+
+When this deadline expires for one or more threads, 'shutdown' will raise
+'ActivityShutdownTimeout' containing the labels of the threads that were
+still alive. The process itself can then exit, and the GHC runtime will
+tear the leaked threads down with it.
+
+Defaults to 'Nothing', which blocks indefinitely waiting for activities to
+shut down.
+-}
+setFatalShutdownPeriodMillis :: Maybe Word64 -> ConfigM actEnv ()
+setFatalShutdownPeriodMillis n = modifyCore $ \conf ->
+  conf
+    { Core.fatalShutdownPeriodMillis = n
     }
 
 
@@ -921,8 +940,10 @@ waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActi
     Core.SReplay -> waitSTM workerWorkflowLoop
 
 
-{- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
-in-flight tasks to complete before finalizing the shutdown.
+{- | Shut down a worker.
+
+This will initiate a graceful shutdown of the worker, waiting for all in-flight
+tasks to complete before finalizing the shutdown.
 -}
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker actEnv -> m ()
 shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, workerActivityWorker} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do

@@ -1,6 +1,8 @@
 module ActivitySpec where
 
 import Control.Concurrent (threadDelay)
+import Control.Concurrent.MVar (newEmptyMVar, putMVar, takeMVar)
+import qualified Control.Exception as E
 import Control.Exception (SomeException)
 import Control.Exception.Annotated (checkpoint)
 import Control.Monad.IO.Class (liftIO)
@@ -22,7 +24,7 @@ import qualified Temporal.Client as C
 import Temporal.Duration
 import Temporal.Exception hiding (activityId)
 import Temporal.Payload
-import Temporal.Worker (configure, setLogger, setNamespace, setTaskQueue)
+import Temporal.Worker (configure, setFatalShutdownPeriodMillis, setLogger, setNamespace, setTaskQueue)
 import Temporal.Workflow (StartActivityOptions(activityId, retryPolicy, cancellationType, heartbeatTimeout))
 import qualified Temporal.Workflow as W
 import Test.Hspec
@@ -30,7 +32,9 @@ import TestHelpers
 
 
 spec :: Spec
-spec = withTestServer_ tests
+spec = do
+  withTestServer_ tests
+  withTestServer_ shutdownTests
 
 
 tests :: SpecWith TestEnv
@@ -729,3 +733,39 @@ tests = describe "Activities" $ do
         let opts = defaultStartOptsWithTimeout taskQueue (seconds 15)
         useClient (C.execute wf.reference "waitCancelAct" opts)
           `shouldReturn` "cancelled"
+
+shutdownTests :: SpecWith TestEnv
+shutdownTests = do
+  describe "Worker shutdown" $ do
+    specify "shutdown raises ActivityShutdownTimeout when an activity swallows async exceptions" $ \TestEnv {..} -> do
+      started <- newEmptyMVar
+      blocked <- newEmptyMVar
+      let act :: Activity () ()
+          act = liftIO $ do
+            putMVar started ()
+            -- Swallow *every* async exception — the worker sends at least two
+            -- during shutdown (one via applyActivityTaskCancel from Rust Core,
+            -- one via notifyShutdown). Poll `blocked` so the test can release
+            -- this thread cleanly once it has verified the timeout.
+            let loop = do
+                  done <- E.try @SomeException (takeMVar blocked)
+                  case done of
+                    Right () -> pure ()
+                    _ -> loop
+            loop
+          actDef = provideActivity defaultCodec "unkillableAct" act
+          workflow :: MyWorkflow ()
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 30)
+          wf = W.provideWorkflow defaultCodec "unkillableActWf" workflow
+          conf = configure () (wf, actDef) $ do
+            baseConf
+            setFatalShutdownPeriodMillis (Just 200)
+
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+          run = withWorker conf $ do
+            _ <- useClient (C.start wf.reference "unkillableActWf" opts)
+            takeMVar started
+      run `shouldThrow` \case
+        ActivityShutdownTimeout labels -> not (null labels)
+      putMVar blocked ()

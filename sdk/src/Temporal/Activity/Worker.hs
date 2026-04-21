@@ -12,9 +12,11 @@ import Control.Monad.Reader
 import Data.Bifunctor
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
+import Data.Maybe (catMaybes)
 import Data.ProtoLens
 import Data.Text (Text)
 import qualified Data.Text as T
+import GHC.Conc.Sync (threadLabel)
 import Lens.Family2
 import qualified ListT
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
@@ -54,12 +56,25 @@ data ActivityWorker env = ActivityWorker
 
 notifyShutdown :: MonadUnliftIO m => ActivityWorker env -> m ()
 notifyShutdown worker = do
-  let shutdownGracePeriod = fromIntegral (Core.gracefulShutdownPeriodMillis $ Core.getWorkerConfig worker.workerCore)
-  -- TODO logging here
-  when (shutdownGracePeriod > 0) $ do
+  let cfg = Core.getWorkerConfig worker.workerCore
+      shutdownGracePeriod = fromIntegral (Core.gracefulShutdownPeriodMillis cfg)
+      fatalShutdownPeriod = Core.fatalShutdownPeriodMillis cfg
+  when (shutdownGracePeriod > 0) $
     threadDelay (shutdownGracePeriod * 1000)
   running <- liftIO $ ListT.toList $ StmMap.listTNonAtomic $ worker.runningActivities
-  forConcurrently_ running $ \thread -> cancelWith (snd thread) WorkerShutdown
+  results <- forConcurrently running $ \(_, thread) -> do
+    -- If a fatal shutdown period was given, set up a watchdog to kill the
+    -- cancellation thread if it hasn't returned within that time limit.
+    let watchdog = case fatalShutdownPeriod of
+          Nothing -> fmap Just
+          Just t -> UnliftIO.timeout (fromIntegral t * 1000)
+    result <- watchdog (cancelWith thread WorkerShutdown)
+    case result of
+      Just () -> pure Nothing
+      Nothing -> liftIO $ threadLabel (asyncThreadId thread)
+  let unterminated = catMaybes results
+  unless (null unterminated) $
+    throwIO $ ActivityShutdownTimeout unterminated
 
 
 newtype ActivityWorkerM env m a = ActivityWorkerM {unActivityWorkerM :: ReaderT (ActivityWorker env) m a}
