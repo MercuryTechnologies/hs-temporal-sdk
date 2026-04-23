@@ -9,9 +9,9 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporalio-client = { git = "https://github.com/temporalio/sdk-core", rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee" }
-temporalio-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee", features = ["ephemeral-server"] }
-temporalio-common = { git = "https://github.com/temporalio/sdk-core", rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee", features = ["serde_serialize"] }
+temporalio-client = { git = "https://github.com/temporalio/sdk-core", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912" }
+temporalio-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["ephemeral-server"] }
+temporalio-common = { git = "https://github.com/temporalio/sdk-core", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["serde_serialize"] }
 tokio = "~1.50"
 tokio-stream = "~0.1"
 tonic = "~0.14"
