@@ -217,6 +217,12 @@ lastCompletionResult ::
   Lens.Family2.LensLike' f s a
 lastCompletionResult
   = Data.ProtoLens.Field.field @"lastCompletionResult"
+lastSdkVersion ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "lastSdkVersion" a) =>
+  Lens.Family2.LensLike' f s a
+lastSdkVersion = Data.ProtoLens.Field.field @"lastSdkVersion"
 maybe'cancelWorkflow ::
   forall f s a.
   (Prelude.Functor f,

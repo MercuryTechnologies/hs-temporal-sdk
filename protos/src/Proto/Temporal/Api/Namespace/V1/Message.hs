@@ -1400,12 +1400,14 @@ instance Data.ProtoLens.Message NamespaceInfo where
       \\DC2supports_schedules\CANd \SOH(\bR\DC1supportsSchedules\SUB7\n\
       \\tDataEntry\DC2\DLE\n\
       \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\132\SOH\n\
+      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\254\SOH\n\
       \\fCapabilities\DC20\n\
       \\DC4eager_workflow_start\CAN\SOH \SOH(\bR\DC2eagerWorkflowStart\DC2\US\n\
       \\vsync_update\CAN\STX \SOH(\bR\n\
       \syncUpdate\DC2!\n\
-      \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate"
+      \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\DC2+\n\
+      \\DC1worker_heartbeats\CAN\EOT \SOH(\bR\DLEworkerHeartbeats\DC2K\n\
+      \\"reported_problems_search_attribute\CAN\ENQ \SOH(\bR\USreportedProblemsSearchAttribute"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1768,11 +1770,15 @@ instance Control.DeepSeq.NFData NamespaceInfo where
      
          * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.eagerWorkflowStart' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
          * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.syncUpdate' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.asyncUpdate' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@ -}
+         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.asyncUpdate' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
+         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.workerHeartbeats' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
+         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.reportedProblemsSearchAttribute' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@ -}
 data NamespaceInfo'Capabilities
   = NamespaceInfo'Capabilities'_constructor {_NamespaceInfo'Capabilities'eagerWorkflowStart :: !Prelude.Bool,
                                              _NamespaceInfo'Capabilities'syncUpdate :: !Prelude.Bool,
                                              _NamespaceInfo'Capabilities'asyncUpdate :: !Prelude.Bool,
+                                             _NamespaceInfo'Capabilities'workerHeartbeats :: !Prelude.Bool,
+                                             _NamespaceInfo'Capabilities'reportedProblemsSearchAttribute :: !Prelude.Bool,
                                              _NamespaceInfo'Capabilities'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show NamespaceInfo'Capabilities where
@@ -1803,6 +1809,23 @@ instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "asyncUpdate" 
            _NamespaceInfo'Capabilities'asyncUpdate
            (\ x__ y__ -> x__ {_NamespaceInfo'Capabilities'asyncUpdate = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "workerHeartbeats" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NamespaceInfo'Capabilities'workerHeartbeats
+           (\ x__ y__
+              -> x__ {_NamespaceInfo'Capabilities'workerHeartbeats = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "reportedProblemsSearchAttribute" Prelude.Bool where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _NamespaceInfo'Capabilities'reportedProblemsSearchAttribute
+           (\ x__ y__
+              -> x__
+                   {_NamespaceInfo'Capabilities'reportedProblemsSearchAttribute = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
   messageName _
     = Data.Text.pack
@@ -1813,7 +1836,9 @@ instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
       \\DC4eager_workflow_start\CAN\SOH \SOH(\bR\DC2eagerWorkflowStart\DC2\US\n\
       \\vsync_update\CAN\STX \SOH(\bR\n\
       \syncUpdate\DC2!\n\
-      \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate"
+      \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\DC2+\n\
+      \\DC1worker_heartbeats\CAN\EOT \SOH(\bR\DLEworkerHeartbeats\DC2K\n\
+      \\"reported_problems_search_attribute\CAN\ENQ \SOH(\bR\USreportedProblemsSearchAttribute"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1844,11 +1869,32 @@ instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"asyncUpdate")) ::
               Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
+        workerHeartbeats__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "worker_heartbeats"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"workerHeartbeats")) ::
+              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
+        reportedProblemsSearchAttribute__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "reported_problems_search_attribute"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
+                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute")) ::
+              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, eagerWorkflowStart__field_descriptor),
            (Data.ProtoLens.Tag 2, syncUpdate__field_descriptor),
-           (Data.ProtoLens.Tag 3, asyncUpdate__field_descriptor)]
+           (Data.ProtoLens.Tag 3, asyncUpdate__field_descriptor),
+           (Data.ProtoLens.Tag 4, workerHeartbeats__field_descriptor),
+           (Data.ProtoLens.Tag 5, 
+            reportedProblemsSearchAttribute__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _NamespaceInfo'Capabilities'_unknownFields
@@ -1859,6 +1905,8 @@ instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
         {_NamespaceInfo'Capabilities'eagerWorkflowStart = Data.ProtoLens.fieldDefault,
          _NamespaceInfo'Capabilities'syncUpdate = Data.ProtoLens.fieldDefault,
          _NamespaceInfo'Capabilities'asyncUpdate = Data.ProtoLens.fieldDefault,
+         _NamespaceInfo'Capabilities'workerHeartbeats = Data.ProtoLens.fieldDefault,
+         _NamespaceInfo'Capabilities'reportedProblemsSearchAttribute = Data.ProtoLens.fieldDefault,
          _NamespaceInfo'Capabilities'_unknownFields = []}
   parseMessage
     = let
@@ -1904,6 +1952,23 @@ instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
                                        "async_update"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"asyncUpdate") y x)
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "worker_heartbeats"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"workerHeartbeats") y x)
+                        40
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
+                                       "reported_problems_search_attribute"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute")
+                                     y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1955,8 +2020,36 @@ instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
                             ((Prelude..)
                                Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
                                _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v
+                           = Lens.Family2.view
+                               (Data.ProtoLens.Field.field @"workerHeartbeats") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               ((Prelude..)
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (\ b -> if b then 1 else 0) _v))
+                      ((Data.Monoid.<>)
+                         (let
+                            _v
+                              = Lens.Family2.view
+                                  (Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute") _x
+                          in
+                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                Data.Monoid.mempty
+                            else
+                                (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
+                                  ((Prelude..)
+                                     Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (\ b -> if b then 1 else 0) _v))
+                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
 instance Control.DeepSeq.NFData NamespaceInfo'Capabilities where
   rnf
     = \ x__
@@ -1967,7 +2060,12 @@ instance Control.DeepSeq.NFData NamespaceInfo'Capabilities where
                 (Control.DeepSeq.deepseq
                    (_NamespaceInfo'Capabilities'syncUpdate x__)
                    (Control.DeepSeq.deepseq
-                      (_NamespaceInfo'Capabilities'asyncUpdate x__) ())))
+                      (_NamespaceInfo'Capabilities'asyncUpdate x__)
+                      (Control.DeepSeq.deepseq
+                         (_NamespaceInfo'Capabilities'workerHeartbeats x__)
+                         (Control.DeepSeq.deepseq
+                            (_NamespaceInfo'Capabilities'reportedProblemsSearchAttribute x__)
+                            ())))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.key' @:: Lens' NamespaceInfo'DataEntry Data.Text.Text@
@@ -2566,7 +2664,7 @@ instance Control.DeepSeq.NFData UpdateNamespaceInfo'DataEntry where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \'temporal/api/namespace/v1/message.proto\DC2\EMtemporal.api.namespace.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB%temporal/api/enums/v1/namespace.proto\"\197\EOT\n\
+    \'temporal/api/namespace/v1/message.proto\DC2\EMtemporal.api.namespace.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB%temporal/api/enums/v1/namespace.proto\"\191\ENQ\n\
     \\rNamespaceInfo\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2;\n\
     \\ENQstate\CAN\STX \SOH(\SO2%.temporal.api.enums.v1.NamespaceStateR\ENQstate\DC2 \n\
@@ -2579,12 +2677,14 @@ packedFileDescriptor
     \\DC2supports_schedules\CANd \SOH(\bR\DC1supportsSchedules\SUB7\n\
     \\tDataEntry\DC2\DLE\n\
     \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\132\SOH\n\
+    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\254\SOH\n\
     \\fCapabilities\DC20\n\
     \\DC4eager_workflow_start\CAN\SOH \SOH(\bR\DC2eagerWorkflowStart\DC2\US\n\
     \\vsync_update\CAN\STX \SOH(\bR\n\
     \syncUpdate\DC2!\n\
-    \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\"\207\ENQ\n\
+    \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\DC2+\n\
+    \\DC1worker_heartbeats\CAN\EOT \SOH(\bR\DLEworkerHeartbeats\DC2K\n\
+    \\"reported_problems_search_attribute\CAN\ENQ \SOH(\bR\USreportedProblemsSearchAttribute\"\207\ENQ\n\
     \\SINamespaceConfig\DC2b\n\
     \ workflow_execution_retention_ttl\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\GSworkflowExecutionRetentionTtl\DC2I\n\
     \\fbad_binaries\CAN\STX \SOH(\v2&.temporal.api.namespace.v1.BadBinariesR\vbadBinaries\DC2Z\n\
@@ -2617,8 +2717,8 @@ packedFileDescriptor
     \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\":\n\
     \\SINamespaceFilter\DC2'\n\
     \\SIinclude_deleted\CAN\SOH \SOH(\bR\SOincludeDeletedB\152\SOH\n\
-    \\FSio.temporal.api.namespace.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/namespace/v1;namespace\170\STX\ESCTemporalio.Api.Namespace.V1\234\STX\RSTemporalio::Api::Namespace::V1J\168\EM\n\
-    \\ACK\DC2\EOT\NUL\NULV\SOH\n\
+    \\FSio.temporal.api.namespace.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/namespace/v1;namespace\170\STX\ESCTemporalio.Api.Namespace.V1\234\STX\RSTemporalio::Api::Namespace::V1J\157\ESC\n\
+    \\ACK\DC2\EOT\NUL\NULZ\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -2656,7 +2756,7 @@ packedFileDescriptor
     \\STX\ETX\STX\DC2\ETX\SO\NUL/\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT\DC1\NUL)\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\DC1\NUL-\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\NAK\n\
@@ -2723,7 +2823,7 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX\SUB !\n\
     \f\n\
-    \\EOT\EOT\NUL\ETX\SOH\DC2\EOT\GS\EOT$\ENQ\SUBX Namespace capability details. Should contain what features are enabled in a namespace.\n\
+    \\EOT\EOT\NUL\ETX\SOH\DC2\EOT\GS\EOT(\ENQ\SUBX Namespace capability details. Should contain what features are enabled in a namespace.\n\
     \\n\
     \\f\n\
     \\ENQ\EOT\NUL\ETX\SOH\SOH\DC2\ETX\GS\f\CAN\n\
@@ -2754,191 +2854,209 @@ packedFileDescriptor
     \\a\EOT\NUL\ETX\SOH\STX\STX\SOH\DC2\ETX#\r\EM\n\
     \\SO\n\
     \\a\EOT\NUL\ETX\SOH\STX\STX\ETX\DC2\ETX#\FS\GS\n\
+    \A\n\
+    \\ACK\EOT\NUL\ETX\SOH\STX\ETX\DC2\ETX%\b#\SUB2 True if the namespace supports worker heartbeats\n\
+    \\n\
+    \\SO\n\
+    \\a\EOT\NUL\ETX\SOH\STX\ETX\ENQ\DC2\ETX%\b\f\n\
+    \\SO\n\
+    \\a\EOT\NUL\ETX\SOH\STX\ETX\SOH\DC2\ETX%\r\RS\n\
+    \\SO\n\
+    \\a\EOT\NUL\ETX\SOH\STX\ETX\ETX\DC2\ETX%!\"\n\
+    \R\n\
+    \\ACK\EOT\NUL\ETX\SOH\STX\EOT\DC2\ETX'\b4\SUBC True if the namespace supports reported problems search attribute\n\
+    \\n\
+    \\SO\n\
+    \\a\EOT\NUL\ETX\SOH\STX\EOT\ENQ\DC2\ETX'\b\f\n\
+    \\SO\n\
+    \\a\EOT\NUL\ETX\SOH\STX\EOT\SOH\DC2\ETX'\r/\n\
+    \\SO\n\
+    \\a\EOT\NUL\ETX\SOH\STX\EOT\ETX\DC2\ETX'23\n\
     \\174\SOH\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETX(\EOT\"\SUB\160\SOH Whether scheduled workflows are supported on this namespace. This is only needed\n\
+    \\EOT\EOT\NUL\STX\a\DC2\ETX,\EOT\"\SUB\160\SOH Whether scheduled workflows are supported on this namespace. This is only needed\n\
     \ temporarily while the feature is experimental, so we can give it a high tag.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETX(\EOT\b\n\
+    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETX,\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX(\t\ESC\n\
+    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX,\t\ESC\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX(\RS!\n\
+    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX,\RS!\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT+\NUL6\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT/\NUL:\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX+\b\ETB\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX/\b\ETB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX,\EOTB\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX0\EOTB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX,\EOT\FS\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX0\EOT\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX,\GS=\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX0\GS=\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX,@A\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX0@A\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX-\EOT!\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX1\EOT!\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX-\EOT\SI\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX1\EOT\SI\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX-\DLE\FS\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX1\DLE\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX-\US \n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX1\US \n\
     \e\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX/\EOTC\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX3\EOTC\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX/\EOT'\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX3\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX/(>\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX3(>\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX/AB\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX3AB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX0\EOT$\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETX4\EOT$\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ENQ\DC2\ETX0\EOT\n\
+    \\ENQ\EOT\SOH\STX\ETX\ENQ\DC2\ETX4\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX0\v\US\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX4\v\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX0\"#\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX4\"#\n\
     \e\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETX2\EOTF\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
+    \\EOT\EOT\SOH\STX\EOT\DC2\ETX6\EOTF\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX2\EOT'\n\
+    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX6\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX2(A\n\
+    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX6(A\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX2DE\n\
+    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX6DE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX3\EOT'\n\
+    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX7\EOT'\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ENQ\DC2\ETX3\EOT\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ENQ\DC2\ETX7\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX3\v\"\n\
+    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX7\v\"\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX3%&\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX7%&\n\
     \,\n\
-    \\EOT\EOT\SOH\STX\ACK\DC2\ETX5\EOT<\SUB\US Map from field name to alias.\n\
+    \\EOT\EOT\SOH\STX\ACK\DC2\ETX9\EOT<\SUB\US Map from field name to alias.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETX5\EOT\ETB\n\
+    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETX9\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETX5\CAN7\n\
+    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETX9\CAN7\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETX5:;\n\
+    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETX9:;\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT8\NUL:\SOH\n\
+    \\STX\EOT\STX\DC2\EOT<\NUL>\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX8\b\DC3\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX<\b\DC3\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX9\EOT,\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX=\EOT,\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX9\EOT\RS\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX=\EOT\RS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX9\US'\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX=\US'\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX9*+\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX=*+\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT<\NUL@\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT@\NULD\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX<\b\NAK\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX@\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX=\EOT\SYN\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETXA\EOT\SYN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX=\EOT\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXA\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX=\v\DC1\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXA\v\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX=\DC4\NAK\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXA\DC4\NAK\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETX>\EOT\CAN\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETXB\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX>\EOT\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXB\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX>\v\DC3\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXB\v\DC3\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX>\SYN\ETB\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXB\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETX?\EOT.\n\
+    \\EOT\EOT\ETX\STX\STX\DC2\ETXC\EOT.\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ACK\DC2\ETX?\EOT\GS\n\
+    \\ENQ\EOT\ETX\STX\STX\ACK\DC2\ETXC\EOT\GS\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX?\RS)\n\
+    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXC\RS)\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX?,-\n\
+    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXC,-\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOTB\NULO\SOH\n\
+    \\STX\EOT\EOT\DC2\EOTF\NULS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXB\b\ESC\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETXF\b\ESC\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXC\EOT\ESC\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETXG\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXC\EOT\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXG\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXC\v\SYN\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXG\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXC\EM\SUB\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXG\EM\SUB\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXD\EOT\ESC\n\
+    \\EOT\EOT\EOT\STX\SOH\DC2\ETXH\EOT\ESC\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXD\EOT\n\
+    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXH\EOT\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXD\v\SYN\n\
+    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXH\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXD\EM\SUB\n\
-    \\150\SOH\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXH\EOT!\SUB\136\SOH A key-value map for any customized purpose.\n\
-    \ If data already exists on the namespace, \n\
-    \ this will merge with the existing key values. \n\
+    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXH\EM\SUB\n\
+    \\148\SOH\n\
+    \\EOT\EOT\EOT\STX\STX\DC2\ETXL\EOT!\SUB\134\SOH A key-value map for any customized purpose.\n\
+    \ If data already exists on the namespace,\n\
+    \ this will merge with the existing key values.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXH\EOT\ETB\n\
+    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXL\EOT\ETB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXH\CAN\FS\n\
+    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXL\CAN\FS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXH\US \n\
+    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXL\US \n\
     \\134\STX\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\ETXN\EOT3\SUB\248\SOH New namespace state, server will reject if transition is not allowed.\n\
+    \\EOT\EOT\EOT\STX\ETX\DC2\ETXR\EOT3\SUB\248\SOH New namespace state, server will reject if transition is not allowed.\n\
     \ Allowed transitions are:\n\
     \  Registered -> [ Deleted | Deprecated | Handover ]\n\
     \  Handover -> [ Registered ]\n\
     \ Default is NAMESPACE_STATE_UNSPECIFIED which is do not change state.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXN\EOT(\n\
+    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXR\EOT(\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXN).\n\
+    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXR).\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXN12\n\
+    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXR12\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOTQ\NULV\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOTU\NULZ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXQ\b\ETB\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETXU\b\ETB\n\
     \\155\STX\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXU\EOT\GS\SUB\141\STX By default namespaces in NAMESPACE_STATE_DELETED state are not included.\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXY\EOT\GS\SUB\141\STX By default namespaces in NAMESPACE_STATE_DELETED state are not included.\n\
     \ Setting include_deleted to true will include deleted namespaces.\n\
     \ Note: Namespace is in NAMESPACE_STATE_DELETED state when it was deleted from the system but associated data is not deleted yet.\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXU\EOT\b\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXY\EOT\b\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXU\t\CAN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXY\t\CAN\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXU\ESC\FSb\ACKproto3"
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXY\ESC\FSb\ACKproto3"

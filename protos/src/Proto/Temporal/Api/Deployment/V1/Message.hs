@@ -2603,13 +2603,15 @@ instance Control.DeepSeq.NFData VersionMetadata'EntriesEntry where
          * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'createTime' @:: Lens' WorkerDeploymentInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
          * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.routingConfig' @:: Lens' WorkerDeploymentInfo RoutingConfig@
          * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'routingConfig' @:: Lens' WorkerDeploymentInfo (Prelude.Maybe RoutingConfig)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastModifierIdentity' @:: Lens' WorkerDeploymentInfo Data.Text.Text@ -}
+         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastModifierIdentity' @:: Lens' WorkerDeploymentInfo Data.Text.Text@
+         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.managerIdentity' @:: Lens' WorkerDeploymentInfo Data.Text.Text@ -}
 data WorkerDeploymentInfo
   = WorkerDeploymentInfo'_constructor {_WorkerDeploymentInfo'name :: !Data.Text.Text,
                                        _WorkerDeploymentInfo'versionSummaries :: !(Data.Vector.Vector WorkerDeploymentInfo'WorkerDeploymentVersionSummary),
                                        _WorkerDeploymentInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
                                        _WorkerDeploymentInfo'routingConfig :: !(Prelude.Maybe RoutingConfig),
                                        _WorkerDeploymentInfo'lastModifierIdentity :: !Data.Text.Text,
+                                       _WorkerDeploymentInfo'managerIdentity :: !Data.Text.Text,
                                        _WorkerDeploymentInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord)
 instance Prelude.Show WorkerDeploymentInfo where
@@ -2677,6 +2679,13 @@ instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "lastModifierIdentit
            (\ x__ y__
               -> x__ {_WorkerDeploymentInfo'lastModifierIdentity = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "managerIdentity" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _WorkerDeploymentInfo'managerIdentity
+           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'managerIdentity = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message WorkerDeploymentInfo where
   messageName _
     = Data.Text.pack "temporal.api.deployment.v1.WorkerDeploymentInfo"
@@ -2688,7 +2697,8 @@ instance Data.ProtoLens.Message WorkerDeploymentInfo where
       \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
       \createTime\DC2P\n\
       \\SOrouting_config\CAN\EOT \SOH(\v2).temporal.api.deployment.v1.RoutingConfigR\rroutingConfig\DC24\n\
-      \\SYNlast_modifier_identity\CAN\ENQ \SOH(\tR\DC4lastModifierIdentity\SUB\220\ACK\n\
+      \\SYNlast_modifier_identity\CAN\ENQ \SOH(\tR\DC4lastModifierIdentity\DC2)\n\
+      \\DLEmanager_identity\CAN\ACK \SOH(\tR\SImanagerIdentity\SUB\220\ACK\n\
       \\RSWorkerDeploymentVersionSummary\DC2\FS\n\
       \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
       \\ACKstatus\CAN\v \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
@@ -2748,13 +2758,23 @@ instance Data.ProtoLens.Message WorkerDeploymentInfo where
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"lastModifierIdentity")) ::
               Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
+        managerIdentity__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "manager_identity"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional
+                 (Data.ProtoLens.Field.field @"managerIdentity")) ::
+              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, name__field_descriptor),
            (Data.ProtoLens.Tag 2, versionSummaries__field_descriptor),
            (Data.ProtoLens.Tag 3, createTime__field_descriptor),
            (Data.ProtoLens.Tag 4, routingConfig__field_descriptor),
-           (Data.ProtoLens.Tag 5, lastModifierIdentity__field_descriptor)]
+           (Data.ProtoLens.Tag 5, lastModifierIdentity__field_descriptor),
+           (Data.ProtoLens.Tag 6, managerIdentity__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _WorkerDeploymentInfo'_unknownFields
@@ -2766,6 +2786,7 @@ instance Data.ProtoLens.Message WorkerDeploymentInfo where
          _WorkerDeploymentInfo'createTime = Prelude.Nothing,
          _WorkerDeploymentInfo'routingConfig = Prelude.Nothing,
          _WorkerDeploymentInfo'lastModifierIdentity = Data.ProtoLens.fieldDefault,
+         _WorkerDeploymentInfo'managerIdentity = Data.ProtoLens.fieldDefault,
          _WorkerDeploymentInfo'_unknownFields = []}
   parseMessage
     = let
@@ -2845,6 +2866,16 @@ instance Data.ProtoLens.Message WorkerDeploymentInfo where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"lastModifierIdentity") y x)
+                                  mutable'versionSummaries
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getText
+                                             (Prelude.fromIntegral len))
+                                       "manager_identity"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"managerIdentity") y x)
                                   mutable'versionSummaries
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
@@ -2940,8 +2971,27 @@ instance Data.ProtoLens.Message WorkerDeploymentInfo where
                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                      Data.Text.Encoding.encodeUtf8 _v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
+                         ((Data.Monoid.<>)
+                            (let
+                               _v
+                                 = Lens.Family2.view
+                                     (Data.ProtoLens.Field.field @"managerIdentity") _x
+                             in
+                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                                   Data.Monoid.mempty
+                               else
+                                   (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                     ((Prelude..)
+                                        (\ bs
+                                           -> (Data.Monoid.<>)
+                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                   (Prelude.fromIntegral
+                                                      (Data.ByteString.length bs)))
+                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                        Data.Text.Encoding.encodeUtf8 _v))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
 instance Control.DeepSeq.NFData WorkerDeploymentInfo where
   rnf
     = \ x__
@@ -2956,7 +3006,9 @@ instance Control.DeepSeq.NFData WorkerDeploymentInfo where
                       (Control.DeepSeq.deepseq
                          (_WorkerDeploymentInfo'routingConfig x__)
                          (Control.DeepSeq.deepseq
-                            (_WorkerDeploymentInfo'lastModifierIdentity x__) ())))))
+                            (_WorkerDeploymentInfo'lastModifierIdentity x__)
+                            (Control.DeepSeq.deepseq
+                               (_WorkerDeploymentInfo'managerIdentity x__) ()))))))
 {- | Fields :
      
          * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.version' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Data.Text.Text@
@@ -5181,14 +5233,15 @@ packedFileDescriptor
     \\DC3VersionDrainageInfo\DC2D\n\
     \\ACKstatus\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.VersionDrainageStatusR\ACKstatus\DC2F\n\
     \\DC1last_changed_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastChangedTime\DC2F\n\
-    \\DC1last_checked_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastCheckedTime\"\204\t\n\
+    \\DC1last_checked_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastCheckedTime\"\247\t\n\
     \\DC4WorkerDeploymentInfo\DC2\DC2\n\
     \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2|\n\
     \\DC1version_summaries\CAN\STX \ETX(\v2O.temporal.api.deployment.v1.WorkerDeploymentInfo.WorkerDeploymentVersionSummaryR\DLEversionSummaries\DC2;\n\
     \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
     \createTime\DC2P\n\
     \\SOrouting_config\CAN\EOT \SOH(\v2).temporal.api.deployment.v1.RoutingConfigR\rroutingConfig\DC24\n\
-    \\SYNlast_modifier_identity\CAN\ENQ \SOH(\tR\DC4lastModifierIdentity\SUB\220\ACK\n\
+    \\SYNlast_modifier_identity\CAN\ENQ \SOH(\tR\DC4lastModifierIdentity\DC2)\n\
+    \\DLEmanager_identity\CAN\ACK \SOH(\tR\SImanagerIdentity\SUB\220\ACK\n\
     \\RSWorkerDeploymentVersionSummary\DC2\FS\n\
     \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
     \\ACKstatus\CAN\v \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
@@ -5220,8 +5273,8 @@ packedFileDescriptor
     \\FScurrent_version_changed_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\EMcurrentVersionChangedTime\DC2[\n\
     \\FSramping_version_changed_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\EMrampingVersionChangedTime\DC2p\n\
     \'ramping_version_percentage_changed_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR#rampingVersionPercentageChangedTimeB\157\SOH\n\
-    \\GSio.temporal.api.deployment.v1B\fMessageProtoP\SOHZ+go.temporal.io/api/deployment/v1;deployment\170\STX\FSTemporalio.Api.Deployment.V1\234\STX\USTemporalio::Api::Deployment::V1J\182q\n\
-    \\a\DC2\ENQ\NUL\NUL\153\STX\SOH\n\
+    \\GSio.temporal.api.deployment.v1B\fMessageProtoP\SOHZ+go.temporal.io/api/deployment/v1;deployment\170\STX\FSTemporalio.Api.Deployment.V1\234\STX\USTemporalio::Api::Deployment::V1J\196t\n\
+    \\a\DC2\ENQ\NUL\NUL\159\STX\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
     \\b\n\
@@ -5697,7 +5750,7 @@ packedFileDescriptor
     \\r\n\
     \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\166\SOH23\n\
     \\169\EOT\n\
-    \\STX\EOT\a\DC2\ACK\177\SOH\NUL\227\SOH\SOH\SUB\154\EOT A Worker Deployment (Deployment, for short) represents all workers serving \n\
+    \\STX\EOT\a\DC2\ACK\177\SOH\NUL\233\SOH\SOH\SUB\154\EOT A Worker Deployment (Deployment, for short) represents all workers serving \n\
     \ a shared set of Task Queues. Typically, a Deployment represents one service or \n\
     \ application.\n\
     \ A Deployment contains multiple Deployment Versions, each representing a different \n\
@@ -5761,175 +5814,188 @@ packedFileDescriptor
     \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\195\SOH\v!\n\
     \\r\n\
     \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\195\SOH$%\n\
-    \\SO\n\
-    \\EOT\EOT\a\ETX\NUL\DC2\ACK\197\SOH\EOT\226\SOH\ENQ\n\
+    \\222\STX\n\
+    \\EOT\EOT\a\STX\ENQ\DC2\EOT\201\SOH\EOT \SUB\207\STX Identity of the client that has the exclusive right to make changes to this Worker Deployment.\n\
+    \ Empty by default.\n\
+    \ If this is set, clients whose identity does not match `manager_identity` will not be able to make changes\n\
+    \ to this Worker Deployment. They can either set their own identity as the manager or unset the field to proceed.\n\
+    \\n\
     \\r\n\
-    \\ENQ\EOT\a\ETX\NUL\SOH\DC2\EOT\197\SOH\f*\n\
-    \7\n\
-    \\ACK\EOT\a\ETX\NUL\STX\NUL\DC2\EOT\199\SOH\b/\SUB' Deprecated. Use `deployment_version`.\n\
+    \\ENQ\EOT\a\STX\ENQ\ENQ\DC2\EOT\201\SOH\EOT\n\
     \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\ENQ\DC2\EOT\199\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\SOH\DC2\EOT\199\SOH\SI\SYN\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\ETX\DC2\EOT\199\SOH\EM\SUB\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\b\DC2\EOT\199\SOH\ESC.\n\
-    \\DLE\n\
-    \\b\EOT\a\ETX\NUL\STX\NUL\b\ETX\DC2\EOT\199\SOH\FS-\n\
-    \>\n\
-    \\ACK\EOT\a\ETX\NUL\STX\SOH\DC2\EOT\202\SOH\bH\SUB. The status of the Worker Deployment Version.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\ACK\DC2\EOT\202\SOH\b;\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\SOH\DC2\EOT\202\SOH<B\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\ETX\DC2\EOT\202\SOHEG\n\
-    \\ESC\n\
-    \\ACK\EOT\a\ETX\NUL\STX\STX\DC2\EOT\205\SOH\b7\SUB\v Required.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\STX\ACK\DC2\EOT\205\SOH\b\US\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\STX\SOH\DC2\EOT\205\SOH 2\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\STX\ETX\DC2\EOT\205\SOH56\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\201\SOH\v\ESC\n\
+    \\r\n\
+    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\201\SOH\RS\US\n\
     \\SO\n\
-    \\ACK\EOT\a\ETX\NUL\STX\ETX\DC2\EOT\206\SOH\b2\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ETX\ACK\DC2\EOT\206\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ETX\SOH\DC2\EOT\206\SOH\"-\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ETX\ETX\DC2\EOT\206\SOH01\n\
-    \:\n\
-    \\ACK\EOT\a\ETX\NUL\STX\EOT\DC2\EOT\208\SOH\b;\SUB* Deprecated. Use `drainage_info` instead.\n\
+    \\EOT\EOT\a\ETX\NUL\DC2\ACK\203\SOH\EOT\232\SOH\ENQ\n\
+    \\r\n\
+    \\ENQ\EOT\a\ETX\NUL\SOH\DC2\EOT\203\SOH\f*\n\
+    \7\n\
+    \\ACK\EOT\a\ETX\NUL\STX\NUL\DC2\EOT\205\SOH\b/\SUB' Deprecated. Use `deployment_version`.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\EOT\ACK\DC2\EOT\208\SOH\b&\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\ENQ\DC2\EOT\205\SOH\b\SO\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\EOT\SOH\DC2\EOT\208\SOH'6\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\SOH\DC2\EOT\205\SOH\SI\SYN\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\EOT\ETX\DC2\EOT\208\SOH9:\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\ETX\DC2\EOT\205\SOH\EM\SUB\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\NUL\b\DC2\EOT\205\SOH\ESC.\n\
+    \\DLE\n\
+    \\b\EOT\a\ETX\NUL\STX\NUL\b\ETX\DC2\EOT\205\SOH\FS-\n\
+    \>\n\
+    \\ACK\EOT\a\ETX\NUL\STX\SOH\DC2\EOT\208\SOH\bH\SUB. The status of the Worker Deployment Version.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\ACK\DC2\EOT\208\SOH\b;\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\SOH\DC2\EOT\208\SOH<B\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\SOH\ETX\DC2\EOT\208\SOHEG\n\
+    \\ESC\n\
+    \\ACK\EOT\a\ETX\NUL\STX\STX\DC2\EOT\211\SOH\b7\SUB\v Required.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\STX\ACK\DC2\EOT\211\SOH\b\US\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\STX\SOH\DC2\EOT\211\SOH 2\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\STX\ETX\DC2\EOT\211\SOH56\n\
+    \\SO\n\
+    \\ACK\EOT\a\ETX\NUL\STX\ETX\DC2\EOT\212\SOH\b2\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\ETX\ACK\DC2\EOT\212\SOH\b!\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\ETX\SOH\DC2\EOT\212\SOH\"-\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\ETX\ETX\DC2\EOT\212\SOH01\n\
+    \:\n\
+    \\ACK\EOT\a\ETX\NUL\STX\EOT\DC2\EOT\214\SOH\b;\SUB* Deprecated. Use `drainage_info` instead.\n\
+    \\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\EOT\ACK\DC2\EOT\214\SOH\b&\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\EOT\SOH\DC2\EOT\214\SOH'6\n\
+    \\SI\n\
+    \\a\EOT\a\ETX\NUL\STX\EOT\ETX\DC2\EOT\214\SOH9:\n\
     \\173\SOH\n\
-    \\ACK\EOT\a\ETX\NUL\STX\ENQ\DC2\EOT\211\SOH\b.\SUB\156\SOH Information about workflow drainage to help the user determine when it is safe\n\
+    \\ACK\EOT\a\ETX\NUL\STX\ENQ\DC2\EOT\217\SOH\b.\SUB\156\SOH Information about workflow drainage to help the user determine when it is safe\n\
     \ to decommission a Version. Not present while version is current or ramping\n\
     \\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ENQ\ACK\DC2\EOT\211\SOH\b\ESC\n\
+    \\a\EOT\a\ETX\NUL\STX\ENQ\ACK\DC2\EOT\217\SOH\b\ESC\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ENQ\SOH\DC2\EOT\211\SOH\FS)\n\
+    \\a\EOT\a\ETX\NUL\STX\ENQ\SOH\DC2\EOT\217\SOH\FS)\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ENQ\ETX\DC2\EOT\211\SOH,-\n\
+    \\a\EOT\a\ETX\NUL\STX\ENQ\ETX\DC2\EOT\217\SOH,-\n\
     \\189\SOH\n\
-    \\ACK\EOT\a\ETX\NUL\STX\ACK\DC2\EOT\215\SOH\b9\SUB\172\SOH Unset if not current.\n\
+    \\ACK\EOT\a\ETX\NUL\STX\ACK\DC2\EOT\221\SOH\b9\SUB\172\SOH Unset if not current.\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: 'Since' captures the field semantics despite being a preposition. --)\n\
     \\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ACK\ACK\DC2\EOT\215\SOH\b!\n\
+    \\a\EOT\a\ETX\NUL\STX\ACK\ACK\DC2\EOT\221\SOH\b!\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ACK\SOH\DC2\EOT\215\SOH\"4\n\
+    \\a\EOT\a\ETX\NUL\STX\ACK\SOH\DC2\EOT\221\SOH\"4\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ACK\ETX\DC2\EOT\215\SOH78\n\
+    \\a\EOT\a\ETX\NUL\STX\ACK\ETX\DC2\EOT\221\SOH78\n\
     \\133\STX\n\
-    \\ACK\EOT\a\ETX\NUL\STX\a\DC2\EOT\219\SOH\b9\SUB\244\SOH Unset if not ramping. Updated when the version first starts ramping, not on each ramp change.\n\
+    \\ACK\EOT\a\ETX\NUL\STX\a\DC2\EOT\225\SOH\b9\SUB\244\SOH Unset if not ramping. Updated when the version first starts ramping, not on each ramp change.\n\
     \ (-- api-linter: core::0140::prepositions=disabled\n\
     \     aip.dev/not-precedent: 'Since' captures the field semantics despite being a preposition. --)\n\
     \\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\a\ACK\DC2\EOT\219\SOH\b!\n\
+    \\a\EOT\a\ETX\NUL\STX\a\ACK\DC2\EOT\225\SOH\b!\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\a\SOH\DC2\EOT\219\SOH\"4\n\
+    \\a\EOT\a\ETX\NUL\STX\a\SOH\DC2\EOT\225\SOH\"4\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\a\ETX\DC2\EOT\219\SOH78\n\
+    \\a\EOT\a\ETX\NUL\STX\a\ETX\DC2\EOT\225\SOH78\n\
     \t\n\
-    \\ACK\EOT\a\ETX\NUL\STX\b\DC2\EOT\221\SOH\b:\SUBd Last time `current_since_time`, `ramping_since_time, or `ramp_percentage` of this version changed.\n\
+    \\ACK\EOT\a\ETX\NUL\STX\b\DC2\EOT\227\SOH\b:\SUBd Last time `current_since_time`, `ramping_since_time, or `ramp_percentage` of this version changed.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\b\ACK\DC2\EOT\221\SOH\b!\n\
+    \\a\EOT\a\ETX\NUL\STX\b\ACK\DC2\EOT\227\SOH\b!\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\b\SOH\DC2\EOT\221\SOH\"5\n\
+    \\a\EOT\a\ETX\NUL\STX\b\SOH\DC2\EOT\227\SOH\"5\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\b\ETX\DC2\EOT\221\SOH89\n\
+    \\a\EOT\a\ETX\NUL\STX\b\ETX\DC2\EOT\227\SOH89\n\
     \N\n\
-    \\ACK\EOT\a\ETX\NUL\STX\t\DC2\EOT\223\SOH\b<\SUB> Timestamp when this version first became current or ramping.\n\
+    \\ACK\EOT\a\ETX\NUL\STX\t\DC2\EOT\229\SOH\b<\SUB> Timestamp when this version first became current or ramping.\n\
     \\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\t\ACK\DC2\EOT\223\SOH\b!\n\
+    \\a\EOT\a\ETX\NUL\STX\t\ACK\DC2\EOT\229\SOH\b!\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\t\SOH\DC2\EOT\223\SOH\"7\n\
+    \\a\EOT\a\ETX\NUL\STX\t\SOH\DC2\EOT\229\SOH\"7\n\
     \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\t\ETX\DC2\EOT\223\SOH:;\n\
+    \\a\EOT\a\ETX\NUL\STX\t\ETX\DC2\EOT\229\SOH:;\n\
     \T\n\
     \\ACK\EOT\a\ETX\NUL\STX\n\
-    \\DC2\EOT\225\SOH\b>\SUBD Timestamp when this version last stopped being current or ramping.\n\
+    \\DC2\EOT\231\SOH\b>\SUBD Timestamp when this version last stopped being current or ramping.\n\
     \\n\
     \\SI\n\
     \\a\EOT\a\ETX\NUL\STX\n\
-    \\ACK\DC2\EOT\225\SOH\b!\n\
+    \\ACK\DC2\EOT\231\SOH\b!\n\
     \\SI\n\
     \\a\EOT\a\ETX\NUL\STX\n\
-    \\SOH\DC2\EOT\225\SOH\"8\n\
+    \\SOH\DC2\EOT\231\SOH\"8\n\
     \\SI\n\
     \\a\EOT\a\ETX\NUL\STX\n\
-    \\ETX\DC2\EOT\225\SOH;=\n\
+    \\ETX\DC2\EOT\231\SOH;=\n\
     \\136\ETX\n\
-    \\STX\EOT\b\DC2\ACK\234\SOH\NUL\243\SOH\SOH\SUB\249\STX A Worker Deployment Version (Version, for short) represents a\n\
+    \\STX\EOT\b\DC2\ACK\240\SOH\NUL\249\SOH\SOH\SUB\249\STX A Worker Deployment Version (Version, for short) represents a\n\
     \ version of workers within a Worker Deployment. (see documentation of WorkerDeploymentVersionInfo)\n\
     \ Version records are created in Temporal server automatically when their\n\
     \ first poller arrives to the server.\n\
     \ Experimental. Worker Deployment Versions are experimental and might significantly change in the future.\n\
     \\n\
     \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\234\SOH\b\US\n\
+    \\ETX\EOT\b\SOH\DC2\EOT\240\SOH\b\US\n\
     \\175\STX\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\239\SOH\EOT\CAN\SUB\160\STX A unique identifier for this Version within the Deployment it is a part of.\n\
+    \\EOT\EOT\b\STX\NUL\DC2\EOT\245\SOH\EOT\CAN\SUB\160\STX A unique identifier for this Version within the Deployment it is a part of.\n\
     \ Not necessarily unique within the namespace.\n\
     \ The combination of `deployment_name` and `build_id` uniquely identifies this\n\
     \ Version within the namespace, because Deployment names are unique within a namespace.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\239\SOH\EOT\n\
+    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\245\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\239\SOH\v\DC3\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\245\SOH\v\DC3\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\239\SOH\SYN\ETB\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\245\SOH\SYN\ETB\n\
     \I\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\242\SOH\EOT\US\SUB; Identifies the Worker Deployment this Version is part of.\n\
+    \\EOT\EOT\b\STX\SOH\DC2\EOT\248\SOH\EOT\US\SUB; Identifies the Worker Deployment this Version is part of.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\242\SOH\EOT\n\
+    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\248\SOH\EOT\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\242\SOH\v\SUB\n\
+    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\248\SOH\v\SUB\n\
     \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\242\SOH\GS\RS\n\
+    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\248\SOH\GS\RS\n\
     \\f\n\
-    \\STX\EOT\t\DC2\ACK\245\SOH\NUL\248\SOH\SOH\n\
+    \\STX\EOT\t\DC2\ACK\251\SOH\NUL\254\SOH\SOH\n\
     \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\245\SOH\b\ETB\n\
+    \\ETX\EOT\t\SOH\DC2\EOT\251\SOH\b\ETB\n\
     \%\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\247\SOH\EOT<\SUB\ETB Arbitrary key-values.\n\
+    \\EOT\EOT\t\STX\NUL\DC2\EOT\253\SOH\EOT<\SUB\ETB Arbitrary key-values.\n\
     \\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\247\SOH\EOT/\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\253\SOH\EOT/\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\247\SOH07\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\253\SOH07\n\
     \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\247\SOH:;\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\253\SOH:;\n\
     \\f\n\
     \\STX\EOT\n\
-    \\DC2\ACK\250\SOH\NUL\153\STX\SOH\n\
+    \\DC2\ACK\128\STX\NUL\159\STX\SOH\n\
     \\v\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\EOT\250\SOH\b\NAK\n\
+    \\SOH\DC2\EOT\128\STX\b\NAK\n\
     \\151\ENQ\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\128\STX\EOTV\SUB\136\ENQ Specifies which Deployment Version should receive new workflow executions and tasks of\n\
+    \\STX\NUL\DC2\EOT\134\STX\EOTV\SUB\136\ENQ Specifies which Deployment Version should receive new workflow executions and tasks of\n\
     \ existing unversioned or AutoUpgrade workflows.\n\
     \ Nil value means no Version in this Deployment (except Ramping Version, if present) receives traffic other than tasks of previously Pinned workflows. In absence of a Current Version, remaining traffic after any ramp (if set)  goes to unversioned workers (those with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.). \n\
     \ Note: Current Version is overridden by the Ramping Version for a portion of traffic when ramp percentage\n\
@@ -5937,36 +6003,36 @@ packedFileDescriptor
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\128\STX\EOT6\n\
+    \\STX\NUL\ACK\DC2\EOT\134\STX\EOT6\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\128\STX7Q\n\
+    \\STX\NUL\SOH\DC2\EOT\134\STX7Q\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\128\STXTU\n\
+    \\STX\NUL\ETX\DC2\EOT\134\STXTU\n\
     \=\n\
     \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\130\STX\EOT3\SUB/ Deprecated. Use `current_deployment_version`.\n\
+    \\STX\SOH\DC2\EOT\136\STX\EOT3\SUB/ Deprecated. Use `current_deployment_version`.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ENQ\DC2\EOT\130\STX\EOT\n\
+    \\STX\SOH\ENQ\DC2\EOT\136\STX\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\130\STX\v\SUB\n\
+    \\STX\SOH\SOH\DC2\EOT\136\STX\v\SUB\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\130\STX\GS\RS\n\
+    \\STX\SOH\ETX\DC2\EOT\136\STX\GS\RS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\SOH\b\DC2\EOT\130\STX\US2\n\
+    \\STX\SOH\b\DC2\EOT\136\STX\US2\n\
     \\SO\n\
     \\ACK\EOT\n\
-    \\STX\SOH\b\ETX\DC2\EOT\130\STX 1\n\
+    \\STX\SOH\b\ETX\DC2\EOT\136\STX 1\n\
     \\255\ETX\n\
     \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\137\STX\EOTV\SUB\240\ETX When ramp percentage is non-zero, that portion of traffic is shifted from the Current Version to the Ramping Version.\n\
+    \\STX\STX\DC2\EOT\143\STX\EOTV\SUB\240\ETX When ramp percentage is non-zero, that portion of traffic is shifted from the Current Version to the Ramping Version.\n\
     \ Must always be different from `current_deployment_version` unless both are nil.\n\
     \ Nil value represents all the unversioned workers (those with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
     \ Note that it is possible to ramp from one Version to another Version, or from unversioned\n\
@@ -5974,87 +6040,87 @@ packedFileDescriptor
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ACK\DC2\EOT\137\STX\EOT6\n\
+    \\STX\STX\ACK\DC2\EOT\143\STX\EOT6\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\137\STX7Q\n\
+    \\STX\STX\SOH\DC2\EOT\143\STX7Q\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\137\STXTU\n\
+    \\STX\STX\ETX\DC2\EOT\143\STXTU\n\
     \=\n\
     \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\139\STX\EOT3\SUB/ Deprecated. Use `ramping_deployment_version`.\n\
+    \\STX\ETX\DC2\EOT\145\STX\EOT3\SUB/ Deprecated. Use `ramping_deployment_version`.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\ENQ\DC2\EOT\139\STX\EOT\n\
+    \\STX\ETX\ENQ\DC2\EOT\145\STX\EOT\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\139\STX\v\SUB\n\
+    \\STX\ETX\SOH\DC2\EOT\145\STX\v\SUB\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\139\STX\GS\RS\n\
+    \\STX\ETX\ETX\DC2\EOT\145\STX\GS\RS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ETX\b\DC2\EOT\139\STX\US2\n\
+    \\STX\ETX\b\DC2\EOT\145\STX\US2\n\
     \\SO\n\
     \\ACK\EOT\n\
-    \\STX\ETX\b\ETX\DC2\EOT\139\STX 1\n\
+    \\STX\ETX\b\ETX\DC2\EOT\145\STX 1\n\
     \\217\STX\n\
     \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\145\STX\EOT)\SUB\202\STX Percentage of tasks that are routed to the Ramping Version instead of the Current Version.\n\
+    \\STX\EOT\DC2\EOT\151\STX\EOT)\SUB\202\STX Percentage of tasks that are routed to the Ramping Version instead of the Current Version.\n\
     \ Valid range: [0, 100]. A 100% value means the Ramping Version is receiving full traffic but\n\
     \ not yet \"promoted\" to be the Current Version, likely due to pending validations.\n\
     \ A 0% value means the Ramping Version is receiving no traffic.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ENQ\DC2\EOT\145\STX\EOT\t\n\
+    \\STX\EOT\ENQ\DC2\EOT\151\STX\EOT\t\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\145\STX\n\
+    \\STX\EOT\SOH\DC2\EOT\151\STX\n\
     \$\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\145\STX'(\n\
+    \\STX\EOT\ETX\DC2\EOT\151\STX'(\n\
     \6\n\
     \\EOT\EOT\n\
-    \\STX\ENQ\DC2\EOT\147\STX\EOT?\SUB( Last time current version was changed.\n\
+    \\STX\ENQ\DC2\EOT\153\STX\EOT?\SUB( Last time current version was changed.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\ACK\DC2\EOT\147\STX\EOT\GS\n\
+    \\STX\ENQ\ACK\DC2\EOT\153\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\SOH\DC2\EOT\147\STX\RS:\n\
+    \\STX\ENQ\SOH\DC2\EOT\153\STX\RS:\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ENQ\ETX\DC2\EOT\147\STX=>\n\
+    \\STX\ENQ\ETX\DC2\EOT\153\STX=>\n\
     \g\n\
     \\EOT\EOT\n\
-    \\STX\ACK\DC2\EOT\149\STX\EOT?\SUBY Last time ramping version was changed. Not updated if only the ramp percentage changes.\n\
+    \\STX\ACK\DC2\EOT\155\STX\EOT?\SUBY Last time ramping version was changed. Not updated if only the ramp percentage changes.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ACK\ACK\DC2\EOT\149\STX\EOT\GS\n\
+    \\STX\ACK\ACK\DC2\EOT\155\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ACK\SOH\DC2\EOT\149\STX\RS:\n\
+    \\STX\ACK\SOH\DC2\EOT\155\STX\RS:\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\ACK\ETX\DC2\EOT\149\STX=>\n\
+    \\STX\ACK\ETX\DC2\EOT\155\STX=>\n\
     \\159\SOH\n\
     \\EOT\EOT\n\
-    \\STX\a\DC2\EOT\152\STX\EOTJ\SUB\144\SOH Last time ramping version percentage was changed.\n\
+    \\STX\a\DC2\EOT\158\STX\EOTJ\SUB\144\SOH Last time ramping version percentage was changed.\n\
     \ If ramping version is changed, this is also updated, even if the percentage stays the same.\n\
     \\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\a\ACK\DC2\EOT\152\STX\EOT\GS\n\
+    \\STX\a\ACK\DC2\EOT\158\STX\EOT\GS\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\a\SOH\DC2\EOT\152\STX\RSE\n\
+    \\STX\a\SOH\DC2\EOT\158\STX\RSE\n\
     \\r\n\
     \\ENQ\EOT\n\
-    \\STX\a\ETX\DC2\EOT\152\STXHIb\ACKproto3"
+    \\STX\a\ETX\DC2\EOT\158\STXHIb\ACKproto3"
