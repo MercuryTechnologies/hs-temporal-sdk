@@ -5615,7 +5615,7 @@ packedFileDescriptor
     \\DC3worker_instance_key\CAN\SOH \SOH(\tH\NULR\DC1workerInstanceKeyB\n\
     \\n\
     \\bselectorB\137\SOH\n\
-    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\220r\n\
+    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\217r\n\
     \\a\DC2\ENQ\NUL\NUL\211\STX\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
@@ -6323,8 +6323,8 @@ packedFileDescriptor
     \\n\
     \\v\n\
     \\ETX\EOT\DLE\SOH\DC2\EOT\144\STX\b\DLE\n\
-    \\183\EOT\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\156\STX\EOT\ESC\SUB\168\EOT Priority key is a positive integer from 1 to n, where smaller integers\n\
+    \\180\EOT\n\
+    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\156\STX\EOT\ESC\SUB\165\EOT Priority key is a positive integer from 1 to n, where smaller integers\n\
     \ correspond to higher priorities (tasks run sooner). In general, tasks in\n\
     \ a queue should be processed in close to priority order, although small\n\
     \ deviations are possible.\n\
@@ -6333,7 +6333,7 @@ packedFileDescriptor
     \ configuration, and defaults to 5.\n\
     \\n\
     \ If priority is not present (or zero), then the effective priority will be\n\
-    \ the default priority, which is is calculated by (min+max)/2. With the\n\
+    \ the default priority, which is calculated by (min+max)/2. With the\n\
     \ default max of 5, and min of 1, that comes out to 3.\n\
     \\n\
     \\r\n\

@@ -51,6 +51,7 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "describeNamespace",
                                           "describeSchedule",
                                           "describeTaskQueue",
+                                          "describeWorker",
                                           "describeWorkerDeployment",
                                           "describeWorkerDeploymentVersion",
                                           "describeWorkflowExecution",
@@ -109,6 +110,7 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
                                           "scanWorkflowExecutions",
                                           "setCurrentDeployment",
                                           "setWorkerDeploymentCurrentVersion",
+                                          "setWorkerDeploymentManager",
                                           "setWorkerDeploymentRampingVersion",
                                           "shutdownWorker",
                                           "signalWithStartWorkflowExecution",
@@ -199,7 +201,8 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
       \\GSDeleteWorkerDeploymentVersion\DC2E.temporal.api.workflowservice.v1.DeleteWorkerDeploymentVersionRequest\SUBF.temporal.api.workflowservice.v1.DeleteWorkerDeploymentVersionResponse\"\254\SOH\130\211\228\147\STX\247\SOH*u/namespaces/{namespace}/worker-deployment-versions/{deployment_version.deployment_name}/{deployment_version.build_id}Z~*|/api/v1/namespaces/{namespace}/worker-deployment-versions/{deployment_version.deployment_name}/{deployment_version.build_id}\DC2\247\STX\n\
       \!SetWorkerDeploymentRampingVersion\DC2I.temporal.api.workflowservice.v1.SetWorkerDeploymentRampingVersionRequest\SUBJ.temporal.api.workflowservice.v1.SetWorkerDeploymentRampingVersionResponse\"\186\SOH\130\211\228\147\STX\179\SOH\"P/namespaces/{namespace}/worker-deployments/{deployment_name}/set-ramping-version:\SOH*Z\\\"W/api/v1/namespaces/{namespace}/worker-deployments/{deployment_name}/set-ramping-version:\SOH*\DC2\255\SOH\n\
       \\NAKListWorkerDeployments\DC2=.temporal.api.workflowservice.v1.ListWorkerDeploymentsRequest\SUB>.temporal.api.workflowservice.v1.ListWorkerDeploymentsResponse\"g\130\211\228\147\STXa\DC2*/namespaces/{namespace}/worker-deploymentsZ3\DC21/api/v1/namespaces/{namespace}/worker-deployments\DC2\240\ETX\n\
-      \%UpdateWorkerDeploymentVersionMetadata\DC2M.temporal.api.workflowservice.v1.UpdateWorkerDeploymentVersionMetadataRequest\SUBN.temporal.api.workflowservice.v1.UpdateWorkerDeploymentVersionMetadataResponse\"\167\STX\130\211\228\147\STX\160\STX\"\133\SOH/namespaces/{namespace}/worker-deployment-versions/{deployment_version.deployment_name}/{deployment_version.build_id}/update-metadata:\SOH*Z\146\SOH\"\140\SOH/api/v1/namespaces/{namespace}/worker-deployment-versions/{deployment_version.deployment_name}/{deployment_version.build_id}/update-metadata:\SOH*\DC2\245\STX\n\
+      \%UpdateWorkerDeploymentVersionMetadata\DC2M.temporal.api.workflowservice.v1.UpdateWorkerDeploymentVersionMetadataRequest\SUBN.temporal.api.workflowservice.v1.UpdateWorkerDeploymentVersionMetadataResponse\"\167\STX\130\211\228\147\STX\160\STX\"\133\SOH/namespaces/{namespace}/worker-deployment-versions/{deployment_version.deployment_name}/{deployment_version.build_id}/update-metadata:\SOH*Z\146\SOH\"\140\SOH/api/v1/namespaces/{namespace}/worker-deployment-versions/{deployment_version.deployment_name}/{deployment_version.build_id}/update-metadata:\SOH*\DC2\210\STX\n\
+      \\SUBSetWorkerDeploymentManager\DC2B.temporal.api.workflowservice.v1.SetWorkerDeploymentManagerRequest\SUBC.temporal.api.workflowservice.v1.SetWorkerDeploymentManagerResponse\"\170\SOH\130\211\228\147\STX\163\SOH\"H/namespaces/{namespace}/worker-deployments/{deployment_name}/set-manager:\SOH*ZT\"O/api/v1/namespaces/{namespace}/worker-deployments/{deployment_name}/set-manager:\SOH*\DC2\245\STX\n\
       \\ETBUpdateWorkflowExecution\DC2?.temporal.api.workflowservice.v1.UpdateWorkflowExecutionRequest\SUB@.temporal.api.workflowservice.v1.UpdateWorkflowExecutionResponse\"\214\SOH\130\211\228\147\STX\207\SOH\"^/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update/{request.input.name}:\SOH*Zj\"e/api/v1/namespaces/{namespace}/workflows/{workflow_execution.workflow_id}/update/{request.input.name}:\SOH*\DC2\170\SOH\n\
       \\ESCPollWorkflowExecutionUpdate\DC2C.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateRequest\SUBD.temporal.api.workflowservice.v1.PollWorkflowExecutionUpdateResponse\"\NUL\DC2\141\STX\n\
       \\DC3StartBatchOperation\DC2;.temporal.api.workflowservice.v1.StartBatchOperationRequest\SUB<.temporal.api.workflowservice.v1.StartBatchOperationResponse\"{\130\211\228\147\STXu\"1/namespaces/{namespace}/batch-operations/{job_id}:\SOH*Z=\"8/api/v1/namespaces/{namespace}/batch-operations/{job_id}:\SOH*\DC2\149\STX\n\
@@ -223,7 +226,8 @@ instance Data.ProtoLens.Service.Types.Service WorkflowService where
       \\vListWorkers\DC23.temporal.api.workflowservice.v1.ListWorkersRequest\SUB4.temporal.api.workflowservice.v1.ListWorkersResponse\"Q\130\211\228\147\STXK\DC2\US/namespaces/{namespace}/workersZ(\DC2&/api/v1/namespaces/{namespace}/workers\DC2\175\STX\n\
       \\NAKUpdateTaskQueueConfig\DC2=.temporal.api.workflowservice.v1.UpdateTaskQueueConfigRequest\SUB>.temporal.api.workflowservice.v1.UpdateTaskQueueConfigResponse\"\150\SOH\130\211\228\147\STX\143\SOH\">/namespaces/{namespace}/task-queues/{task_queue}/update-config:\SOH*ZJ\"E/api/v1/namespaces/{namespace}/task-queues/{task_queue}/update-config:\SOH*\DC2\253\SOH\n\
       \\DC1FetchWorkerConfig\DC29.temporal.api.workflowservice.v1.FetchWorkerConfigRequest\SUB:.temporal.api.workflowservice.v1.FetchWorkerConfigResponse\"q\130\211\228\147\STXk\",/namespaces/{namespace}/workers/fetch-config:\SOH*Z8\"3/api/v1/namespaces/{namespace}/workers/fetch-config:\SOH*\DC2\130\STX\n\
-      \\DC2UpdateWorkerConfig\DC2:.temporal.api.workflowservice.v1.UpdateWorkerConfigRequest\SUB;.temporal.api.workflowservice.v1.UpdateWorkerConfigResponse\"s\130\211\228\147\STXm\"-/namespaces/{namespace}/workers/update-config:\SOH*Z9\"4/api/v1/namespaces/{namespace}/workers/update-config:\SOH*"
+      \\DC2UpdateWorkerConfig\DC2:.temporal.api.workflowservice.v1.UpdateWorkerConfigRequest\SUB;.temporal.api.workflowservice.v1.UpdateWorkerConfigResponse\"s\130\211\228\147\STXm\"-/namespaces/{namespace}/workers/update-config:\SOH*Z9\"4/api/v1/namespaces/{namespace}/workers/update-config:\SOH*\DC2\148\STX\n\
+      \\SODescribeWorker\DC26.temporal.api.workflowservice.v1.DescribeWorkerRequest\SUB7.temporal.api.workflowservice.v1.DescribeWorkerResponse\"\144\SOH\130\211\228\147\STX\137\SOH\DC2>/namespaces/{namespace}/workers/describe/{worker_instance_key}ZG\DC2E/api/v1/namespaces/{namespace}/workers/describe/{worker_instance_key}"
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "registerNamespace" where
   type MethodName WorkflowService "registerNamespace" = "RegisterNamespace"
   type MethodInput WorkflowService "registerNamespace" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.RegisterNamespaceRequest
@@ -564,6 +568,11 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorke
   type MethodInput WorkflowService "updateWorkerDeploymentVersionMetadata" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerDeploymentVersionMetadataRequest
   type MethodOutput WorkflowService "updateWorkerDeploymentVersionMetadata" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerDeploymentVersionMetadataResponse
   type MethodStreamingType WorkflowService "updateWorkerDeploymentVersionMetadata" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "setWorkerDeploymentManager" where
+  type MethodName WorkflowService "setWorkerDeploymentManager" = "SetWorkerDeploymentManager"
+  type MethodInput WorkflowService "setWorkerDeploymentManager" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetWorkerDeploymentManagerRequest
+  type MethodOutput WorkflowService "setWorkerDeploymentManager" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.SetWorkerDeploymentManagerResponse
+  type MethodStreamingType WorkflowService "setWorkerDeploymentManager" = 'Data.ProtoLens.Service.Types.NonStreaming
 instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorkflowExecution" where
   type MethodName WorkflowService "updateWorkflowExecution" = "UpdateWorkflowExecution"
   type MethodInput WorkflowService "updateWorkflowExecution" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkflowExecutionRequest
@@ -684,3 +693,8 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "updateWorke
   type MethodInput WorkflowService "updateWorkerConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerConfigRequest
   type MethodOutput WorkflowService "updateWorkerConfig" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.UpdateWorkerConfigResponse
   type MethodStreamingType WorkflowService "updateWorkerConfig" = 'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl WorkflowService "describeWorker" where
+  type MethodName WorkflowService "describeWorker" = "DescribeWorker"
+  type MethodInput WorkflowService "describeWorker" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkerRequest
+  type MethodOutput WorkflowService "describeWorker" = Proto.Temporal.Api.Workflowservice.V1.RequestResponse.DescribeWorkerResponse
+  type MethodStreamingType WorkflowService "describeWorker" = 'Data.ProtoLens.Service.Types.NonStreaming

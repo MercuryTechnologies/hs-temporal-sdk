@@ -169,6 +169,13 @@ reason ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>
   Lens.Family2.LensLike' f s a
 reason = Data.ProtoLens.Field.field @"reason"
+reportedProblemsSearchAttribute ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "reportedProblemsSearchAttribute" a) =>
+  Lens.Family2.LensLike' f s a
+reportedProblemsSearchAttribute
+  = Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute"
 state ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "state" a) =>
@@ -205,6 +212,12 @@ visibilityArchivalUri ::
   Lens.Family2.LensLike' f s a
 visibilityArchivalUri
   = Data.ProtoLens.Field.field @"visibilityArchivalUri"
+workerHeartbeats ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "workerHeartbeats" a) =>
+  Lens.Family2.LensLike' f s a
+workerHeartbeats = Data.ProtoLens.Field.field @"workerHeartbeats"
 workflowExecutionRetentionTtl ::
   forall f s a.
   (Prelude.Functor f,

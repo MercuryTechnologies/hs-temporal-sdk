@@ -153,6 +153,12 @@ lastModifierIdentity ::
   Lens.Family2.LensLike' f s a
 lastModifierIdentity
   = Data.ProtoLens.Field.field @"lastModifierIdentity"
+managerIdentity ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "managerIdentity" a) =>
+  Lens.Family2.LensLike' f s a
+managerIdentity = Data.ProtoLens.Field.field @"managerIdentity"
 maybe'createTime ::
   forall f s a.
   (Prelude.Functor f,
