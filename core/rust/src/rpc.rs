@@ -1,9 +1,9 @@
 use crate::client::{rpc_req, rpc_resp, CRPCError, ClientRef, RPCError, RpcCall, TemporalCall};
 use crate::runtime::{Capability, HsCallback, MVar};
 use ffi_convert::{CArray, CReprOf};
-use temporalio_client::OperatorService;
-use temporalio_client::TestService;
-use temporalio_client::WorkflowService;
+use temporal_client::OperatorService;
+use temporal_client::TestService;
+use temporal_client::WorkflowService;
 
 macro_rules! rpc_call {
     ($retry_client:ident, $call:ident, $call_name:ident) => {{

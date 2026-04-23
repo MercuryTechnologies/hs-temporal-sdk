@@ -1300,9 +1300,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.21.4"
+version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 
 [[package]]
 name = "openssl-probe"
@@ -2000,6 +2000,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustfsm"
+version = "0.1.0"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
+dependencies = [
+ "rustfsm_procmacro",
+ "rustfsm_trait",
+]
+
+[[package]]
+name = "rustfsm_procmacro"
+version = "0.1.0"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
+dependencies = [
+ "derive_more",
+ "proc-macro2",
+ "quote",
+ "rustfsm_trait",
+ "syn 2.0.117",
+]
+
+[[package]]
+name = "rustfsm_trait"
+version = "0.1.0"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
+
+[[package]]
 name = "rustix"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2074,9 +2100,9 @@ checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
 
 [[package]]
 name = "schannel"
-version = "0.1.29"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91c1b7e4904c873ef0710c1f407dde2e6287de2bebc1bbbf7d430bb7cbffd939"
+checksum = "891d81b926048e76efe18581bf793546b4c0eaf8448d72be8de2bbee5fd166e1"
 dependencies = [
  "windows-sys 0.61.2",
 ]
@@ -2335,9 +2361,9 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.27.0"
+version = "3.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
+checksum = "82a72c767771b47409d2345987fda8628641887d5466101319899796367354a0"
 dependencies = [
  "fastrand",
  "getrandom 0.4.2",
@@ -2347,32 +2373,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "temporal_bridge"
+name = "temporal-client"
 version = "0.1.0"
-dependencies = [
- "async-trait",
- "ffi-convert",
- "libc",
- "prost",
- "prost-wkt-types",
- "serde",
- "serde_json",
- "temporalio-client",
- "temporalio-common",
- "temporalio-sdk-core",
- "tokio",
- "tokio-stream",
- "tonic",
- "tonic-prost",
- "tracing",
- "tracing-subscriber",
- "url",
-]
-
-[[package]]
-name = "temporalio-client"
-version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=5560b4a0d4ed94425fd7e4b96328e0b3654e9aee#5560b4a0d4ed94425fd7e4b96328e0b3654e9aee"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2390,7 +2393,8 @@ dependencies = [
  "hyper-util",
  "parking_lot",
  "slotmap",
- "temporalio-common",
+ "temporal-sdk-core-api",
+ "temporal-sdk-core-protos",
  "thiserror 2.0.18",
  "tokio",
  "tonic",
@@ -2401,47 +2405,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "temporalio-common"
+name = "temporal-sdk-core"
 version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=5560b4a0d4ed94425fd7e4b96328e0b3654e9aee#5560b4a0d4ed94425fd7e4b96328e0b3654e9aee"
-dependencies = [
- "anyhow",
- "async-trait",
- "base64",
- "derive_builder",
- "derive_more",
- "opentelemetry",
- "prost",
- "prost-wkt",
- "prost-wkt-types",
- "rand 0.9.2",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tonic",
- "tonic-prost",
- "tonic-prost-build",
- "tracing",
- "tracing-core",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "temporalio-macros"
-version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=5560b4a0d4ed94425fd7e4b96328e0b3654e9aee#5560b4a0d4ed94425fd7e4b96328e0b3654e9aee"
-dependencies = [
- "derive_more",
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
-name = "temporalio-sdk-core"
-version = "0.1.0"
-source = "git+https://github.com/temporalio/sdk-core?rev=5560b4a0d4ed94425fd7e4b96328e0b3654e9aee#5560b4a0d4ed94425fd7e4b96328e0b3654e9aee"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2476,15 +2442,16 @@ dependencies = [
  "rand 0.9.2",
  "reqwest",
  "ringbuf",
+ "rustfsm",
  "serde",
  "serde_json",
  "siphasher",
  "slotmap",
  "sysinfo",
  "tar",
- "temporalio-client",
- "temporalio-common",
- "temporalio-macros",
+ "temporal-client",
+ "temporal-sdk-core-api",
+ "temporal-sdk-core-protos",
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
@@ -2495,6 +2462,71 @@ dependencies = [
  "url",
  "uuid",
  "zip",
+]
+
+[[package]]
+name = "temporal-sdk-core-api"
+version = "0.1.0"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
+dependencies = [
+ "async-trait",
+ "derive_builder",
+ "derive_more",
+ "opentelemetry",
+ "prost",
+ "serde_json",
+ "temporal-sdk-core-protos",
+ "thiserror 2.0.18",
+ "tonic",
+ "tracing",
+ "tracing-core",
+ "url",
+]
+
+[[package]]
+name = "temporal-sdk-core-protos"
+version = "0.1.0"
+source = "git+https://github.com/temporalio/sdk-core?rev=6bed63efebaece3c8f21b89caec49e178ce94d96#6bed63efebaece3c8f21b89caec49e178ce94d96"
+dependencies = [
+ "anyhow",
+ "base64",
+ "derive_more",
+ "prost",
+ "prost-wkt",
+ "prost-wkt-types",
+ "rand 0.9.2",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+ "uuid",
+]
+
+[[package]]
+name = "temporal_bridge"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "ffi-convert",
+ "libc",
+ "prost",
+ "prost-wkt-types",
+ "rustfsm",
+ "serde",
+ "serde_json",
+ "temporal-client",
+ "temporal-sdk-core",
+ "temporal-sdk-core-api",
+ "temporal-sdk-core-protos",
+ "tokio",
+ "tokio-stream",
+ "tonic",
+ "tonic-prost",
+ "tracing",
+ "tracing-subscriber",
+ "url",
 ]
 
 [[package]]
@@ -3510,18 +3542,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.42"
+version = "0.8.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2578b716f8a7a858b7f02d5bd870c14bf4ddbbcf3a4c05414ba6503640505e3"
+checksum = "96e13bc581734df6250836c59a5f44f3c57db9f9acb9dc8e3eaabdaf6170254d"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.42"
+version = "0.8.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e6cc098ea4d3bd6246687de65af3f920c430e236bee1e3bf2e441463f08a02f"
+checksum = "3545ea9e86d12ab9bba9fcd99b54c1556fd3199007def5a03c375623d05fac1c"
 dependencies = [
  "proc-macro2",
  "quote",

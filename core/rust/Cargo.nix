@@ -4104,9 +4104,9 @@ rec {
       };
       "once_cell" = rec {
         crateName = "once_cell";
-        version = "1.21.4";
+        version = "1.21.3";
         edition = "2021";
-        sha256 = "0l1v676wf71kjg2khch4dphwh1jp3291ffiymr2mvy1kxd5kwz4z";
+        sha256 = "0b9x77lb9f1j6nqgf5aka4s2qj0nly176bpbrv6f9iakk5ff3xa2";
         authors = [
           "Aleksey Kladov <aleksey.kladov@gmail.com>"
         ];
@@ -6569,6 +6569,86 @@ rec {
         ];
 
       };
+      "rustfsm" = rec {
+        crateName = "rustfsm";
+        version = "0.1.0";
+        edition = "2024";
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/temporalio/sdk-core";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
+        };
+        authors = [
+          "Spencer Judge <spencer@temporal.io>"
+        ];
+        dependencies = [
+          {
+            name = "rustfsm_procmacro";
+            packageId = "rustfsm_procmacro";
+          }
+          {
+            name = "rustfsm_trait";
+            packageId = "rustfsm_trait";
+          }
+        ];
+
+      };
+      "rustfsm_procmacro" = rec {
+        crateName = "rustfsm_procmacro";
+        version = "0.1.0";
+        edition = "2024";
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/temporalio/sdk-core";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
+        };
+        procMacro = true;
+        authors = [
+          "Spencer Judge <spencer@temporal.io>"
+        ];
+        dependencies = [
+          {
+            name = "derive_more";
+            packageId = "derive_more";
+            features = [ "constructor" "display" "from" "into" "debug" "try_into" ];
+          }
+          {
+            name = "proc-macro2";
+            packageId = "proc-macro2";
+          }
+          {
+            name = "quote";
+            packageId = "quote";
+          }
+          {
+            name = "rustfsm_trait";
+            packageId = "rustfsm_trait";
+          }
+          {
+            name = "syn";
+            packageId = "syn 2.0.117";
+            features = [ "default" "extra-traits" ];
+          }
+        ];
+
+      };
+      "rustfsm_trait" = rec {
+        crateName = "rustfsm_trait";
+        version = "0.1.0";
+        edition = "2024";
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/temporalio/sdk-core";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
+        };
+        authors = [
+          "Spencer Judge <spencer@temporal.io>"
+        ];
+
+      };
       "rustix" = rec {
         crateName = "rustix";
         version = "1.1.4";
@@ -6865,9 +6945,9 @@ rec {
       };
       "schannel" = rec {
         crateName = "schannel";
-        version = "0.1.29";
+        version = "0.1.28";
         edition = "2018";
-        sha256 = "0ffrzz5vf2s3gnzvphgb5gg8fqifvryl07qcf7q3x1scj3jbghci";
+        sha256 = "1qb6s5gyxfz2inz753a4z3mc1d266mwvz0c5w7ppd3h44swq27c9";
         authors = [
           "Steven Fackler <sfackler@gmail.com>"
           "Steffen Butzer <steffen.butzer@outlook.com>"
@@ -7599,9 +7679,9 @@ rec {
       };
       "tempfile" = rec {
         crateName = "tempfile";
-        version = "3.27.0";
+        version = "3.26.0";
         edition = "2021";
-        sha256 = "1gblhnyfjsbg9wjg194n89wrzah7jy3yzgnyzhp56f3v9jd7wj9j";
+        sha256 = "182lfcv9d5w9349i0rjlgn4431k2m3yqfn9ls84p9d3ifxv2r9w2";
         authors = [
           "Steven Allen <steven@stebalien.com>"
           "The Rust Project Developers"
@@ -7645,100 +7725,19 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "getrandom" ];
       };
-      "temporal_bridge" = rec {
-        crateName = "temporal_bridge";
-        version = "0.1.0";
-        edition = "2024";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };type = [ "cdylib" "staticlib" ];
-        dependencies = [
-          {
-            name = "async-trait";
-            packageId = "async-trait";
-          }
-          {
-            name = "ffi-convert";
-            packageId = "ffi-convert";
-          }
-          {
-            name = "libc";
-            packageId = "libc";
-          }
-          {
-            name = "prost";
-            packageId = "prost";
-          }
-          {
-            name = "prost-wkt-types";
-            packageId = "prost-wkt-types";
-            rename = "prost-types";
-          }
-          {
-            name = "serde";
-            packageId = "serde";
-            features = [ "derive" ];
-          }
-          {
-            name = "serde_json";
-            packageId = "serde_json";
-          }
-          {
-            name = "temporalio-client";
-            packageId = "temporalio-client";
-          }
-          {
-            name = "temporalio-common";
-            packageId = "temporalio-common";
-            features = [ "serde_serialize" ];
-          }
-          {
-            name = "temporalio-sdk-core";
-            packageId = "temporalio-sdk-core";
-            features = [ "ephemeral-server" ];
-          }
-          {
-            name = "tokio";
-            packageId = "tokio";
-          }
-          {
-            name = "tokio-stream";
-            packageId = "tokio-stream";
-          }
-          {
-            name = "tonic";
-            packageId = "tonic";
-          }
-          {
-            name = "tonic-prost";
-            packageId = "tonic-prost";
-          }
-          {
-            name = "tracing";
-            packageId = "tracing";
-          }
-          {
-            name = "tracing-subscriber";
-            packageId = "tracing-subscriber";
-          }
-          {
-            name = "url";
-            packageId = "url";
-          }
-        ];
-
-      };
-      "temporalio-client" = rec {
-        crateName = "temporalio-client";
+      "temporal-client" = rec {
+        crateName = "temporal-client";
         version = "0.1.0";
         edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee";
-          sha256 = "1200sxxmxk194rdmc09r7imzyy56zrmdjd178lyyzr1g1kdzszf1";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
         };
-        libName = "temporalio_client";
+        libName = "temporal_client";
         authors = [
-          "Temporal Technologies Inc. <sdk@temporal.io>"
+          "Spencer Judge <spencer@temporal.io>"
         ];
         dependencies = [
           {
@@ -7808,8 +7807,12 @@ rec {
             packageId = "slotmap";
           }
           {
-            name = "temporalio-common";
-            packageId = "temporalio-common";
+            name = "temporal-sdk-core-api";
+            packageId = "temporal-sdk-core-api";
+          }
+          {
+            name = "temporal-sdk-core-protos";
+            packageId = "temporal-sdk-core-protos";
           }
           {
             name = "thiserror";
@@ -7847,171 +7850,20 @@ rec {
           "telemetry" = [ "dep:opentelemetry" ];
         };
       };
-      "temporalio-common" = rec {
-        crateName = "temporalio-common";
+      "temporal-sdk-core" = rec {
+        crateName = "temporal-sdk-core";
         version = "0.1.0";
         edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-core";
-          rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee";
-          sha256 = "1200sxxmxk194rdmc09r7imzyy56zrmdjd178lyyzr1g1kdzszf1";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
         };
-        libName = "temporalio_common";
+        libName = "temporal_sdk_core";
         authors = [
-          "Temporal Technologies Inc. <sdk@temporal.io>"
-        ];
-        dependencies = [
-          {
-            name = "anyhow";
-            packageId = "anyhow";
-          }
-          {
-            name = "async-trait";
-            packageId = "async-trait";
-          }
-          {
-            name = "base64";
-            packageId = "base64";
-          }
-          {
-            name = "derive_builder";
-            packageId = "derive_builder";
-          }
-          {
-            name = "derive_more";
-            packageId = "derive_more";
-            features = [ "constructor" "display" "from" "into" "debug" "try_into" ];
-          }
-          {
-            name = "opentelemetry";
-            packageId = "opentelemetry";
-            optional = true;
-            features = [ "metrics" ];
-          }
-          {
-            name = "prost";
-            packageId = "prost";
-          }
-          {
-            name = "prost-wkt";
-            packageId = "prost-wkt";
-          }
-          {
-            name = "prost-wkt-types";
-            packageId = "prost-wkt-types";
-            rename = "prost-types";
-          }
-          {
-            name = "rand";
-            packageId = "rand 0.9.2";
-            optional = true;
-          }
-          {
-            name = "serde";
-            packageId = "serde";
-            features = [ "derive" ];
-          }
-          {
-            name = "serde_json";
-            packageId = "serde_json";
-          }
-          {
-            name = "thiserror";
-            packageId = "thiserror 2.0.18";
-          }
-          {
-            name = "tonic";
-            packageId = "tonic";
-          }
-          {
-            name = "tonic-prost";
-            packageId = "tonic-prost";
-          }
-          {
-            name = "tracing";
-            packageId = "tracing";
-          }
-          {
-            name = "tracing-core";
-            packageId = "tracing-core";
-          }
-          {
-            name = "url";
-            packageId = "url";
-          }
-          {
-            name = "uuid";
-            packageId = "uuid";
-            features = [ "v4" ];
-          }
-        ];
-        buildDependencies = [
-          {
-            name = "tonic-prost-build";
-            packageId = "tonic-prost-build";
-          }
-        ];
-        features = {
-          "envconfig" = [ "dep:toml" "dep:dirs" ];
-          "history_builders" = [ "rand" ];
-          "otel_impls" = [ "dep:opentelemetry" ];
-          "rand" = [ "dep:rand" ];
-          "test-utilities" = [ "history_builders" ];
-        };
-        resolvedDefaultFeatures = [ "history_builders" "otel_impls" "rand" "serde_serialize" "test-utilities" ];
-      };
-      "temporalio-macros" = rec {
-        crateName = "temporalio-macros";
-        version = "0.1.0";
-        edition = "2024";
-        workspace_member = null;
-        src = pkgs.fetchgit {
-          url = "https://github.com/temporalio/sdk-core";
-          rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee";
-          sha256 = "1200sxxmxk194rdmc09r7imzyy56zrmdjd178lyyzr1g1kdzszf1";
-        };
-        procMacro = true;
-        libName = "temporalio_macros";
-        authors = [
-          "Temporal Technologies Inc. <sdk@temporal.io>"
-        ];
-        dependencies = [
-          {
-            name = "derive_more";
-            packageId = "derive_more";
-            features = [ "constructor" "display" "from" "into" "debug" "try_into" ];
-          }
-          {
-            name = "proc-macro2";
-            packageId = "proc-macro2";
-          }
-          {
-            name = "quote";
-            packageId = "quote";
-          }
-          {
-            name = "syn";
-            packageId = "syn 2.0.117";
-            features = [ "default" "extra-traits" ];
-          }
-        ];
-
-      };
-      "temporalio-sdk-core" = rec {
-        crateName = "temporalio-sdk-core";
-        version = "0.1.0";
-        edition = "2024";
-        crateBin = [];
-        workspace_member = null;
-        src = pkgs.fetchgit {
-          url = "https://github.com/temporalio/sdk-core";
-          rev = "5560b4a0d4ed94425fd7e4b96328e0b3654e9aee";
-          sha256 = "1200sxxmxk194rdmc09r7imzyy56zrmdjd178lyyzr1g1kdzszf1";
-        };
-        libName = "temporalio_sdk_core";
-        authors = [
-          "Temporal Technologies Inc. <sdk@temporal.io>"
+          "Spencer Judge <spencer@temporal.io>"
+          "Vitaly Arbuzov <vitaly@temporal.io>"
         ];
         dependencies = [
           {
@@ -8168,6 +8020,10 @@ rec {
             packageId = "ringbuf";
           }
           {
+            name = "rustfsm";
+            packageId = "rustfsm";
+          }
+          {
             name = "serde";
             packageId = "serde";
           }
@@ -8195,17 +8051,18 @@ rec {
             optional = true;
           }
           {
-            name = "temporalio-client";
-            packageId = "temporalio-client";
+            name = "temporal-client";
+            packageId = "temporal-client";
           }
           {
-            name = "temporalio-common";
-            packageId = "temporalio-common";
-            features = [ "otel_impls" "history_builders" "test-utilities" ];
+            name = "temporal-sdk-core-api";
+            packageId = "temporal-sdk-core-api";
+            features = [ "otel_impls" ];
           }
           {
-            name = "temporalio-macros";
-            packageId = "temporalio-macros";
+            name = "temporal-sdk-core-protos";
+            packageId = "temporal-sdk-core-protos";
+            features = [ "history_builders" "test-utilities" ];
           }
           {
             name = "thiserror";
@@ -8280,6 +8137,256 @@ rec {
           "tokio-console" = [ "console-subscriber" ];
         };
         resolvedDefaultFeatures = [ "default" "ephemeral-server" "otel" "prom" ];
+      };
+      "temporal-sdk-core-api" = rec {
+        crateName = "temporal-sdk-core-api";
+        version = "0.1.0";
+        edition = "2024";
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/temporalio/sdk-core";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
+        };
+        libName = "temporal_sdk_core_api";
+        authors = [
+          "Spencer Judge <spencer@temporal.io>"
+        ];
+        dependencies = [
+          {
+            name = "async-trait";
+            packageId = "async-trait";
+          }
+          {
+            name = "derive_builder";
+            packageId = "derive_builder";
+          }
+          {
+            name = "derive_more";
+            packageId = "derive_more";
+            features = [ "constructor" "display" "from" "into" "debug" "try_into" ];
+          }
+          {
+            name = "opentelemetry";
+            packageId = "opentelemetry";
+            optional = true;
+            features = [ "metrics" ];
+          }
+          {
+            name = "prost";
+            packageId = "prost";
+          }
+          {
+            name = "serde_json";
+            packageId = "serde_json";
+          }
+          {
+            name = "temporal-sdk-core-protos";
+            packageId = "temporal-sdk-core-protos";
+          }
+          {
+            name = "thiserror";
+            packageId = "thiserror 2.0.18";
+          }
+          {
+            name = "tonic";
+            packageId = "tonic";
+          }
+          {
+            name = "tracing";
+            packageId = "tracing";
+          }
+          {
+            name = "tracing-core";
+            packageId = "tracing-core";
+          }
+          {
+            name = "url";
+            packageId = "url";
+          }
+        ];
+        features = {
+          "envconfig" = [ "dep:toml" "dep:serde" "dep:dirs" ];
+          "otel_impls" = [ "dep:opentelemetry" ];
+        };
+        resolvedDefaultFeatures = [ "otel_impls" ];
+      };
+      "temporal-sdk-core-protos" = rec {
+        crateName = "temporal-sdk-core-protos";
+        version = "0.1.0";
+        edition = "2024";
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/temporalio/sdk-core";
+          rev = "6bed63efebaece3c8f21b89caec49e178ce94d96";
+          sha256 = "165jw9c4lcs33vm9bk2khzl82r9dyxmi7q7106ygfzlgylfkqc2z";
+        };
+        libName = "temporal_sdk_core_protos";
+        authors = [
+          "Spencer Judge <spencer@temporal.io>"
+        ];
+        dependencies = [
+          {
+            name = "anyhow";
+            packageId = "anyhow";
+          }
+          {
+            name = "base64";
+            packageId = "base64";
+          }
+          {
+            name = "derive_more";
+            packageId = "derive_more";
+            features = [ "constructor" "display" "from" "into" "debug" "try_into" ];
+          }
+          {
+            name = "prost";
+            packageId = "prost";
+          }
+          {
+            name = "prost-wkt";
+            packageId = "prost-wkt";
+          }
+          {
+            name = "prost-wkt-types";
+            packageId = "prost-wkt-types";
+            rename = "prost-types";
+          }
+          {
+            name = "rand";
+            packageId = "rand 0.9.2";
+            optional = true;
+          }
+          {
+            name = "serde";
+            packageId = "serde";
+            features = [ "derive" ];
+          }
+          {
+            name = "serde_json";
+            packageId = "serde_json";
+          }
+          {
+            name = "thiserror";
+            packageId = "thiserror 2.0.18";
+          }
+          {
+            name = "tonic";
+            packageId = "tonic";
+          }
+          {
+            name = "tonic-prost";
+            packageId = "tonic-prost";
+          }
+          {
+            name = "uuid";
+            packageId = "uuid";
+            optional = true;
+            features = [ "v4" ];
+          }
+        ];
+        buildDependencies = [
+          {
+            name = "tonic-prost-build";
+            packageId = "tonic-prost-build";
+          }
+        ];
+        features = {
+          "history_builders" = [ "uuid" "rand" ];
+          "rand" = [ "dep:rand" ];
+          "test-utilities" = [ "history_builders" ];
+          "uuid" = [ "dep:uuid" ];
+        };
+        resolvedDefaultFeatures = [ "history_builders" "rand" "serde_serialize" "test-utilities" "uuid" ];
+      };
+      "temporal_bridge" = rec {
+        crateName = "temporal_bridge";
+        version = "0.1.0";
+        edition = "2024";
+        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };type = [ "cdylib" "staticlib" ];
+        dependencies = [
+          {
+            name = "async-trait";
+            packageId = "async-trait";
+          }
+          {
+            name = "ffi-convert";
+            packageId = "ffi-convert";
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+          }
+          {
+            name = "prost";
+            packageId = "prost";
+          }
+          {
+            name = "prost-wkt-types";
+            packageId = "prost-wkt-types";
+            rename = "prost-types";
+          }
+          {
+            name = "rustfsm";
+            packageId = "rustfsm";
+          }
+          {
+            name = "serde";
+            packageId = "serde";
+            features = [ "derive" ];
+          }
+          {
+            name = "serde_json";
+            packageId = "serde_json";
+          }
+          {
+            name = "temporal-client";
+            packageId = "temporal-client";
+          }
+          {
+            name = "temporal-sdk-core";
+            packageId = "temporal-sdk-core";
+            features = [ "ephemeral-server" ];
+          }
+          {
+            name = "temporal-sdk-core-api";
+            packageId = "temporal-sdk-core-api";
+          }
+          {
+            name = "temporal-sdk-core-protos";
+            packageId = "temporal-sdk-core-protos";
+            features = [ "serde_serialize" ];
+          }
+          {
+            name = "tokio";
+            packageId = "tokio";
+          }
+          {
+            name = "tokio-stream";
+            packageId = "tokio-stream";
+          }
+          {
+            name = "tonic";
+            packageId = "tonic";
+          }
+          {
+            name = "tonic-prost";
+            packageId = "tonic-prost";
+          }
+          {
+            name = "tracing";
+            packageId = "tracing";
+          }
+          {
+            name = "tracing-subscriber";
+            packageId = "tracing-subscriber";
+          }
+          {
+            name = "url";
+            packageId = "url";
+          }
+        ];
+
       };
       "termtree" = rec {
         crateName = "termtree";
@@ -13181,9 +13288,9 @@ rec {
       };
       "zerocopy" = rec {
         crateName = "zerocopy";
-        version = "0.8.42";
+        version = "0.8.41";
         edition = "2021";
-        sha256 = "1qq50mj06rds2iac197kpkdlvgql1j3vvm82gy5qayladxqqnmzj";
+        sha256 = "0k95f1hszgda7s7drfdcz6wpvigk8igrmi9n10jzckbkh72kpqcn";
         authors = [
           "Joshua Liebow-Feeser <joshlf@google.com>"
           "Jack Wrenn <jswrenn@amazon.com>"
@@ -13217,9 +13324,9 @@ rec {
       };
       "zerocopy-derive" = rec {
         crateName = "zerocopy-derive";
-        version = "0.8.42";
+        version = "0.8.41";
         edition = "2021";
-        sha256 = "0bx010zlchg4y8xixvkb4c74634j7ypnbpl7cqjdcfsdxacc0v3y";
+        sha256 = "075cbz826mip7jhgbph7j0cx6vsmq5a9pngwm6xvjanihsgfli9m";
         procMacro = true;
         libName = "zerocopy_derive";
         authors = [

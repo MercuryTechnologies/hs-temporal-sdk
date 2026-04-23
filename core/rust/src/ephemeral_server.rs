@@ -4,7 +4,7 @@ use ffi_convert::*;
 use serde::Deserialize;
 use std::ffi::{c_char, CStr};
 use std::time::Duration;
-use temporalio_sdk_core::ephemeral_server::*;
+use temporal_sdk_core::ephemeral_server::*;
 
 pub struct EphemeralServerRef {
     pub(crate) server: EphemeralServer,

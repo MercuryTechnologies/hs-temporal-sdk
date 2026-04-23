@@ -23,7 +23,7 @@ let
           PROTOC = "${pkgs.protobuf}/bin/protoc";
           PROTOC_INCLUDE = "${pkgs.protobuf}/include";
         };
-        temporalio-common = _attrs: {
+        temporal-sdk-core-protos = _attrs: {
           PROTOC = "${pkgs.protobuf}/bin/protoc";
           PROTOC_INCLUDE = "${pkgs.protobuf}/include";
         };
@@ -52,5 +52,5 @@ let
 in
 {
   temporal_bridge = cargoNix.rootCrate.build.lib;
-  temporal-sdk-core-src = cargoNix.internal.crates.temporalio-sdk-core.src;
+  temporal-sdk-core-src = cargoNix.internal.crates.temporal-sdk-core.src;
 }
