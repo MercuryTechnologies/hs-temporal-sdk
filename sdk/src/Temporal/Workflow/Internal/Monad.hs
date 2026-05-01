@@ -965,8 +965,17 @@ data ActivityInput = ActivityInput
   }
 
 
+data LocalActivityInput = LocalActivityInput
+  { localActivityType :: Text
+  , localArgs :: Vector Payload
+  , localOptions :: StartLocalActivityOptions
+  , localSeq :: Sequence
+  }
+
+
 data WorkflowOutboundInterceptor = WorkflowOutboundInterceptor
   { scheduleActivity :: ActivityInput -> (ActivityInput -> IO (Task Payload)) -> IO (Task Payload)
+  , scheduleLocalActivity :: LocalActivityInput -> (LocalActivityInput -> IO (Task Payload)) -> IO (Task Payload)
   , startChildWorkflowExecution :: Text -> StartChildWorkflowOptions -> (Text -> StartChildWorkflowOptions -> IO (ChildWorkflowHandle Payload)) -> IO (ChildWorkflowHandle Payload)
   , continueAsNew :: forall a. Text -> ContinueAsNewOptions -> (Text -> ContinueAsNewOptions -> IO a) -> IO a
   }
@@ -976,6 +985,7 @@ instance Semigroup WorkflowOutboundInterceptor where
   l <> r =
     WorkflowOutboundInterceptor
       { scheduleActivity = \input cont -> scheduleActivity l input $ \input' -> scheduleActivity r input' cont
+      , scheduleLocalActivity = \input cont -> Temporal.Workflow.Internal.Monad.scheduleLocalActivity l input $ \input' -> Temporal.Workflow.Internal.Monad.scheduleLocalActivity r input' cont
       , startChildWorkflowExecution = \t input cont -> startChildWorkflowExecution l t input $ \t' input' -> startChildWorkflowExecution r t' input' cont
       , continueAsNew = \n input cont -> continueAsNew l n input $ \n' input' -> continueAsNew r n' input' cont
       }
@@ -985,6 +995,7 @@ instance Monoid WorkflowOutboundInterceptor where
   mempty =
     WorkflowOutboundInterceptor
       { scheduleActivity = \input cont -> cont input
+      , scheduleLocalActivity = \input cont -> cont input
       , startChildWorkflowExecution = \t input cont -> cont t input
       , continueAsNew = \n input cont -> cont n input
       }

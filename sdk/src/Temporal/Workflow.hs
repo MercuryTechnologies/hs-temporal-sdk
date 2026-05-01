@@ -117,6 +117,7 @@ module Temporal.Workflow (
   StartLocalActivityOptions (..),
   defaultStartLocalActivityOptions,
   startLocalActivity,
+  executeLocalActivity,
 
   -- ** Child workflow operations
   -- $childWorkflow
@@ -320,6 +321,7 @@ import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Common.TimeoutType
+import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, nanoseconds, seconds)
 import Temporal.Exception
 import Temporal.Payload
@@ -793,151 +795,129 @@ executeChildWorkflow (workflowRef -> k@(KnownWorkflow codec _)) opts = withWorkf
   waitChildWorkflowResult h
 
 
-data StartLocalActivityOptions = StartLocalActivityOptions
-  { activityId :: Maybe ActivityId
-  , scheduleToCloseTimeout :: Maybe Duration
-  -- ^ Indicates how long the caller is willing to wait for local activity completion. Limits how
-  -- long retries will be attempted. When not specified defaults to the workflow execution
-  -- timeout (which may be unset).
-  , scheduleToStartTimeout :: Maybe Duration
-  -- ^ Limits time the local activity can idle internally before being executed. That can happen if
-  -- the worker is currently at max concurrent local activity executions. This timeout is always
-  -- non retryable as all a retry would achieve is to put it back into the same queue. Defaults
-  -- to `schedule_to_close_timeout` if not specified and that is set. Must be <=
-  -- `schedule_to_close_timeout` when set, otherwise, it will be clamped down.
-  , startToCloseTimeout :: Maybe Duration
-  -- ^ Maximum time the local activity is allowed to execute after the task is dispatched. This
-  -- timeout is always retryable. Either or both of `schedule_to_close_timeout` and this must be
-  -- specified. If set, this must be <= `schedule_to_close_timeout`, otherwise, it will be
-  -- clamped down.
-  , retryPolicy :: Maybe RetryPolicy
-  -- ^ Specify a retry policy for the local activity. By default local activities will be retried
-  -- indefinitely.
-  , localRetryThreshold :: Maybe Duration
-  -- ^ If the activity is retrying and backoff would exceed this value, lang will be told to
-  -- schedule a timer and retry the activity after. Otherwise, backoff will happen internally in
-  -- core. Defaults to 1 minute.
-  , cancellationType :: ActivityCancellationType
-  -- ^ Defines how the workflow will wait (or not) for cancellation of the activity to be
-  -- confirmed. Lang should default this to `WAIT_CANCELLATION_COMPLETED`, even though proto
-  -- will default to `TRY_CANCEL` automatically.
-  , headers :: Map Text Payload
-  }
-
-
-{- |
-Default options for starting a local activity.
-
-@
-'StartLocalActivityOptions'
-  { activityId = 'Nothing'
-  , scheduleToCloseTimeout = 'Nothing'
-  , scheduleToStartTimeout = 'Nothing'
-  , startToCloseTimeout = 'Nothing'
-  , retryPolicy = 'Nothing'
-  , localRetryThreshold = 'Nothing'
-  , cancellationType = 'ActivityCancellationWaitCancellationCompleted'
-  , headers = 'mempty'
-  }
-@
--}
-defaultStartLocalActivityOptions :: StartLocalActivityOptions
-defaultStartLocalActivityOptions =
-  StartLocalActivityOptions
-    { activityId = Nothing
-    , scheduleToCloseTimeout = Nothing
-    , scheduleToStartTimeout = Nothing
-    , startToCloseTimeout = Nothing
-    , retryPolicy = Nothing
-    , localRetryThreshold = Nothing
-    , cancellationType = ActivityCancellationWaitCancellationCompleted
-    , headers = mempty
-    }
-
-
-startLocalActivity
-  :: forall act
-   . (RequireCallStack, ActivityRef act)
-  => act
+startLocalActivityFromPayloads
+  :: forall args result
+   . RequireCallStack
+  => KnownActivity args result
   -> StartLocalActivityOptions
-  -> (ActivityArgs act :->: Workflow (Task (ActivityResult act)))
-startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArgs @(ActivityArgs act) @(Task (ActivityResult act)) codec $ \typedPayloads -> do
+  -> Vector Payload
+  -> Workflow (Task result)
+startLocalActivityFromPayloads (KnownActivity codec name) opts typedPayloads = do
   updateCallStackW
   originalTime <- time
-  ilift $ do
-    inst <- ask
-    encodedPayloads <- processorEncodePayloads inst.payloadProcessor typedPayloads
-    let ps = fmap convertToProtoPayload encodedPayloads
-    s@(Sequence actSeq) <- nextActivitySequence
+  cancelledRef <- ilift $ liftIO $ newIORef False
+  rawTask <- scheduleLocalActivityAttempt name opts typedPayloads 0 (timespecToTimestamp originalTime) cancelledRef
+  pure
+    ( rawTask
+        `bindTask` ( \payload -> Workflow $ \_ -> do
+                      result <- liftIO $ decode codec payload
+                      case result of
+                        Left err -> pure $ Throw $ toException $ ValueError err
+                        Right val -> pure $ Done val
+                   )
+    )
+
+
+-- | Schedule a single local activity attempt. Returns a Task that resolves with
+-- the raw Payload on success. On DoBackoff, sleeps for the backoff duration and
+-- recursively re-schedules with updated attempt/originalScheduleTime, creating
+-- the server-side timer that core expects for long backoffs.
+--
+-- The @cancelledRef@ is shared across all retry attempts so that
+-- 'cancelAction' on the outermost 'Task' can signal cancellation to the
+-- DoBackoff retry loop.
+scheduleLocalActivityAttempt
+  :: RequireCallStack
+  => Text
+  -> StartLocalActivityOptions
+  -> Vector Payload
+  -> Word32
+  -> Timestamp.Timestamp
+  -> IORef Bool
+  -> Workflow (Task Payload)
+scheduleLocalActivityAttempt name opts typedPayloads attemptNum origSchedTime cancelledRef = ilift $ do
+  runInIO <- askRunInIO
+  inst <- ask
+  s@(Sequence actSeq) <- nextActivitySequence
+  let intercept :: LocalActivityInput -> (LocalActivityInput -> IO (Task Payload)) -> IO (Task Payload)
+      intercept = inst.outboundInterceptor.scheduleLocalActivity
+  liftIO $ intercept (LocalActivityInput name typedPayloads opts s) $ \localInput -> runInIO $ do
     resultSlot <- newTrackedIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
-    -- TODO, seems like `attempt` and `originalScheduledTime`
-    -- imply that we are in charge of retrying local activities ourselves?
-    let actId = maybe (Text.pack $ show actSeq) rawActivityId opts.activityId
+    let localOpts = localInput.localOptions
+    hdrs <- processorEncodePayloads inst.payloadProcessor localOpts.headers
+    args <- processorEncodePayloads inst.payloadProcessor localInput.localArgs
+    let actId = maybe (Text.pack $ show actSeq) rawActivityId localOpts.activityId
         cmd =
           defMessage
             & Command.scheduleLocalActivity
               .~ ( defMessage
                     & Command.seq .~ actSeq
                     & Command.activityId .~ actId
-                    & Command.activityType .~ n
-                    -- & attempt .~ _
-                    -- & headers .~ _
-                    & Command.originalScheduleTime .~ timespecToTimestamp originalTime
-                    & Command.vec'arguments .~ ps
-                    & Command.maybe'scheduleToCloseTimeout .~ (durationToProto <$> opts.scheduleToCloseTimeout)
-                    & Command.maybe'scheduleToStartTimeout .~ (durationToProto <$> opts.scheduleToStartTimeout)
-                    & Command.maybe'startToCloseTimeout .~ (durationToProto <$> opts.startToCloseTimeout)
-                    & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-                    & Command.maybe'localRetryThreshold .~ (durationToProto <$> opts.localRetryThreshold)
-                    & Command.cancellationType .~ activityCancellationTypeToProto opts.cancellationType
+                    & Command.activityType .~ localInput.localActivityType
+                    & Command.headers .~ fmap convertToProtoPayload hdrs
+                    & Command.attempt .~ attemptNum
+                    & Command.originalScheduleTime .~ origSchedTime
+                    & Command.vec'arguments .~ fmap convertToProtoPayload args
+                    & Command.maybe'scheduleToCloseTimeout .~ (durationToProto <$> localOpts.scheduleToCloseTimeout)
+                    & Command.maybe'scheduleToStartTimeout .~ (durationToProto <$> localOpts.scheduleToStartTimeout)
+                    & Command.maybe'startToCloseTimeout .~ (durationToProto <$> localOpts.startToCloseTimeout)
+                    & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> localOpts.retryPolicy)
+                    & Command.maybe'localRetryThreshold .~ (durationToProto <$> localOpts.localRetryThreshold)
+                    & Command.cancellationType .~ activityCancellationTypeToProto localOpts.cancellationType
                  )
     addCommand cmd
     pure $
       Task
         { waitAction = do
             res <- getIVar resultSlot
-            Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
-              Nothing -> error "Activity result missing status"
+            case res ^. Activation.result . ActivityResult.maybe'status of
+              Nothing -> error "Local activity result missing status"
               Just (ActivityResult.ActivityResolution'Completed success) -> do
-                decodedPayload <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload $ success ^. ActivityResult.result
-                case decodedPayload of
-                  Left err -> pure $ Throw $ toException $ ValueError err
-                  Right payload -> do
-                    result <- liftIO $ decode codec payload
-                    case result of
-                      Left err -> pure $ Throw $ toException $ ValueError err
-                      Right val -> pure $ Done val
+                res' <- ilift $ liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result)
+                case res' of
+                  Left err -> Temporal.Workflow.Internal.Monad.throw $ ValueError err
+                  Right val -> pure val
               Just (ActivityResult.ActivityResolution'Failed failure_) ->
                 let failure = failure_ ^. ActivityResult.failure
-                in pure $
-                    Throw $
-                      toException $
-                        ActivityFailure
-                          { message = failure ^. Failure.message
-                          , activityType = ActivityType n
-                          , activityId = ActivityId actId
-                          , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
-                          , identity = failure ^. Failure.activityFailureInfo . Failure.identity
-                          , cause =
-                              let cause_ = failure ^. Failure.cause
-                              in ApplicationFailure
-                                  { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
-                                  , message = cause_ ^. Failure.message
-                                  , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
-                                  , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
-                                  , stack = cause_ ^. Failure.stackTrace
-                                  , nextRetryDelay = Nothing
-                                  }
-                          , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
-                          , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
-                          , original = failure ^. Failure.activityFailureInfo
-                          , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
-                          }
-              Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
-              Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
+                    cause_ = failure ^. Failure.cause
+                in Temporal.Workflow.Internal.Monad.throw $
+                    ActivityFailure
+                      { message = failure ^. Failure.message
+                      , activityType = ActivityType localInput.localActivityType
+                      , activityId = ActivityId actId
+                      , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
+                      , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+                      , cause =
+                          ApplicationFailure
+                            { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
+                            , message = cause_ ^. Failure.message
+                            , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
+                            , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
+                            , stack = cause_ ^. Failure.stackTrace
+                            , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
+                            }
+                      , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
+                      , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
+                      , original = failure ^. Failure.activityFailureInfo
+                      , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
+                      }
+              Just (ActivityResult.ActivityResolution'Cancelled details) ->
+                Temporal.Workflow.Internal.Monad.throw $ ActivityCancelled (details ^. ActivityResult.failure)
+              Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> do
+                cancelled <- ilift $ liftIO $ readIORef cancelledRef
+                if cancelled
+                  then Temporal.Workflow.Internal.Monad.throw $ ActivityCancelled defMessage
+                  else do
+                    let dur = durationFromProto (doBackoff ^. ActivityResult.backoffDuration)
+                        newOrigTime = doBackoff ^. ActivityResult.originalScheduleTime
+                        newAttempt = doBackoff ^. ActivityResult.attempt
+                    sleep dur
+                    retryTask <- scheduleLocalActivityAttempt name opts typedPayloads newAttempt newOrigTime cancelledRef
+                    Temporal.Workflow.Unsafe.Handle.wait retryTask
         , cancelAction = do
+            ilift $ liftIO $ writeIORef cancelledRef True
             let cancelCmd =
                   defMessage
                     & Command.requestCancelLocalActivity
@@ -946,6 +926,27 @@ startLocalActivity (activityRef -> KnownActivity codec n) opts = withWorkflowArg
                          )
             ilift $ addCommand cancelCmd
         }
+
+
+startLocalActivity
+  :: forall act
+   . (RequireCallStack, ActivityRef act)
+  => act
+  -> StartLocalActivityOptions
+  -> (ActivityArgs act :->: Workflow (Task (ActivityResult act)))
+startLocalActivity (activityRef -> k@(KnownActivity codec _name)) opts =
+  withWorkflowArgs @(ActivityArgs act) @(Task (ActivityResult act)) codec (startLocalActivityFromPayloads k opts)
+
+
+executeLocalActivity
+  :: forall act
+   . (RequireCallStack, ActivityRef act)
+  => act
+  -> StartLocalActivityOptions
+  -> (ActivityArgs act :->: Workflow (ActivityResult act))
+executeLocalActivity (activityRef -> k@(KnownActivity codec _name)) opts = withWorkflowArgs @(ActivityArgs act) @(ActivityResult act) codec $ \typedPayloads -> do
+  actHandle <- startLocalActivityFromPayloads k opts typedPayloads
+  Temporal.Workflow.Unsafe.Handle.wait actHandle
 
 
 {- $metadata
