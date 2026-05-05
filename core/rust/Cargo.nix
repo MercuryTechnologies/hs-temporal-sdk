@@ -463,6 +463,73 @@ rec {
         };
         resolvedDefaultFeatures = [ "std" ];
       };
+      "bon" = rec {
+        crateName = "bon";
+        version = "3.9.1";
+        edition = "2021";
+        sha256 = "1zmj96nj080arzvy35h3wxza2sygp7gi1hsk6djywxh6an9bwzgl";
+        dependencies = [
+          {
+            name = "bon-macros";
+            packageId = "bon-macros";
+          }
+          {
+            name = "rustversion";
+            packageId = "rustversion";
+          }
+        ];
+        features = {
+          "alloc" = [ "bon-macros/alloc" ];
+          "default" = [ "std" ];
+          "experimental-generics-setters" = [ "bon-macros/experimental-generics-setters" ];
+          "experimental-overwritable" = [ "bon-macros/experimental-overwritable" ];
+          "implied-bounds" = [ "bon-macros/implied-bounds" ];
+          "std" = [ "bon-macros/std" "alloc" ];
+        };
+        resolvedDefaultFeatures = [ "alloc" "default" "implied-bounds" "std" ];
+      };
+      "bon-macros" = rec {
+        crateName = "bon-macros";
+        version = "3.9.1";
+        edition = "2021";
+        sha256 = "0z66ygzjyr4ivp3mzn2y98yhs5yh2qnri7f2f99jvd7fd88x76si";
+        procMacro = true;
+        libName = "bon_macros";
+        dependencies = [
+          {
+            name = "darling";
+            packageId = "darling";
+          }
+          {
+            name = "ident_case";
+            packageId = "ident_case";
+          }
+          {
+            name = "prettyplease";
+            packageId = "prettyplease";
+          }
+          {
+            name = "proc-macro2";
+            packageId = "proc-macro2";
+          }
+          {
+            name = "quote";
+            packageId = "quote";
+          }
+          {
+            name = "rustversion";
+            packageId = "rustversion";
+          }
+          {
+            name = "syn";
+            packageId = "syn 2.0.117";
+            features = [ "full" "visit-mut" "visit" ];
+          }
+        ];
+        features = {
+        };
+        resolvedDefaultFeatures = [ "alloc" "default" "implied-bounds" "std" ];
+      };
       "bumpalo" = rec {
         crateName = "bumpalo";
         version = "3.20.2";
@@ -749,9 +816,9 @@ rec {
       };
       "darling" = rec {
         crateName = "darling";
-        version = "0.20.11";
+        version = "0.23.0";
         edition = "2021";
-        sha256 = "1vmlphlrlw4f50z16p4bc9p5qwdni1ba95qmxfrrmzs6dh8lczzw";
+        sha256 = "179fj6p6ajw4dnkrik51wjhifxwy02x5zhligyymcb905zd17bi5";
         authors = [
           "Ted Driggs <ted.driggs@outlook.com>"
         ];
@@ -768,23 +835,20 @@ rec {
         features = {
           "default" = [ "suggestions" ];
           "diagnostics" = [ "darling_core/diagnostics" ];
+          "serde" = [ "darling_core/serde" ];
           "suggestions" = [ "darling_core/suggestions" ];
         };
         resolvedDefaultFeatures = [ "default" "suggestions" ];
       };
       "darling_core" = rec {
         crateName = "darling_core";
-        version = "0.20.11";
+        version = "0.23.0";
         edition = "2021";
-        sha256 = "0bj1af6xl4ablnqbgn827m43b8fiicgv180749f5cphqdmcvj00d";
+        sha256 = "1c033vrks38vpw8kwgd5w088dsr511kfz55n9db56prkgh7sarcq";
         authors = [
           "Ted Driggs <ted.driggs@outlook.com>"
         ];
         dependencies = [
-          {
-            name = "fnv";
-            packageId = "fnv";
-          }
           {
             name = "ident_case";
             packageId = "ident_case";
@@ -809,6 +873,7 @@ rec {
           }
         ];
         features = {
+          "serde" = [ "dep:serde" ];
           "strsim" = [ "dep:strsim" ];
           "suggestions" = [ "strsim" ];
         };
@@ -816,9 +881,9 @@ rec {
       };
       "darling_macro" = rec {
         crateName = "darling_macro";
-        version = "0.20.11";
+        version = "0.23.0";
         edition = "2021";
-        sha256 = "1bbfbc2px6sj1pqqq97bgqn6c8xdnb2fmz66f7f40nrqrcybjd7w";
+        sha256 = "13fvzji9xyp304mgq720z5l0xgm54qj68jibwscagkynggn88fdc";
         procMacro = true;
         authors = [
           "Ted Driggs <ted.driggs@outlook.com>"
@@ -912,95 +977,6 @@ rec {
           }
         ];
 
-      };
-      "derive_builder" = rec {
-        crateName = "derive_builder";
-        version = "0.20.2";
-        edition = "2018";
-        sha256 = "0is9z7v3kznziqsxa5jqji3ja6ay9wzravppzhcaczwbx84znzah";
-        authors = [
-          "Colin Kiegel <kiegel@gmx.de>"
-          "Pascal Hertleif <killercup@gmail.com>"
-          "Jan-Erik Rediger <janerik@fnordig.de>"
-          "Ted Driggs <ted.driggs@outlook.com>"
-        ];
-        dependencies = [
-          {
-            name = "derive_builder_macro";
-            packageId = "derive_builder_macro";
-          }
-        ];
-        features = {
-          "alloc" = [ "derive_builder_macro/alloc" ];
-          "clippy" = [ "derive_builder_macro/clippy" ];
-          "default" = [ "std" ];
-          "std" = [ "derive_builder_macro/lib_has_std" ];
-        };
-        resolvedDefaultFeatures = [ "default" "std" ];
-      };
-      "derive_builder_core" = rec {
-        crateName = "derive_builder_core";
-        version = "0.20.2";
-        edition = "2018";
-        sha256 = "1s640r6q46c2iiz25sgvxw3lk6b6v5y8hwylng7kas2d09xwynrd";
-        authors = [
-          "Colin Kiegel <kiegel@gmx.de>"
-          "Pascal Hertleif <killercup@gmail.com>"
-          "Jan-Erik Rediger <janerik@fnordig.de>"
-          "Ted Driggs <ted.driggs@outlook.com>"
-        ];
-        dependencies = [
-          {
-            name = "darling";
-            packageId = "darling";
-          }
-          {
-            name = "proc-macro2";
-            packageId = "proc-macro2";
-          }
-          {
-            name = "quote";
-            packageId = "quote";
-          }
-          {
-            name = "syn";
-            packageId = "syn 2.0.117";
-            features = [ "full" "extra-traits" ];
-          }
-        ];
-        features = {
-        };
-        resolvedDefaultFeatures = [ "lib_has_std" ];
-      };
-      "derive_builder_macro" = rec {
-        crateName = "derive_builder_macro";
-        version = "0.20.2";
-        edition = "2018";
-        sha256 = "0g1zznpqrmvjlp2w7p0jzsjvpmw5rvdag0rfyypjhnadpzib0qxb";
-        procMacro = true;
-        authors = [
-          "Colin Kiegel <kiegel@gmx.de>"
-          "Pascal Hertleif <killercup@gmail.com>"
-          "Jan-Erik Rediger <janerik@fnordig.de>"
-          "Ted Driggs <ted.driggs@outlook.com>"
-        ];
-        dependencies = [
-          {
-            name = "derive_builder_core";
-            packageId = "derive_builder_core";
-          }
-          {
-            name = "syn";
-            packageId = "syn 2.0.117";
-            features = [ "full" "extra-traits" ];
-          }
-        ];
-        features = {
-          "alloc" = [ "derive_builder_core/alloc" ];
-          "clippy" = [ "derive_builder_core/clippy" ];
-          "lib_has_std" = [ "derive_builder_core/lib_has_std" ];
-        };
-        resolvedDefaultFeatures = [ "lib_has_std" ];
       };
       "derive_more" = rec {
         crateName = "derive_more";
@@ -7647,6 +7623,10 @@ rec {
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };type = [ "cdylib" "staticlib" ];
         dependencies = [
           {
+            name = "anyhow";
+            packageId = "anyhow";
+          }
+          {
             name = "async-trait";
             packageId = "async-trait";
           }
@@ -7728,8 +7708,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-rust";
-          rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912";
-          sha256 = "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2";
+          rev = "43d582b57fbc63d858a35f11ebfee193bda00834";
+          sha256 = "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj";
         };
         libName = "temporalio_client";
         authors = [
@@ -7753,12 +7733,12 @@ rec {
             packageId = "base64";
           }
           {
-            name = "bytes";
-            packageId = "bytes";
+            name = "bon";
+            packageId = "bon";
           }
           {
-            name = "derive_builder";
-            packageId = "derive_builder";
+            name = "bytes";
+            packageId = "bytes";
           }
           {
             name = "derive_more";
@@ -7853,8 +7833,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-rust";
-          rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912";
-          sha256 = "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2";
+          rev = "43d582b57fbc63d858a35f11ebfee193bda00834";
+          sha256 = "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj";
         };
         libName = "temporalio_common";
         authors = [
@@ -7874,8 +7854,9 @@ rec {
             packageId = "base64";
           }
           {
-            name = "derive_builder";
-            packageId = "derive_builder";
+            name = "bon";
+            packageId = "bon";
+            features = [ "implied-bounds" ];
           }
           {
             name = "derive_more";
@@ -7967,8 +7948,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-rust";
-          rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912";
-          sha256 = "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2";
+          rev = "43d582b57fbc63d858a35f11ebfee193bda00834";
+          sha256 = "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj";
         };
         procMacro = true;
         libName = "temporalio_macros";
@@ -8005,8 +7986,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/temporalio/sdk-rust";
-          rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912";
-          sha256 = "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2";
+          rev = "43d582b57fbc63d858a35f11ebfee193bda00834";
+          sha256 = "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj";
         };
         libName = "temporalio_sdk_core";
         authors = [
@@ -8020,6 +8001,11 @@ rec {
           {
             name = "async-trait";
             packageId = "async-trait";
+          }
+          {
+            name = "bon";
+            packageId = "bon";
+            features = [ "implied-bounds" ];
           }
           {
             name = "crossbeam-channel";
@@ -8036,10 +8022,6 @@ rec {
           {
             name = "dashmap";
             packageId = "dashmap";
-          }
-          {
-            name = "derive_builder";
-            packageId = "derive_builder";
           }
           {
             name = "derive_more";
@@ -8269,6 +8251,7 @@ rec {
           }
         ];
         features = {
+          "antithesis_assertions" = [ "dep:antithesis_sdk" ];
           "console-subscriber" = [ "dep:console-subscriber" ];
           "debug-plugin" = [ "dep:reqwest" ];
           "default" = [ "otel" "prom" ];

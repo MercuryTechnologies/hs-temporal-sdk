@@ -9,9 +9,9 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporalio-client = { git = "https://github.com/temporalio/sdk-rust", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912" }
-temporalio-sdk-core = { git = "https://github.com/temporalio/sdk-rust", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["ephemeral-server"] }
-temporalio-common = { git = "https://github.com/temporalio/sdk-rust", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["serde_serialize"] }
+temporalio-client = { git = "https://github.com/temporalio/sdk-rust", rev = "43d582b57fbc63d858a35f11ebfee193bda00834" }
+temporalio-sdk-core = { git = "https://github.com/temporalio/sdk-rust", rev = "43d582b57fbc63d858a35f11ebfee193bda00834", features = ["ephemeral-server"] }
+temporalio-common = { git = "https://github.com/temporalio/sdk-rust", rev = "43d582b57fbc63d858a35f11ebfee193bda00834", features = ["serde_serialize"] }
 tokio = "~1.52"
 tokio-stream = "~0.1"
 tonic = "~0.14"
@@ -26,6 +26,7 @@ prost = "~0.14"
 prost-types = { version = "~0.7", package = "prost-wkt-types" }
 libc = "~0.2"
 async-trait = "0.1"
+anyhow = "~1.0"
 
 [profile.release]
 opt-level = 3
