@@ -9,17 +9,17 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-temporalio-client = { git = "https://github.com/temporalio/sdk-core", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912" }
-temporalio-sdk-core = { git = "https://github.com/temporalio/sdk-core", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["ephemeral-server"] }
-temporalio-common = { git = "https://github.com/temporalio/sdk-core", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["serde_serialize"] }
-tokio = "~1.50"
+temporalio-client = { git = "https://github.com/temporalio/sdk-rust", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912" }
+temporalio-sdk-core = { git = "https://github.com/temporalio/sdk-rust", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["ephemeral-server"] }
+temporalio-common = { git = "https://github.com/temporalio/sdk-rust", rev = "9a87ebf7260c3594675ffed83a3728d2cd96e912", features = ["serde_serialize"] }
+tokio = "~1.52"
 tokio-stream = "~0.1"
 tonic = "~0.14"
 tonic-prost = "~0.14"
 tracing = "~0.1"
 tracing-subscriber = "~0.3.21"
 url = "~2.5"
-ffi-convert = "~0.6"
+ffi-convert = "~0.7"
 serde = { version = "~1.0", features = ["derive"] }
 serde_json = "~1.0"
 prost = "~0.14"
