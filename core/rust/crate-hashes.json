@@ -1,6 +1,6 @@
 {
-  "git+https://github.com/temporalio/sdk-rust?rev=9a87ebf7260c3594675ffed83a3728d2cd96e912#temporalio-client@0.1.0": "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2",
-  "git+https://github.com/temporalio/sdk-rust?rev=9a87ebf7260c3594675ffed83a3728d2cd96e912#temporalio-common@0.1.0": "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2",
-  "git+https://github.com/temporalio/sdk-rust?rev=9a87ebf7260c3594675ffed83a3728d2cd96e912#temporalio-macros@0.1.0": "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2",
-  "git+https://github.com/temporalio/sdk-rust?rev=9a87ebf7260c3594675ffed83a3728d2cd96e912#temporalio-sdk-core@0.1.0": "0zvl7d6v1k0fkhcn90rp911wfxy7051ppgzjpnf9dvrq79w63ys2"
+  "git+https://github.com/temporalio/sdk-rust?rev=43d582b57fbc63d858a35f11ebfee193bda00834#temporalio-client@0.1.0": "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj",
+  "git+https://github.com/temporalio/sdk-rust?rev=43d582b57fbc63d858a35f11ebfee193bda00834#temporalio-common@0.1.0": "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj",
+  "git+https://github.com/temporalio/sdk-rust?rev=43d582b57fbc63d858a35f11ebfee193bda00834#temporalio-macros@0.1.0": "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj",
+  "git+https://github.com/temporalio/sdk-rust?rev=43d582b57fbc63d858a35f11ebfee193bda00834#temporalio-sdk-core@0.1.0": "022x9qh7q7vsc74psslr26485mn66q9c72qz8wlz5njfsn7x7bpj"
 }
