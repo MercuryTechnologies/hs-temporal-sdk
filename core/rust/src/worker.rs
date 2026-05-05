@@ -356,31 +356,119 @@ pub unsafe extern "C" fn hs_temporal_slot_reserve_complete(completion: *mut Slot
     }
 }
 
+/// Per-worker configuration options.
+///
+/// This struct should mirror the configuration we want to expose from [temporal::sdk_core::worker::WorkerConfig] in a
+/// way that can be cleanly passed across the C FFI from Haskell.
+///
+/// Where possible, we'll try to adhere to the naming conventions used in the Rust SDK, and most of the field comments
+/// have been copied verbatim from the upstream [temporal::sdk_core::worker::WorkerConfig] fields.
 #[derive(Serialize, Deserialize)]
 pub struct WorkerConfig {
+    /// The Temporal service namespace this worker is bound to.
     namespace: String,
+    /// The task queue this worker will poll from; this task queue name applies to both workflow and activity polling.
     task_queue: String,
+    /// Legacy build identifier string, in the future this will be replaced with a proper [WorkerVersioningStrategy]
+    /// enum bridge type that allows us to select one of the versioning strategies provided by the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `versioning_strategy` configuration field.
     build_id: String,
-    identity_override: Option<String>,
+    /// A human-readable string that can identify this worker.
+    ///
+    /// If set, overrides the identity set (if any) on the client used by this worker.
+    client_identity_override: Option<String>,
+    /// If set nonzero, workflows will be cached and sticky task queues will be used, meaning that history updates are
+    /// applied incrementally to suspended instances of workflow execution.
+    ///
+    /// Workflows are evicted according to a least-recently-used policy once the cache maximum has been reached.
+    ///
+    /// Workflows may also be explicitly evicted at any time, or as a result of errors or failures.
     max_cached_workflows: usize,
-    max_outstanding_workflow_tasks: usize,
-    max_outstanding_activities: usize,
-    max_outstanding_local_activities: usize,
-    max_concurrent_workflow_task_polls: usize,
-    nonsticky_to_sticky_poll_ratio: f32,
-    max_concurrent_activity_task_polls: usize,
-    no_remote_activities: bool,
-    sticky_queue_schedule_to_start_timeout_millis: u64,
-    max_heartbeat_throttle_interval_millis: u64,
-    default_heartbeat_throttle_interval_millis: u64,
-    max_activities_per_second: Option<f64>,
-    max_task_queue_activities_per_second: Option<f64>,
-    graceful_shutdown_period_millis: u64,
-    nondeterminism_as_workflow_fail: bool,
-    nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    /// Set a [crate::WorkerTuner] for this worker by way of our [TunerConfig] FFI bridge type.
+    ///
+    /// Either this or at least one of the `max_outstanding_*` fields must be set.
     tuner: Option<TunerConfig>,
+    /// The maximum allowed number of workflow tasks that will ever be given to this worker at one time.
+    ///
+    /// Note that one workflow task may require multiple activations - so the WFT counts as "outstanding" until all
+    /// activations it requires have been completed. Must be at least 2 if `max_cached_workflows` is > 0, or is an
+    /// error.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
+    max_outstanding_workflow_tasks: usize,
+    /// The maximum number of activity tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
+    max_outstanding_activities: usize,
+    /// The maximum number of local activity tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
+    max_outstanding_local_activities: usize,
+    /// The maximum number of nexus tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
     max_outstanding_nexus_tasks: Option<usize>,
-    max_concurrent_nexus_task_polls: Option<usize>,
+    /// Legacy maximum concurrent workflow task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `workflow_task_poller_behavior` configuration field.
+    max_concurrent_workflow_task_polls: usize,
+    /// Legacy maximum concurrent activity task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with an `activity_task_poller_behavior` configuration field.
+    max_concurrent_activity_task_polls: usize,
+    /// Legacy maximum concurrent nexus task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `nexus_task_poller_behavior` configuration field.
+    max_concurrent_nexus_task_polls: usize,
+    /// (max workflow task polls * this number) = the number of max pollers that will be allowed for
+    /// the nonsticky queue when sticky tasks are enabled.
+    ///
+    /// Because we only support [PollerBehavior::SimpleMaximum] currently, this applies if sticky tasks are enabled.
+    nonsticky_to_sticky_poll_ratio: f32,
+    /// How long a workflow task is allowed to sit on the sticky queue before it is timed out and moved to the
+    /// non-sticky queue where it may be picked up by any worker.
+    sticky_queue_schedule_to_start_timeout_millis: u64,
+    /// Longest interval for throttling activity heartbeat, in milliseconds.
+    max_heartbeat_throttle_interval_millis: u64,
+    /// Default interval for throttling activity heartbeats in case an activity's heartbeat timeout is not set, in
+    /// milliseconds.
+    ///
+    /// When the timeout *is* set, throttling is set to 80% of that value.
+    default_heartbeat_throttle_interval_millis: u64,
+    /// Sets the maximum number of activities per second the task queue will dispatch, controlled server-side.
+    ///
+    /// Note that this only takes effect upon an activity poll request.
+    ///
+    /// If multiple workers on the same queue have different values set, they will thrash with the last poller winning.
+    ///
+    /// Setting this to a nonzero value will also disable eager activity execution.
+    max_task_queue_activities_per_second: Option<f64>,
+    /// Limits the number of activities per second that this worker will process.
+    ///
+    /// The worker will not poll for new activities if by doing so it might receive and execute an activity which would
+    /// cause it to exceed this limit.
+    ///
+    /// Negative, zero, or NaN values will cause building the options to fail.
+    max_worker_activities_per_second: Option<f64>,
+    /// The grace period, in milliseconds, that the core worker will afford any running workflows & activities after
+    /// shutdown has been initiated.
+    graceful_shutdown_period_millis: u64,
+    /// Whether nondeterministic workflows will trigger a workflow failure.
+    nondeterminism_as_workflow_fail: bool,
+    /// A list of workflow types for whom workflow failures will be considered to be nondeterminism errors.
+    nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    /// If set to true this worker will only handle workflow tasks and local activities, it will not poll for activity
+    /// tasks.
+    ///
+    /// This will eventually be replaced with a `task_types` field enumerating `WorkerTaskTypes`.
+    no_remote_activities: bool,
 }
 
 impl TryFrom<&WorkerConfig> for TunerHolder {
@@ -419,7 +507,7 @@ impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
             .versioning_strategy(WorkerVersioningStrategy::None {
                 build_id: conf.build_id,
             })
-            .maybe_client_identity_override(conf.identity_override)
+            .maybe_client_identity_override(conf.client_identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
             .tuner(Arc::new(converted_tuner))
             .workflow_task_poller_behavior(PollerBehavior::SimpleMaximum(
@@ -438,7 +526,7 @@ impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
             .default_heartbeat_throttle_interval(Duration::from_millis(
                 conf.default_heartbeat_throttle_interval_millis,
             ))
-            .maybe_max_worker_activities_per_second(conf.max_activities_per_second)
+            .maybe_max_worker_activities_per_second(conf.max_worker_activities_per_second)
             .maybe_max_task_queue_activities_per_second(conf.max_task_queue_activities_per_second)
             .graceful_shutdown_period(Duration::from_millis(conf.graceful_shutdown_period_millis))
             .workflow_failure_errors(if conf.nondeterminism_as_workflow_fail {
