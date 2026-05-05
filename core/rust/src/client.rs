@@ -13,33 +13,69 @@ use url::Url;
 
 type Client = RetryClient<ConfiguredClient<TemporalServiceClient>>;
 
+/// Configuration options for [connect_client].
 #[derive(Serialize, Deserialize)]
 pub struct ClientConfig {
+    /// The server to connect to.
     target_url: String,
+    /// The name of the SDK being implemented on top of the Rust core SDK.
+    ///
+    /// This is used to set the `client-name` header in all RPC calls.
     client_name: String,
+    /// The version of the SDK being implemented on top of the Rust core SDK.
+    ///
+    /// This is used to set the `client-version` header in all RPC calls; the server decides if the client is supported
+    /// based on this.
     client_version: String,
+    /// HTTP headers to include on every RPC call.
+    ///
+    /// These must be valid gRPC metadata keys; invalid keys or values will return an error upon connection.
     metadata: HashMap<String, String>,
+    /// An API key to use for authentication; if set, TLS will be enabled by default.
     api_key: Option<String>,
+    /// A human-readable string that can identify this process.
     identity: String,
+    /// If specified, the client will establish a TLS connection as defined by [ClientTlsConfig].
     tls_config: Option<ClientTlsConfig>,
+    /// Client retry configuration; defaults to [RetryOptions::default].
     retry_config: Option<ClientRetryConfig>,
 }
 
+/// Configuration options for TLS and, optionally, mTLS.
 #[derive(Serialize, Deserialize)]
 struct ClientTlsConfig {
+    /// Bytes representing the root CA certificate used by the server.
+    ///
+    /// If not set, the SDK will fall back to the operating system's root CA certificate store.
     server_root_ca_cert: Option<Vec<u8>>,
+    /// Sets the domain name against which to verify the server's TLS certificates.
+    ///
+    /// If not provided, the SDK will fall back to extracting the domain name from the URL used to connect.
     domain: Option<String>,
+    /// The PEM-encoded certificate this client should use for mTLS authentication.
     client_cert: Option<Vec<u8>>,
+    /// The PEM-encoded private key this client should use for mTLS authentication.
     client_private_key: Option<Vec<u8>>,
 }
 
+/// Configuration for retrying requests to the server.
 #[derive(Serialize, Deserialize)]
 struct ClientRetryConfig {
+    /// Initial wait time before the first retry, in milliseconds.
     pub initial_interval_millis: u64,
+    /// Fractional value used to determine jitter that should be added to, or subtracted from, the retry interval length.
+    /// 
+    /// For example, a factor of `0.2` will jitter by ±20%.
     pub randomization_factor: f64,
+    /// Rate at which retry time should be increased, until it reaches [max_interval_millis].
     pub multiplier: f64,
+    /// Maximum amount of time to wait between retries, in milliseconds.
     pub max_interval_millis: u64,
+    /// Maximum total amount of time requests should be retried for, in milliseconds.
+    ///
+    /// If [None], then no limit will be applied.
     pub max_elapsed_time_millis: Option<u64>,
+    /// Maximum number of retry attempts.
     pub max_retries: usize,
 }
 

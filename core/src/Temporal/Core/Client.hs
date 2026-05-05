@@ -88,33 +88,76 @@ foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runti
 foreign import ccall "hs_temporal_drop_client" raw_freeClient :: Ptr CoreClient -> IO ()
 
 
+-- | Configuration options for 'connectClient'.
 data ClientConfig = ClientConfig
   { targetUrl :: Text
+  -- ^ The server to connect to.
   , clientName :: Text
+  -- ^ The name of the SDK being implemented on top of the Rust core SDK.
+  --
+  -- Tis is used to set the @client-name@ header in all RPC calls.
   , clientVersion :: Text
+  -- ^ The version of the SDK being implemented on top of the Rust core SDK.
+  --
+  -- This is used to set the @client-version@ header in all RPC calls; the
+  -- server decides if the client is supported based on this.
   , metadata :: HashMap Text Text
-  , identity :: Text
-  , tlsConfig :: Maybe ClientTlsConfig
-  , retryConfig :: Maybe ClientRetryConfig
+  -- ^ HTTP headers to include on every RPC call.
+  --
+  -- These must be valid gRPC metadata keys; invalid keys or values will return
+  -- an error upon connection.
   , apiKey :: Maybe APIKey
+  -- ^ An API key to use for authentication; if set, TLS will be enabled by default.
+  , identity :: Text
+  -- ^ A human-readable string that can identify this process.
+  , tlsConfig :: Maybe ClientTlsConfig
+  -- ^ If specified, the client will establish a TLS connection as defined by
+  -- the options provided in 'ClientTlsConfig'.
+  , retryConfig :: Maybe ClientRetryConfig
+  -- ^ Client retry configuration; if unset, the default retry options provided
+  -- by the underlying Rust SDK shall be used.
   }
 
 
+-- | Configuration options for TLS and, optionally, mTLS.
 data ClientTlsConfig = ClientTlsConfig
   { serverRootCaCert :: Maybe ByteVector
+  -- ^ Bytes representing the root CA certificate used by the server.
+  --
+  -- If not set, the SDK will fall back to the operating system's root CA
+  -- certificate store.
   , domain :: Maybe Text
+  -- ^ Sets the domain name against which to verify the server's TLS certificates.
+  --
+  -- If not provided, the SDK will fall back to extracting the domain name from
+  -- the URL used to connect.
   , clientCert :: Maybe ByteVector
+  -- ^ The PEM-encoded certificate this client should use for mTLS authentication.
   , clientPrivateKey :: Maybe ByteVector
+  -- ^ The PEM-encoded private key this client should use for mTLS authentication.
   }
 
 
+-- | Configuration for retrying requests to the server.
 data ClientRetryConfig = ClientRetryConfig
   { initialIntervalMillis :: Word64
+  -- ^ Initial wait time before the first retry, in milliseconds.
   , randomizationFactor :: Double
+  -- ^ Fractional value used to determine jitter that should be added to, or
+  -- subtracted from, the retry interval length.
+  --
+  -- For example, a factor of `0.2` will jitter by ±20%.
   , multiplier :: Double
+  -- ^ Rate at which retry time should be increased, until it reaches
+  -- 'maxIntervalMillis'.
   , maxIntervalMillis :: Word64
+  -- ^ Maximum amount of time to wait between retries, in milliseconds.
   , maxElapsedTimeMillis :: Maybe Word64
+  -- ^ Maximum total amount of time requests should be retried for, in milliseconds.
+  -- 
+  -- If Nothing, then no limit will be applied.
   , maxRetries :: Word64
+  -- ^ Maximum number of retry attempts.
   }
 
 
