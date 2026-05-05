@@ -464,62 +464,168 @@ instance FromJSON TunerConfig where
       <*> o .:? "resource_based_tuner_options"
 
 
+-- | Per-worker configuration options.
 data WorkerConfig = WorkerConfig
   { namespace :: Text
+  -- ^ The Temporal service namespace this worker is bound to.
   , taskQueue :: Text
+  -- ^ The task queue this worker will poll from; this task queue name
+  -- applies to both workflow and activity polling.
   , buildId :: Text
-  , identityOverride :: Maybe Text
+  -- ^ Legacy build identifier string, in the future this will be replaced
+  -- with a proper @WorkerVersioningStrategy@ bridge type that allows us to
+  -- select one of the versioning strategies provided by the upstream SDK.
+  --
+  -- This will eventually be replaced with a @versioningStrategy@
+  -- configuration field.
+  , clientIdentityOverride :: Maybe Text
+  -- ^ A human-readable string that can identify this worker.
+  --
+  -- If set, overrides the identity set (if any) on the client used by this
+  -- worker.
   , maxCachedWorkflows :: Word64
-  , maxOutstandingWorkflowTasks :: Word64
-  , maxOutstandingActivities :: Word64
-  , maxOutstandingLocalActivities :: Word64
-  , maxConcurrentWorkflowTaskPolls :: Word64
-  , nonstickyToStickyPollRatio :: Float
-  , maxConcurrentActivityTaskPolls :: Word64
-  , noRemoteActivities :: Bool
-  , stickyQueueScheduleToStartTimeoutMillis :: Word64
-  , maxHeartbeatThrottleIntervalMillis :: Word64
-  , defaultHeartbeatThrottleIntervalMillis :: Word64
-  , maxActivitiesPerSecond :: Maybe Double
-  , maxTaskQueueActivitiesPerSecond :: Maybe Double
-  , gracefulShutdownPeriodMillis :: Word64
-  , nondeterminismAsWorkflowFail :: Bool
-  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  -- ^ If set nonzero, workflows will be cached and sticky task queues will
+  -- be used, meaning that history updates are applied incrementally to
+  -- suspended instances of workflow execution.
+  --
+  -- Workflows are evicted according to a least-recently-used policy once the
+  -- cache maximum has been reached.
+  --
+  -- Workflows may also be explicitly evicted at any time, or as a result of
+  -- errors or failures.
   , tuner :: Maybe TunerConfig
+  -- ^ Set a 'TunerConfig' for this worker; mutually exclusive with
+  -- @maxOutstanding*@ fields.
+  , maxOutstandingWorkflowTasks :: Word64
+  -- ^ The maximum number of workflow tasks that will ever be given to this
+  -- worker concurrently.
+  --
+  -- Mutually exclusive with 'tuner'; if both are defined, 'tuner' has priority.
+  , maxOutstandingActivities :: Word64
+  -- ^ The maximum number of activity tasks that will ever be given to this
+  -- worker concurrently.
+  --
+  -- Mutually exclusive with 'tuner'; if both are defined, 'tuner' has priority.
+  , maxOutstandingLocalActivities :: Word64
+  -- ^ The maximum number of local activity tasks that will ever be given to
+  -- this worker concurrently.
+  --
+  -- Mutually exclusive with 'tuner'; if both are defined, 'tuner' has priority.
   , maxOutstandingNexusTasks :: Maybe Word64
+  -- ^ The maximum number of nexus tasks that will ever be given to this worker
+  -- concurrently.
+  --
+  -- Mutually exclusive with 'tuner'; if both are defined, 'tuner' has priority.
+  , maxConcurrentWorkflowTaskPolls :: Word64
+  -- ^ Legacy maximum concurrent workflow task poller configuration field, in
+  -- the future this will be replaced with a proper @PollerBehavior@ enum
+  -- bridge type that allows us to provide an appropriate polling behavior
+  -- based on the upstream SDK.
+  --
+  -- This will eventually be replaced with a @workflowTaskPollerBehavior@
+  -- configuration field of (eventual) type @PollerBehavior@.
+  , maxConcurrentActivityTaskPolls :: Word64
+  -- ^ Legacy maximum concurrent activity task poller configuration field, in
+  -- the future this will be replaced with a proper @PollerBehavior@ enum
+  -- bridge type that allows us to provide an appropriate polling behavior
+  -- based on the upstream SDK.
+  --
+  -- This will eventually be replaced with a @activityTaskPollerBehavior@
+  -- configuration field of (eventual) type @PollerBehavior@.
   , maxConcurrentNexusTaskPolls :: Maybe Word64
+  -- ^ Legacy maximum concurrent nexus task poller configuration field, in
+  -- the future this will be replaced with a proper @PollerBehavior@ enum
+  -- bridge type that allows us to provide an appropriate polling behavior
+  -- based on the upstream SDK.
+  --
+  -- This will eventually be replaced with a @nexusTaskPollerBehavior@
+  -- configuration field of (eventual) type @PollerBehavior@.
+  , nonstickyToStickyPollRatio :: Float
+  -- ^ (max workflow task polls * this number) = the number of max pollers
+  -- that will be allowed for the nonsticky queue when sticky tasks are
+  -- enabled.
+  , stickyQueueScheduleToStartTimeoutMillis :: Word64
+  -- ^ How long a workflow task is allowed to sit on the sticky queue before it is timed out and moved to the
+  -- non-sticky queue where it may be picked up by any worker.
+  , maxHeartbeatThrottleIntervalMillis :: Word64
+  -- ^ Longest interval for throttling activity heartbeat, in milliseconds.
+  , defaultHeartbeatThrottleIntervalMillis :: Word64
+  -- ^ Default interval for throttling activity heartbeats in case an
+  -- activity's heartbeat timeout is not set, in milliseconds.
+  --
+  -- When the timeout *is* set, throttling is set to 80% of that value.
+  , maxTaskQueueActivitiesPerSecond :: Maybe Double
+  -- ^ Limits the number of activities per second that this worker will
+  -- process.
+  --
+  -- The worker will not poll for new activities if by doing so it might
+  -- receive and execute an activity which would cause it to exceed this
+  -- limit.
+  --
+  -- Negative, zero, or NaN values will cause building the options to fail.
+  , maxWorkerActivitiesPerSecond :: Maybe Double
+  -- ^ Sets the maximum number of activities per second the task queue will
+  -- dispatch, controlled server-side.
+  --
+  -- Note that this only takes effect upon an activity poll request.
+  --
+  -- If multiple workers on the same queue have different values set, they
+  -- will thrash with the last poller winning.
+  --
+  -- Setting this to a nonzero value will also disable eager activity
+  -- execution.
+  , gracefulShutdownPeriodMillis :: Word64
+  -- ^ The grace period, in milliseconds, that the core worker will afford
+  -- any running workflows & activities after shutdown has been initiated.
+  , nondeterminismAsWorkflowFail :: Bool
+  -- ^ Whether nondeterministic workflows will trigger a workflow failure.
+  , nondeterminismAsWorkflowFailForTypes :: [Text]
+  -- ^ A list of workflow types for whom workflow failures will be considered
+  -- to be nondeterminism errors.
+  , noRemoteActivities :: Bool
+  -- ^ If set to true this worker will only handle workflow tasks and local
+  -- activities, it will not poll for activity tasks.
+  --
+  -- This will eventually be replaced with a @taskTypes@ field enumerating the
+  -- task types this worker can process.
   }
 
 
 deriveJSON (defaultOptions {fieldLabelModifier = camelTo2 '_'}) ''WorkerConfig
 
 
+-- | Sensible defaults for 'WorkerConfig'; where possible they should reflect
+-- the default values specified by the [Rust SDK](https://github.com/temporalio/sdk-core/blob/master/crates/sdk-core/src/worker/mod.rs).
+
+-- /NOTE/: 'maxOutstandingWorkflowTasks', 'maxOutstandingActivity', and
+-- 'maxOutstandingLocalActivities' default to @1000@ in lieu of there being
+-- a sensible default provided upstream.
 defaultWorkerConfig :: WorkerConfig
 defaultWorkerConfig =
   WorkerConfig
     { namespace = "default"
     , taskQueue = "default"
     , buildId = ""
-    , identityOverride = Nothing
+    , clientIdentityOverride = Nothing
     , maxCachedWorkflows = 100000
+    , tuner = Nothing
     , maxOutstandingWorkflowTasks = 1000
     , maxOutstandingActivities = 1000
     , maxOutstandingLocalActivities = 1000
+    , maxOutstandingNexusTasks = Nothing
     , maxConcurrentWorkflowTaskPolls = 5
-    , nonstickyToStickyPollRatio = 0.85
     , maxConcurrentActivityTaskPolls = 5
-    , noRemoteActivities = False
+    , maxConcurrentNexusTaskPolls = Nothing
+    , nonstickyToStickyPollRatio = 0.85
     , stickyQueueScheduleToStartTimeoutMillis = 60000
     , maxHeartbeatThrottleIntervalMillis = 300000
     , defaultHeartbeatThrottleIntervalMillis = 300000
-    , maxActivitiesPerSecond = Nothing
     , maxTaskQueueActivitiesPerSecond = Nothing
+    , maxWorkerActivitiesPerSecond = Nothing
     , gracefulShutdownPeriodMillis = 0
     , nondeterminismAsWorkflowFail = False
     , nondeterminismAsWorkflowFailForTypes = []
-    , tuner = Nothing
-    , maxOutstandingNexusTasks = Nothing
-    , maxConcurrentNexusTaskPolls = Nothing
+    , noRemoteActivities = False
     }
 
 

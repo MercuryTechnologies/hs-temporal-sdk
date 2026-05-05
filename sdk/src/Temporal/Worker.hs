@@ -339,7 +339,7 @@ setBuildId bid = modifyCore $ \conf ->
 setIdentity :: Text -> ConfigM actEnv ()
 setIdentity ident = modifyCore $ \conf ->
   conf
-    { Core.identityOverride = Just ident
+    { Core.clientIdentityOverride = Just ident
     }
 
 
@@ -434,7 +434,7 @@ setMaxHeartbeatThrottleIntervalMillis n = modifyCore $ \conf ->
     }
 
 
--- Default interval for throttling activity heartbeats in case
+-- | Default interval for throttling activity heartbeats in case
 -- ActivityOptions.heartbeat_timeout is unset.
 -- When the timeout is set in the ActivityOptions,
 -- throttling is set to @heartbeat_timeout * 0.8@.
@@ -455,7 +455,7 @@ If unset, no rate limiting will be applied to Worker's Activities. (tctl task-qu
 setMaxActivitiesPerSecond :: Double -> ConfigM actEnv ()
 setMaxActivitiesPerSecond n = modifyCore $ \conf ->
   conf
-    { Core.maxActivitiesPerSecond = Just n
+    { Core.maxWorkerActivitiesPerSecond = Just n
     }
 
 
