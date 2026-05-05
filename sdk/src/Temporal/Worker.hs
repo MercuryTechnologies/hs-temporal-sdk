@@ -76,6 +76,8 @@ module Temporal.Worker (
   setMaxOutstandingWorkflowTasks,
   setMaxOutstandingActivities,
   setMaxOutstandingLocalActivities,
+  setMaxOutstandingNexusTasks,
+  unsetMaxOutstandingNexusTasks,
   setMaxConcurrentWorkflowTaskPolls,
   setNonstickyToStickyPollRatio,
   setMaxConcurrentActivityTaskPolls,
@@ -369,6 +371,18 @@ setMaxOutstandingLocalActivities n = modifyCore $ \conf ->
     }
 
 
+setMaxOutstandingNexusTasks :: Word64 -> ConfigM actEnv ()
+setMaxOutstandingNexusTasks n = modifyCore $ \conf ->
+  conf
+    { Core.maxOutstandingNexusTasks = Just n
+    }
+
+unsetMaxOutstandingNexusTasks :: ConfigM actEnv ()
+unsetMaxOutstandingNexusTasks = modifyCore $ \conf ->
+  conf
+    { Core.maxOutstandingNexusTasks = Nothing
+    }
+
 setMaxConcurrentWorkflowTaskPolls :: Word64 -> ConfigM actEnv ()
 setMaxConcurrentWorkflowTaskPolls n = modifyCore $ \conf ->
   conf
@@ -473,9 +487,11 @@ setGracefulShutdownPeriodMillis n = modifyCore $ \conf ->
 {- | Set a tuner for the worker, controlling how task slots are allocated.
 
 When a tuner is set, the @maxOutstandingWorkflowTasks@, @maxOutstandingActivities@,
-and @maxOutstandingLocalActivities@ fields are ignored in favor of the tuner's
-slot suppliers. This enables dynamic scaling strategies like resource-based
-autoscaling with PID controllers targeting CPU and memory thresholds.
+@maxOutstandingLocalActivities@, and @maxOutstandingNexusTasks@ fields are
+ignored in favor of the tuner's slot suppliers.
+
+This enables dynamic scaling strategies like resource-based autoscaling with PID
+controllers targeting CPU and memory thresholds.
 
 Use 'Core.FixedSizeSlotSupplier' for a static number of slots, or
 'Core.ResourceBasedSlotSupplier' to scale slots based on system resource usage.
