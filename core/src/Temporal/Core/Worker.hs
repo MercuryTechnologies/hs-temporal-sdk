@@ -438,6 +438,7 @@ data TunerConfig = TunerConfig
   { workflowSlotSupplier :: Maybe SlotSupplierConfig
   , activitySlotSupplier :: Maybe SlotSupplierConfig
   , localActivitySlotSupplier :: Maybe SlotSupplierConfig
+  , nexusSlotSupplier :: Maybe SlotSupplierConfig
   , resourceBasedTunerOptions :: Maybe ResourceBasedTunerConfig
   }
 
@@ -448,6 +449,7 @@ instance ToJSON TunerConfig where
       [ "workflow_slot_supplier" .= workflowSlotSupplier t
       , "activity_slot_supplier" .= activitySlotSupplier t
       , "local_activity_slot_supplier" .= localActivitySlotSupplier t
+      , "nexus_slot_supplier" .= nexusSlotSupplier t
       , "resource_based_tuner_options" .= resourceBasedTunerOptions t
       ]
 
@@ -458,6 +460,7 @@ instance FromJSON TunerConfig where
       <$> o .:? "workflow_slot_supplier"
       <*> o .:? "activity_slot_supplier"
       <*> o .:? "local_activity_slot_supplier"
+      <*> o .:? "nexus_slot_supplier"
       <*> o .:? "resource_based_tuner_options"
 
 

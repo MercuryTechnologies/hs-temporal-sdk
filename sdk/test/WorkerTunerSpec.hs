@@ -171,6 +171,7 @@ spec = do
                 { workflowSlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 100) (Just 0)
                 , activitySlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 10) (Just 20)
                 , localActivitySlotSupplier = Just $ ResourceBasedSlotSupplier (Just 1) (Just 50) Nothing
+                , nexusSlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 10) (Just 100)
                 , resourceBasedTunerOptions =
                     Just
                       ResourceBasedTunerConfig
@@ -187,6 +188,7 @@ spec = do
                 { workflowSlotSupplier = Just $ FixedSizeSlotSupplier 10
                 , activitySlotSupplier = Just $ FixedSizeSlotSupplier 10
                 , localActivitySlotSupplier = Just $ FixedSizeSlotSupplier 10
+                , nexusSlotSupplier = Just $ FixedSizeSlotSupplier 5
                 , resourceBasedTunerOptions = Nothing
                 }
         result <- runWorkflowWithTuner pn tunerCfg
@@ -198,6 +200,7 @@ spec = do
                 { workflowSlotSupplier = Just $ FixedSizeSlotSupplier 10
                 , activitySlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 10) (Just 20)
                 , localActivitySlotSupplier = Just $ FixedSizeSlotSupplier 10
+                , nexusSlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 10) (Just 100)
                 , resourceBasedTunerOptions =
                     Just
                       ResourceBasedTunerConfig
@@ -214,6 +217,7 @@ spec = do
                 { workflowSlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 100) Nothing
                 , activitySlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 100) (Just 20)
                 , localActivitySlotSupplier = Just $ ResourceBasedSlotSupplier (Just 1) (Just 50) Nothing
+                , nexusSlotSupplier = Just $ ResourceBasedSlotSupplier (Just 2) (Just 10) (Just 100)
                 , resourceBasedTunerOptions =
                     Just
                       ResourceBasedTunerConfig
@@ -230,6 +234,7 @@ spec = do
                 { workflowSlotSupplier = Just $ ResourceBasedSlotSupplier Nothing Nothing Nothing
                 , activitySlotSupplier = Just $ ResourceBasedSlotSupplier (Just 1) Nothing Nothing
                 , localActivitySlotSupplier = Nothing
+                , nexusSlotSupplier = Just $ ResourceBasedSlotSupplier Nothing Nothing Nothing
                 , resourceBasedTunerOptions =
                     Just
                       ResourceBasedTunerConfig
@@ -256,6 +261,7 @@ spec = do
                   { workflowSlotSupplier = Just $ CustomSlotSupplierConfig h
                   , activitySlotSupplier = Just $ FixedSizeSlotSupplier 10
                   , localActivitySlotSupplier = Just $ FixedSizeSlotSupplier 10
+                  , nexusSlotSupplier = Just $ FixedSizeSlotSupplier 10
                   , resourceBasedTunerOptions = Nothing
                   }
           result <- runWorkflowWithTuner pn tunerCfg
@@ -278,6 +284,7 @@ spec = do
                   { workflowSlotSupplier = Just $ CustomSlotSupplierConfig h
                   , activitySlotSupplier = Just $ CustomSlotSupplierConfig h
                   , localActivitySlotSupplier = Just $ CustomSlotSupplierConfig h
+                  , nexusSlotSupplier = Just $ CustomSlotSupplierConfig h
                   , resourceBasedTunerOptions = Nothing
                   }
           result <- runActivityWorkflowWithTuner pn tunerCfg
@@ -314,6 +321,7 @@ spec = do
                   { workflowSlotSupplier = Just $ CustomSlotSupplierConfig h
                   , activitySlotSupplier = Just $ FixedSizeSlotSupplier 10
                   , localActivitySlotSupplier = Just $ FixedSizeSlotSupplier 10
+                  , nexusSlotSupplier = Just $ FixedSizeSlotSupplier 10
                   , resourceBasedTunerOptions = Nothing
                   }
           result <- runWorkflowWithTuner pn tunerCfg

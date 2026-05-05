@@ -6,8 +6,7 @@ use std::ffi::CStr;
 use std::str::{FromStr, from_utf8_unchecked};
 use std::time::Duration;
 use temporalio_client::{
-    ClientOptions, ClientOptionsBuilder, ClientOptionsBuilderError, ConfiguredClient, RetryClient,
-    RetryConfig, TemporalServiceClient, TlsConfig,
+    ClientOptions, ConfiguredClient, RetryClient, RetryOptions, TemporalServiceClient, TlsOptions,
 };
 use tonic::metadata::{MetadataKey, errors::InvalidMetadataValue};
 use url::Url;
@@ -20,10 +19,10 @@ pub struct ClientConfig {
     client_name: String,
     client_version: String,
     metadata: HashMap<String, String>,
+    api_key: Option<String>,
     identity: String,
     tls_config: Option<ClientTlsConfig>,
     retry_config: Option<ClientRetryConfig>,
-    api_key: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -44,51 +43,62 @@ struct ClientRetryConfig {
     pub max_retries: usize,
 }
 
-fn client_config_to_options(
-    client_config: ClientConfig,
-) -> Result<ClientOptions, ClientOptionsBuilderError> {
-    let mut defaults = ClientOptionsBuilder::default();
-    let mut options_builder = defaults
-        .target_url(Url::parse(&client_config.target_url).unwrap())
-        .client_name(client_config.client_name)
-        .client_version(client_config.client_version)
-        .identity(client_config.identity);
+impl TryFrom<ClientConfig> for ClientOptions {
+    type Error = anyhow::Error;
 
-    if let Some(tls_config) = client_config.tls_config {
-        let tls_config = TlsConfig {
-            server_root_ca_cert: tls_config.server_root_ca_cert,
-            domain: tls_config.domain,
-            client_tls_config: match (tls_config.client_cert, tls_config.client_private_key) {
+    fn try_from(cfg: ClientConfig) -> anyhow::Result<Self> {
+        let tls_cfg = cfg.tls_config.map(|c| c.try_into()).transpose()?;
+        let retry_cfg = cfg
+            .retry_config
+            .map_or(RetryOptions::default(), |c| c.into());
+        Ok(ClientOptions::builder()
+            .target_url(Url::parse(&cfg.target_url)?)
+            .client_name(cfg.client_name)
+            .client_version(cfg.client_version)
+            .identity(cfg.identity)
+            .retry_options(retry_cfg)
+            .maybe_api_key(cfg.api_key)
+            .maybe_tls_options(tls_cfg)
+            .build())
+    }
+}
+
+impl TryFrom<ClientTlsConfig> for TlsOptions {
+    type Error = anyhow::Error;
+
+    fn try_from(cfg: ClientTlsConfig) -> anyhow::Result<Self> {
+        Ok(TlsOptions {
+            server_root_ca_cert: cfg.server_root_ca_cert,
+            domain: cfg.domain,
+            client_tls_options: match (cfg.client_cert, cfg.client_private_key) {
+                (None, None) => None,
                 (Some(client_cert), Some(client_private_key)) => {
-                    Some(temporalio_client::ClientTlsConfig {
+                    Some(temporalio_client::ClientTlsOptions {
                         client_cert,
                         client_private_key,
                     })
                 }
-                _ => None,
+                _ => {
+                    return Err(anyhow::anyhow!(
+                        "Must have both client cert and private key or neither"
+                    ));
+                }
             },
-        };
-        options_builder = options_builder.tls_cfg(tls_config);
+        })
     }
+}
 
-    if let Some(retry_config) = client_config.retry_config {
-        options_builder = options_builder.retry_config(RetryConfig {
-            initial_interval: Duration::from_millis(retry_config.initial_interval_millis),
-            randomization_factor: retry_config.randomization_factor,
-            multiplier: retry_config.multiplier,
-            max_interval: Duration::from_millis(retry_config.max_interval_millis),
-            max_elapsed_time: retry_config
-                .max_elapsed_time_millis
-                .map(Duration::from_millis),
-            max_retries: retry_config.max_retries,
-        });
+impl From<ClientRetryConfig> for RetryOptions {
+    fn from(cfg: ClientRetryConfig) -> Self {
+        RetryOptions {
+            initial_interval: Duration::from_millis(cfg.initial_interval_millis),
+            randomization_factor: cfg.randomization_factor,
+            multiplier: cfg.multiplier,
+            max_interval: Duration::from_millis(cfg.max_interval_millis),
+            max_elapsed_time: cfg.max_elapsed_time_millis.map(Duration::from_millis),
+            max_retries: cfg.max_retries,
+        }
     }
-
-    if client_config.api_key.is_some() {
-        options_builder = options_builder.api_key(client_config.api_key)
-    }
-
-    options_builder.build()
 }
 
 #[repr(C)]
@@ -196,7 +206,7 @@ pub fn connect_client(
     config: ClientConfig,
     hs_callback: HsCallback<ClientRef, CArray<u8>>,
 ) {
-    let opts: ClientOptions = client_config_to_options(config).unwrap();
+    let opts: ClientOptions = config.try_into().unwrap();
     let runtime = runtime_ref.runtime.clone();
     runtime_ref
         .runtime
@@ -321,13 +331,11 @@ where
 {
     match res {
         Ok(resp) => Ok(resp.get_ref().encode_to_vec()),
-        Err(err) => {
-            Err(CRPCError::c_repr_of(RPCError {
-                code: err.code() as u32,
-                message: err.message().to_owned(),
-                details: err.details().into(),
-            })
-            .unwrap())
-        }
+        Err(err) => Err(CRPCError::c_repr_of(RPCError {
+            code: err.code() as u32,
+            message: err.message().to_owned(),
+            details: err.details().into(),
+        })
+        .unwrap()),
     }
 }
