@@ -134,6 +134,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3"
 
 [[package]]
+name = "bon"
+version = "3.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f47dbe92550676ee653353c310dfb9cf6ba17ee70396e1f7cf0a2020ad49b2fe"
+dependencies = [
+ "bon-macros",
+ "rustversion",
+]
+
+[[package]]
+name = "bon-macros"
+version = "3.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "519bd3116aeeb42d5372c29d982d16d0170d3d4a5ed85fc7dd91642ffff3c67c"
+dependencies = [
+ "darling",
+ "ident_case",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn 2.0.117",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1420,6 +1445,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "pbjson"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8edd1efdd8ab23ba9cb9ace3d9987a72663d5d7c9f74fa00b51d6213645cf6c"
+dependencies = [
+ "base64",
+ "serde",
+]
+
+[[package]]
+name = "pbjson-build"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ed4d5c6ae95e08ac768883c8401cf0e8deb4e6e1d6a4e1fd3d2ec4f0ec63200"
+dependencies = [
+ "heck",
+ "itertools",
+ "prost",
+ "prost-types",
+]
+
+[[package]]
 name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2362,7 +2409,7 @@ dependencies = [
  "serde",
  "serde_json",
  "temporalio-client",
- "temporalio-common",
+ "temporalio-common 0.4.0",
  "temporalio-sdk-core",
  "tokio",
  "tokio-stream",
@@ -2395,7 +2442,7 @@ dependencies = [
  "parking_lot",
  "rand 0.9.4",
  "slotmap",
- "temporalio-common",
+ "temporalio-common 0.1.0",
  "thiserror 2.0.18",
  "tokio",
  "tonic",
@@ -2428,6 +2475,39 @@ dependencies = [
  "tonic-prost-build",
  "tracing",
  "tracing-core",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "temporalio-common"
+version = "0.4.0"
+source = "git+https://github.com/temporalio/sdk-core?rev=a22517e43db15e2a7592f376775a67951c116d0d#a22517e43db15e2a7592f376775a67951c116d0d"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "base64",
+ "bon",
+ "crc32fast",
+ "derive_more",
+ "erased-serde",
+ "futures",
+ "parking_lot",
+ "pbjson",
+ "pbjson-build",
+ "prost",
+ "prost-types",
+ "prost-wkt",
+ "prost-wkt-types",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+ "tracing",
+ "tracing-core",
+ "tracing-subscriber",
  "url",
  "uuid",
 ]
@@ -2488,7 +2568,7 @@ dependencies = [
  "sysinfo",
  "tar",
  "temporalio-client",
- "temporalio-common",
+ "temporalio-common 0.1.0",
  "temporalio-macros",
  "thiserror 2.0.18",
  "tokio",
