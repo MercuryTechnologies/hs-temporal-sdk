@@ -8,18 +8,18 @@ use std::sync::Arc;
 use std::time::Duration;
 use temporalio_common::Worker;
 use temporalio_common::errors::{PollError, WorkflowErrorType};
+use temporalio_common::protos::coresdk::nexus::NexusTaskCompletion;
 use temporalio_common::protos::coresdk::workflow_completion::WorkflowActivationCompletion;
 use temporalio_common::protos::coresdk::{ActivityHeartbeat, ActivityTaskCompletion};
-use temporalio_common::protos::coresdk::nexus::NexusTaskCompletion;
 use temporalio_common::protos::temporal::api::history::v1::History;
 use temporalio_common::worker::{
-    PollerBehavior, SlotKind, SlotInfoTrait, SlotMarkUsedContext, SlotReleaseContext,
+    PollerBehavior, SlotInfoTrait, SlotKind, SlotMarkUsedContext, SlotReleaseContext,
     SlotReservationContext, SlotSupplier, SlotSupplierPermit, WorkerVersioningStrategy,
 };
 use temporalio_sdk_core::replay::{HistoryForReplay, ReplayWorkerInput};
 use temporalio_sdk_core::{
-    ResourceBasedSlotsOptionsBuilder, ResourceSlotOptions,
-    SlotSupplierOptions, TunerHolderOptionsBuilder,
+    FixedSizeSlotSupplier, ResourceBasedSlotsOptions, ResourceSlotOptions, SlotSupplierOptions,
+    TunerBuilder, TunerHolder, TunerHolderOptions,
 };
 use tokio::sync::mpsc::{Sender, channel};
 use tokio_stream::wrappers::ReceiverStream;
@@ -59,90 +59,93 @@ pub struct TunerConfig {
     pub workflow_slot_supplier: Option<SlotSupplierConfig>,
     pub activity_slot_supplier: Option<SlotSupplierConfig>,
     pub local_activity_slot_supplier: Option<SlotSupplierConfig>,
+    pub nexus_slot_supplier: Option<SlotSupplierConfig>,
     pub resource_based_tuner_options: Option<ResourceBasedTunerConfig>,
 }
 
-impl TunerConfig {
-    fn build_tuner_holder(self) -> Result<Box<dyn temporalio_common::worker::WorkerTuner + Send + Sync>, WorkerError> {
-        let resource_opts = self.resource_based_tuner_options.as_ref().map(|rbt| {
-            ResourceBasedSlotsOptionsBuilder::default()
+impl<SK: SlotKind + Send + Sync + 'static> From<&SlotSupplierConfig>
+    for temporalio_sdk_core::SlotSupplierOptions<SK>
+{
+    fn from(cfg: &SlotSupplierConfig) -> SlotSupplierOptions<SK> {
+        match cfg {
+            SlotSupplierConfig::FixedSize { slots } => {
+                SlotSupplierOptions::FixedSize { slots: *slots }
+            }
+            SlotSupplierConfig::ResourceBased {
+                minimum_slots,
+                maximum_slots,
+                ramp_throttle_ms,
+            } => SlotSupplierOptions::ResourceBased(ResourceSlotOptions::new(
+                minimum_slots.unwrap_or(1),
+                maximum_slots.unwrap_or(10_000),
+                Duration::from_millis(ramp_throttle_ms.unwrap_or(50)),
+            )),
+            SlotSupplierConfig::Custom { handle } => {
+                let inner_ptr = *handle as *const HaskellSlotSupplierInner;
+                let inner = unsafe { &*inner_ptr };
+                let supplier: HaskellSlotSupplier<SK> = HaskellSlotSupplier {
+                    inner: Arc::new(HaskellSlotSupplierInner {
+                        reserve_fn: inner.reserve_fn,
+                        try_reserve_fn: inner.try_reserve_fn,
+                        mark_used_fn: inner.mark_used_fn,
+                        release_fn: inner.release_fn,
+                    }),
+                    _phantom: PhantomData,
+                };
+                SlotSupplierOptions::Custom(Arc::new(supplier))
+            }
+        }
+    }
+}
+
+impl TryFrom<&TunerConfig> for TunerHolder {
+    type Error = WorkerError;
+    fn try_from(cfg: &TunerConfig) -> Result<Self, WorkerError> {
+        let maybe_resource_opts = cfg.resource_based_tuner_options.as_ref().map(|rbt| {
+            ResourceBasedSlotsOptions::builder()
                 .target_mem_usage(rbt.target_memory_usage)
-                .target_cpu_usage(rbt.target_cpu_usage)
+                .target_cpu_usage(rbt.target_memory_usage)
                 .build()
-                .expect("resource based slot options should not fail with just targets set")
         });
 
-        let any_resource_based = matches!(self.workflow_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }))
-            || matches!(self.activity_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }))
-            || matches!(self.local_activity_slot_supplier, Some(SlotSupplierConfig::ResourceBased { .. }));
+        let any_resource_based = matches!(
+            cfg.workflow_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        ) || matches!(
+            cfg.activity_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        ) || matches!(
+            cfg.local_activity_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        ) || matches!(
+            cfg.nexus_slot_supplier,
+            Some(SlotSupplierConfig::ResourceBased { .. })
+        );
 
-        if any_resource_based && resource_opts.is_none() {
+        if any_resource_based && maybe_resource_opts.is_none() {
             return Err(WorkerError {
                 code: WorkerErrorCode::InvalidWorkerConfig,
                 message: "resource_based_tuner_options must be set when any slot supplier is resource_based".to_string(),
             });
         }
 
-        let mut builder = TunerHolderOptionsBuilder::default();
+        let maybe_workflow_slot_opts = cfg.workflow_slot_supplier.as_ref().map(Into::into);
+        let maybe_activity_slot_opts = cfg.activity_slot_supplier.as_ref().map(Into::into);
+        let maybe_local_activity_slot_opts =
+            cfg.local_activity_slot_supplier.as_ref().map(Into::into);
+        let maybe_nexus_slot_opts = cfg.nexus_slot_supplier.as_ref().map(Into::into);
 
-        if let Some(ref opts) = resource_opts {
-            builder.resource_based_options(opts.clone());
-        }
-
-        if let Some(ref ss) = self.workflow_slot_supplier {
-            builder.workflow_slot_options(to_slot_supplier_options(ss)?);
-        }
-        if let Some(ref ss) = self.activity_slot_supplier {
-            builder.activity_slot_options(to_slot_supplier_options(ss)?);
-        }
-        if let Some(ref ss) = self.local_activity_slot_supplier {
-            builder.local_activity_slot_options(to_slot_supplier_options(ss)?);
-        }
-
-        let tuner = builder.build_tuner_holder().map_err(|err| WorkerError {
-            code: WorkerErrorCode::InvalidWorkerConfig,
-            message: format!("Failed building tuner: {}", err),
-        })?;
-
-        Ok(Box::new(tuner))
-    }
-}
-
-fn to_slot_supplier_options<SK: SlotKind + Send + Sync + 'static>(
-    config: &SlotSupplierConfig,
-) -> Result<SlotSupplierOptions<SK>, WorkerError>
-where
-    SK::Info: SlotInfoTrait,
-{
-    match config {
-        SlotSupplierConfig::FixedSize { slots } => {
-            Ok(SlotSupplierOptions::FixedSize { slots: *slots })
-        }
-        SlotSupplierConfig::ResourceBased {
-            minimum_slots,
-            maximum_slots,
-            ramp_throttle_ms,
-        } => Ok(SlotSupplierOptions::ResourceBased(
-            ResourceSlotOptions::new(
-                minimum_slots.unwrap_or(1),
-                maximum_slots.unwrap_or(10_000),
-                Duration::from_millis(ramp_throttle_ms.unwrap_or(50)),
-            ),
-        )),
-        SlotSupplierConfig::Custom { handle } => {
-            let inner_ptr = *handle as *const HaskellSlotSupplierInner;
-            let inner = unsafe { &*inner_ptr };
-            let supplier: HaskellSlotSupplier<SK> = HaskellSlotSupplier {
-                inner: Arc::new(HaskellSlotSupplierInner {
-                    reserve_fn: inner.reserve_fn,
-                    try_reserve_fn: inner.try_reserve_fn,
-                    mark_used_fn: inner.mark_used_fn,
-                    release_fn: inner.release_fn,
-                }),
-                _phantom: PhantomData,
-            };
-            Ok(SlotSupplierOptions::Custom(Arc::new(supplier)))
-        }
+        TunerHolderOptions::builder()
+            .maybe_workflow_slot_options(maybe_workflow_slot_opts)
+            .maybe_activity_slot_options(maybe_activity_slot_opts)
+            .maybe_local_activity_slot_options(maybe_local_activity_slot_opts)
+            .maybe_nexus_slot_options(maybe_nexus_slot_opts)
+            .maybe_resource_based_options(maybe_resource_opts)
+            .build_tuner_holder()
+            .map_err(|err| WorkerError {
+                code: WorkerErrorCode::InvalidWorkerConfig,
+                message: format!("Failed building tuner: {}", err),
+            })
     }
 }
 
@@ -160,7 +163,11 @@ where
 /// `try_reserve_slot`: synchronous. Returns 1 if a slot was granted, 0 otherwise.
 ///
 /// `mark_slot_used` / `release_slot`: fire-and-forget notifications with JSON-encoded info.
-type ReserveSlotFn = unsafe extern "C" fn(ctx_ptr: *const u8, ctx_len: usize, completion: *mut SlotReserveCompletion);
+type ReserveSlotFn = unsafe extern "C" fn(
+    ctx_ptr: *const u8,
+    ctx_len: usize,
+    completion: *mut SlotReserveCompletion,
+);
 type TryReserveSlotFn = unsafe extern "C" fn(ctx_ptr: *const u8, ctx_len: usize) -> i32;
 type MarkSlotUsedFn = unsafe extern "C" fn(info_ptr: *const u8, info_len: usize);
 type ReleaseSlotFn = unsafe extern "C" fn(info_ptr: *const u8, info_len: usize);
@@ -210,7 +217,10 @@ impl SerializedSlotReservationContext {
 #[serde(tag = "type")]
 enum SerializedSlotInfo {
     #[serde(rename = "workflow")]
-    Workflow { workflow_type: String, is_sticky: bool },
+    Workflow {
+        workflow_type: String,
+        is_sticky: bool,
+    },
     #[serde(rename = "activity")]
     Activity { activity_type: String },
     #[serde(rename = "local_activity")]
@@ -289,7 +299,9 @@ where
     }
 
     fn release_slot(&self, ctx: &dyn SlotReleaseContext<SlotKind = SK>) {
-        let info = ctx.info().map(|i| SerializedSlotInfo::from_info(i.downcast()));
+        let info = ctx
+            .info()
+            .map(|i| SerializedSlotInfo::from_info(i.downcast()));
         let json = serde_json::to_vec(&SerializedReleaseContext { slot_info: info })
             .expect("serialization should not fail");
         unsafe { (self.inner.release_fn)(json.as_ptr(), json.len()) };
@@ -337,55 +349,167 @@ pub unsafe extern "C" fn hs_temporal_drop_custom_slot_supplier(
 ///
 /// Haskell FFI bridge invariants.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn hs_temporal_slot_reserve_complete(
-    completion: *mut SlotReserveCompletion,
-) {
+pub unsafe extern "C" fn hs_temporal_slot_reserve_complete(completion: *mut SlotReserveCompletion) {
     let mut completion = unsafe { Box::from_raw(completion) };
     if let Some(sender) = completion.sender.take() {
         let _ = sender.send(());
     }
 }
 
+/// Per-worker configuration options.
+///
+/// This struct should mirror the configuration we want to expose from [temporal::sdk_core::worker::WorkerConfig] in a
+/// way that can be cleanly passed across the C FFI from Haskell.
+///
+/// Where possible, we'll try to adhere to the naming conventions used in the Rust SDK, and most of the field comments
+/// have been copied verbatim from the upstream [temporal::sdk_core::worker::WorkerConfig] fields.
 #[derive(Serialize, Deserialize)]
 pub struct WorkerConfig {
+    /// The Temporal service namespace this worker is bound to.
     namespace: String,
+    /// The task queue this worker will poll from; this task queue name applies to both workflow and activity polling.
     task_queue: String,
+    /// Legacy build identifier string, in the future this will be replaced with a proper [WorkerVersioningStrategy]
+    /// enum bridge type that allows us to select one of the versioning strategies provided by the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `versioning_strategy` configuration field.
     build_id: String,
-    identity_override: Option<String>,
+    /// A human-readable string that can identify this worker.
+    ///
+    /// If set, overrides the identity set (if any) on the client used by this worker.
+    client_identity_override: Option<String>,
+    /// If set nonzero, workflows will be cached and sticky task queues will be used, meaning that history updates are
+    /// applied incrementally to suspended instances of workflow execution.
+    ///
+    /// Workflows are evicted according to a least-recently-used policy once the cache maximum has been reached.
+    ///
+    /// Workflows may also be explicitly evicted at any time, or as a result of errors or failures.
     max_cached_workflows: usize,
-    max_outstanding_workflow_tasks: usize,
-    max_outstanding_activities: usize,
-    max_outstanding_local_activities: usize,
-    max_concurrent_workflow_task_polls: usize,
-    nonsticky_to_sticky_poll_ratio: f32,
-    max_concurrent_activity_task_polls: usize,
-    no_remote_activities: bool,
-    sticky_queue_schedule_to_start_timeout_millis: u64,
-    max_heartbeat_throttle_interval_millis: u64,
-    default_heartbeat_throttle_interval_millis: u64,
-    max_activities_per_second: Option<f64>,
-    max_task_queue_activities_per_second: Option<f64>,
-    graceful_shutdown_period_millis: u64,
-    nondeterminism_as_workflow_fail: bool,
-    nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    /// Set a [crate::WorkerTuner] for this worker by way of our [TunerConfig] FFI bridge type.
+    ///
+    /// Either this or at least one of the `max_outstanding_*` fields must be set.
     tuner: Option<TunerConfig>,
+    /// The maximum allowed number of workflow tasks that will ever be given to this worker at one time.
+    ///
+    /// Note that one workflow task may require multiple activations - so the WFT counts as "outstanding" until all
+    /// activations it requires have been completed. Must be at least 2 if `max_cached_workflows` is > 0, or is an
+    /// error.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
+    max_outstanding_workflow_tasks: usize,
+    /// The maximum number of activity tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
+    max_outstanding_activities: usize,
+    /// The maximum number of local activity tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
+    max_outstanding_local_activities: usize,
+    /// The maximum number of nexus tasks that will ever be given to this worker concurrently.
+    ///
+    /// Mutually exclusive with `tuner`; if both are defined, `tuner` has priority over this field.
     max_outstanding_nexus_tasks: Option<usize>,
-    max_concurrent_nexus_task_polls: Option<usize>,
+    /// Legacy maximum concurrent workflow task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `workflow_task_poller_behavior` configuration field.
+    max_concurrent_workflow_task_polls: usize,
+    /// Legacy maximum concurrent activity task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with an `activity_task_poller_behavior` configuration field.
+    max_concurrent_activity_task_polls: usize,
+    /// Legacy maximum concurrent nexus task poller configuration field, in the future this will be replaced with
+    /// a proper [PollerBehavior] enum bridge type that allows us to provide an appropriate polling behavior based on
+    /// the upstream SDK.
+    ///
+    /// This will eventually be replaced with a `nexus_task_poller_behavior` configuration field.
+    max_concurrent_nexus_task_polls: usize,
+    /// (max workflow task polls * this number) = the number of max pollers that will be allowed for
+    /// the nonsticky queue when sticky tasks are enabled.
+    ///
+    /// Because we only support [PollerBehavior::SimpleMaximum] currently, this applies if sticky tasks are enabled.
+    nonsticky_to_sticky_poll_ratio: f32,
+    /// How long a workflow task is allowed to sit on the sticky queue before it is timed out and moved to the
+    /// non-sticky queue where it may be picked up by any worker.
+    sticky_queue_schedule_to_start_timeout_millis: u64,
+    /// Longest interval for throttling activity heartbeat, in milliseconds.
+    max_heartbeat_throttle_interval_millis: u64,
+    /// Default interval for throttling activity heartbeats in case an activity's heartbeat timeout is not set, in
+    /// milliseconds.
+    ///
+    /// When the timeout *is* set, throttling is set to 80% of that value.
+    default_heartbeat_throttle_interval_millis: u64,
+    /// Sets the maximum number of activities per second the task queue will dispatch, controlled server-side.
+    ///
+    /// Note that this only takes effect upon an activity poll request.
+    ///
+    /// If multiple workers on the same queue have different values set, they will thrash with the last poller winning.
+    ///
+    /// Setting this to a nonzero value will also disable eager activity execution.
+    max_task_queue_activities_per_second: Option<f64>,
+    /// Limits the number of activities per second that this worker will process.
+    ///
+    /// The worker will not poll for new activities if by doing so it might receive and execute an activity which would
+    /// cause it to exceed this limit.
+    ///
+    /// Negative, zero, or NaN values will cause building the options to fail.
+    max_worker_activities_per_second: Option<f64>,
+    /// The grace period, in milliseconds, that the core worker will afford any running workflows & activities after
+    /// shutdown has been initiated.
+    graceful_shutdown_period_millis: u64,
+    /// Whether nondeterministic workflows will trigger a workflow failure.
+    nondeterminism_as_workflow_fail: bool,
+    /// A list of workflow types for whom workflow failures will be considered to be nondeterminism errors.
+    nondeterminism_as_workflow_fail_for_types: Vec<String>,
+    /// If set to true this worker will only handle workflow tasks and local activities, it will not poll for activity
+    /// tasks.
+    ///
+    /// This will eventually be replaced with a `task_types` field enumerating `WorkerTaskTypes`.
+    no_remote_activities: bool,
+}
+
+impl TryFrom<&WorkerConfig> for TunerHolder {
+    type Error = WorkerError;
+    fn try_from(conf: &WorkerConfig) -> Result<TunerHolder, WorkerError> {
+        match conf.tuner {
+            Some(ref tuner_config) => tuner_config.try_into(),
+            None => {
+                let mut builder = TunerBuilder::default();
+                builder.workflow_slot_supplier(Arc::new(FixedSizeSlotSupplier::new(
+                    conf.max_outstanding_workflow_tasks,
+                )));
+                builder.activity_slot_supplier(Arc::new(FixedSizeSlotSupplier::new(
+                    conf.max_outstanding_activities,
+                )));
+                builder.local_activity_slot_supplier(Arc::new(FixedSizeSlotSupplier::new(
+                    conf.max_outstanding_local_activities,
+                )));
+                if let Some(m) = conf.max_outstanding_nexus_tasks {
+                    builder.nexus_slot_supplier(Arc::new(FixedSizeSlotSupplier::new(m)));
+                };
+                Ok(builder.build())
+            }
+        }
+    }
 }
 
 impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
     type Error = WorkerError;
 
     fn try_from(conf: WorkerConfig) -> Result<Self, WorkerError> {
-        let mut builder = temporalio_sdk_core::WorkerConfigBuilder::default();
-        builder
+        let converted_tuner: TunerHolder = (&conf).try_into()?;
+        temporalio_sdk_core::WorkerConfig::builder()
             .namespace(conf.namespace)
             .task_queue(conf.task_queue)
             .versioning_strategy(WorkerVersioningStrategy::None {
                 build_id: conf.build_id,
             })
-            .client_identity_override(conf.identity_override)
+            .maybe_client_identity_override(conf.client_identity_override)
             .max_cached_workflows(conf.max_cached_workflows)
+            .tuner(Arc::new(converted_tuner))
             .workflow_task_poller_behavior(PollerBehavior::SimpleMaximum(
                 conf.max_concurrent_workflow_task_polls,
             ))
@@ -393,7 +517,6 @@ impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
             .activity_task_poller_behavior(PollerBehavior::SimpleMaximum(
                 conf.max_concurrent_activity_task_polls,
             ))
-            .no_remote_activities(conf.no_remote_activities)
             .sticky_queue_schedule_to_start_timeout(Duration::from_millis(
                 conf.sticky_queue_schedule_to_start_timeout_millis,
             ))
@@ -403,8 +526,8 @@ impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
             .default_heartbeat_throttle_interval(Duration::from_millis(
                 conf.default_heartbeat_throttle_interval_millis,
             ))
-            .max_worker_activities_per_second(conf.max_activities_per_second)
-            .max_task_queue_activities_per_second(conf.max_task_queue_activities_per_second)
+            .maybe_max_worker_activities_per_second(conf.max_worker_activities_per_second)
+            .maybe_max_task_queue_activities_per_second(conf.max_task_queue_activities_per_second)
             .graceful_shutdown_period(Duration::from_millis(conf.graceful_shutdown_period_millis))
             .workflow_failure_errors(if conf.nondeterminism_as_workflow_fail {
                 HashSet::from([WorkflowErrorType::Nondeterminism])
@@ -424,35 +547,29 @@ impl TryFrom<WorkerConfig> for temporalio_sdk_core::WorkerConfig {
             )
             .nexus_task_poller_behavior(PollerBehavior::SimpleMaximum(
                 conf.max_concurrent_nexus_task_polls.unwrap_or(5),
-            ));
-
-        if let Some(max) = conf.max_outstanding_nexus_tasks {
-            builder.max_outstanding_nexus_tasks(max);
-        }
-
-        match conf.tuner {
-            Some(tuner_config) => {
-                let tuner = tuner_config.build_tuner_holder()?;
-                builder.tuner(Arc::from(tuner));
-            }
-            None => {
-                builder
-                    .max_outstanding_workflow_tasks(conf.max_outstanding_workflow_tasks)
-                    .max_outstanding_activities(conf.max_outstanding_activities)
-                    .max_outstanding_local_activities(conf.max_outstanding_local_activities);
-            }
-        }
-
-        builder.build().map_err(|err| WorkerError {
-            code: WorkerErrorCode::InvalidWorkerConfig,
-            message: format!("{}", err),
-        })
+            ))
+            // FIXME: Implement 'WorkerTaskTypes' as an FFI type
+            .task_types(temporalio_common::worker::WorkerTaskTypes {
+                enable_workflows: true,
+                enable_local_activities: true,
+                enable_remote_activities: !conf.no_remote_activities,
+                enable_nexus: true,
+            })
+            .build()
+            .map_err(|err| WorkerError {
+                code: WorkerErrorCode::InvalidWorkerConfig,
+                message: err.to_string(),
+            })
     }
 }
 
 macro_rules! enter_sync {
     ($runtime:expr) => {
-        let _trace_guard = $runtime.core.telemetry().trace_subscriber().map(|s| tracing::subscriber::set_default(s));
+        let _trace_guard = $runtime
+            .core
+            .telemetry()
+            .trace_subscriber()
+            .map(|s| tracing::subscriber::set_default(s));
         let _guard = $runtime.core.tokio_handle().enter();
     };
 }
@@ -631,12 +748,11 @@ fn new_replay_worker(
     let (history_pusher, stream) = HistoryPusher::new(runtime_ref.runtime.clone());
     let worker = WorkerRef {
         worker: Some(Arc::new(
-            temporalio_sdk_core::init_replay_worker(ReplayWorkerInput::new(config, stream)).map_err(
-                |err| WorkerError {
+            temporalio_sdk_core::init_replay_worker(ReplayWorkerInput::new(config, stream))
+                .map_err(|err| WorkerError {
                     code: WorkerErrorCode::InitReplayWorkerFailed,
                     message: format!("Failed creating replay worker: {}", err),
-                },
-            )?,
+                })?,
         )),
         runtime: runtime_ref.runtime.clone(),
     };
@@ -796,8 +912,10 @@ impl WorkerRef {
                     message: format!("Poll failure: {}", err),
                 }),
             };
-            Ok(CArray::c_repr_of(bytes.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?)
-                .unwrap())
+            Ok(
+                CArray::c_repr_of(bytes.map_err(|err| CWorkerError::c_repr_of(err).unwrap())?)
+                    .unwrap(),
+            )
         })
     }
 
@@ -1307,9 +1425,10 @@ pub unsafe extern "C" fn hs_temporal_history_proto_to_json(
                     .into_raw_pointer_mut();
             },
             Err(err) => unsafe {
-                *error_slot = CArray::c_repr_of(format!("JSON serialization failed: {}", err).into_bytes())
-                    .unwrap()
-                    .into_raw_pointer_mut();
+                *error_slot =
+                    CArray::c_repr_of(format!("JSON serialization failed: {}", err).into_bytes())
+                        .unwrap()
+                        .into_raw_pointer_mut();
             },
         },
         Err(err) => unsafe {
