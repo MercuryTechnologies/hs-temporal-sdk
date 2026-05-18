@@ -348,7 +348,8 @@ makeOpenTelemetryInterceptor = do
                         { kind = Client
                         , attributes =
                             HashMap.fromList
-                              [ ("temporal.workflow_id", toAttribute $ rawWorkflowId wfId)
+                              [ ("temporal.task_queue", toAttribute $ rawTaskQueue taskQueue)
+                              , ("temporal.workflow_id", toAttribute $ rawWorkflowId wfId)
                               , ("temporal.workflow_type", toAttribute $ rawWorkflowType ty)
                               ]
                         }
