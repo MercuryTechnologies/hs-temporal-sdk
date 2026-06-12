@@ -76,9 +76,7 @@ import qualified Data.ByteString.Lazy as BL
 import Data.IORef
 import Data.ProtoLens.Encoding (decodeMessageOrDie, encodeMessage)
 import Data.Text (Text)
-import Data.Void (Void)
 import Data.Word
-import Foreign.C.String
 import Foreign.C.Types
 import Foreign.Marshal hiding (void)
 import Foreign.Ptr
@@ -94,7 +92,7 @@ import Temporal.Core.CTypes
 import Temporal.Core.Client
 import Temporal.Internal.FFI
 import Temporal.Runtime
-import UnliftIO (MonadIO, MonadUnliftIO, liftIO)
+import UnliftIO (liftIO)
 import qualified UnliftIO
 
 
@@ -129,10 +127,6 @@ instance KnownWorkerType 'Replay where
   knownWorkerType = SReplay
 
 
-singFor :: KnownWorkerType ty => proxy ty -> SWorkerType ty
-singFor _ = knownWorkerType
-
-
 data Worker (ty :: WorkerType) = Worker
   { workerPtr :: {-# UNPACK #-} !(IORef (Ptr (Worker ty)))
   , workerConfig :: !WorkerConfig
@@ -142,8 +136,8 @@ data Worker (ty :: WorkerType) = Worker
 
 
 withWorker :: forall ty a. KnownWorkerType ty => Worker ty -> (Ptr (Worker ty) -> IO a) -> IO a
-withWorker (Worker ptrRef _ _ r) f = withRuntime r $ \_ -> do
-  ptr <- readIORef ptrRef
+withWorker w f = withRuntime w.workerRuntime $ \_ -> do
+  ptr <- readIORef w.workerPtr
   f ptr
 
 
@@ -156,9 +150,6 @@ getWorkerConfig = workerConfig
 
 
 newtype HistoryPusher = HistoryPusher {historyPusher :: Ptr HistoryPusher}
-
-
-type Proto = ByteString
 
 
 type RunId = ByteString
@@ -930,8 +921,8 @@ foreign import ccall "hs_temporal_history_pusher_close" raw_closeHistoryPusher :
 
 
 closeHistory :: HistoryPusher -> IO ()
-closeHistory (HistoryPusher hp) =
-  raw_closeHistoryPusher hp
+closeHistory hp =
+  raw_closeHistoryPusher hp.historyPusher
 
 
 -- | Bracket-style wrapper for Worker that ensures proper cleanup.

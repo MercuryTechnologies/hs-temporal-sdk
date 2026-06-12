@@ -12,6 +12,7 @@ module Temporal.Core.Client (
   Client,
   clientConfig,
   connectClient,
+  reconnectClient,
   defaultClientConfig,
   closeClient,
   clientRuntime,
@@ -50,7 +51,6 @@ module Temporal.Core.Client (
 
 import Control.Concurrent
 import Control.Exception
-import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Data.Aeson
@@ -198,10 +198,10 @@ clientRuntime = runtime
 
 
 withClient :: Client -> (Ptr CoreClient -> IO a) -> IO a
-withClient (Client cc r _) f = do
-  (CoreClient c) <- readMVar cc
-  withRuntime r $ \_ ->
-    f c
+withClient c f = do
+  (CoreClient cPtr) <- readMVar c.client
+  withRuntime c.runtime $ \_ ->
+    f cPtr
 
 
 newtype ByteVector = ByteVector {byteVector :: ByteString}
@@ -294,7 +294,7 @@ connectClient rt conf = do
       else pure conf
 
   clientPtrSlot <- liftIO newEmptyMVar
-  withRunInIO $ \runInIO -> do
+  _ <- withRunInIO $ \runInIO -> do
     forkIO $ runInIO $ do
       liftIO $ withRuntime rt $ \rtPtr -> BS.useAsCString (BL.toStrict $ encode conf') $ \confPtr -> do
         let tryConnect = makeTokioAsyncCall (raw_connectClient rtPtr confPtr)

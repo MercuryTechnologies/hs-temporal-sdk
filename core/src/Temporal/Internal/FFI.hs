@@ -10,17 +10,10 @@ import Control.Exception
 import Control.Monad
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
-import Data.Coerce
-import Data.IORef
-import Data.Kind (Type)
-import Data.Proxy
 import Data.Text (Text)
-import qualified Data.Text as Text
 import qualified Data.Text.Foreign as Text
 import qualified Data.Vector.Storable as Vector
 import Data.Word
-import Foreign.C.String
-import Foreign.C.Types
 import Foreign.Marshal.Alloc
 import qualified Foreign.Marshal.Utils as Marshal
 import Foreign.Ptr
@@ -140,7 +133,7 @@ withTokioAsyncCall call freeErr freeRes processErr processRes =
       -- Wait for Rust to complete, but spawn cleanup thread if interrupted
       let spawnCleanupThread = void $ forkIO $ do
             -- Wait for Rust to finish and clean up
-            takeMVar mvar
+            _ <- takeMVar mvar
             errPtr <- peek errorSlot
             resPtr <- peek resultSlot
             when (errPtr /= nullPtr) (freeErr errPtr)
@@ -148,7 +141,7 @@ withTokioAsyncCall call freeErr freeRes processErr processRes =
 
       (do
         -- Allow interruption during the wait
-        restore (takeMVar mvar)
+        _ <- restore (takeMVar mvar)
 
         -- Now process the result, masked
         errPtr <- peek errorSlot

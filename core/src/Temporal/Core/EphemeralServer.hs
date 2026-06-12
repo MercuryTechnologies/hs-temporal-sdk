@@ -6,7 +6,6 @@
 
 module Temporal.Core.EphemeralServer where
 
-import Control.Monad
 import Data.Aeson
 import Data.Aeson.TH
 import Data.ByteString (ByteString, useAsCString)
