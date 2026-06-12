@@ -158,7 +158,7 @@ requireActivityNotRunning tt m = do
 
 -- TODO, where should async exception masking happen?
 applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv m ()
-applyActivityTaskStart tsk tt msg = do
+applyActivityTaskStart _tsk tt msg = do
   w <- ask
   let c = Core.getWorkerConfig w.workerCore
       tq = Core.taskQueue c
@@ -313,6 +313,7 @@ applyActivityTaskCancel tt msg = do
         AT.CANCELLED -> CancelRequested
         AT.TIMED_OUT -> Timeout
         AT.WORKER_SHUTDOWN -> WorkerShutdown
-        AT.ActivityCancelReason'Unrecognized _ -> UnknownCancellationReason
+        -- TODO: PAUSED and RESET need dedicated ActivityCancelReason constructors (follow-up)
+        _ -> UnknownCancellationReason
   forM_ running $ \a ->
     cancelWith a cancelReason `finally` atomically (StmMap.delete tt w.runningActivities)

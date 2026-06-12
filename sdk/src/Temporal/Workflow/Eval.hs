@@ -128,7 +128,7 @@ runWorkflow wf = provideCallStack $ do
   let
     -- Run a job, and put its result in the given IVar
     schedule :: ContinuationEnv -> JobList -> Workflow b -> IVar b -> SuspendableWorkflowExecution ()
-    schedule env rq wf' ivar@IVar {ivarRef = !ref} = do
+    schedule env rq wf' ivar@IVar {ivarRef = ref} = do
       lift $ do
         cs <- readIORef inst.workflowCallStack
         logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)

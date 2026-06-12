@@ -17,7 +17,7 @@ import Temporal.Workflow.Definition (WorkflowRef)
 data WorkflowAssertionFailure
   = WorkflowShouldExist WorkflowId
   | WorkflowShouldNotExist WorkflowId
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 
 instance Exception WorkflowAssertionFailure

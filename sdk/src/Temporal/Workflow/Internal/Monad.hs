@@ -352,7 +352,7 @@ instance ThawedGen StdGen Workflow where
 
 {-# INLINE addJob #-}
 addJob :: ContinuationEnv -> Workflow b -> IVar b -> IVar a -> InstanceM ()
-addJob env !wf !resultIVar IVar {ivarRef = !ref} =
+addJob env !wf !resultIVar IVar {ivarRef = ref} =
   join $ liftIO $ atomicModifyIORefCAS ref $ \case
     IVarEmpty list -> (IVarEmpty (JobCons env wf resultIVar list), pure ())
     full -> (full, modifyIORef' env.runQueueRef (JobCons env wf resultIVar))
@@ -497,7 +497,7 @@ newTrackedIVar = do
 
 
 getIVar :: IVar a -> Workflow a
-getIVar i@(IVar {ivarId = vid, ivarRef = !ref}) = Workflow $ \env -> do
+getIVar i@(IVar {ivarId = vid, ivarRef = ref}) = Workflow $ \env -> do
   e <- readIORef ref
   case e of
     IVarFull (Ok a) -> do
@@ -516,7 +516,7 @@ getIVar i@(IVar {ivarId = vid, ivarRef = !ref}) = Workflow $ \env -> do
 
 -- Just a specialised version of getIVar, for efficiency in <*>
 getIVarApply :: IVar (a -> b) -> a -> Workflow b
-getIVarApply i@IVar {ivarId = vid, ivarRef = !ref} a = Workflow $ \env -> do
+getIVarApply i@IVar {ivarId = vid, ivarRef = ref} a = Workflow $ \env -> do
   e <- readIORef ref
   case e of
     IVarFull (Ok f) -> do
@@ -547,7 +547,7 @@ removeBlockedStack vid = do
 
 
 putIVar :: IVar a -> ResultVal a -> ContinuationEnv -> IO ()
-putIVar IVar {ivarRef = !ref} a ContinuationEnv {..} = do
+putIVar IVar {ivarRef = ref} a ContinuationEnv {..} = do
   e <- readIORef ref
   case e of
     IVarEmpty jobs -> trace_ "putIVar/Empty" $ do
@@ -560,7 +560,7 @@ putIVar IVar {ivarRef = !ref} a ContinuationEnv {..} = do
 
 
 tryReadIVar :: IVar a -> Workflow (Maybe a)
-tryReadIVar i@IVar {ivarRef = !ref} = Workflow $ \env -> do
+tryReadIVar i@IVar {ivarRef = ref} = Workflow $ \env -> do
   e <- readIORef ref
   case e of
     IVarFull (Ok a) -> pure $ Done (Just a)

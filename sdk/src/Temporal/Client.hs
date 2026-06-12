@@ -1226,7 +1226,7 @@ Uses describeWorkflowExecution to query the server - returns False if the workfl
 is not found, True if it exists, and throws an exception for other errors.
 -}
 checkWorkflowExecutionExists :: (MonadIO m, HasWorkflowClient m, WorkflowRef wf) => wf -> WorkflowId -> m Bool
-checkWorkflowExecutionExists wfRef wfId = do
+checkWorkflowExecutionExists _wfRef wfId = do
   c <- askWorkflowClient
   liftIO $ do
     let req =

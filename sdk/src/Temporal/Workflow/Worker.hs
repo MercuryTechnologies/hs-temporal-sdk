@@ -226,7 +226,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                       defMessage
                         & Completion.runId .~ (activation ^. Activation.runId)
                         & Completion.failed .~ failureProto
-                liftIO $ Core.completeWorkflowActivation workerCore completionMessage
+                _ <- liftIO $ Core.completeWorkflowActivation workerCore completionMessage
                 pure Nothing
               Right (searchAttrs, hdrs, memo) -> do
                 let runId_ = RunId $ activation ^. CommonProto.runId

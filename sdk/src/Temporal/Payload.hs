@@ -43,6 +43,7 @@ module Temporal.Payload (
   PayloadProcessor (..),
   ApplyPayloads,
   ArgsOf,
+  ArgsAndResult,
   ResultOf,
   (:->:),
   convertToProtoPayload,
@@ -350,10 +351,6 @@ type family ArgsAndResult (f :: Type) :: ([Type], Type) where
 type family ArgsOf f where
   ArgsOf (arg -> rest) = arg ': ArgsOf rest
   ArgsOf _ = '[]
-
-
-type family FunctorInnerValue m :: Type -> Type where
-  FunctorInnerValue (m a) = a
 
 
 type family ResultOf (m :: Type -> Type) f where

@@ -16,6 +16,7 @@ module Temporal.Client.Namespace
   , FailoverStatus(..)
   ) where
 
+import Prelude hiding (filter)
 import Control.Monad.IO.Class
 import Conduit
 import Data.Int (Int64, Int32)

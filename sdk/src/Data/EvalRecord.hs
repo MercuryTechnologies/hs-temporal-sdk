@@ -859,10 +859,10 @@ instance (ConstraintsRec b, ApplicativeRec b, AllRecF Semigroup f b, AllRecF Mon
   mappend = (<>)
 
 
-data MapMatches pred f :: Type -> Exp Type
+data MapMatches predicate f :: Type -> Exp Type
 
 
-type instance Eval (MapMatches pred f a) = ValueOnMatch (pred @@ a) (f @@ a) a
+type instance Eval (MapMatches predicate f a) = ValueOnMatch (predicate @@ a) (f @@ a) a
 
 
 type family ValueOnMatch cond b a where
@@ -883,20 +883,20 @@ instance ApplyOnMatch 'False where
 
 
 mapMatching
-  :: forall (pred :: Type -> Exp Bool) (f :: Type -> Exp Type) (g :: Type -> Exp Type) rec
-   . (FunctorRec rec, ConstraintsRec rec, AllRecF ApplyOnMatch (pred <=< f) rec)
-  => Proxy (pred :: Type -> Exp Bool)
+  :: forall (predicate :: Type -> Exp Bool) (f :: Type -> Exp Type) (g :: Type -> Exp Type) rec
+   . (FunctorRec rec, ConstraintsRec rec, AllRecF ApplyOnMatch (predicate <=< f) rec)
+  => Proxy (predicate :: Type -> Exp Bool)
   -> (forall a. Metadata a -> f @@ a -> (g <=< f) @@ a)
   -> rec f
-  -> rec (MapMatches pred g <=< f)
+  -> rec (MapMatches predicate g <=< f)
 mapMatching p f =
-  Data.EvalRecord.mapC @(ClassF ApplyOnMatch (pred <=< f))
+  Data.EvalRecord.mapC @(ClassF ApplyOnMatch (predicate <=< f))
     applyIfRelevant
   where
-    applyIfRelevant :: forall a. ApplyOnMatch ((pred <=< f) @@ a) => Metadata a -> f @@ a -> (MapMatches pred g <=< f) @@ a
+    applyIfRelevant :: forall a. ApplyOnMatch ((predicate <=< f) @@ a) => Metadata a -> f @@ a -> (MapMatches predicate g <=< f) @@ a
     applyIfRelevant meta x =
       let
-        predAppProxy :: Proxy (pred @@ (f @@ a))
+        predAppProxy :: Proxy (predicate @@ (f @@ a))
         predAppProxy = applyPred p x
 
         mapFn :: f @@ a -> (g <=< f) @@ a
@@ -905,5 +905,5 @@ mapMatching p f =
         applyOnMatch predAppProxy mapFn x
 
 
-applyPred :: Proxy pred -> a -> Proxy (pred @@ a)
+applyPred :: Proxy predicate -> a -> Proxy (predicate @@ a)
 applyPred _ _ = Proxy
