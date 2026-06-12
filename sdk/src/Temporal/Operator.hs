@@ -16,7 +16,6 @@ import Data.ProtoLens (Message (defMessage))
 import Data.Text (Text)
 import Lens.Family2
 import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
-import qualified Proto.Temporal.Api.Nexus.V1.Message as NexusProto
 import qualified Proto.Temporal.Api.Nexus.V1.Message_Fields as NexusProto
 import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
 import Temporal.Common (Namespace (..), NexusEndpointName (..), TaskQueue (..))

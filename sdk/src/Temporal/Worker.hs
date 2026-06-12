@@ -651,9 +651,9 @@ runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (sta
   case res of
     Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
     Right () -> do
-      res <- atomically $ readTChan evictions
-      if evictionWasNonRecoverable res
-        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
+      eviction <- atomically $ readTChan evictions
+      if evictionWasNonRecoverable eviction
+        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage eviction}
         else pure $ Right ()
 
 
@@ -671,9 +671,9 @@ runReplayHistoryProto rt conf (WorkflowId wfId) protoBytes = runWorkerContext co
   case res of
     Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
     Right () -> do
-      res <- atomically $ readTChan evictions
-      if evictionWasNonRecoverable res
-        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
+      eviction <- atomically $ readTChan evictions
+      if evictionWasNonRecoverable eviction
+        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage eviction}
         else pure $ Right ()
 
 
@@ -692,9 +692,9 @@ runReplayHistoryJson rt conf (WorkflowId wfId) historyJson = runWorkerContext co
   case res of
     Left e -> pure $ Left $ ReplayHistoryFailure {message = e.message}
     Right () -> do
-      res <- atomically $ readTChan evictions
-      if evictionWasNonRecoverable res
-        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage res}
+      eviction <- atomically $ readTChan evictions
+      if evictionWasNonRecoverable eviction
+        then pure $ Left $ ReplayHistoryFailure {message = evictionMessage eviction}
         else pure $ Right ()
 
 

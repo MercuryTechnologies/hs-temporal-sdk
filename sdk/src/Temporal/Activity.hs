@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 {- |
 Module: Temporal.Activity
@@ -222,6 +223,6 @@ activityWorkflowClient = Activity $ do
       , enableTimeSkipping = False
       }
 
-
+-- NOTE: intentionally defined as an orphan to avoid a module cycle
 instance HasWorkflowClient (Activity env) where
   askWorkflowClient = activityWorkflowClient

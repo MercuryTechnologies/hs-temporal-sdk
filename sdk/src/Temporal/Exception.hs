@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-partial-fields #-}
 
 module Temporal.Exception (
   -- * Common types
@@ -103,6 +104,8 @@ import Temporal.Workflow.Types
 
 ---------------------------------------------------------------------
 -- Unpacking errors from protobuf Any values
+
+-- NOTE: fields are partial by design
 
 {- | A description of a failure during `unpack` to decode an `Any` message
 into the expected type.
@@ -833,18 +836,6 @@ instance Enum RPCStatusCode where
 instance Bounded RPCStatusCode where
   minBound = minBound
   maxBound = maxBound
-
-
-rpcErrorToStatus :: Temporal.Core.Client.RpcError -> Status
-rpcErrorToStatus = decodeMessageOrDie . (.details)
-
-
-unpackStatus :: Message msg => Status -> Either UnpackError msg
-unpackStatus s = unpackAny $ V.head (s ^. Status.vec'details)
-
-
-decodeFromProof :: Message msg => Proxy msg -> BS.ByteString -> Either String msg
-decodeFromProof _ = decodeMessage
 
 
 {- | Detailed error information for various types of RPC errors returned by the Temporal server.

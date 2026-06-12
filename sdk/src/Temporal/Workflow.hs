@@ -450,8 +450,8 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
             Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
               Nothing -> error "Activity result missing status"
               Just (ActivityResult.ActivityResolution'Completed success) -> do
-                res <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result)
-                pure $ case res of
+                decoded <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result)
+                pure $ case decoded of
                   Left err -> Throw $ toException $ ValueError err
                   Right val -> Done val
               Just (ActivityResult.ActivityResolution'Failed failure_) ->
@@ -1327,7 +1327,7 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
     HashMap.insert (Just n) updateImplementation handles
   where
     updateHandler :: UpdateId -> Vector Payload -> Map Text Payload -> Workflow Payload
-    updateHandler updateId vec hdrs = do
+    updateHandler _updateId vec _hdrs = do
       ePayloads <-
         ilift $
           liftIO $
@@ -1343,7 +1343,7 @@ setUpdateHandler (updateRef -> KnownUpdate codec n) f mValidator = ilift $ do
           pure $ Throw $ toException $ ValueError err
         Right w -> w >>= \result -> ilift (liftIO $ encode codec result)
     updateValidatorHandler :: validator -> UpdateId -> Vector Payload -> Map Text Payload -> Validation (Either SomeException ())
-    updateValidatorHandler v updateId vec hdrs = do
+    updateValidatorHandler v _updateId vec _hdrs = do
       eResult <-
         Validation $
           applyPayloads
@@ -1478,8 +1478,8 @@ If the duration is less than or equal to zero, the function will return immediat
 sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
   updateCallStackW
-  t <- createTimer ts
-  mapM_ Temporal.Workflow.Unsafe.Handle.wait t
+  timer <- createTimer ts
+  traverse_ Temporal.Workflow.Unsafe.Handle.wait timer
 
 
 {- | Suspends the workflow execution until the specified system time.
@@ -1492,8 +1492,8 @@ sleepUntilSystemTime :: RequireCallStack => SystemTime -> Workflow ()
 sleepUntilSystemTime t = do
   updateCallStackW
   currentTime <- time
-  t <- createTimer (diffSystemTime currentTime t)
-  mapM_ Temporal.Workflow.Unsafe.Handle.wait t
+  timer <- createTimer (diffSystemTime currentTime t)
+  traverse_ Temporal.Workflow.Unsafe.Handle.wait timer
 
 
 {- | Suspends the workflow execution until the specified UTC time.

@@ -684,7 +684,7 @@ applyJobs
   -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
 applyJobs jobs fAwait = UnliftIO.try $ do
   Logging.logDebug $ Text.pack ("Applying jobs: " <> show jobs)
-  let JobGroups {..} = jobGroups
+  let JobGroups {..} = getJobGroups
   patchNotifications
   queryWorkflows
   otherJobs
@@ -700,15 +700,14 @@ applyJobs jobs fAwait = UnliftIO.try $ do
         case activations of
           [] -> case updateWorkflows ++ signalWorkflows of
             [] -> suspend (Await wf)
-            jobs -> do
-              lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf []
+            jobs' -> lift (traverse injectWorkflowSignalOrUpdate jobs') *> wf []
           _ -> case updateWorkflows ++ signalWorkflows of
             [] -> wf activations
-            jobs -> lift (mapM_ injectWorkflowSignalOrUpdate jobs) *> wf activations
+            jobs' -> lift (traverse injectWorkflowSignalOrUpdate jobs') *> wf activations
     )
       <$> fAwait
   where
-    jobGroups =
+    getJobGroups =
       V.foldr
         ( \job jobGroups -> case job ^. Activation.maybe'variant of
             Just (WorkflowActivationJob'NotifyHasPatch n) -> jobGroups {patchNotifications = applyNotifyHasPatch n *> jobGroups.patchNotifications}

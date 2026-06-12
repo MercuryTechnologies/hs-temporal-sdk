@@ -81,6 +81,8 @@ ghc-options:
 - -fdefer-diagnostics
 # - -fprint-explicit-kinds
 - -Wno-redundant-constraints
+- -Wno-missing-role-annotations
+- -Wno-missing-poly-kind-signatures
 # - -Werror
 library:
   source-dirs: src
