@@ -203,7 +203,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
               searchAttrs <- liftIO $ do
                 decodedAttrs <- initializeWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
                 either (throwIO . ValueError) pure decodedAttrs
-              hdrs <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
+              hdrs <- processorTryDecodePayloads worker.processor (initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
               memo <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
               pure (searchAttrs, hdrs, memo)
             case ePayloads of

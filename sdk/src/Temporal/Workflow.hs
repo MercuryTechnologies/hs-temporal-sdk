@@ -415,7 +415,6 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
 
     i <- readIORef inst.workflowInstanceInfo
-    hdrs <- processorEncodePayloads inst.payloadProcessor activityInput.options.headers
     args <- processorEncodePayloads inst.payloadProcessor activityInput.args
     let actId = maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
         scheduleActivity =
@@ -424,7 +423,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
             & Command.activityId .~ actId
             & Command.activityType .~ activityInput.activityType
             & Command.taskQueue .~ rawTaskQueue (fromMaybe i.taskQueue activityInput.options.taskQueue)
-            & Command.headers .~ fmap convertToProtoPayload hdrs
+            & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
             & Command.vec'arguments .~ fmap convertToProtoPayload args
             & Command.maybe'retryPolicy .~ fmap retryPolicyToProto activityInput.options.retryPolicy
             & Command.cancellationType .~ activityCancellationTypeToProto activityInput.options.cancellationType
@@ -696,7 +695,6 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
       wfHandle <- liftIO $ inst.outboundInterceptor.startChildWorkflowExecution (knownWorkflowName k) opts $ \wfName opts' -> runInIO $ do
         args <- processorEncodePayloads inst.payloadProcessor typedPayloads
         let convertedPayloads = fmap convertToProtoPayload args
-        hdrs <- processorEncodePayloads inst.payloadProcessor opts'.headers
         memo <- processorEncodePayloads inst.payloadProcessor opts'.initialMemo
 
         s@(Sequence wfSeq) <- nextChildWorkflowSequence
@@ -720,7 +718,7 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
                 & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts'.workflowIdReusePolicy
                 & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts'.retryPolicy
                 & Command.cronSchedule .~ fromMaybe "" opts'.cronSchedule
-                & Command.headers .~ fmap convertToProtoPayload hdrs
+                & Command.headers .~ fmap convertToProtoPayload opts'.headers
                 & Command.memo .~ fmap convertToProtoPayload memo
                 & Command.searchAttributes .~ searchAttrs
                 & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts'.cancellationType

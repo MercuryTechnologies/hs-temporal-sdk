@@ -98,7 +98,7 @@ execute worker = runActivityWorker worker go
 activityInfoFromProto :: MonadIO m => TaskToken -> TaskQueue -> AT.Start -> ActivityWorkerM actEnv m ActivityInfo
 activityInfoFromProto tt tq msg = do
   w <- ask
-  hdrs <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.headerFields))
+  hdrs <- processorTryDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.headerFields))
   heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'heartbeatDetails))
   heartbeatsRef <- newIORef heartbeats
   pure $
