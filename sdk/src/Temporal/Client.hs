@@ -384,7 +384,6 @@ signal
   -> (SignalArgs sig :->: m ())
 signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) opts = withArgs @(SignalArgs sig) @(m ()) sCodec $ \inputs -> liftIO $ do
   inputs' <- processorEncodePayloads c.clientConfig.payloadProcessor =<< liftIO (sequence inputs)
-  hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts.headers
   result <-
     signalWorkflowExecution c.clientCore $
       defMessage
@@ -401,7 +400,7 @@ signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) 
         -- Deprecated, no need to set
         -- & WF.control .~ _
         -- TODO put other useful headers in here
-        & WF.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+        & WF.header .~ headerToProto (fmap convertToProtoPayload opts.headers)
   -- FIXME: Can we just ignore this now that it's no longer present?
   -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
   case result of
@@ -460,7 +459,6 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
           }
   eRes <- h.workflowHandleClient.clientConfig.interceptors.queryWorkflow baseInput $ \input -> do
     queryArgs <- processorEncodePayloads processor input.queryWorkflowArgs
-    headerPayloads <- processorEncodePayloads processor input.queryWorkflowHeaders
     let msg :: QueryWorkflowRequest
         msg =
           defMessage
@@ -475,7 +473,7 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
                     & Query.queryType .~ input.queryWorkflowType
                     & Query.queryArgs
                       .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload queryArgs)
-                    & Query.header .~ headerToProto (fmap convertToProtoPayload headerPayloads)
+                    & Query.header .~ headerToProto (fmap convertToProtoPayload input.queryWorkflowHeaders)
                  )
             & WF.queryRejectCondition .~ case opts.queryRejectCondition of
               QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
@@ -579,7 +577,6 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
     reqId <- UUID.nextRandom
     searchAttrs <- searchAttributesToProto opts'.searchAttributes
     payloads'' <- processorEncodePayloads c.clientConfig.payloadProcessor payloads'
-    hdrs <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.headers
     memo' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.memo
     let tq = rawTaskQueue opts'.taskQueue
         req =
@@ -611,7 +608,7 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
             & WF.memo .~ convertToProtoMemo memo'
             & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
             --     TODO Not sure how to use these yet
-            & WF.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+            & WF.header .~ headerToProto (fmap convertToProtoPayload opts'.headers)
             & WF.requestEagerExecution .~ opts'.requestEagerExecution
             {-
               These values will be available as ContinuedFailure and LastCompletionResult in the
@@ -693,7 +690,6 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
     searchAttrs <- searchAttributesToProto opts'.signalWithStartOptions.searchAttributes
     sigPayloads'' <- processorEncodePayloads processor opts'.signalWithStartSignalArgs
     wfPayloads'' <- processorEncodePayloads processor opts'.signalWithStartArgs
-    hdrs <- processorEncodePayloads processor opts'.signalWithStartOptions.headers
     memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
     let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
         msg =
@@ -729,7 +725,7 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
             & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy)
             & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
             & RR.memo .~ convertToProtoMemo memo'
-            & RR.header .~ headerToProto (fmap convertToProtoPayload hdrs)
+            & RR.header .~ headerToProto (fmap convertToProtoPayload opts'.signalWithStartOptions.headers)
     -- & RR.workflowStartDelay .~ _
     -- & RR.skipGenerateWorkflowTask .~ _
     res <-
@@ -1078,7 +1074,6 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
           }
   updateHandle <- liftIO $ h.workflowHandleClient.clientConfig.interceptors.updateWorkflow baseInput $ \input -> do
     updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
-    headerPayloads <- processorEncodePayloads processor input.updateWorkflowHeaders
     let msg :: UpdateWorkflowExecutionRequest
         msg =
           defMessage
@@ -1102,7 +1097,7 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
                          )
                     & Update.input
                       .~ ( defMessage
-                            & Update.header .~ headerToProto (fmap convertToProtoPayload headerPayloads)
+                            & Update.header .~ headerToProto (fmap convertToProtoPayload input.updateWorkflowHeaders)
                             & Update.name .~ input.updateWorkflowType
                             & Update.args .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload updateArgs)
                          )

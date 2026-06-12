@@ -58,6 +58,7 @@ module Temporal.Payload (
   UnencodedPayload,
   processorEncodePayloads,
   processorDecodePayloads,
+  processorTryDecodePayloads,
   AllArgs,
   GatherArgs,
   GatherArgsOf,
@@ -456,6 +457,22 @@ processorEncodePayloads processor = liftIO . mapM (payloadProcessorEncode proces
 processorDecodePayloads :: (MonadIO m, Traversable f) => PayloadProcessor -> f Payload -> m (f Payload)
 processorDecodePayloads processor = liftIO . mapM (payloadProcessorDecode processor >=> either (throwIO . ValueError) pure)
 {-# INLINE processorDecodePayloads #-}
+
+
+{- | Best-effort header decoding for backwards compatibility.
+
+@DEPRECATED@ - This is a temporary fix for an oversight in the SDK where
+headers were not consistently handled without payload processing codecs. Once
+we've run this for awhile, we can remove this function and have callsites
+convert headers directly rom protobuf payloads as-intended.
+-}
+processorTryDecodePayloads :: (MonadIO m, Traversable f) => PayloadProcessor -> f Payload -> m (f Payload)
+processorTryDecodePayloads processor = liftIO . traverse tryDecode
+  where
+    tryDecode p = do
+      result <- payloadProcessorDecode processor p
+      pure $ either (\_ -> p) id result
+{-# INLINE processorTryDecodePayloads #-}
 
 
 gatherArgs :: forall args codec. (VarArgs args, AllArgs (Codec codec) args) => codec -> args :->: V.Vector UnencodedPayload

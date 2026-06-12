@@ -387,11 +387,12 @@ setUpWorkflowExecution initializeWorkflow = do
   writeIORef inst.workflowTime (initializeWorkflow ^. Activation.startTime . to timespecFromTimestamp)
   info <- readIORef inst.workflowInstanceInfo
 
+  hdrs <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers))
   pure $
     ExecuteWorkflowInput
       { executeWorkflowInputType = WorkflowType (initializeWorkflow ^. Activation.workflowType)
       , executeWorkflowInputArgs = fmap convertFromProtoPayload (initializeWorkflow ^. Command.vec'arguments)
-      , executeWorkflowInputHeaders = fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers)
+      , executeWorkflowInputHeaders = hdrs
       , executeWorkflowInputInfo = info
       }
 
@@ -442,12 +443,13 @@ applyQueryWorkflow queryWorkflow = do
   Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let processor = inst.payloadProcessor
   args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
+  hdrs <- processorTryDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers))
   let baseInput =
         HandleQueryInput
           { handleQueryId = QueryId (queryWorkflow ^. Activation.queryId)
           , handleQueryInputType = queryWorkflow ^. Activation.queryType
           , handleQueryInputArgs = args
-          , handleQueryInputHeaders = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
+          , handleQueryInputHeaders = hdrs
           , handleQueryWorkflowInfo = instInfo
           }
       lookupHandler input =
@@ -541,9 +543,9 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
         pure (pure False, error "This should never happen")
       Just WorkflowUpdateImplementation {..} -> do
         updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
+        updateHeaders <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.headers))
         let runValidator = doUpdate ^. Activation.runValidator
             updateId = UpdateId $ doUpdate ^. Activation.id
-            updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
         case updateArgs of
           Left err ->
             pure
@@ -916,7 +918,6 @@ convertExitVariantToCommand variant = do
                 else continueAsNewOptions.searchAttributes
             )
       args <- processorEncodePayloads processor continueAsNewArguments
-      hdrs <- processorEncodePayloads processor continueAsNewOptions.headers
       memo <- processorEncodePayloads processor continueAsNewOptions.memo
       pure $
         defMessage
@@ -927,7 +928,7 @@ convertExitVariantToCommand variant = do
                   & Command.vec'arguments .~ fmap convertToProtoPayload args
                   & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> continueAsNewOptions.retryPolicy)
                   & Command.searchAttributes .~ searchAttrs
-                  & Command.headers .~ fmap convertToProtoPayload hdrs
+                  & Command.headers .~ fmap convertToProtoPayload continueAsNewOptions.headers
                   & Command.memo .~ fmap convertToProtoPayload memo
                   & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> continueAsNewOptions.taskTimeout)
                   & Command.maybe'workflowRunTimeout .~ (durationToProto <$> continueAsNewOptions.runTimeout)
