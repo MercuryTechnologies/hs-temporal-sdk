@@ -7,7 +7,6 @@ import Data.ProtoLens (Message (defMessage))
 import Proto.Temporal.Api.Testservice.V1.RequestResponse
 import Proto.Temporal.Api.Testservice.V1.Service
 import Temporal.Core.Client
-import Temporal.Internal.FFI
 
 
 foreign import ccall "hs_get_current_time" hs_get_current_time :: PrimRpcCall

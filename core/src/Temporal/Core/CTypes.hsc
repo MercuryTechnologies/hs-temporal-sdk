@@ -268,7 +268,7 @@ instance Storable WorkerErrorCode where
     PollFailure -> poke ptr #{const PollFailure}
     CompletionFailure -> poke ptr #{const CompletionFailure}
     InvalidWorkerConfig -> poke ptr #{const InvalidWorkerConfig}
-    (UnknownError code) -> poke ptr code
+    (UnknownError errCode) -> poke ptr errCode
     where
       ptr = (castPtr ptr_ :: Ptr #{type WorkerErrorCode})
 
