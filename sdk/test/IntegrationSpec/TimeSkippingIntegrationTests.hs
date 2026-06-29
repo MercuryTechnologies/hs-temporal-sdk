@@ -15,7 +15,7 @@
 
 {-# HLINT ignore "Redundant bracket" #-}
 
-module IntegrationSpec where
+module IntegrationSpec.TimeSkippingIntegrationTests (spec) where
 
 import Common
 import Control.Concurrent
@@ -48,26 +48,13 @@ import qualified Data.Vector as V
 import DiscoverInstances (discoverInstances)
 import GHC.Generics
 import GHC.Stack (SrcLoc (..), callStack, fromCallSiteList)
-import qualified IntegrationSpec.ActivityLifecycle as ActivityLifecycle
-import qualified IntegrationSpec.ClientOperations as ClientOperations
-import qualified IntegrationSpec.ErrorHandling as ErrorHandling
-import qualified IntegrationSpec.ExceptionConversionTests as ExceptionConversionTests
 import IntegrationSpec.HangingWorkflow
-import qualified IntegrationSpec.HangingWorkflowTests as HangingWorkflowTests
 import IntegrationSpec.NoOpWorkflow
-import qualified IntegrationSpec.RegressionTests as RegressionTests
-import qualified IntegrationSpec.RetryPolicyTests as RetryPolicyTests
 import IntegrationSpec.Signals
-import qualified IntegrationSpec.TerminateTests as TerminateTests
 import IntegrationSpec.TimeSkipping
-import qualified IntegrationSpec.TimeSkippingIntegrationTests as TimeSkippingIntegrationTests
-import qualified IntegrationSpec.TimeSkippingWorkflowTests as TimeSkippingWorkflowTests
 import IntegrationSpec.TimeoutsInWorkflows
-import qualified IntegrationSpec.UpdateInterceptorTests as UpdateInterceptorTests
 import IntegrationSpec.Updates
 import IntegrationSpec.Utils
-import qualified IntegrationSpec.WorkerManagement as WorkerManagement
-import qualified IntegrationSpec.WorkflowExecution as WorkflowExecution
 import Lens.Family2
 import OpenTelemetry.Trace
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
@@ -106,31 +93,24 @@ import Test.Hspec
 import TestHelpers (waitForWorkflowStart)
 
 
-spec :: Spec
+spec :: SpecWith TestEnv
 spec = do
-  ErrorHandling.spec
-
-  aroundAll withServer $ do
-    aroundAllWith (flip $ setup mempty) needsClient
-    aroundAllWith (flip $ setup mempty) TerminateTests.spec
-    UpdateInterceptorTests.spec
-
-  around withTimeSkippingServer $ do
-    aroundWith (flip $ setupTimeSkipping mempty) needsTimeSkipping
-
-
-needsClient :: SpecWith TestEnv
-needsClient = do
-  WorkflowExecution.spec
-  ActivityLifecycle.spec
-  WorkerManagement.spec
-  ClientOperations.spec
-  RegressionTests.spec
-  RetryPolicyTests.spec
-  ExceptionConversionTests.spec
-  HangingWorkflowTests.spec
-  TimeSkippingIntegrationTests.spec
-
-
-needsTimeSkipping :: SpecWith TestEnv
-needsTimeSkipping = TimeSkippingWorkflowTests.spec
+  describe "Time Skipping" do
+    it "fails if not connected to the time-skipping server" $ \TestEnv {..} -> do
+      let conf = provideCallStack $ configure () (discoverDefinitions @() $$(discoverInstances) $$(discoverInstances)) $ do
+            baseConf
+      withWorker conf $ do
+        let opts =
+              (C.startWorkflowOptions taskQueue)
+                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
+                , C.timeouts =
+                    C.TimeoutOptions
+                      { C.runTimeout = Just $ seconds 15
+                      , C.executionTimeout = Nothing
+                      , C.taskTimeout = Nothing
+                      }
+                }
+        h <- useClient (C.start VariableSleepWorkflow "variable-sleep-workflow" opts 10)
+        (Temporal.Client.TestService.unlockTimeSkippingWithSleep (C.clientCore (C.workflowHandleClient h)) (seconds 10))
+          `shouldThrow` \case
+            Temporal.Client.TestService.TimeSkippingNotSupported -> True

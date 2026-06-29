@@ -90,7 +90,6 @@ library:
   - Temporal.Activity.Definition
   - Temporal.Activity.Worker
   - Temporal.Client.Types
-  - Temporal.Client.AsyncActivity
   - Temporal.Client.Workflow
   - Temporal.Common
   - Temporal.Common.Async
@@ -170,4 +169,18 @@ tests:
       TestHelpers,
       THCompiles,
       WorkerTunerSpec,
-      VisibilityQuerySpec
+      VisibilityQuerySpec,
+      IntegrationSpec.Utils,
+      IntegrationSpec.WorkflowExecution,
+      IntegrationSpec.ActivityLifecycle,
+      IntegrationSpec.WorkerManagement,
+      IntegrationSpec.ClientOperations,
+      IntegrationSpec.RegressionTests,
+      IntegrationSpec.RetryPolicyTests,
+      IntegrationSpec.ExceptionConversionTests,
+      IntegrationSpec.HangingWorkflowTests,
+      IntegrationSpec.TimeSkippingIntegrationTests,
+      IntegrationSpec.TimeSkippingWorkflowTests,
+      IntegrationSpec.TerminateTests,
+      IntegrationSpec.UpdateInterceptorTests,
+      IntegrationSpec.ErrorHandling
