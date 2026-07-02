@@ -18,9 +18,13 @@ inadvisable use.
 -}
 module Temporal.Workflow.Unsafe (
   performUnsafeNonDeterministicIO,
+  unsafeReadWorkflowVault,
+  unsafeIsReplaying,
 ) where
 
 import Control.Monad.IO.Class
+import Data.IORef (readIORef)
+import Data.Vault.Strict (Vault)
 import Temporal.Workflow
 import Temporal.Workflow.Internal.Monad
 
@@ -57,3 +61,28 @@ Temporal SDK:
 performUnsafeNonDeterministicIO :: IO a -> Workflow a
 performUnsafeNonDeterministicIO m = Workflow (\_ -> Done <$> liftIO m)
 {-# INLINE performUnsafeNonDeterministicIO #-}
+
+
+{- | Read the worker 'Vault' associated with the currently executing workflow.
+
+This is \"unsafe\" only in the sense that the presence of a given key is a
+property of how the worker was configured, not something the type system
+guarantees; reading the vault itself is deterministic and replay-safe.
+-}
+unsafeReadWorkflowVault :: Workflow Vault
+unsafeReadWorkflowVault = do
+  inst <- askInstance
+  pure inst.workflowVault
+
+
+{- | Whether the workflow is currently replaying recorded history rather than
+executing for the first time.
+
+This is intended for gating side effects that must not be repeated on every
+replay; it is unsafe only inasmuch as it provides a side-channel for workflow
+state that could be used to introduce non-determinism.
+-}
+unsafeIsReplaying :: Workflow Bool
+unsafeIsReplaying = do
+  inst <- askInstance
+  performUnsafeNonDeterministicIO (readIORef inst.workflowIsReplaying)
