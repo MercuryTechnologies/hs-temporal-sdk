@@ -6,6 +6,7 @@ module Temporal.Workflow.Internal.Monad where
 import Control.Applicative
 import Control.Concurrent.Async
 import Control.Monad
+import Control.Exception.Base (NoMatchingContinuationPrompt (..))
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -24,6 +25,7 @@ import Data.Vector (Vector)
 import Data.Word (Word32, Word64)
 import GHC.Stack
 import GHC.TypeLits
+import OpenTelemetry.Context (Context)
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
 import Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands (WorkflowCommand)
 import RequireCallStack
@@ -46,7 +48,7 @@ import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Types
-import Text.Printf
+import Temporal.Workflow.Internal.DelimCC
 import UnliftIO
 
 
@@ -77,15 +79,15 @@ A critical aspect of developing Workflow Definitions is ensuring they exhibit ce
 that is, making sure that the same Commands are emitted in the same sequence,
 whenever a corresponding Workflow Function Execution (instance of the Function Definition) is re-executed.
 -}
-newtype Workflow a = Workflow {unWorkflow :: ContinuationEnv -> InstanceM (Result a)}
+newtype Workflow a = Workflow {unWorkflow :: FiberEnv -> InstanceM a}
 
 
 ilift :: RequireCallStack => InstanceM a -> Workflow a
-ilift m = Workflow $ \_ -> Done <$> m
+ilift m = Workflow $ const m
 
 
 askInstance :: Workflow WorkflowInstance
-askInstance = Workflow $ \_ -> asks Done
+askInstance = Workflow $ const ask
 
 
 addCommand :: WorkflowCommand -> InstanceM ()
@@ -113,72 +115,132 @@ data ContinuationEnv = ContinuationEnv
   }
 
 
+{- | Per-fiber execution context threaded through every 'Workflow' action.
+
+'fiberContEnv' is the per-instance scheduling state shared by all fibers.
+'fiberLocals' is shared between a fiber and any sub-fibers it runs inline
+('parallelAp', 'Temporal.Workflow.biselectOpt').
+'fiberSuspend' blocks the current fiber on an 'IVar' by capturing its
+continuation up to the delimiter installed by 'runFiber'; sub-fibers get
+their own delimiter and therefore their own suspend function.
+-}
+data FiberEnv = FiberEnv
+  { fiberContEnv :: {-# UNPACK #-} !ContinuationEnv
+  , fiberLocals :: !FiberLocals
+  , fiberSuspend :: forall v. IVar v -> IO (ResultVal v)
+  }
+
+
+{- | Mutable state owned by one logical fiber (the main workflow, an injected
+signal\/update handler job, or an internal job created by the concurrency
+combinators).
+
+The OpenTelemetry 'Context' slot gives each fiber its own view of the
+thread-local context: the scheduler attaches it before every step and
+snapshots it back at every suspension, so spans created while one fiber is
+running never leak onto interleaved fibers or across activations.
+'Nothing' means the fiber has not run yet and inherits the ambient context
+of its first step.
+
+'fiberIsDetachedHandler' marks fibers whose result IVar has no dependents
+(injected signal\/update handler jobs): nothing ever reads their outcome, so
+the scheduler logs their failures instead of letting them vanish silently.
+-}
+data FiberLocals = FiberLocals
+  { fiberOtelContext :: {-# UNPACK #-} !(IORef (Maybe Context))
+  , fiberIsDetachedHandler :: !Bool
+  }
+
+
+-- | Fiber-local state for a fiber whose result is consumed by another fiber
+-- (or by 'Temporal.Workflow.Eval.runWorkflow' itself).
+newFiberLocals :: MonadIO m => m FiberLocals
+newFiberLocals = do
+  ctx <- newIORef Nothing
+  pure FiberLocals {fiberOtelContext = ctx, fiberIsDetachedHandler = False}
+
+
+-- | Fiber-local state for a detached handler fiber (injected signal\/update
+-- jobs): failures are logged by the scheduler since nothing awaits them.
+newDetachedHandlerFiberLocals :: MonadIO m => m FiberLocals
+newDetachedHandlerFiberLocals = do
+  ctx <- newIORef Nothing
+  pure FiberLocals {fiberOtelContext = ctx, fiberIsDetachedHandler = True}
+
+
+{- | A workflow-level exception (raised by 'throw' or delivered through an
+'IVar' as 'ThrowWorkflow'), as distinguished from exceptions thrown by the
+SDK machinery itself. Only workflow-level exceptions are catchable by
+'Temporal.Workflow.Internal.Monad.catch'.
+-}
+newtype WorkflowThrown = WorkflowThrown SomeException
+
+
+instance Show WorkflowThrown where
+  show (WorkflowThrown e) = "WorkflowThrown (" <> show e <> ")"
+
+
+instance Exception WorkflowThrown
+
+
+throwWorkflow :: MonadIO m => SomeException -> m a
+throwWorkflow = liftIO . throwIO . WorkflowThrown
+
+
+-- | Deliver the contents of a filled 'IVar' into the current fiber.
+deliverResultVal :: MonadIO m => ResultVal a -> m a
+deliverResultVal (Ok a) = pure a
+deliverResultVal (ThrowWorkflow e) = throwWorkflow e
+deliverResultVal (ThrowInternal e) = liftIO $ throwIO e
+
+
 instance Functor Workflow where
-  fmap f (Workflow m) = Workflow $ \env -> do
-    r <- m env
-    case r of
-      Done a -> return (Done (f a))
-      Throw e -> return (Throw e)
-      Blocked ivar cont ->
-        trace_ "fmap Blocked" $
-          return (Blocked ivar (f :<$> cont))
+  fmap f (Workflow m) = Workflow (fmap f . m)
 
 
 instance Applicative Workflow where
-  pure a = Workflow $ \_env -> return (Done a)
+  pure a = Workflow $ \_env -> pure a
 
 
-  -- TODO: Don't use parallelAp here, because people get too
-  -- confused about what's going on.
+  -- NB: deliberately the sequential version, because people get too
+  -- confused about what's going on with the parallel one. Use
+  -- 'ConcurrentWorkflow' to opt in to 'parallelAp'.
   ff <*> aa = ff >>= \f -> aa >>= \a -> pure (f a)
 
+{- | Explore both sides of an applicative composition concurrently.
 
--- (<*>) = parallelAp
-
+Each side runs as a sub-fiber (its own delimited continuation). If a side
+suspends on an 'IVar', the other side still gets to run; when both suspend,
+the function side is parked as an independent job in the scheduler (Note
+[Blocked/Blocked]) and the argument side is adopted by the parent fiber.
+-}
 parallelAp :: Workflow (a -> b) -> Workflow a -> Workflow b
-parallelAp (Workflow ff) (Workflow aa) = Workflow $ \env -> do
-  rf <- ff env
-  case rf of
-    Done f -> do
-      ra <- aa env
-      case ra of
-        Done a -> trace_ "Done/Done" $ return (Done (f a))
-        Throw e -> trace_ "Done/Throw" $ return (Throw e)
-        Blocked ivar fcont ->
-          trace_ "Done/Blocked" $
-            return (Blocked ivar (f :<$> fcont))
-    Throw e -> trace_ "Throw" $ return (Throw e)
-    Blocked ivar1 fcont -> do
-      ra <- aa env
-      case ra of
-        Done a ->
-          trace_ "Blocked/Done" $
-            return (Blocked ivar1 (($ a) :<$> fcont))
-        Throw e ->
-          trace_ "Blocked/Throw" $
-            return (Blocked ivar1 (fcont :>>= (\_ -> throw e)))
-        -- Note [Blocked/Blocked]
-        Blocked ivar2 acont ->
-          trace_ "Blocked/Blocked" $
-            blockedBlocked env ivar1 fcont ivar2 acont
-
-
-blockedBlocked
-  :: ContinuationEnv
-  -> IVar c
-  -> Cont (a -> b)
-  -> IVar d
-  -> Cont a
-  -> InstanceM (Result b)
-blockedBlocked _ _ (Return i) ivar2 acont =
-  return (Blocked ivar2 (acont :>>= getIVarApply i))
-blockedBlocked _ _ (g :<$> Return i) ivar2 acont =
-  return (Blocked ivar2 (acont :>>= \a -> (`g` a) <$> getIVar i))
-blockedBlocked env ivar1 fcont ivar2 acont = do
-  i <- newIVar
-  addJob env (toWf fcont) i ivar1
-  let cont = acont :>>= \a -> getIVarApply i a
-  return (Blocked ivar2 cont)
+parallelAp ff aa = Workflow $ \env -> do
+  sf <- runSubFiber env ff
+  case sf of
+    SubDone f -> do
+      sa <- runSubFiber env aa
+      case sa of
+        SubDone a -> pure (f a)
+        SubThrown e -> throwWorkflow e
+        SubBlocked ivar k -> f <$> driveSubFiber env ivar k
+    SubThrown e -> throwWorkflow e
+    SubBlocked ivar1 kf -> do
+      sa <- runSubFiber env aa
+      case sa of
+        SubDone a -> ($ a) <$> driveSubFiber env ivar1 kf
+        SubThrown e -> do
+          -- Match the historical semantics: let the blocked function side
+          -- run to completion before rethrowing the argument side's error.
+          _ <- driveSubFiber env ivar1 kf
+          throwWorkflow e
+        SubBlocked ivar2 ka -> do
+          -- Note [Blocked/Blocked]
+          i <- newIVar
+          parkTask (fiberContEnv env) (fiberLocals env) (ResumeTask ivar1 kf) i ivar1
+          a <- driveSubFiber env ivar2 ka
+          f <- unWorkflow (getIVar i) env
+          pure (f a)
 
 
 -- Note [Blocked/Blocked]
@@ -195,23 +257,16 @@ blockedBlocked env ivar1 fcont ivar2 acont = do
 --
 --   (ff >>= putIVar i) <*> (a <- aa; f <- getIVar i; return (f a)
 --
--- where the IVar i is a new synchronisation point.  If the right side
--- gets to the `getIVar` first, it will block until the left side has
--- called 'putIVar'.
---
--- We can also do it the other way around:
---
---   (do ff <- f; getIVar i; return (ff a)) <*> (a >>= putIVar i)
+-- where the IVar i is a new synchronisation point.  The suspended
+-- function side is parked on the IVar it blocked on; when that fills,
+-- the scheduler resumes it and its result lands in 'i'.  The parent
+-- fiber adopts the argument side and finally reads 'i', blocking until
+-- the function side has caught up.
 
 instance Monad Workflow where
   Workflow m >>= k = Workflow $ \env -> do
-    e <- m env
-    case e of
-      Done a -> unWorkflow (k a) env
-      Throw e' -> return (Throw e')
-      Blocked ivar cont ->
-        trace_ ">>= Blocked" $
-          return (Blocked ivar (cont :>>= k))
+    a <- m env
+    unWorkflow (k a) env
 
 
 -- A note on (>>):
@@ -238,7 +293,7 @@ instance TypeError ('Text "A workflow definition cannot directly perform IO. Use
 instance {-# OVERLAPPABLE #-} MonadLogger Workflow where
   monadLoggerLog loc src lvl msg = Workflow $ \_ -> do
     logger <- asks workflowInstanceLogger
-    fmap Done $ liftIO $ logger loc src lvl (toLogStr msg)
+    liftIO $ logger loc src lvl (toLogStr msg)
 
 
 instance Semigroup a => Semigroup (Workflow a) where
@@ -254,30 +309,27 @@ instance Monoid a => Monoid (Workflow a) where
 
 -- | Throw an exception in the Workflow monad
 throw :: (HasCallStack, Exception e) => e -> Workflow a
-throw e = Workflow $ \env -> liftIO $ raise env e
+throw e = Workflow $ \_ -> throwWorkflow (toException e)
 
 
-{-# INLINE raiseImpl #-}
-raiseImpl :: ContinuationEnv -> SomeException -> IO (Result b)
-raiseImpl _ e = return $ Throw e
+{- | Catch an exception in the Workflow monad.
 
-
-raise :: Exception e => ContinuationEnv -> e -> IO (Result a)
-raise env e = raiseImpl env (toException e)
-
-
--- | Catch an exception in the Workflow monad
+Catches workflow-level exceptions ('throw', failed activities, etc.) as
+well as synchronous exceptions of a matching type thrown by SDK-internal
+code. Because the handler frames live on the fiber's captured continuation,
+a 'catch' remains armed across suspension points: blocking in the middle of
+the protected region and resuming on a later activation preserves it.
+-}
 catch :: Exception e => Workflow a -> (e -> Workflow a) -> Workflow a
-catch (Workflow m) h = Workflow $ \env -> do
-  r <- UnliftIO.try $ m env
-  case r of
-    Left e -> unWorkflow (h e) env
-    Right r' -> case r' of
-      Done a -> pure $ Done a
-      Throw e
-        | Just e' <- fromException e -> unWorkflow (h e') env
-        | otherwise -> liftIO $ raise env e
-      Blocked ivar k -> return $ Blocked ivar $ Cont $ Temporal.Workflow.Internal.Monad.catch (toWf k) h
+catch (Workflow m) h = Workflow $ \env ->
+  m env `UnliftIO.catch` \(se :: SomeException) ->
+    case fromException se of
+      Just (WorkflowThrown inner)
+        | Just e <- fromException inner -> unWorkflow (h e) env
+        | otherwise -> throwIO se
+      Nothing
+        | Just e <- fromException se -> unWorkflow (h e) env
+        | otherwise -> throwIO se
 
 
 -- | Catch exceptions that satisfy a predicate
@@ -327,12 +379,12 @@ applyWorkflowGen :: (StdGen -> (a, StdGen)) -> WorkflowGenM -> Workflow a
 applyWorkflowGen f (WorkflowGenM ref) = Workflow $ \_ -> do
   g <- readIORef ref
   case f g of
-    (!a, !g') -> Done a <$ writeIORef ref g'
+    (!a, !g') -> a <$ writeIORef ref g'
 {-# INLINE applyWorkflowGen #-}
 
 
 newWorkflowGenM :: StdGen -> Workflow WorkflowGenM
-newWorkflowGenM g = Workflow $ \_ -> Done . WorkflowGenM <$> newIORef g
+newWorkflowGenM g = Workflow $ \_ -> WorkflowGenM <$> newIORef g
 {-# INLINE newWorkflowGenM #-}
 
 
@@ -342,7 +394,7 @@ instance RandomGenM WorkflowGenM StdGen Workflow where
 
 instance FrozenGen StdGen Workflow where
   type MutableGen StdGen Workflow = WorkflowGenM
-  freezeGen g = Workflow $ \_ -> Done <$> readIORef (unWorkflowGenM g)
+  freezeGen g = Workflow $ \_ -> readIORef (unWorkflowGenM g)
 
 #if MIN_VERSION_random(1,3,0)
 instance ThawedGen StdGen Workflow where
@@ -350,12 +402,18 @@ instance ThawedGen StdGen Workflow where
   thawGen = newWorkflowGenM
 
 
-{-# INLINE addJob #-}
-addJob :: ContinuationEnv -> Workflow b -> IVar b -> IVar a -> InstanceM ()
-addJob env !wf !resultIVar IVar {ivarRef = ref} =
+{-# INLINE parkTask #-}
+
+
+{- | Park a task on the IVar it is waiting for; when the IVar is filled,
+'putIVar' moves it onto the run queue. If the IVar is already full, the task
+goes straight onto the front of the run queue.
+-}
+parkTask :: ContinuationEnv -> FiberLocals -> FiberTask b -> IVar b -> IVar a -> InstanceM ()
+parkTask env locals !task !resultIVar IVar {ivarRef = ref} =
   join $ liftIO $ atomicModifyIORefCAS ref $ \case
-    IVarEmpty list -> (IVarEmpty (JobCons env wf resultIVar list), pure ())
-    full -> (full, modifyIORef' env.runQueueRef (JobCons env wf resultIVar))
+    IVarEmpty list -> (IVarEmpty (JobCons env locals task resultIVar list), pure ())
+    full -> (full, modifyIORef' env.runQueueRef (JobCons env locals task resultIVar))
 
 
 {- | Yield control back to the workflow scheduler, re-queueing the current
@@ -368,83 +426,61 @@ round-trip to the server and is invisible to replay.
 -}
 yield :: Workflow ()
 yield = Workflow $ \env -> do
-  -- NOTE: We return `Blocked gate` on a fresh, empty `IVar` so the scheduler
-  -- parks the current continuation in gate's waiting list, and we append a
+  -- NOTE: We suspend the current fiber on a fresh, empty `IVar` so the
+  -- scheduler parks its continuation in gate's waiting list, and we append a
   -- trivial "filler" job, targeting gate, to the back of the run queue.
   --
   -- Once the scheduler drains everything ahead of it, the filler runs, fills
   -- gate, and the parked continuation is re-queued and resumed.
-  -- 
+  --
   -- Keeping a job on the run queue for the duration of the yield is what prevents
   -- the scheduler from flushing commands and suspending.
-  -- 
+  --
   -- The gate is intentionally untracked so this momentary block does not show
   -- up in __stack_trace queries.
   gate <- newIVar
-  let filler = Workflow $ \_ -> pure (Done ())
-  liftIO $ modifyIORef' env.runQueueRef $ \j ->
-    appendJobList j (JobCons env filler gate JobNil)
-  pure (Blocked gate (Return gate))
+  let cenv = fiberContEnv env
+  liftIO $ modifyIORef' cenv.runQueueRef $ \j ->
+    appendJobList j (JobCons cenv (fiberLocals env) (FreshTask (pure ())) gate JobNil)
+  _ <- liftIO $ fiberSuspend env gate
+  pure ()
 
 
 -- -----------------------------------------------------------------------------
--- Cont
+-- Fibers
 
-{- | A data representation of a Workflow continuation.  This is to avoid
-repeatedly traversing a left-biased tree in a continuation, leading
-O(n^2) complexity for some pathalogical cases.
+{- | The status of a fiber after running it as far as it can go: either it
+produced a result, or it suspended waiting on an 'IVar'.
 
-See "A Smart View on Datatypes", Jaskelioff/Rivas, ICFP'15
+A suspended fiber is a first-class continuation captured with 'control0'
+(see 'suspendVia'); resuming it delivers the 'ResultVal' of the 'IVar' it
+was blocked on and runs the fiber to its next suspension point (or to
+completion). The continuation re-installs its own 'prompt', so a resumed
+fiber may suspend again. Each continuation must be resumed at most once.
 -}
-data Cont a
-  = Cont (Workflow a)
-  | forall b. Cont b :>>= (b -> Workflow a)
-  | forall b. (b -> a) :<$> (Cont b)
-  | Return (IVar a)
+data Status a
+  = SDone a
+  | forall v. SBlocked {-# UNPACK #-} !(IVar v) (ResultVal v -> IO (Status a))
 
 
-toWf :: Cont a -> Workflow a
-toWf (Cont wf) = wf
-toWf (m :>>= k) = toWfBind m k
-toWf (f :<$> x) = toWfFmap f x
-toWf (Return i) = getIVar i
-
-
-toWfBind :: Cont b -> (b -> Workflow a) -> Workflow a
-toWfBind (m :>>= k) k2 = toWfBind m (k >=> k2)
-toWfBind (Cont wf) k = wf >>= k
-toWfBind (f :<$> x) k = toWfBind x (k . f)
-toWfBind (Return i) k = getIVar i >>= k
-
-
-toWfFmap :: (a -> b) -> Cont a -> Workflow b
-toWfFmap f (m :>>= k) = toWfBind m (k >=> return . f)
-toWfFmap f (Cont wf) = f <$> wf
-toWfFmap f (g :<$> x) = toWfFmap (f . g) x
-toWfFmap f (Return i) = f <$> getIVar i
-
-
--- -----------------------------------------------------------------------------
--- Result
-
-{- | The result of a computation is either 'Done' with a value, 'Throw'
-with an exception, or 'Blocked' on the result of a data fetch with
-a continuation.
+{- | Like 'Status', but for sub-fibers run inside another fiber
+('parallelAp', 'Temporal.Workflow.biselectOpt'): workflow-level exceptions
+('WorkflowThrown') are reified so the caller can sequence other work before
+propagating them. Internal exceptions still propagate natively.
 -}
-data Result a
-  = Done a
-  | Throw SomeException
-  | -- | The 'IVar' is what we are blocked on; 'Cont' is the
-    -- continuation.  This might be wrapped further if we're
-    -- nested inside multiple '>>=', before finally being added
-    -- to the 'IVar'.
-    forall b.
-    Blocked
-      {-# UNPACK #-} !(IVar b)
-      (Cont a)
+data SubStatus a
+  = SubDone a
+  | SubThrown SomeException
+  | forall v. SubBlocked {-# UNPACK #-} !(IVar v) (ResultVal v -> IO (Status a))
 
 
-{- | A list of computations together with the IVar into which they
+-- | A schedulable unit of work: a fiber not yet started, or a suspended one.
+data FiberTask a
+  = FreshTask (Workflow a)
+  | forall v. ResumeTask {-# UNPACK #-} !(IVar v) (ResultVal v -> IO (Status a))
+
+
+{- | A list of fibers together with the IVar into which they
 should put their result.
 
 This could be an ordinary list, but the optimised representation
@@ -455,7 +491,8 @@ data JobList
   | forall a.
     JobCons
       ContinuationEnv
-      (Workflow a)
+      !FiberLocals
+      !(FiberTask a)
       {-# UNPACK #-} !(IVar a)
       JobList
 
@@ -463,18 +500,116 @@ data JobList
 appendJobList :: JobList -> JobList -> JobList
 appendJobList JobNil c = c
 appendJobList c JobNil = c
-appendJobList (JobCons a b c d) e = JobCons a b c $! appendJobList d e
+appendJobList (JobCons a b c d e) f = JobCons a b c d $! appendJobList e f
 
 
 lengthJobList :: JobList -> Int
 lengthJobList JobNil = 0
-lengthJobList (JobCons _ _ _ j) = 1 + lengthJobList j
+lengthJobList (JobCons _ _ _ _ j) = 1 + lengthJobList j
 
 
-instance (Show a) => Show (Result a) where
-  show (Done a) = printf "Done(%s)" $ show a
-  show (Throw e) = printf "Throw(%s)" $ show e
-  show Blocked {} = "Blocked"
+-- | Run a workflow from the start as a fiber, delimited by a fresh prompt.
+runFiber :: ContinuationEnv -> FiberLocals -> Workflow a -> InstanceM (Status a)
+runFiber cenv locals (Workflow f) = do
+  inst <- ask
+  liftIO $ do
+    tag <- newPromptTag
+    let env = FiberEnv cenv locals (suspendVia tag)
+    prompt tag (SDone <$> runReaderT (unInstanceM (f env)) inst)
+
+
+{- | Block the current fiber on an 'IVar': capture the continuation up to the
+fiber's delimiter and return it to whoever ran the fiber as an 'SBlocked'.
+The captured continuation is resumed with the contents of the 'IVar' once it
+has been filled.
+
+Two failure modes are turned into precise errors here:
+
+* Blocking outside a fiber (no delimiter on the stack) — e.g. running a
+  blocking 'Workflow' action from inside 'performUnsafeNonDeterministicIO',
+  from an interceptor's IO continuation on a foreign thread, or from an STM
+  transaction — raises 'NoMatchingContinuationPrompt', which we rethrow as a
+  'RuntimeError' explaining the misuse.
+* A captured continuation is strictly one-shot; resuming it twice would
+  silently reuse a stack segment. A guard turns any accidental double
+  resumption (a scheduler invariant violation) into a loud 'RuntimeError'.
+-}
+suspendVia :: PromptTag (Status a) -> IVar v -> IO (ResultVal v)
+suspendVia tag ivar = do
+  resumed <- newIORef False
+  control0
+    tag
+    ( \k -> pure $ SBlocked ivar $ \rv -> do
+        alreadyResumed <- atomicModifyIORefCAS resumed (\r -> (True, r))
+        when alreadyResumed $
+          throwIO $
+            RuntimeError "Internal invariant violation: a suspended workflow fiber was resumed more than once. Please report this as a bug in hs-temporal-sdk."
+        prompt tag (k (pure rv))
+    )
+    `UnliftIO.catch` \NoMatchingContinuationPrompt ->
+      throwIO $
+        RuntimeError "A blocking Workflow operation was used outside the workflow scheduler. This usually means a blocking action (executeActivity, sleep, getIVar, waitCondition, ...) was run from inside performUnsafeNonDeterministicIO, from an interceptor's IO continuation on another thread, or from within an STM transaction. Blocking Workflow operations may only run on the workflow's own fiber."
+
+
+{- | Run a schedulable task: start a fresh fiber, or resume a suspended one
+with the now-available contents of the IVar it was blocked on.
+-}
+runFiberTask :: ContinuationEnv -> FiberLocals -> FiberTask a -> InstanceM (Status a)
+runFiberTask cenv locals (FreshTask wf) = runFiber cenv locals wf
+runFiberTask _ _ (ResumeTask ivar k) = do
+  contents <- readIORef (ivarRef ivar)
+  case contents of
+    IVarFull rv -> liftIO $ k rv
+    -- Spurious wakeup (should not happen: tasks are only moved to the run
+    -- queue when their IVar is filled); simply park again.
+    IVarEmpty _ -> pure (SBlocked ivar k)
+
+
+subStatus :: Status a -> SubStatus a
+subStatus (SDone a) = SubDone a
+subStatus (SBlocked i k) = SubBlocked i k
+
+
+{- | Run a workflow as a sub-fiber of the current fiber, reifying
+workflow-level exceptions.
+-}
+runSubFiber :: FiberEnv -> Workflow a -> InstanceM (SubStatus a)
+runSubFiber env wf =
+  (subStatus <$> runFiber (fiberContEnv env) (fiberLocals env) wf)
+    `UnliftIO.catch` \(WorkflowThrown e) -> pure (SubThrown e)
+
+
+-- | Resume a suspended sub-fiber with the contents of the IVar it blocked on.
+resumeSubFiber :: (ResultVal v -> IO (Status a)) -> ResultVal v -> InstanceM (SubStatus a)
+resumeSubFiber k rv =
+  liftIO $ (subStatus <$> k rv) `UnliftIO.catch` \(WorkflowThrown e) -> pure (SubThrown e)
+
+
+{- | Step a possibly-suspended sub-fiber: resume it only if the IVar it is
+blocked on has been filled in the meantime; otherwise leave it suspended.
+-}
+stepSubFiber :: IVar v -> (ResultVal v -> IO (Status a)) -> InstanceM (SubStatus a)
+stepSubFiber ivar k = do
+  contents <- readIORef (ivarRef ivar)
+  case contents of
+    IVarFull rv -> resumeSubFiber k rv
+    IVarEmpty _ -> pure (SubBlocked ivar k)
+
+
+{- | Adopt a suspended sub-fiber: block the parent fiber on the same IVars
+the sub-fiber blocks on until the sub-fiber completes.
+-}
+driveSubFiber :: forall a v0. FiberEnv -> IVar v0 -> (ResultVal v0 -> IO (Status a)) -> InstanceM a
+driveSubFiber env = go
+  where
+    go :: IVar v -> (ResultVal v -> IO (Status a)) -> InstanceM a
+    go ivar k = do
+      rv <- liftIO $ fiberSuspend env ivar
+      st <- resumeSubFiber k rv
+      case st of
+        SubDone a -> pure a
+        SubThrown e -> throwWorkflow e
+        SubBlocked ivar' k' -> go ivar' k'
 
 
 data IVarContents a
@@ -529,37 +664,14 @@ getIVar :: IVar a -> Workflow a
 getIVar i@(IVar {ivarId = vid, ivarRef = ref}) = Workflow $ \env -> do
   e <- readIORef ref
   case e of
-    IVarFull (Ok a) -> do
+    IVarFull r -> do
       when (vid /= 0) $ removeBlockedStack vid
-      pure $ Done a
-    IVarFull (ThrowWorkflow e') -> do
-      when (vid /= 0) $ removeBlockedStack vid
-      liftIO $ raiseFromIVar env i e'
-    IVarFull (ThrowInternal e') -> do
-      when (vid /= 0) $ removeBlockedStack vid
-      throwIO e'
+      deliverResultVal r
     IVarEmpty _ -> do
       when (vid /= 0) $ recordBlockedStack vid
-      pure $ Blocked i (Return i)
-
-
--- Just a specialised version of getIVar, for efficiency in <*>
-getIVarApply :: IVar (a -> b) -> a -> Workflow b
-getIVarApply i@IVar {ivarId = vid, ivarRef = ref} a = Workflow $ \env -> do
-  e <- readIORef ref
-  case e of
-    IVarFull (Ok f) -> do
+      r <- liftIO $ fiberSuspend env i
       when (vid /= 0) $ removeBlockedStack vid
-      return (Done (f a))
-    IVarFull (ThrowWorkflow e') -> do
-      when (vid /= 0) $ removeBlockedStack vid
-      liftIO $ raiseFromIVar env i e'
-    IVarFull (ThrowInternal e') -> do
-      when (vid /= 0) $ removeBlockedStack vid
-      throwIO e'
-    IVarEmpty _ -> do
-      when (vid /= 0) $ recordBlockedStack vid
-      return (Blocked i (Cont (getIVarApply i a)))
+      deliverResultVal r
 
 
 recordBlockedStack :: Word64 -> InstanceM ()
@@ -589,17 +701,13 @@ putIVar IVar {ivarRef = ref} a ContinuationEnv {..} = do
 
 
 tryReadIVar :: IVar a -> Workflow (Maybe a)
-tryReadIVar i@IVar {ivarRef = ref} = Workflow $ \env -> do
+tryReadIVar IVar {ivarRef = ref} = Workflow $ \_ -> do
   e <- readIORef ref
   case e of
-    IVarFull (Ok a) -> pure $ Done (Just a)
-    IVarFull (ThrowWorkflow e') -> liftIO $ raiseFromIVar env i e'
+    IVarFull (Ok a) -> pure $ Just a
+    IVarFull (ThrowWorkflow e') -> throwWorkflow e'
     IVarFull (ThrowInternal e') -> throwIO e'
-    IVarEmpty _ -> pure $ Done Nothing
-
-
-raiseFromIVar :: Exception e => ContinuationEnv -> IVar a -> e -> IO (Result b)
-raiseFromIVar env _ivar e = raiseImpl env (toException e)
+    IVarEmpty _ -> pure Nothing
 
 
 {- | A very restricted Monad that allows for reading 'StateVar' values. This Monad
@@ -646,7 +754,7 @@ instance Ord (StateVar a) where
 
 newStateVar :: a -> Workflow (StateVar a)
 newStateVar a = Workflow $ \_ -> do
-  Done <$> (StateVar <$> nextVarIdSequence <*> newIORef a)
+  StateVar <$> nextVarIdSequence <*> newIORef a
 
 
 reevaluateDependentConditions :: StateVar a -> InstanceM ()
@@ -695,18 +803,17 @@ instance MonadReadStateVar Validation where
 
 
 instance MonadReadStateVar Workflow where
-  readStateVar var = Workflow $ \_ -> Done <$> readIORef var.stateVarRef
+  readStateVar var = Workflow $ \_ -> readIORef var.stateVarRef
 
 
 instance MonadWriteStateVar Workflow where
   writeStateVar var a = Workflow $ \_ -> do
     writeIORef var.stateVarRef a
     reevaluateDependentConditions var
-    pure $ Done ()
   modifyStateVar var f = Workflow $ \_ -> do
     res <- modifyIORef' var.stateVarRef f
     reevaluateDependentConditions var
-    pure $ Done res
+    pure res
 
 
 {- | The Query monad is a very constrained version of the Workflow monad. It can
@@ -755,7 +862,6 @@ updateCallStackW :: RequireCallStack => Workflow ()
 updateCallStackW = Workflow $ \_ -> do
   inst <- ask
   writeIORef inst.workflowCallStack $ popCallStack callStack
-  pure $ Done ()
 
 
 data WorkflowUpdateImplementation = WorkflowUpdateImplementation
@@ -779,7 +885,7 @@ data WorkflowInstance = WorkflowInstance
   , -- | Signals that arrived before their handler was registered.
     -- These are buffered and delivered when setSignalHandler is called.
     -- Uses Endo for O(1) append (diff-list style).
-    workflowBufferedSignals :: {-# UNPACK #-} !(IORef (HashMap Text (Endo [Vector Payload])))
+    workflowBufferedSignals :: {-# UNPACK #-} !(IORef (HashMap Text (Endo [(Vector Payload, Map Text Payload)])))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
   , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
@@ -946,6 +1052,14 @@ data HandleUpdateInput = HandleUpdateInput
   }
 
 
+data HandleSignalInput = HandleSignalInput
+  { handleSignalInputType :: Text
+  , handleSignalInputArgs :: Vector Payload
+  , handleSignalInputHeaders :: Map Text Payload
+  , handleSignalWorkflowInfo :: Info
+  }
+
+
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
       :: ExecuteWorkflowInput
@@ -959,6 +1073,10 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       :: HandleUpdateInput
       -> (HandleUpdateInput -> Workflow Payload)
       -> Workflow Payload
+  , handleSignal
+      :: HandleSignalInput
+      -> (HandleSignalInput -> Workflow ())
+      -> Workflow ()
   , validateUpdate
       :: HandleUpdateInput
       -> (HandleUpdateInput -> IO (Either SomeException ()))
@@ -972,6 +1090,7 @@ instance Semigroup WorkflowInboundInterceptor where
       { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
       , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
+      , handleSignal = \input cont -> a.handleSignal input $ \input' -> b.handleSignal input' cont
       , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
       }
 
@@ -982,6 +1101,7 @@ instance Monoid WorkflowInboundInterceptor where
       { executeWorkflow = \input cont -> cont input
       , handleQuery = \input cont -> cont input
       , handleUpdate = \input cont -> cont input
+      , handleSignal = \input cont -> cont input
       , validateUpdate = \input cont -> cont input
       }
 

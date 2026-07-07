@@ -387,7 +387,11 @@ setUpWorkflowExecution initializeWorkflow = do
   writeIORef inst.workflowTime (initializeWorkflow ^. Activation.startTime . to timespecFromTimestamp)
   info <- readIORef inst.workflowInstanceInfo
 
-  hdrs <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers))
+  -- Headers deliberately bypass the payload processor: no Temporal SDK
+  -- (including this one's client paths) encodes headers with the payload
+  -- codec, and running e.g. tracing headers through an asymmetric processor
+  -- corrupts them.
+  let hdrs = fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers)
   pure $
     ExecuteWorkflowInput
       { executeWorkflowInputType = WorkflowType (initializeWorkflow ^. Activation.workflowType)
@@ -443,7 +447,8 @@ applyQueryWorkflow queryWorkflow = do
   Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
   let processor = inst.payloadProcessor
   args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
-  hdrs <- processorTryDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers))
+  -- Headers deliberately bypass the payload processor (see setUpWorkflowExecution).
+  let hdrs = fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers)
   let baseInput =
         HandleQueryInput
           { handleQueryId = QueryId (queryWorkflow ^. Activation.queryId)
@@ -502,20 +507,33 @@ applySignalWorkflow signalWorkflow = join $ do
     -- Decode inputs first - we need them whether we have a handler or are buffering
     eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input))
     case eInputs of
-      Left err -> pure $ Throw err
-      Right args -> case handlerOrDefault of
-        Nothing -> do
-          -- Buffer the signal until a handler is registered (matching TypeScript SDK behavior)
-          -- Uses Endo for O(1) append (diff-list style), maintaining FIFO order
-          -- flip (<>) ensures old signals come before new: old <> new
-          Logging.logDebug $ Text.pack ("Buffering signal (no handler registered yet): " <> show signalName)
-          liftIO $
-            modifyIORef' inst.workflowBufferedSignals $
-              HashMap.insertWith (flip (<>)) signalName (Endo (args :))
-          pure $ Done $ pure ()
-        Just handler -> pure $ Done $ do
-          Logging.logDebug $ Text.pack ("Applying signal handler for signal: " <> show signalName)
-          handler args
+      Left err -> throwWorkflow err
+      Right args -> do
+        -- Headers deliberately bypass the payload processor (see setUpWorkflowExecution).
+        let signalHeaders = fmap convertFromProtoPayload (signalWorkflow ^. Activation.headers)
+        case handlerOrDefault of
+          Nothing -> do
+            -- Buffer the signal (and its headers) until a handler is registered (matching TypeScript SDK behavior)
+            -- Uses Endo for O(1) append (diff-list style), maintaining FIFO order
+            -- flip (<>) ensures old signals come before new: old <> new
+            Logging.logDebug $ Text.pack ("Buffering signal (no handler registered yet): " <> show signalName)
+            liftIO $
+              modifyIORef' inst.workflowBufferedSignals $
+                HashMap.insertWith (flip (<>)) signalName (Endo ((args, signalHeaders) :))
+            pure $ pure ()
+          Just handler -> do
+            instInfo <- readIORef inst.workflowInstanceInfo
+            let input =
+                  HandleSignalInput
+                    { handleSignalInputType = signalName
+                    , handleSignalInputArgs = args
+                    , handleSignalInputHeaders = signalHeaders
+                    , handleSignalWorkflowInfo = instInfo
+                    }
+            pure $ do
+              Logging.logDebug $ Text.pack ("Applying signal handler for signal: " <> show signalName)
+              inst.inboundInterceptor.handleSignal input $ \input' ->
+                handler input'.handleSignalInputArgs
 
 
 applyDoUpdateWorkflow :: DoUpdate -> Workflow ()
@@ -543,7 +561,8 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
         pure (pure False, error "This should never happen")
       Just WorkflowUpdateImplementation {..} -> do
         updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
-        updateHeaders <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.headers))
+        -- Headers deliberately bypass the payload processor (see setUpWorkflowExecution).
+        let updateHeaders = fmap convertFromProtoPayload (doUpdate ^. Activation.headers)
         let runValidator = doUpdate ^. Activation.runValidator
             updateId = UpdateId $ doUpdate ^. Activation.id
         case updateArgs of
@@ -632,7 +651,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
                       & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
                    )
-          pure $ Throw err
+          throwWorkflow err
         Right payload -> do
           Logging.logDebug "gonna send an update completed message!"
           payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
@@ -643,7 +662,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                       & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
                       & Command.completed .~ convertToProtoPayload payload'
                    )
-          pure $ Done ()
+          pure ()
 
 
 applyNotifyHasPatch :: NotifyHasPatch -> InstanceM ()

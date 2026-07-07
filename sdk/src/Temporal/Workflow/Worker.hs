@@ -51,7 +51,8 @@ data EvictionWithRunID = EvictionWithRunID
   deriving stock (Show)
 
 
-data WorkflowWorker = forall ty.
+data WorkflowWorker
+  = forall ty.
   Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
@@ -203,7 +204,9 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
               searchAttrs <- liftIO $ do
                 decodedAttrs <- initializeWorkflow ^. Activation.searchAttributes . Message.indexedFields . to searchAttributesFromProto
                 either (throwIO . ValueError) pure decodedAttrs
-              hdrs <- processorTryDecodePayloads worker.processor (initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload))
+              -- Headers deliberately bypass the payload processor: no SDK
+              -- encodes headers with the payload codec.
+              let hdrs = initializeWorkflow ^. Activation.headers . to (fmap convertFromProtoPayload)
               memo <- processorDecodePayloads worker.processor (initializeWorkflow ^. Activation.memo . Message.fields . to (fmap convertFromProtoPayload))
               pure (searchAttrs, hdrs, memo)
             case ePayloads of
@@ -244,11 +247,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                       rootWf <- initializeWorkflow ^. Activation.maybe'rootWorkflow
                       let rWfId = rootWf ^. CommonProto.workflowId
                           rRunId = rootWf ^. CommonProto.runId
-                      if Text.null rWfId then Nothing
-                      else Just RootExecution
-                        { rootWorkflowId = WorkflowId rWfId
-                        , rootRunId = RunId rRunId
-                        }
+                      if Text.null rWfId
+                        then Nothing
+                        else
+                          Just
+                            RootExecution
+                              { rootWorkflowId = WorkflowId rWfId
+                              , rootRunId = RunId rRunId
+                              }
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength

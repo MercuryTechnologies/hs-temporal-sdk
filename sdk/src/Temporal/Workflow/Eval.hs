@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
@@ -7,10 +6,12 @@
 
 module Temporal.Workflow.Eval where
 
+import Control.Monad (void, when)
 import Control.Monad.Reader
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.Stack
+import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import RequireCallStack
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
@@ -125,10 +126,11 @@ runWorkflow wf = provideCallStack $ do
   inst <- lift ask
   pendingActivations <- lift $ newTVarIO []
   finalResult@IVar {ivarRef = resultRef} <- newIVar -- where to put the final result
+  mainLocals <- lift newFiberLocals
   let
-    -- Run a job, and put its result in the given IVar
-    schedule :: ContinuationEnv -> JobList -> Workflow b -> IVar b -> SuspendableWorkflowExecution ()
-    schedule env rq wf' ivar@IVar {ivarRef = ref} = do
+    -- Run a task (fresh or suspended fiber), and put its result in the given IVar
+    schedule :: ContinuationEnv -> JobList -> FiberLocals -> FiberTask b -> IVar b -> SuspendableWorkflowExecution ()
+    schedule env rq locals task ivar@IVar {ivarRef = ref} = do
       lift $ do
         cs <- readIORef inst.workflowCallStack
         logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
@@ -140,7 +142,7 @@ runWorkflow wf = provideCallStack $ do
               IVarFull _ ->
                 -- An IVar is typically only meant to be written to once
                 -- so it's tempting to think we should throw an error here. But there
-                -- are legitimate use-cases for writing several times– namely
+                -- are legitimate use-cases for writing several times– namely
                 -- when using race, biselect, etc.
                 reschedule env rq
               IVarEmpty workflowActions -> do
@@ -150,34 +152,39 @@ runWorkflow wf = provideCallStack $ do
                   then -- comparing IORefs of different types is safe, it's
                   -- pointer-equality on the MutVar#.
 
-                  -- TODO, I don't know if there are any cases where we need
-                  -- to worry about discarding unfinished computations, but
-                  -- I think exiting at the conclusion of a workflow is the
-                  -- right thing to do.
+                    -- TODO, I don't know if there are any cases where we need
+                    -- to worry about discarding unfinished computations, but
+                    -- I think exiting at the conclusion of a workflow is the
+                    -- right thing to do.
                     pure ()
                   else -- We have a result, but don't discard unfinished
                   -- computations in the run queue.
                   --
                   -- In our case, unfinished computations can represent signals.
-                  --
-                  -- Nothing can depend on the final IVar, so workflowActions must
-                  -- be empty.
-                  -- case rq of
-                  --   JobNil -> return ()
-                  --   _ -> modifyIORef' env.runQueueRef (appendJobList rq)
                     reschedule env $ appendJobList workflowActions rq
-      r <- lift $ UnliftIO.try $ do
-        let (Workflow run) = wf'
-        run env
+      r <- lift $ UnliftIO.try $ withFiberContext locals $ runFiberTask env locals task
       case r of
-        Left e -> do
-          rethrowAsyncExceptions e
-          result $ ThrowInternal e
-        Right (Done a) -> result $ Ok a
-        Right (Throw ex) -> result $ ThrowWorkflow ex
-        Right (Blocked i fn) -> do
+        Left e
+          | Just (WorkflowThrown inner) <- fromException e -> do
+              -- Nothing awaits a detached handler fiber's result, so surface
+              -- the failure in the logs instead of letting it vanish. Update
+              -- handlers rethrow after reporting a rejection to the server,
+              -- so this is debug-level noise for them; see
+              -- applyDoUpdateWorkflow.
+              when (fiberIsDetachedHandler locals) $
+                lift $
+                  Logging.logDebug =<< withRunId ("Signal/update handler finished with a workflow-level exception (dropped; update rejections are already reported): " <> Text.pack (show inner))
+              result $ ThrowWorkflow inner
+          | otherwise -> do
+              rethrowAsyncExceptions e
+              when (fiberIsDetachedHandler locals) $
+                lift $
+                  Logging.logWarn =<< withRunId ("Unhandled exception in a signal/update handler; nothing awaits the handler's result, so the exception is dropped: " <> Text.pack (show e))
+              result $ ThrowInternal e
+        Right (SDone a) -> result $ Ok a
+        Right (SBlocked i k) -> do
           lift (Logging.logDebug =<< withRunId "scheduled job blocked")
-          lift $ addJob env (toWf fn) ivar i
+          lift $ parkTask env locals (ResumeTask i k) ivar i
           reschedule env rq
 
     reschedule :: ContinuationEnv -> JobList -> SuspendableWorkflowExecution ()
@@ -188,11 +195,11 @@ runWorkflow wf = provideCallStack $ do
           rq <- lift $ readIORef runQueueRef
           case rq of
             JobNil -> emptyRunQueue env
-            JobCons env' a b c -> do
+            JobCons env' locals' task' ivar' rest -> do
               lift $ writeIORef runQueueRef JobNil
-              schedule env' c a b
-        JobCons env' a b c ->
-          schedule env' c a b
+              schedule env' rest locals' task' ivar'
+        JobCons env' locals' task' ivar' rest ->
+          schedule env' rest locals' task' ivar'
 
     emptyRunQueue :: ContinuationEnv -> SuspendableWorkflowExecution ()
     emptyRunQueue env = do
@@ -261,7 +268,7 @@ runWorkflow wf = provideCallStack $ do
           reschedule env jobs
 
   let env = inst.workflowInstanceContinuationEnv
-  schedule env JobNil wf finalResult
+  schedule env JobNil mainLocals (FreshTask wf) finalResult
   r <- readIORef resultRef
   case r of
     IVarEmpty _ -> error "runWorkflow: missing result"
@@ -281,7 +288,31 @@ rethrowAsyncExceptions e
 injectWorkflowSignalOrUpdate :: Workflow a -> InstanceM ()
 injectWorkflowSignalOrUpdate signal = do
   result <- newIVar
+  locals <- newDetachedHandlerFiberLocals
   inst <- ask
   let env@(ContinuationEnv jobList) = inst.workflowInstanceContinuationEnv
   -- Append to end (FIFO) to preserve arrival order for signals/updates
-  modifyIORef' jobList $ \j -> appendJobList j (JobCons env signal result JobNil)
+  modifyIORef' jobList $ \j -> appendJobList j (JobCons env locals (FreshTask signal) result JobNil)
+
+
+{- | Run one fiber step under the fiber's own OpenTelemetry context.
+
+Fibers interleave on a single thread (and may resume on a different thread
+after an activation), so the thread-local OTel context cannot be trusted
+across steps. Instead each fiber owns a context slot: it is attached before
+the step, snapshotted back after the step (whether the fiber completed or
+suspended), and the ambient context is restored for the scheduler. A fiber
+that has not run yet inherits the ambient context of its first step, which
+is the workflow's root context.
+-}
+withFiberContext :: FiberLocals -> InstanceM a -> InstanceM a
+withFiberContext locals act = do
+  prev <- getContext
+  mctx <- readIORef locals.fiberOtelContext
+  case mctx of
+    Nothing -> pure ()
+    Just ctx -> void $ attachContext ctx
+  r <- act `UnliftIO.onException` void (attachContext prev)
+  writeIORef locals.fiberOtelContext . Just =<< getContext
+  void $ attachContext prev
+  pure r
