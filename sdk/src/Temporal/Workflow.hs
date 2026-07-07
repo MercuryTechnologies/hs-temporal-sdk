@@ -175,6 +175,7 @@ module Temporal.Workflow (
   independently,
   biselect,
   biselectOpt,
+  yield,
 
   -- * Interacting with running Workflows
 
@@ -1435,7 +1436,8 @@ Note that the timer is started when the command is received by the Temporal Plat
 not when the timer is created. The command is sent as soon as the workflow is blocked
 by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWorkflow', etc.
 
-If the duration is less than or equal to zero, the timer will not be created.
+If the duration is less than or equal to zero, no timer is created and this
+returns 'Nothing'.
 -}
 createTimer :: Duration -> Workflow (Maybe Timer)
 createTimer ts = provideCallStack $ ilift $ do
@@ -1444,13 +1446,12 @@ createTimer ts = provideCallStack $ ilift $ do
   if ts <= mempty
     then pure Nothing
     else do
-      let ts' = if ts <= mempty then nanoseconds 1 else ts
-          cmd =
+      let cmd =
             defMessage
               & Command.startTimer
                 .~ ( defMessage
                       & Command.seq .~ seqId
-                      & Command.startToFireTimeout .~ durationToProto ts'
+                      & Command.startToFireTimeout .~ durationToProto ts
                    )
       Logging.logDebug "Add command: sleep"
       res <- newTrackedIVar
@@ -1472,7 +1473,8 @@ by any operation, such as 'sleep', 'awaitCondition', 'awaitActivity', 'awaitWork
 This function suspends the workflow itself, allowing other workflows to execute. It does not
 block the workflow thread in a busy-wait.
 
-If the duration is less than or equal to zero, the function will return immediately.
+__NOTE__: If the duration is less than or equal to zero, no timer is created and the
+function returns immediately; see 'createTimer' for details.
 -}
 sleep :: RequireCallStack => Duration -> Workflow ()
 sleep ts = do
@@ -1483,9 +1485,8 @@ sleep ts = do
 
 {- | Suspends the workflow execution until the specified system time.
 
-If the target time is in the past, the function will return immediately.
-
-See 'sleep' for details about timer behavior and workflow suspension.
+__NOTE__: If the target time is in the past, no timer is created and the
+function returns immediately; see 'createTimer' for details.
 -}
 sleepUntilSystemTime :: RequireCallStack => SystemTime -> Workflow ()
 sleepUntilSystemTime t = do
@@ -1497,7 +1498,7 @@ sleepUntilSystemTime t = do
 
 {- | Suspends the workflow execution until the specified UTC time.
 
-If the target time is in the past, the function will return immediately.
+If the target time is in the past, the function returns immediately.
 
 See 'sleep' for details about timer behavior and workflow suspension.
 -}

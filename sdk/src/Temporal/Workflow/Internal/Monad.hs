@@ -358,6 +358,35 @@ addJob env !wf !resultIVar IVar {ivarRef = ref} =
     full -> (full, modifyIORef' env.runQueueRef (JobCons env wf resultIVar))
 
 
+{- | Yield control back to the workflow scheduler, re-queueing the current
+continuation behind everything that is currently runnable.
+
+This is a purely local yield: it appends the continuation to the instance run
+queue and returns control to the scheduler, emits __no__ command, writes
+__no__ history, and never reaches the flush-and-suspend boundary, does not
+round-trip to the server and is invisible to replay.
+-}
+yield :: Workflow ()
+yield = Workflow $ \env -> do
+  -- NOTE: We return `Blocked gate` on a fresh, empty `IVar` so the scheduler
+  -- parks the current continuation in gate's waiting list, and we append a
+  -- trivial "filler" job, targeting gate, to the back of the run queue.
+  --
+  -- Once the scheduler drains everything ahead of it, the filler runs, fills
+  -- gate, and the parked continuation is re-queued and resumed.
+  -- 
+  -- Keeping a job on the run queue for the duration of the yield is what prevents
+  -- the scheduler from flushing commands and suspending.
+  -- 
+  -- The gate is intentionally untracked so this momentary block does not show
+  -- up in __stack_trace queries.
+  gate <- newIVar
+  let filler = Workflow $ \_ -> pure (Done ())
+  liftIO $ modifyIORef' env.runQueueRef $ \j ->
+    appendJobList j (JobCons env filler gate JobNil)
+  pure (Blocked gate (Return gate))
+
+
 -- -----------------------------------------------------------------------------
 -- Cont
 

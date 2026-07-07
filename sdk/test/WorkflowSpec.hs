@@ -325,6 +325,28 @@ tests = do
         let opts = defaultStartOpts taskQueue
         useClient (C.execute wf.reference "multiStateVar" opts) `shouldReturn` (42, "hello")
 
+  describe "Local yield" $ do
+    specify "yield hands control to a concurrent branch before resuming" $ \TestEnv {..} -> do
+      -- Branch A records 1, yields, then records 3; Branch B records 2.
+      --
+      -- With yield, A blocks after 1, letting B record 2 before A resumes:
+      -- -> [1, 2, 3].
+      --
+      -- Without yield, A runs straight through (1, 3) then B (2):
+      -- -> [1, 3, 2].
+      let workflow :: MyWorkflow [Int]
+          workflow = do
+            st <- W.newStateVar ([] :: [Int])
+            let a = W.modifyStateVar st (1 :) *> W.yield *> W.modifyStateVar st (3 :)
+                b = W.modifyStateVar st (2 :)
+            W.concurrently_ a b
+            reverse <$> W.readStateVar st
+          wf = W.provideWorkflow defaultCodec "localYield" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "localYield" opts) `shouldReturn` [1, 2, 3]
+
   describe "WorkflowIdConflictPolicy" $ do
     specify "Fail policy prevents duplicate workflows" $ \TestEnv {..} -> do
       let wf :: W.ProvidedWorkflow (W.Workflow ())
