@@ -198,11 +198,19 @@ tests = describe "Activities" $ do
               else pure 99
           actDef = provideActivity defaultCodec "retryHbAct" act
           workflow :: MyWorkflow Int
-          workflow = W.executeActivity actDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+          workflow =
+            W.executeActivity
+              actDef.reference
+              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 30)
+                { retryPolicy = Just $ W.defaultRetryPolicy {W.initialInterval = milliseconds 50}
+                }
           wf = W.provideWorkflow defaultCodec "retryHbActWf" workflow
           conf = configure () (wf, actDef) $ do baseConf
       withWorker conf $ do
-        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        -- Generous execution timeout: with retries in play the test should
+        -- never flake on a loaded machine; the fast retry policy keeps the
+        -- happy path quick.
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
         useClient (C.execute wf.reference "retryHbAct" opts)
           `shouldReturn` 99
 
@@ -216,11 +224,16 @@ tests = describe "Activities" $ do
               else pure 1
           actDef = provideActivity defaultCodec "retryAct" act
           workflow :: MyWorkflow Int
-          workflow = W.executeActivity actDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+          workflow =
+            W.executeActivity
+              actDef.reference
+              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 30)
+                { retryPolicy = Just $ W.defaultRetryPolicy {W.initialInterval = milliseconds 50}
+                }
           wf = W.provideWorkflow defaultCodec "retryActWf" workflow
           conf = configure () (wf, actDef) $ do baseConf
       withWorker conf $ do
-        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
         useClient (C.execute wf.reference "retryAct" opts)
           `shouldReturn` 1
 

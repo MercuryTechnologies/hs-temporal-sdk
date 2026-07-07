@@ -159,7 +159,8 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
 import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
 import qualified Temporal.Client.TestService as TestService
-import Temporal.Client.Types
+import Temporal.Client.Types hiding (signal)
+import qualified Temporal.Client.Types
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
 import Temporal.Core.Client.WorkflowService hiding (deleteWorkflowExecution, describeWorkflowExecution, resetWorkflowExecution)
@@ -395,28 +396,36 @@ signal
   -> (SignalArgs sig :->: m ())
 signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) opts = withArgs @(SignalArgs sig) @(m ()) sCodec $ \inputs -> liftIO $ do
   inputs' <- processorEncodePayloads c.clientConfig.payloadProcessor =<< liftIO (sequence inputs)
-  result <-
-    signalWorkflowExecution c.clientCore $
-      defMessage
-        & WF.namespace .~ rawNamespace c.clientConfig.namespace
-        & WF.workflowExecution
-          .~ ( defMessage
-                & Common.workflowId .~ rawWorkflowId wf
-                & Common.runId .~ maybe "" rawRunId r
-             )
-        & WF.signalName .~ sName
-        & WF.input .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload inputs')
-        & WF.identity .~ Core.identity (Core.clientConfig c.clientCore)
-        & WF.requestId .~ fromMaybe "" opts.requestId
-        -- Deprecated, no need to set
-        -- & WF.control .~ _
-        -- TODO put other useful headers in here
-        & WF.header .~ headerToProto (fmap convertToProtoPayload opts.headers)
-  -- FIXME: Can we just ignore this now that it's no longer present?
-  -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
-  case result of
-    Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-    Right _ -> pure ()
+  let baseInput =
+        SignalWorkflowInput
+          { signalWorkflowWorkflowId = wf
+          , signalWorkflowRunId = r
+          , signalWorkflowSignalName = sName
+          , signalWorkflowArgs = inputs'
+          , signalWorkflowHeaders = opts.headers
+          }
+  Temporal.Client.Types.signal c.clientConfig.interceptors baseInput $ \input -> do
+    result <-
+      signalWorkflowExecution c.clientCore $
+        defMessage
+          & WF.namespace .~ rawNamespace c.clientConfig.namespace
+          & WF.workflowExecution
+            .~ ( defMessage
+                  & Common.workflowId .~ rawWorkflowId input.signalWorkflowWorkflowId
+                  & Common.runId .~ maybe "" rawRunId input.signalWorkflowRunId
+               )
+          & WF.signalName .~ input.signalWorkflowSignalName
+          & WF.input .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload input.signalWorkflowArgs)
+          & WF.identity .~ Core.identity (Core.clientConfig c.clientCore)
+          & WF.requestId .~ fromMaybe "" opts.requestId
+          -- Deprecated, no need to set
+          -- & WF.control .~ _
+          & WF.header .~ headerToProto (fmap convertToProtoPayload input.signalWorkflowHeaders)
+    -- FIXME: Can we just ignore this now that it's no longer present?
+    -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
+    case result of
+      Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
+      Right _ -> pure ()
 
 
 data QueryOptions = QueryOptions
@@ -729,7 +738,7 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
             & RR.workflowIdConflictPolicy
               .~ workflowIdConflictPolicyToProto
                 (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.signalWithStartOptions.workflowIdConflictPolicy)
-            & RR.signalName .~ sigName
+            & RR.signalName .~ opts'.signalWithStartSignalName
             & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload sigPayloads'')
             -- Deprecated, no need to set
             -- & RR.control .~ _
