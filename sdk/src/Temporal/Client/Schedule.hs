@@ -212,7 +212,7 @@ import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow
+import Temporal.Workflow hiding (yield)
 import UnliftIO
 
 
