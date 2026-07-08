@@ -1060,3 +1060,103 @@ tests = do
         let opts = defaultStartOpts taskQueue
         useClient (C.execute wf.reference "continuedFailureWf" opts)
           `shouldReturn` True
+
+  describe "race loser cancellation" $ do
+    specify "runs the dropped loser's finally and returns the winner" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Either Text Text, Bool)
+          workflow = do
+            cleanupRan <- W.newStateVar False
+            gate <- W.newStateVar False
+            let winner :: MyWorkflow Text
+                winner = W.sleep (nanoseconds 1) >> pure "winner"
+                loser :: MyWorkflow Text
+                loser =
+                  (W.waitCondition (W.readStateVar gate) >> pure "loser")
+                    `Catch.finally` W.writeStateVar cleanupRan True
+            result <- winner `W.race` loser
+            ran <- W.readStateVar cleanupRan
+            pure (result, ran)
+          wf = W.provideWorkflow defaultCodec "raceLoserFinally" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient (C.execute wf.reference "raceLoserFinally" opts)
+          `shouldReturn` (Left "winner", True)
+
+    specify "catch-all in the loser does not swallow the fiber cancellation" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Bool, Bool)
+          workflow = do
+            cleanupRan <- W.newStateVar False
+            swallowed <- W.newStateVar False
+            gate <- W.newStateVar False
+            let winner :: MyWorkflow Text
+                winner = W.sleep (nanoseconds 1) >> pure "winner"
+                loser :: MyWorkflow Text
+                loser =
+                  ( (W.waitCondition (W.readStateVar gate) >> pure "loser")
+                      `Catch.catch` \(_ :: SomeException) -> W.writeStateVar swallowed True >> pure "swallowed"
+                  )
+                    `Catch.finally` W.writeStateVar cleanupRan True
+            _ <- winner `W.race` loser
+            ran <- W.readStateVar cleanupRan
+            sw <- W.readStateVar swallowed
+            pure (ran, sw)
+          wf = W.provideWorkflow defaultCodec "raceLoserCatchAll" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient (C.execute wf.reference "raceLoserCatchAll" opts)
+          `shouldReturn` (True, False)
+
+    specify "the winning side still runs its bracket release exactly once" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Either Int Text, Int)
+          workflow = do
+            winnerReleases <- W.newStateVar (0 :: Int)
+            gate <- W.newStateVar False
+            let winner :: MyWorkflow Int
+                winner =
+                  Catch.bracket
+                    (pure ())
+                    (\_ -> W.modifyStateVar winnerReleases (+ 1))
+                    (\_ -> W.sleep (nanoseconds 1) >> pure 42)
+                loser :: MyWorkflow Text
+                loser = W.waitCondition (W.readStateVar gate) >> pure "loser"
+            result <- winner `W.race` loser
+            releases <- W.readStateVar winnerReleases
+            pure (result, releases)
+          wf = W.provideWorkflow defaultCodec "raceWinnerBracket" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient (C.execute wf.reference "raceWinnerBracket" opts)
+          `shouldReturn` (Left 42, 1)
+
+    specify "runs all nested finalizers on the dropped loser" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Bool, Bool)
+          workflow = do
+            outerRan <- W.newStateVar False
+            innerRan <- W.newStateVar False
+            gate <- W.newStateVar False
+            let winner :: MyWorkflow Text
+                winner = W.sleep (nanoseconds 1) >> pure "winner"
+                loser :: MyWorkflow Text
+                loser =
+                  Catch.bracket
+                    (pure ())
+                    (\_ -> W.writeStateVar outerRan True)
+                    ( \_ ->
+                        Catch.bracket
+                          (pure ())
+                          (\_ -> W.writeStateVar innerRan True)
+                          (\_ -> W.waitCondition (W.readStateVar gate) >> pure "loser")
+                    )
+            _ <- winner `W.race` loser
+            outer <- W.readStateVar outerRan
+            inner <- W.readStateVar innerRan
+            pure (outer, inner)
+          wf = W.provideWorkflow defaultCodec "raceLoserNested" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient (C.execute wf.reference "raceLoserNested" opts)
+          `shouldReturn` (True, True)

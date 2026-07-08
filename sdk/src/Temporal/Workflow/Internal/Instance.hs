@@ -20,6 +20,7 @@ module Temporal.Workflow.Internal.Instance (
 
 import Control.Monad.Reader
 import Data.Atomics (atomicModifyIORefCAS)
+import qualified Data.HashSet as HashSet
 import Data.ProtoLens
 import qualified Data.Text as T
 import GHC.Stack
@@ -41,12 +42,16 @@ flushCommands :: HasCallStack => InstanceM ()
 flushCommands = do
   inst <- ask
   info <- readIORef inst.workflowInstanceInfo
+  knownFlags <- readIORef inst.workflowKnownFlags
   cmds <- atomically $ do
     currentCmds <- readTVar inst.workflowCommands
     writeTVar inst.workflowCommands $ Reversed []
     pure currentCmds
   let completionSuccessful :: Core.Success
-      completionSuccessful = defMessage & Completion.commands .~ fromReversed cmds
+      completionSuccessful =
+        defMessage
+          & Completion.commands .~ fromReversed cmds
+          & Completion.usedInternalFlags .~ HashSet.toList knownFlags
       completionMessage :: Core.WorkflowActivationCompletion
       completionMessage =
         defMessage
