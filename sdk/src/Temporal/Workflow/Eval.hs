@@ -6,6 +6,7 @@
 
 module Temporal.Workflow.Eval where
 
+import Control.Exception.Base (NoMatchingContinuationPrompt (..))
 import Control.Monad (void, when)
 import Control.Monad.Reader
 import Data.Text (Text)
@@ -15,7 +16,8 @@ import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import RequireCallStack
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
-import Temporal.Coroutine
+import Temporal.Exception (RuntimeError (..))
+import Temporal.Workflow.Internal.DelimCC (PromptTag, control0, prompt)
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import Text.Printf
@@ -30,13 +32,39 @@ withRunId arg = do
   return ("[runId=" <> rawRunId info.runId <> "] " <> arg)
 
 
-type SuspendableWorkflowExecution a = Coroutine (Await [ActivationResult]) InstanceM a
+-- | A run either finished, or suspended awaiting the next activation's results.
+--
+-- Run-level analogue of 'Status'.
+data RunStatus a
+  = RunDone a
+  | RunBlocked ([ActivationResult] -> IO (RunStatus a))
+
+
+-- | Suspend the run until the driver supplies the next activation's results.
+--
+-- Run-level analogue of 'suspendVia'.
+awaitActivationVia :: PromptTag (RunStatus a) -> IO [ActivationResult]
+awaitActivationVia tag = do
+  resumed <- newIORef False
+  control0
+    tag
+    ( \k -> pure $ RunBlocked $ \rs -> do
+        alreadyResumed <- atomicModifyIORef' resumed (\r -> (True, r))
+        when alreadyResumed $
+          throwIO $
+            RuntimeError "Internal invariant violation: a suspended workflow run was resumed more than once. Please report this as a bug in hs-temporal-sdk."
+        prompt tag (k (pure rs))
+    )
+    `UnliftIO.catch` \NoMatchingContinuationPrompt ->
+      throwIO $
+        RuntimeError "A workflow run awaited an activation outside the run scheduler. Please report this as a bug in hs-temporal-sdk."
 
 
 {- | Values that were blocking waiting for an activation, and have now
-been unblocked. The worker feeds these into a suspended workflow
-after converting workflow activation results.
-This unblocks the relevant computations.
+been unblocked.
+
+The worker feeds these into a suspended workflow after converting workflow
+activation results; this unblocks the relevant computations.
 -}
 data ActivationResult
   = forall a.
@@ -121,23 +149,22 @@ data ActivationResult
 --
 -- We hand this back to
 -- emptyRunQueue.
-runWorkflow :: forall a. HasCallStack => (RequireCallStackImpl => Workflow a) -> SuspendableWorkflowExecution a
-runWorkflow wf = provideCallStack $ do
-  inst <- lift ask
-  pendingActivations <- lift $ newTVarIO []
+runWorkflow :: forall a. HasCallStack => IO [ActivationResult] -> (RequireCallStackImpl => Workflow a) -> InstanceM a
+runWorkflow awaitAction wf = provideCallStack $ do
+  inst <- ask
+  pendingActivations <- newTVarIO []
   finalResult@IVar {ivarRef = resultRef} <- newIVar -- where to put the final result
-  mainLocals <- lift newFiberLocals
+  mainLocals <- newFiberLocals
   let
     -- Run a task (fresh or suspended fiber), and put its result in the given IVar
-    schedule :: ContinuationEnv -> JobList -> FiberLocals -> FiberTask b -> IVar b -> SuspendableWorkflowExecution ()
+    schedule :: ContinuationEnv -> JobList -> FiberLocals -> FiberTask b -> IVar b -> InstanceM ()
     schedule env rq locals task ivar@IVar {ivarRef = ref} = do
-      lift $ do
-        cs <- readIORef inst.workflowCallStack
-        logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
-        Logging.logDebug logMsg
+      cs <- readIORef inst.workflowCallStack
+      logMsg <- withRunId (Text.pack $ printf "schedule: %d\n%s" (1 + lengthJobList rq) $ prettyCallStack cs)
+      Logging.logDebug logMsg
       let {-# INLINE result #-}
           result r = do
-            e <- lift $ readIORef ref
+            e <- readIORef ref
             case e of
               IVarFull _ ->
                 -- An IVar is typically only meant to be written to once
@@ -146,7 +173,7 @@ runWorkflow wf = provideCallStack $ do
                 -- when using race, biselect, etc.
                 reschedule env rq
               IVarEmpty workflowActions -> do
-                lift $ writeIORef ref (IVarFull r)
+                writeIORef ref (IVarFull r)
                 -- Have we got the final result now?
                 if ref == unsafeCoerce resultRef
                   then -- comparing IORefs of different types is safe, it's
@@ -162,7 +189,7 @@ runWorkflow wf = provideCallStack $ do
                   --
                   -- In our case, unfinished computations can represent signals.
                     reschedule env $ appendJobList workflowActions rq
-      r <- lift $ UnliftIO.try $ withFiberContext locals $ runFiberTask env locals task
+      r <- UnliftIO.try $ withFiberContext locals $ runFiberTask env locals task
       case r of
         Left e
           | Just (WorkflowThrown inner) <- fromException e -> do
@@ -172,52 +199,48 @@ runWorkflow wf = provideCallStack $ do
               -- so this is debug-level noise for them; see
               -- applyDoUpdateWorkflow.
               when (fiberIsDetachedHandler locals) $
-                lift $
-                  Logging.logDebug =<< withRunId ("Signal/update handler finished with a workflow-level exception (dropped; update rejections are already reported): " <> Text.pack (show inner))
+                Logging.logDebug =<< withRunId ("Signal/update handler finished with a workflow-level exception (dropped; update rejections are already reported): " <> Text.pack (show inner))
               result $ ThrowWorkflow inner
           | otherwise -> do
               rethrowAsyncExceptions e
               when (fiberIsDetachedHandler locals) $
-                lift $
-                  Logging.logWarn =<< withRunId ("Unhandled exception in a signal/update handler; nothing awaits the handler's result, so the exception is dropped: " <> Text.pack (show e))
+                Logging.logWarn =<< withRunId ("Unhandled exception in a signal/update handler; nothing awaits the handler's result, so the exception is dropped: " <> Text.pack (show e))
               result $ ThrowInternal e
         Right (SDone a) -> result $ Ok a
         Right (SBlocked i k) -> do
-          lift (Logging.logDebug =<< withRunId "scheduled job blocked")
-          lift $ parkTask env locals (ResumeTask i k) ivar i
+          Logging.logDebug =<< withRunId "scheduled job blocked"
+          parkTask env locals (ResumeTask i k) ivar i
           reschedule env rq
 
-    reschedule :: ContinuationEnv -> JobList -> SuspendableWorkflowExecution ()
+    reschedule :: ContinuationEnv -> JobList -> InstanceM ()
     reschedule env@ContinuationEnv {..} jobs = do
-      lift (Logging.logDebug =<< withRunId "reschedule")
+      Logging.logDebug =<< withRunId "reschedule"
       case jobs of
         JobNil -> do
-          rq <- lift $ readIORef runQueueRef
+          rq <- readIORef runQueueRef
           case rq of
             JobNil -> emptyRunQueue env
             JobCons env' locals' task' ivar' rest -> do
-              lift $ writeIORef runQueueRef JobNil
+              writeIORef runQueueRef JobNil
               schedule env' rest locals' task' ivar'
         JobCons env' locals' task' ivar' rest ->
           schedule env' rest locals' task' ivar'
 
-    emptyRunQueue :: ContinuationEnv -> SuspendableWorkflowExecution ()
+    emptyRunQueue :: ContinuationEnv -> InstanceM ()
     emptyRunQueue env = do
-      lift $ do
-        logMsg <- withRunId "emptyRunQueue"
-        Logging.logDebug logMsg
+      Logging.logDebug =<< withRunId "emptyRunQueue"
       workflowActions <- checkActivationResults env
       case workflowActions of
         JobNil -> awaitActivation env
         _ -> reschedule env workflowActions
 
-    awaitActivation :: ContinuationEnv -> SuspendableWorkflowExecution ()
+    awaitActivation :: ContinuationEnv -> InstanceM ()
     awaitActivation env = do
-      lift (Logging.logDebug =<< withRunId "flushCommandsAndAwaitActivation")
+      Logging.logDebug =<< withRunId "flushCommandsAndAwaitActivation"
       waitActivationResults env
 
-    checkActivationResults :: ContinuationEnv -> SuspendableWorkflowExecution JobList
-    checkActivationResults _env = lift $ do
+    checkActivationResults :: ContinuationEnv -> InstanceM JobList
+    checkActivationResults _env = do
       Logging.logDebug =<< withRunId "checkActivationResults"
       comps <- atomically $ do
         c <- readTVar pendingActivations
@@ -248,23 +271,22 @@ runWorkflow wf = provideCallStack $ do
           jobs <- mapM getComplete comps
           return (foldr appendJobList JobNil jobs)
 
-    waitActivationResults :: ContinuationEnv -> SuspendableWorkflowExecution ()
+    waitActivationResults :: ContinuationEnv -> InstanceM ()
     waitActivationResults env = do
-      lift (Logging.logDebug =<< withRunId "waitActivationResults")
+      Logging.logDebug =<< withRunId "waitActivationResults"
       newActivations <- do
-        activations <- lift $ readTVarIO pendingActivations
+        activations <- readTVarIO pendingActivations
         if null activations
-          then await
+          then liftIO awaitAction
           else do
-            lift $ atomically $ writeTVar pendingActivations []
+            atomically $ writeTVar pendingActivations []
             return activations
       atomically $ writeTVar pendingActivations newActivations
-      jobs <- lift $ readIORef env.runQueueRef
+      jobs <- readIORef env.runQueueRef
       case jobs of
-        JobNil -> do
-          emptyRunQueue env
+        JobNil -> emptyRunQueue env
         _ -> do
-          lift $ writeIORef env.runQueueRef JobNil
+          writeIORef env.runQueueRef JobNil
           reschedule env jobs
 
   let env = inst.workflowInstanceContinuationEnv

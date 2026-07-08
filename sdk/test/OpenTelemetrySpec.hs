@@ -259,3 +259,30 @@ tests = describe "OpenTelemetry spans" $ do
     handleSignal <- spanNamed "HandleSignal:otelBufferedSig"
     runWorkflow `shouldBeChildOf` clientSws
     handleSignal `shouldBeChildOf` runWorkflow
+
+  it "opens and closes the RunWorkflow span exactly once across a multi-activation run" $ \TestEnv {..} -> do
+    drainSpans
+    -- Signal sent after start forces a second activation, so the run suspends
+    -- and resumes through the interceptor's span bracket.
+    let unblockSig = W.KnownSignal @'[] "otelSpanCountUnblock" defaultCodec
+        workflow :: W.Workflow ()
+        workflow = provideCallStack $ do
+          st <- W.newStateVar False
+          W.setSignalHandler unblockSig $ W.writeStateVar st True
+          W.waitCondition (W.readStateVar st)
+        wf = W.provideWorkflow defaultCodec "otelSpanCountWorkflow" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+      wfH <- useClient (C.start wf.reference "otelSpanCount" opts)
+      waitForWorkflowStart wfH
+      C.signal wfH unblockSig C.defaultSignalOptions
+      C.waitWorkflowResult wfH `shouldReturn` ()
+    spans <- readIORef capturedSpans
+    let runWorkflowSpans = filter (\s -> spanName s == "RunWorkflow:otelSpanCountWorkflow") spans
+    -- One RunWorkflow span total: per-activation re-entry would give >= 2, a
+    -- leaked span would give 0.
+    length runWorkflowSpans `shouldBe` 1
+    [only] <- pure runWorkflowSpans
+    handleSignal <- spanNamed "HandleSignal:otelSpanCountUnblock"
+    handleSignal `shouldBeChildOf` only

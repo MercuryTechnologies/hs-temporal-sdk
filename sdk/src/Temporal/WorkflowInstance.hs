@@ -6,7 +6,6 @@ module Temporal.WorkflowInstance (
   Info (..),
   RootExecution (..),
   create,
-  activate,
   addCommand,
   nextActivitySequence,
   nextChildWorkflowSequence,
@@ -29,12 +28,10 @@ import qualified Data.Aeson as Aeson
 #if __GLASGOW_HASKELL__ < 910
 import Data.Foldable (foldl')
 #endif
-import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe (mapMaybe)
 import Data.Monoid (Endo (..))
 import Data.ProtoLens
-import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.HashSet as HashSet
@@ -85,13 +82,13 @@ import System.Random (mkStdGen)
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Worker as Core
-import Temporal.Coroutine
 import Temporal.Duration
 import Temporal.Exception
 import qualified Temporal.Exception as Err
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecution, injectWorkflowSignalOrUpdate, runWorkflow)
+import Temporal.Workflow.Eval (ActivationResult (..), RunStatus (..), awaitActivationVia, injectWorkflowSignalOrUpdate, runWorkflow)
+import Temporal.Workflow.Internal.DelimCC (newPromptTag, prompt)
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -157,18 +154,28 @@ create
     workflowCancellationVar <- newIVar
     activationChannel <- newTQueueIO
     executionThread <- newIORef (error "Workflow thread not yet started")
-    -- The execution thread is funny because it needs access to the instance, but the instance
-    -- needs access to the execution thread. It's a bit of a circular dependency, but
-    -- pretty innocuous since writing to the executionThread var happens before anything else
-    -- is allowed to interact with the instance.
+    -- The execution thread is funny because it needs access to the instance,
+    -- but the instance needs access to the execution thread.
+    --
+    -- It's a bit of a circular dependency, but pretty innocuous since writing
+    -- to the executionThread var happens before anything else is allowed to
+    -- interact with the instance.
     let inst = WorkflowInstance {..}
     workerThread <- liftIO $ async $ runInstanceM inst $ do
       Logging.logDebug "Start workflow execution thread"
       exec <- setUpWorkflowExecution start
-      res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
-        Logging.logDebug "Executing workflow"
-        wf <- applyStartWorkflow exec' workflowFn
-        runWorkflowToCompletion wf
+      -- The prompt wraps the interceptor and runTopLevel so suspensions =
+      -- capture their frames.
+      tag <- liftIO newPromptTag
+      status0 <-
+        liftIO $
+          prompt tag $
+            fmap RunDone $
+              inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
+                Logging.logDebug "Executing workflow"
+                wf <- applyStartWorkflow exec' workflowFn
+                runWorkflow (awaitActivationVia tag) wf
+      res <- driveRun status0
       Logging.logDebug "Workflow execution completed"
       addCommand =<< convertExitVariantToCommand res
       flushCommands
@@ -181,32 +188,42 @@ create
     pure inst
 
 
-runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM Payload
-runWorkflowToCompletion wf = do
+-- | Feed activations to a suspended run until it completes.
+driveRun :: HasCallStack => RunStatus (WorkflowExitVariant Payload) -> InstanceM (WorkflowExitVariant Payload)
+driveRun (RunDone a) = pure a
+driveRun (RunBlocked k) = do
   inst <- ask
-  let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution Payload) -> InstanceM (SuspendableWorkflowExecution Payload)
-      completeStep suspension = do
-        Logging.logDebug "Awaiting activation results from workflow"
-        -- If the workflow is blocked, then we necessarily have to signal the temporal-core
-        -- that we are stuck. Once we get unstuck (e.g. something is in the activation channel)
-        -- then we can resume the workflow.
-        --
-        -- There are a few cases like singalWithStart where a workflow will reach a blocking
-        -- state, but we aren't actually ready to flush the commands yet. So, we read
-        -- from the activation channel and resume the workflow until the channel is emptied.
-        --
-        -- Once we're blocked in that way, then we should flush the commands and wait for
-        -- the next activation(s?).
-        activation <- join $ atomically $ do
-          mActivition <- tryReadTQueue inst.activationChannel
-          case mActivition of
-            Nothing -> do
-              pure $ do
-                flushCommands
-                atomically $ readTQueue inst.activationChannel
-            Just act -> pure $ pure act
-        fmap runIdentity $ activate activation $ Identity suspension
-  supplyM completeStep wf
+  Logging.logDebug "Awaiting activation results from workflow"
+  -- signalWithStart can reach a blocking state before its buffered signals
+  -- arrive, so drain the channel and resume until it is empty before flushing.
+  activation <- join $ atomically $ do
+    mActivation <- tryReadTQueue inst.activationChannel
+    case mActivation of
+      Nothing ->
+        pure $ do
+          flushCommands
+          atomically $ readTQueue inst.activationChannel
+      Just act -> pure $ pure act
+  eStep <- stepActivation activation
+  case eStep of
+    Left err -> do
+      Logging.logWarn "Failed activation on workflow"
+      info <- readIORef inst.workflowInstanceInfo
+      let failure =
+            defMessage
+              & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
+          completion =
+            (defMessage & Completion.runId .~ rawRunId info.runId)
+              & Completion.failed .~ failure
+      liftIO (inst.workflowCompleteActivation completion >>= either throwIO pure)
+      throwIO err
+    -- A query-only activation resolves nothing and delivers no handlers; resuming
+    -- would just block again and desync core's state machine, so leave the run
+    -- suspended and loop to flush the query response on the next drain.
+    Right ([], []) -> driveRun (RunBlocked k)
+    Right (results, sigUpdateJobs) -> do
+      mapM_ injectWorkflowSignalOrUpdate sigUpdateJobs
+      driveRun =<< liftIO (k results)
 
 
 {- | This runs indefinitely, handling queries that come in after the workflow has completed.
@@ -221,9 +238,11 @@ handleQueriesAfterCompletion :: InstanceM ()
 handleQueriesAfterCompletion = forever $ do
   w <- ask
   activation <- atomically . readTQueue =<< asks activationChannel
-  completion <- UnliftIO.try $ activate activation Proxy
-
-  case completion of
+  -- The workflow has finished; the run is not resumed.
+  --
+  -- We still apply the activation's jobs before flushing.
+  eStep <- stepActivation activation
+  case eStep of
     Left err -> do
       Logging.logDebug ("Workflow failure: " <> Text.pack (show err))
       let appFailure = mkApplicationFailure err w.errorConverters
@@ -236,9 +255,8 @@ handleQueriesAfterCompletion = forever $ do
             defMessage
               & Completion.runId .~ (activation ^. Activation.runId)
               & Completion.failed .~ failureProto
-      inst <- ask
-      liftIO (inst.workflowCompleteActivation completionMessage >>= either throwIO pure)
-    Right Proxy -> do
+      liftIO (w.workflowCompleteActivation completionMessage >>= either throwIO pure)
+    Right _ -> do
       -- At this point, the workflow isn't running, so we can always flush the commands.
       flushCommands
 
@@ -332,53 +350,34 @@ addBuiltinQueryHandlers inst = do
     sdkVersion = Text.pack (showVersion version)
 
 
--- This should never raise an exception, but instead catch all exceptions
--- and set as completion failure.
-activate
-  :: Functor f
-  => WorkflowActivation
-  -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload))
-  -> InstanceM (f (SuspendableWorkflowExecution Payload))
-activate act suspension = do
+-- | Update instance state from the activation and apply its jobs under the
+-- deadlock timeout.
+--
+-- Callers decide whether to resume the run or send a completion.
+stepActivation
+  :: WorkflowActivation
+  -> InstanceM (Either SomeException ([ActivationResult], [Workflow ()]))
+stepActivation act = do
   inst <- ask
-  info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info ->
+  atomicModifyIORef' inst.workflowInstanceInfo $ \info ->
     let info' =
           info
             { historyLength = act ^. Activation.historyLength
             , continueAsNewSuggested = act ^. Activation.continueAsNewSuggested
             }
-    in (info', info')
-  let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
+    in (info', ())
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   writeIORef inst.workflowIsReplaying (act ^. Activation.isReplaying)
   modifyIORef' inst.workflowKnownFlags (HashSet.union (HashSet.fromList (act ^. Activation.availableInternalFlags)))
-  eResult <- case inst.workflowDeadlockTimeout of
-    Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
+  case inst.workflowDeadlockTimeout of
+    Nothing -> applyJobs (act ^. Activation.vec'jobs)
     Just timeoutDuration -> do
-      res <- UnliftIO.timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs) suspension
+      res <- UnliftIO.timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs)
       case res of
         Nothing -> do
           Logging.logError "Deadlock detected"
           pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
         Just res' -> pure res'
-  -- TODO: Can the completion send both successful commands and a failure
-  -- message at the same time? In theory we can make partial progress on
-  -- a workflow, but still fail at some point?
-  case eResult of
-    Left err -> do
-      Logging.logWarn "Failed activation on workflow" -- <> toLogStr (show $ workflowType info) <> " with ID " <> toLogStr (workflowId info) <> " and run ID " <> toLogStr (runId info))
-      -- TODO, failures should have source / stack trace info
-      -- TODO, convert failure type using a supplied payload converter
-      let failure =
-            defMessage
-              & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
-          completion =
-            completionBase
-              & Completion.failed .~ failure
-      liftIO (inst.workflowCompleteActivation completion >>= either throwIO pure)
-      -- I think it's morally okay to crash the worker thread here.
-      throwIO err
-    Right f -> pure f
 
 
 -- | This gives us the basic state for a workflow instance prior to initial evaluation.
@@ -404,7 +403,7 @@ setUpWorkflowExecution initializeWorkflow = do
       }
 
 
-applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (SuspendableWorkflowExecution Payload)
+applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (Workflow Payload)
 applyStartWorkflow execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
@@ -428,9 +427,7 @@ applyStartWorkflow execInput workflowFn = do
           Left msg -> do
             Logging.logError $ Text.pack ("Failed to decode workflow arguments: " <> msg)
             throwIO (ValueError msg)
-          Right act -> do
-            Logging.logDebug "Calling runWorkflow"
-            pure (runWorkflow act)
+          Right act -> pure act
 
   liftIO $ executeWorkflowBase execInput
 
@@ -698,38 +695,19 @@ data JobGroups = JobGroups
   }
 
 
+-- | Run an activation's jobs, returning resolved results plus pending
+-- signal/update handlers (updates before signals).
 applyJobs
-  :: Functor f
-  => Vector WorkflowActivationJob
-  -- We use the functor here because we need to call applyJobs both before and after a workflow has completed.
-  -- During workflow execution, identity is the functor, but after a workflow has completed, Proxy is the functor
-  -- since we don't actually have any continuation to run.
-  -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload))
-  -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
-applyJobs jobs fAwait = UnliftIO.try $ do
+  :: Vector WorkflowActivationJob
+  -> InstanceM (Either SomeException ([ActivationResult], [Workflow ()]))
+applyJobs jobs = UnliftIO.try $ do
   Logging.logDebug $ Text.pack ("Applying jobs: " <> show jobs)
   let JobGroups {..} = getJobGroups
   patchNotifications
   queryWorkflows
   otherJobs
   activationResults <- applyResolutions resolutions
-  let activations = activationResults
-  pure $
-    ( \(Await wf) ->
-        -- If we don't have any activations or signals, then no useful state could have changed.
-        -- This happens when we receive non-resolving jobs like queries. If we reactivate
-        -- the workflow, it will just block again, which we don't want, because it confuses
-        -- the SDK core's state machine.
-
-        case activations of
-          [] -> case updateWorkflows ++ signalWorkflows of
-            [] -> suspend (Await wf)
-            jobs' -> lift (traverse injectWorkflowSignalOrUpdate jobs') *> wf []
-          _ -> case updateWorkflows ++ signalWorkflows of
-            [] -> wf activations
-            jobs' -> lift (traverse injectWorkflowSignalOrUpdate jobs') *> wf activations
-    )
-      <$> fAwait
+  pure (activationResults, updateWorkflows ++ signalWorkflows)
   where
     getJobGroups =
       V.foldr

@@ -6,8 +6,10 @@ import Conduit
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, bracket)
 import Control.Exception.Annotated (checkpoint)
+import Control.Monad (forever)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
+import System.Timeout (timeout)
 import Data.Aeson (toJSON)
 import Data.Int (Int64)
 import Data.ProtoLens (defMessage)
@@ -42,6 +44,28 @@ spec = withTestServer_ tests
 
 tests :: SpecWith TestEnv
 tests = do
+  describe "Deadlock detection" $ do
+    -- Pending: the deadlock timeout wraps only applyJobs, not fiber execution,
+    -- so a non-suspending loop hangs instead of being detected.
+    xit "detects a non-suspending infinite-loop workflow body as a deadlock" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow ()
+          workflow = do
+            counter <- W.newStateVar (0 :: Int)
+            -- Never suspends, so never yields to the scheduler.
+            forever (W.modifyStateVar counter (+ 1))
+          wf = W.provideWorkflow defaultCodec "deadlockLoop" workflow
+          conf = configure () wf $ do
+            baseConf
+            setDeadlockTimeout (Just 500_000)
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+      outcome <-
+        timeout 15_000_000 $
+          (Catch.try (withWorker conf $ useClient (C.start wf.reference "deadlockLoopWf" opts >>= C.waitWorkflowResult)) :: IO (Either SomeException ()))
+      case outcome of
+        Just (Left e) -> show e `shouldContain` "eadlock"
+        Just (Right _) -> expectationFailure "workflow completed despite a non-suspending infinite loop"
+        Nothing -> expectationFailure "deadlock not detected within the outer bound"
+
   describe "Workflow Basics" $ do
     specify "should run a no-op workflow" $ \TestEnv {..} -> do
       let workflow :: W.Workflow ()

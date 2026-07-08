@@ -71,6 +71,7 @@ module Temporal.Worker (
   setNamespace,
   setTaskQueue,
   setBuildId,
+  setDeadlockTimeout,
   setIdentity,
   setMaxCachedWorkflows,
   setMaxOutstandingWorkflowTasks,
@@ -282,6 +283,23 @@ addErrorConverter :: (Exception e) => (e -> ApplicationFailure) -> ConfigM actEn
 addErrorConverter f = ConfigM $ modify' $ \conf ->
   conf
     { applicationErrorConverters = ApplicationFailureHandler f : applicationErrorConverters conf
+    }
+
+
+{- | Set the per-activation deadlock-detection timeout, in microseconds.
+
+If a workflow activation does not complete within this budget, it is treated as
+a deadlock and the activation fails.
+
+Defaults to @'Just' 1000000@ (1s); @'Nothing'@ disables detection.
+
+__NOTE__: Currently only covers activation-job application, not workflow code
+itself.
+-}
+setDeadlockTimeout :: Maybe Int -> ConfigM actEnv ()
+setDeadlockTimeout t = ConfigM $ modify' $ \conf ->
+  conf
+    { deadlockTimeout = t
     }
 
 
