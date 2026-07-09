@@ -82,6 +82,7 @@ module Temporal.Client (
   -- * Workflow history utilities
   fetchHistory,
   streamEvents,
+  streamEventsWith,
   FollowOption (..),
 
   -- * List workflows
@@ -1011,15 +1012,28 @@ streamEvents
   => FollowOption
   -> GetWorkflowExecutionHistoryRequest
   -> ConduitT i HistoryEvent m ()
-streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
+streamEvents followOpt baseReq = do
+  c <- askWorkflowClient
+  let fetch req =
+        liftIO (getWorkflowExecutionHistory c.clientCore req)
+          >>= either (throwIO . Temporal.Exception.coreRpcErrorToRpcError) pure
+  streamEventsWith fetch followOpt baseReq
+
+
+{- | 'streamEvents' with the history fetch injected. Factored out so the
+follow / pagination loop can be tested without a live server. -}
+streamEventsWith
+  :: (Monad m)
+  => (GetWorkflowExecutionHistoryRequest -> m GetWorkflowExecutionHistoryResponse)
+  -> FollowOption
+  -> GetWorkflowExecutionHistoryRequest
+  -> ConduitT i HistoryEvent m ()
+streamEventsWith fetch followOpt = go
   where
-    go c req = do
-      res <- liftIO $ getWorkflowExecutionHistory c.clientCore req
-      case res of
-        Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-        Right x -> do
-          yieldMany (x ^. RR.history . History.events)
-          for_ (decideLoop baseReq x) (go c)
+    go req = do
+      x <- lift (fetch req)
+      yieldMany (x ^. RR.history . History.events)
+      for_ (decideLoop req x) go
     decideLoop :: GetWorkflowExecutionHistoryRequest -> GetWorkflowExecutionHistoryResponse -> Maybe GetWorkflowExecutionHistoryRequest
     decideLoop req res =
       if V.null (res ^. RR.history . History.vec'events)
@@ -1047,7 +1061,9 @@ streamEvents followOpt baseReq = askWorkflowClient >>= \c -> go c baseReq
                           & RR.nextPageToken .~ ""
                           & RR.execution %~ (RR.runId .~ (attrs ^. History.newExecutionRunId))
                 ThisRunOnly -> Nothing
-              _ -> Nothing
+              -- A non-terminal last event means the run's history continues on
+              -- the next page; keep paginating rather than truncating here.
+              _ -> nextPage
       where
         nextPage =
           if res ^. RR.nextPageToken == ""

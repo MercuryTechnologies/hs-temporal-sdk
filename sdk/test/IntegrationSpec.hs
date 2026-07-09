@@ -58,7 +58,6 @@ import IntegrationSpec.Updates
 import Lens.Family2
 import OpenTelemetry.Trace
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
-import Proto.Temporal.Api.History.V1.Message (WorkflowExecutionFailedEventAttributes (..))
 import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
 import RequireCallStack
 import System.Directory
