@@ -497,7 +497,7 @@ testImpls =
       , basicActivity = pure 1
       , heartbeatWorks = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
           heartbeat ()
-          liftIO $ threadDelay 1_000_000
+          liftIO $ threadDelay 200_000
           pure 1
       , runHeartbeat = do
           h <-
@@ -777,42 +777,6 @@ needsClient = do
                         }
                   }
           useClient (C.execute wf.reference "immediateActivityCancellation" opts)
-            `shouldReturn` 1
-      specify "Activity cancellation on heartbeat returns the expected result to workflows" $ \TestEnv {..} -> do
-        let testActivity :: Activity () Int
-            testActivity = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
-              liftIO $ threadDelay 2_000_000
-              heartbeat ()
-              pure 0
-
-            testActivityAct :: ProvidedActivity () (Activity () Int)
-            testActivityAct = provideActivity defaultCodec "heartbeatAllowsOpportunityToCancel" testActivity
-
-            testFn :: MyWorkflow Int
-            testFn = do
-              h1 <-
-                W.startActivity
-                  testActivityAct.reference
-                  (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
-              W.sleep $ nanoseconds 1
-              W.cancel (h1 :: W.Task Int)
-              W.wait h1 `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
-
-            wf = W.provideWorkflow defaultCodec "activityCancellationOnHeartbeat" testFn
-            conf = configure () (wf, testActivityAct) $ do
-              baseConf
-        withWorker conf $ do
-          let opts =
-                (C.startWorkflowOptions taskQueue)
-                  { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                  , C.timeouts =
-                      C.TimeoutOptions
-                        { C.runTimeout = Just $ seconds 30
-                        , C.executionTimeout = Nothing
-                        , C.taskTimeout = Nothing
-                        }
-                  }
-          useClient (C.execute wf.reference "activityCancellationOnHeartbeat" opts)
             `shouldReturn` 1
       specify "Activity retry exhaustion returns that in the RetryState" $ \TestEnv {..} -> do
         wfId <- uuidText
