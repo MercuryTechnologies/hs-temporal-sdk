@@ -151,6 +151,7 @@ tests:
     source-dirs: test
     other-modules:
       Spec,
+      ClientHistorySpec,
       ContinueAsNewSpec,
       DurationSpec,
       IntegrationSpec,
