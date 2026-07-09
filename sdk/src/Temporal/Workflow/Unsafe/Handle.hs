@@ -70,7 +70,7 @@ instance Cancel (ExternalWorkflowHandle a) where
     inst <- ask
     s@(Sequence sVal) <- nextExternalCancelSequence
     res <- newTrackedIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalCancels = HashMap.insert s res (externalCancels seqMaps)}
     addCommand
       ( defMessage
