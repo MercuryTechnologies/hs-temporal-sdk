@@ -55,35 +55,26 @@ awaitActivationVia tag = do
 
 -- How this works:
 --
--- A workflow instance executes a `Workflow` computation on its own thread.
--- There is a cooperative interplay between the main instance thread
--- responsible for executing WorkflowActivations and the workflow thread.
+-- runWorkflow drives a single workflow run as a tree of cooperatively
+-- scheduled fibers on the thread advancing the run (the worker's activator
+-- thread).
 --
--- The workflow thread evaluates computations as deeply as possible before
--- blocking and forcing the WorkfowActivation processing code to submit
--- a WorkflowActivationCompletion to the core worker.
+-- Fibers are stepped as far as they go, then block on IVars whose results can
+-- only be supplied by a future activation.
+-- 
+-- When nothing is runnable, the whole run suspends: `awaitAction`
+-- captures its continuation up to the prompt installed by `runActivation`,
+-- which drains the pending commands into a completion and, on the next
+-- activation, fills the awaited IVars and resumes the continuation.
 --
--- This has a lot of similarities to ideas from Haxl's GenHaxl monad with
--- regards to suspending and resuming as we get results back, but is different
--- in that we want to treat execution of async tasks
--- (executeChildWorkflow, timers, etc.) as awaitable and cancellable.
--- That is, we return a handle similar to an Async value and
--- let the workflow writer choose if/when to suspend. It's also viable
--- to just start a workflow or activity for its side effects and ignore the result
+-- The scheduler borrows from Haxl's GenHaxl -- run work until it blocks, then
+-- suspend -- but treats async operations (e.g. activities, timers, child
+-- workflows) as first-class awaitable/cancellable handles rather than an
+-- implicit dependency graph: the workflow decides if and when to await a handle.
 --
--- Another difference is that workflow signals allow for these handles to be
--- altered out of band, so we can't just traverse the tree and trust the
--- computation flow to be fully within our control. I think this is fine,
--- but it does mean that we might need to update the scheduler code below
--- to allow injecting these signals into the run queue.
---
--- Regardless, once we signal a WorkflowActivationCompletion, we wait in a
--- suspended state.
---
--- The core worker will eventually activate the instance again, at which
--- point we use Sequence values in the variants of the different workflow
--- activation jobs to fill any corresponding handles with their
--- results and continue execution.
+-- Signals and updates may fill handles out of band, so the scheduler also
+-- injects their jobs into the run queue.
+-- 
 --                                                              ┌────────────────────┐
 --                               Run a Workflow action that     │                    │
 --                               fills an IVar.                 │                    │
@@ -110,7 +101,7 @@ awaitActivationVia tag = do
 --                  ▼             │                  ▼                                   │
 --     ┌────────────────────────┐ ┌────────────────────────────────────┐    ┌────────────────────────┐
 --     │                        │ │                                    │    │                        │
---     │ checkActivationResults │ │  flushCommandsAndAwaitActivation   │───▶│ waitActivationResults  │
+--     │ checkActivationResults │ │           awaitActivation          │───▶│ waitActivationResults  │
 --     │                        │ │                                    │    │                        │
 --     └────────────────────────┘ └────────────────────────────────────┘    └────────────────────────┘
 -- Look at queued workflow         If we don't have any filled
@@ -216,7 +207,7 @@ runWorkflow awaitAction wf = provideCallStack $ do
 
     awaitActivation :: ContinuationEnv -> InstanceM ()
     awaitActivation env = do
-      Logging.logDebug =<< withRunId "flushCommandsAndAwaitActivation"
+      Logging.logDebug =<< withRunId "awaitActivation"
       waitActivationResults env
 
     checkActivationResults :: ContinuationEnv -> InstanceM JobList
@@ -297,15 +288,14 @@ injectWorkflowSignalOrUpdate signal = do
 
 {- | Run one fiber step under the fiber's own OpenTelemetry context.
 
-Fibers for one workflow instance all interleave cooperatively on that
-instance's single dedicated GHC thread, so a fiber never migrates threads;
-but because sibling fibers share that thread, the thread-local OTel context
-left behind by one fiber cannot be trusted by the next. Instead each fiber
-owns a context slot: it is attached before
-the step, snapshotted back after the step (whether the fiber completed or
-suspended), and the ambient context is restored for the scheduler. A fiber
-that has not run yet inherits the ambient context of its first step, which
-is the workflow's root context.
+Fibers for one workflow instance interleave cooperatively on whichever thread
+is advancing the current activation, and a fiber's continuation may resume on
+a different thread on a later activation. Either way the thread-local OTel
+context left behind by one fiber cannot be trusted by the next, so each fiber
+owns a context slot: it is attached before the step, snapshotted back after the
+step (whether the fiber completed or suspended), and the ambient context is
+restored for the scheduler. A fiber that has not run yet inherits the ambient
+context of its first step, which is the workflow's root context.
 -}
 withFiberContext :: FiberLocals -> InstanceM a -> InstanceM a
 withFiberContext locals act = do

@@ -408,10 +408,10 @@ you have gone wrong: acquire it in an activity instead.
 Caveats, made explicit:
 
   * 'mask' and 'uninterruptibleMask' do NOT block async exceptions. The
-    @restore@ argument is 'id'. Do not rely on them for atomicity. (A given
-    workflow instance runs entirely on one dedicated GHC thread and its
-    fibers are scheduled cooperatively, so there is no concurrent thread
-    racing to deliver an async exception mid-region anyway.)
+    @restore@ argument is 'id'. Do not rely on them for atomicity. A given
+    workflow run's activations are serialised by its per-run 'MVar' and its
+    fibers are scheduled cooperatively, so within a region there is no
+    concurrent thread racing to deliver an async exception anyway.
 
   * 'generalBracket' runs @release@ for 'Catch.ExitCaseSuccess' and
     'Catch.ExitCaseException', so @bracket@\/@finally@\/@onException@ close a
@@ -591,7 +591,7 @@ data ActivationResult
 'Temporal.WorkflowInstance.activate'.
 
 The enclosing 'MVar' doubles as the per-run lock: taking it serialises the
-activations of one run.
+activations of one run, so all per-run state is mutated single-threaded.
 
 A run begins 'ExecNotStarted', holding the thunk that sets up execution and runs
 to the first suspension; each step then parks the one-shot resume continuation
