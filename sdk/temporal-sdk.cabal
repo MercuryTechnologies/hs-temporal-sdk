@@ -103,7 +103,6 @@ library
       aeson
     , annotated-exception
     , async
-    , atomic-primops
     , base >=4.7 && <5
     , base64
     , bytestring
@@ -231,7 +230,6 @@ test-suite temporal-sdk-tests
       aeson
     , annotated-exception
     , async
-    , atomic-primops
     , base
     , base64
     , bytestring

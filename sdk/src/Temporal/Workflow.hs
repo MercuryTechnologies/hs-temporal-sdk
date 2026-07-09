@@ -279,7 +279,6 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (Value)
-import Data.Atomics (atomicModifyIORefCAS)
 import qualified Data.Bits as Bits
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
@@ -415,7 +414,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
     resultSlot <- newTrackedIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
 
     i <- readIORef inst.workflowInstanceInfo
@@ -545,7 +544,7 @@ startNexusOperation client operationName opts input = ilift $ do
   s@(Sequence nexusSeq) <- nextNexusOperationSequence
   startVar <- newIVar
   resultVar <- newIVar
-  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+  modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
     seqMaps {nexusOperations = HashMap.insert s (NexusOperationHandles startVar resultVar) (nexusOperations seqMaps)}
 
   encodedInput <- liftIO $ payloadProcessorEncode inst.payloadProcessor input
@@ -655,7 +654,7 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
                     -- & Command.headers .~ _
                 )
     addCommand cmd
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalSignals = HashMap.insert s resVar seqMaps.externalSignals}
     pure $
       Task
@@ -741,7 +740,7 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
                 , childWorkflowId = wfId
                 }
 
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+        modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
           seqMaps {childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows}
 
         addCommand cmd
@@ -844,7 +843,7 @@ scheduleLocalActivityAttempt name opts typedPayloads attemptNum origSchedTime ca
       intercept = inst.outboundInterceptor.scheduleLocalActivity
   liftIO $ intercept (LocalActivityInput name typedPayloads opts s) $ \localInput -> runInIO $ do
     resultSlot <- newTrackedIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
     let localOpts = localInput.localOptions
     hdrs <- processorEncodePayloads inst.payloadProcessor localOpts.headers
@@ -1388,8 +1387,10 @@ setSignalHandler (signalRef -> KnownSignal n codec) f = do
       HashMap.insert (Just n) handle' handlers
     -- Get and clear any buffered signals for this signal name
     -- Uses appEndo to convert the Endo diff-list back to a regular list
-    liftIO $ atomicModifyIORefCAS inst.workflowBufferedSignals $ \buf ->
-      (HashMap.delete n buf, foldMap (`appEndo` []) $ HashMap.lookup n buf)
+    liftIO $ do
+      buf <- readIORef inst.workflowBufferedSignals
+      writeIORef inst.workflowBufferedSignals (HashMap.delete n buf)
+      pure $ foldMap (`appEndo` []) (HashMap.lookup n buf)
   -- Process any buffered signals (matching TypeScript SDK behavior), routing
   -- them through the signal inbound interceptor with their original headers.
   unless (null bufferedSignals) $ do
@@ -1469,7 +1470,7 @@ createTimer ts = provideCallStack $ ilift $ do
                    )
       Logging.logDebug "Add command: sleep"
       res <- newTrackedIVar
-      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
         seqMaps {timers = HashMap.insert s res seqMaps.timers}
       addCommand cmd
       pure $ Just $ Timer {timerSequence = s, timerHandle = res}
@@ -1549,7 +1550,7 @@ instance Cancel Timer where
         (Ok ())
         inst.workflowInstanceContinuationEnv
 
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {timers = HashMap.delete t.timerSequence seqMaps.timers}
 
     Logging.logDebug "finished putIVar: cancelTimer"
@@ -1633,7 +1634,7 @@ waitCondition c@(Condition m) = do
         inst <- ask
         res <- newTrackedIVar
         conditionSeq <- nextConditionSequence
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+        modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
           seqMaps
             { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, touchedVars) seqMaps.conditionsAwaitingSignal
             }

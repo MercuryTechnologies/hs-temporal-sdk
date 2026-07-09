@@ -9,7 +9,6 @@ import Control.Exception.Base (NoMatchingContinuationPrompt (..))
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Atomics (atomicModifyIORefCAS)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.HashSet (HashSet)
@@ -93,8 +92,7 @@ askInstance = Workflow $ const ask
 addCommand :: WorkflowCommand -> InstanceM ()
 addCommand command = do
   inst <- ask
-  atomically $ do
-    modifyTVar' inst.workflowCommands $ \cmds -> push command cmds
+  modifyIORef' inst.workflowCommands $ \cmds -> push command cmds
 
 
 {- | This function can be used to trace a bunch of lines to stdout when
@@ -510,10 +508,11 @@ instance ThawedGen StdGen Workflow where
 goes straight onto the front of the run queue.
 -}
 parkTask :: ContinuationEnv -> FiberLocals -> FiberTask b -> IVar b -> IVar a -> InstanceM ()
-parkTask env locals !task !resultIVar IVar {ivarRef = ref} =
-  join $ liftIO $ atomicModifyIORefCAS ref $ \case
-    IVarEmpty list -> (IVarEmpty (JobCons env locals task resultIVar list), pure ())
-    full -> (full, modifyIORef' env.runQueueRef (JobCons env locals task resultIVar))
+parkTask env locals !task !resultIVar IVar {ivarRef = ref} = do
+  contents <- readIORef ref
+  case contents of
+    IVarEmpty list -> writeIORef ref (IVarEmpty (JobCons env locals task resultIVar list))
+    _full -> modifyIORef' env.runQueueRef (JobCons env locals task resultIVar)
 
 
 {- | Yield control back to the workflow scheduler, re-queueing the current
@@ -686,7 +685,8 @@ suspendVia tag ivar = do
   control0
     tag
     ( \k -> pure $ SBlocked ivar $ \rv -> do
-        alreadyResumed <- atomicModifyIORefCAS resumed (\r -> (True, r))
+        alreadyResumed <- readIORef resumed
+        writeIORef resumed True
         when alreadyResumed $
           throwIO $
             RuntimeError "Internal invariant violation: a suspended workflow fiber was resumed more than once. Please report this as a bug in hs-temporal-sdk."
@@ -885,7 +885,10 @@ newIVar = do
 newTrackedIVar :: InstanceM (IVar a)
 newTrackedIVar = do
   inst <- ask
-  ivarId <- liftIO $ atomicModifyIORefCAS inst.workflowIVarCounter (\n -> let !n' = n + 1 in (n', n'))
+  ivarId <- liftIO $ do
+    n <- readIORef inst.workflowIVarCounter
+    let !n' = n + 1
+    n' <$ writeIORef inst.workflowIVarCounter n'
   ivarRef <- newIORef $ IVarEmpty JobNil
   pure IVar {..}
 
@@ -990,26 +993,25 @@ newStateVar a = Workflow $ \_ -> do
 reevaluateDependentConditions :: StateVar a -> InstanceM ()
 reevaluateDependentConditions cref = do
   inst <- ask
-  join $ atomically $ do
-    seqMaps <- readTVar inst.workflowSequenceMaps
-    let pendingConds = seqMaps.conditionsAwaitingSignal
-        (reactivateConds, unactivatedConds) =
-          HashMap.foldlWithKey'
-            ( \(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) ->
-                if cref.stateVarId `Set.member` varDependencies
-                  then
-                    ( reactivateConds' >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
-                    , unactivatedConds'
-                    )
-                  else
-                    ( reactivateConds'
-                    , HashMap.insert k v unactivatedConds'
-                    )
-            )
-            (pure (), mempty)
-            pendingConds
-    writeTVar inst.workflowSequenceMaps (seqMaps {conditionsAwaitingSignal = unactivatedConds})
-    pure reactivateConds
+  seqMaps <- readIORef inst.workflowSequenceMaps
+  let pendingConds = seqMaps.conditionsAwaitingSignal
+      (reactivateConds, unactivatedConds) =
+        HashMap.foldlWithKey'
+          ( \(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) ->
+              if cref.stateVarId `Set.member` varDependencies
+                then
+                  ( reactivateConds' >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
+                  , unactivatedConds'
+                  )
+                else
+                  ( reactivateConds'
+                  , HashMap.insert k v unactivatedConds'
+                  )
+          )
+          (pure (), mempty)
+          pendingConds
+  writeIORef inst.workflowSequenceMaps (seqMaps {conditionsAwaitingSignal = unactivatedConds})
+  reactivateConds
 
 
 class MonadReadStateVar m where
@@ -1116,8 +1118,8 @@ data WorkflowInstance = WorkflowInstance
     -- @used_internal_flags@ so behaviour changes gated on a flag replay
     -- deterministically (histories predating a flag simply lack its id).
     workflowKnownFlags :: {-# UNPACK #-} !(IORef (HashSet Word32))
-  , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
-  , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
+  , workflowCommands :: {-# UNPACK #-} !(IORef (Reversed WorkflowCommand))
+  , workflowSequenceMaps :: {-# UNPACK #-} !(IORef SequenceMaps)
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
   , -- | Signals that arrived before their handler was registered.
     -- These are buffered and delivered when setSignalHandler is called.
@@ -1390,6 +1392,7 @@ instance Monoid WorkflowOutboundInterceptor where
 nextVarIdSequence :: InstanceM Sequence
 nextVarIdSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = varId seqs
-    in (seqs {varId = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {varId = succ seq'}

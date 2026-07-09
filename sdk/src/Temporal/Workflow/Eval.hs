@@ -131,7 +131,7 @@ awaitActivationVia tag = do
 runWorkflow :: forall a. HasCallStack => IO [ActivationResult] -> (RequireCallStackImpl => Workflow a) -> InstanceM a
 runWorkflow awaitAction wf = provideCallStack $ do
   inst <- ask
-  pendingActivations <- newTVarIO []
+  pendingActivations <- newIORef []
   finalResult@IVar {ivarRef = resultRef} <- newIVar -- where to put the final result
   mainLocals <- newFiberLocals
   let
@@ -221,10 +221,8 @@ runWorkflow awaitAction wf = provideCallStack $ do
     checkActivationResults :: ContinuationEnv -> InstanceM JobList
     checkActivationResults _env = do
       Logging.logDebug =<< withRunId "checkActivationResults"
-      comps <- atomically $ do
-        c <- readTVar pendingActivations
-        writeTVar pendingActivations []
-        pure c
+      comps <- readIORef pendingActivations
+      writeIORef pendingActivations []
       case comps of
         [] -> do
           Logging.logDebug =<< withRunId "No new activation results"
@@ -254,13 +252,13 @@ runWorkflow awaitAction wf = provideCallStack $ do
     waitActivationResults env = do
       Logging.logDebug =<< withRunId "waitActivationResults"
       newActivations <- do
-        activations <- readTVarIO pendingActivations
+        activations <- readIORef pendingActivations
         if null activations
           then liftIO awaitAction
           else do
-            atomically $ writeTVar pendingActivations []
+            writeIORef pendingActivations []
             return activations
-      atomically $ writeTVar pendingActivations newActivations
+      writeIORef pendingActivations newActivations
       jobs <- readIORef env.runQueueRef
       case jobs of
         JobNil -> emptyRunQueue env

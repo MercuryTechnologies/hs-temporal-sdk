@@ -19,7 +19,6 @@ module Temporal.Workflow.Internal.Instance (
 ) where
 
 import Control.Monad.Reader
-import Data.Atomics (atomicModifyIORefCAS)
 import qualified Data.HashSet as HashSet
 import Data.ProtoLens
 import qualified Data.Text as T
@@ -44,10 +43,8 @@ drainCommands = do
   inst <- ask
   info <- readIORef inst.workflowInstanceInfo
   knownFlags <- readIORef inst.workflowKnownFlags
-  cmds <- atomically $ do
-    currentCmds <- readTVar inst.workflowCommands
-    writeTVar inst.workflowCommands $ Reversed []
-    pure currentCmds
+  cmds <- readIORef inst.workflowCommands
+  writeIORef inst.workflowCommands $ Reversed []
   let completionSuccessful :: Core.Success
       completionSuccessful =
         defMessage
@@ -65,54 +62,61 @@ drainCommands = do
 nextExternalCancelSequence :: InstanceM Sequence
 nextExternalCancelSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = externalCancel seqs
-    in (seqs {externalCancel = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {externalCancel = succ seq'}
 
 
 nextChildWorkflowSequence :: InstanceM Sequence
 nextChildWorkflowSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = childWorkflow seqs
-    in (seqs {childWorkflow = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {childWorkflow = succ seq'}
 
 
 nextExternalSignalSequence :: InstanceM Sequence
 nextExternalSignalSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = externalSignal seqs
-    in (seqs {externalSignal = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {externalSignal = succ seq'}
 
 
 nextTimerSequence :: InstanceM Sequence
 nextTimerSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = timer seqs
-    in (seqs {timer = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {timer = succ seq'}
 
 
 nextActivitySequence :: InstanceM Sequence
 nextActivitySequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = activity seqs
-    in (seqs {activity = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {activity = succ seq'}
 
 
 nextConditionSequence :: InstanceM Sequence
 nextConditionSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = condition seqs
-    in (seqs {condition = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {condition = succ seq'}
 
 
 nextNexusOperationSequence :: InstanceM Sequence
 nextNexusOperationSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = nexusOperation seqs
-    in (seqs {nexusOperation = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {nexusOperation = succ seq'}
