@@ -130,6 +130,12 @@ module Temporal.Workflow (
   ChildWorkflowHandle,
   Wait (..),
   Cancel (..),
+  -- * Awaitables (return the first, keep the rest running)
+  Pending,
+  Awaitable (..),
+  awaitableWait,
+  poll,
+  select,
   WorkflowHandle (..),
   waitChildWorkflowResult,
   waitChildWorkflowStart,
@@ -337,7 +343,7 @@ import Temporal.Workflow.Unsafe.Handle
 import Temporal.Workflow.Update
 import Temporal.Workflow.WorkflowInstance
 import Temporal.WorkflowInstance
-import UnliftIO
+import UnliftIO hiding (poll)
 
 
 -- class MonadWorkflow m where
@@ -1519,12 +1525,14 @@ sleepUntilUTCTime :: RequireCallStack => UTCTime -> Workflow ()
 sleepUntilUTCTime = sleepUntilSystemTime . utcToSystemTime
 
 
+instance Awaitable Timer where
+  type Awaited Timer = ()
+  toPending t = Pending (timerHandle t) deliverResultVal
+
+
 instance Wait Timer where
   type WaitResult Timer = Workflow ()
-  wait :: RequireCallStack => Timer -> WaitResult Timer
-  wait t = do
-    updateCallStackW
-    getIVar $ timerHandle t
+  wait = awaitableWait
 
 
 instance Cancel Timer where

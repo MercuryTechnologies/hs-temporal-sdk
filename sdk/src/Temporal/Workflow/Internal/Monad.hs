@@ -11,11 +11,14 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Atomics (atomicModifyIORefCAS)
+import Data.Foldable (for_)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.HashSet (HashSet)
 import qualified Data.HashSet as HashSet
 import Data.Kind
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import Data.Map.Strict (Map)
 import Data.Monoid (Endo (..))
 import Data.Set (Set)
@@ -894,6 +897,100 @@ tryReadIVar IVar {ivarRef = ref} = Workflow $ \_ -> do
     IVarFull (ThrowWorkflow e') -> throwWorkflow e'
     IVarFull (ThrowInternal e') -> throwIO e'
     IVarEmpty _ -> pure Nothing
+
+
+-- | A type-erased 'IVar', for 'awaitAny'.
+data SomeIVar = forall v. SomeIVar (IVar v)
+
+
+{- | A first-class handle to a single pending result: the 'IVar' the result will
+be delivered on, paired with a decoder from its raw 'ResultVal' to @a@.
+
+It is a 'Functor' but deliberately not an 'Applicative'\/'Monad': those would
+admit an effect between a bind and the suspension point, and a 'Pending's 
+only valid suspension point is the 'IVar' it wraps.
+-}
+data Pending a = forall v. Pending !(IVar v) !(ResultVal v -> IO a)
+
+
+instance Functor Pending where
+  fmap f (Pending ivar dec) = Pending ivar (fmap f . dec)
+
+
+-- | The 'IVar' underlying a 'Pending', type-erased.
+pendingIVar :: Pending a -> SomeIVar
+pendingIVar (Pending ivar _) = SomeIVar ivar
+
+
+-- | Block until the 'Pending' resolves, then decode.
+-- 
+-- __NOTE__: Callers should prefer the polymorphic 'Temporal.Workflow.wait'.
+awaitPending :: Pending a -> Workflow a
+awaitPending (Pending i@(IVar {ivarId = vid, ivarRef = ref}) dec) = Workflow $ \env -> do
+  e <- readIORef ref
+  rv <- case e of
+    IVarFull r -> do
+      when (vid /= 0) $ removeBlockedStack vid
+      pure r
+    IVarEmpty _ -> do
+      when (vid /= 0) $ recordBlockedStack vid
+      r <- liftIO $ fiberSuspend env i
+      when (vid /= 0) $ removeBlockedStack vid
+      pure r
+  liftIO $ dec rv
+
+
+-- | Non-blocking read.
+-- 
+-- __NOTE__: Callers should prefer the polymorphic 'Temporal.Workflow.poll'.
+pollPending :: Pending a -> Workflow (Maybe a)
+pollPending (Pending IVar {ivarRef = ref} dec) = Workflow $ \_ -> do
+  e <- readIORef ref
+  case e of
+    IVarFull r -> Just <$> liftIO (dec r)
+    IVarEmpty _ -> pure Nothing
+
+
+-- | Block until one of @sources@ resolves; return its index, or the lowest of
+-- two indices if both resolve simultaneously.
+awaitAny :: FiberEnv -> NonEmpty SomeIVar -> InstanceM Int
+awaitAny env sources = do
+  let cenv = fiberContEnv env
+      locals = fiberLocals env
+      srcs = NE.toList sources
+      scanFull :: Int -> [SomeIVar] -> InstanceM (Maybe Int)
+      scanFull _ [] = pure Nothing
+      scanFull !i (SomeIVar ivar : rest) = do
+        c <- readIORef (ivarRef ivar)
+        case c of
+          IVarFull _ -> pure (Just i)
+          IVarEmpty _ -> scanFull (i + 1) rest
+  mFast <- scanFull 0 srcs
+  case mFast of
+    Just i -> pure i
+    Nothing -> do
+      wakeup <- newIVar
+      for_ (reverse (zip [0 :: Int ..] srcs)) $ \(idx, SomeIVar iv) -> do
+        wakerRes <- newIVar
+        let waker = FreshTask $ Workflow $ \_ ->
+              liftIO $ putIVar wakeup (Ok idx) cenv
+        parkTask cenv locals waker wakerRes iv
+      liftIO (fiberSuspend env wakeup) >>= deliverResultVal
+
+
+{- | Return whichever of two 'Pending's resolves first; unlike 'race', the 'Pending'
+that doesn't resolve is __not__ canceled.
+
+If both 'Pending's resolve simultaneously, the first is returned on the 'Left'.
+
+-- __NOTE__: Callers should prefer the polymorphic 'Temporal.Workflow.select'.
+-}
+selectPending :: Pending a -> Pending b -> Workflow (Either a b)
+selectPending l r = Workflow $ \env -> do
+  idx <- awaitAny env (pendingIVar l :| [pendingIVar r])
+  if idx == 0
+    then Left <$> unWorkflow (awaitPending l) env
+    else Right <$> unWorkflow (awaitPending r) env
 
 
 {- | A very restricted Monad that allows for reading 'StateVar' values. This Monad

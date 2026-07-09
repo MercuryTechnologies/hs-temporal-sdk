@@ -2,6 +2,7 @@ module TimerSpec where
 
 import Control.Exception (SomeException)
 import qualified Control.Monad.Catch as Catch
+import Data.Maybe (isJust, isNothing)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime, diffUTCTime)
 import qualified Temporal.Client as C
@@ -266,3 +267,115 @@ tests = describe "Timers and Sleep" $ do
       withWorker conf $ do
         let opts = defaultStartOpts taskQueue
         useClient (C.execute wf.reference "timerInCatch" opts) `shouldReturn` "recovered"
+
+  describe "Awaitable (select / poll / await)" $ do
+    specify "select returns the source that resolves first (left-biased)" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Text
+          workflow = do
+            mfast <- W.createTimer (nanoseconds 1)
+            mslow <- W.createTimer (minutes 100)
+            case (mfast, mslow) of
+              (Just fast, Just slow) -> do
+                r <- W.select fast slow
+                pure $ either (const "fast") (const "slow") r
+              _ -> pure "no-timer"
+          wf = W.provideWorkflow defaultCodec "awaitableSelect" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient (C.execute wf.reference "awaitableSelect" opts) `shouldReturn` "fast"
+
+    specify "poll is Nothing before the source resolves and Just after" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Bool, Bool)
+          workflow = do
+            mt <- W.createTimer (nanoseconds 10)
+            case mt of
+              Nothing -> pure (False, False)
+              Just t -> do
+                before <- W.poll t
+                W.wait t
+                after <- W.poll t
+                pure (isNothing before, isJust after)
+          wf = W.provideWorkflow defaultCodec "awaitablePoll" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "awaitablePoll" opts) `shouldReturn` (True, True)
+
+    specify "wait on a reified Awaitable blocks until it resolves" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow Bool
+          workflow = do
+            earlier <- W.now
+            mt <- W.createTimer (nanoseconds 10)
+            case mt of
+              Nothing -> pure False
+              Just t -> do
+                W.wait (W.toPending t)
+                later <- W.now
+                pure (later > earlier)
+          wf = W.provideWorkflow defaultCodec "awaitableAwait" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "awaitableAwait" opts) `shouldReturn` True
+
+    specify "select is left-biased when both sources are already resolved" $ \TestEnv {..} -> do
+      -- Resolve a timer, then select it against itself. Both sources are full
+      -- when select runs, so the index-order scan must return the left one
+      -- without parking (parking a full source jumps the run queue and would
+      -- flip the bias).
+      let workflow :: MyWorkflow Text
+          workflow = do
+            mt <- W.createTimer (nanoseconds 10)
+            case mt of
+              Nothing -> pure "no-timer"
+              Just t -> do
+                W.wait t
+                r <- W.select (fmap (const ("l" :: Text)) (W.toPending t)) (fmap (const "r") (W.toPending t))
+                pure (either id id r)
+          wf = W.provideWorkflow defaultCodec "awaitableSelectFastTie" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "awaitableSelectFastTie" opts) `shouldReturn` "l"
+
+    specify "select is left-biased when both sources alias one unresolved IVar" $ \TestEnv {..} -> do
+      -- Both sources are 'Pending's over the same, still-unresolved timer, so
+      -- awaitAny parks two wakers on one IVar and resolves them together. The
+      -- left index must win regardless of park order.
+      let workflow :: MyWorkflow Text
+          workflow = do
+            mt <- W.createTimer (nanoseconds 10)
+            case mt of
+              Nothing -> pure "no-timer"
+              Just t -> do
+                r <- W.select (fmap (const ("l" :: Text)) (W.toPending t)) (fmap (const "r") (W.toPending t))
+                pure (either id id r)
+          wf = W.provideWorkflow defaultCodec "awaitableSelectAliasTie" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOpts taskQueue
+        useClient (C.execute wf.reference "awaitableSelectAliasTie" opts) `shouldReturn` "l"
+
+    specify "a select blocked on the losing side is cancelled and runs its finalizer" $ \TestEnv {..} -> do
+      let workflow :: MyWorkflow (Text, Bool)
+          workflow = do
+            st <- W.newStateVar False
+            let loser :: MyWorkflow Text
+                loser = do
+                  mt1 <- W.createTimer (minutes 100)
+                  mt2 <- W.createTimer (minutes 100)
+                  case (mt1, mt2) of
+                    (Just a, Just b) ->
+                      Catch.finally
+                        (either (const "a") (const "b") <$> W.select a b)
+                        (W.writeStateVar st True)
+                    _ -> pure "no-timer"
+            r <- W.race (pure "win" :: MyWorkflow Text) loser
+            ran <- W.readStateVar st
+            pure (either id id r, ran)
+          wf = W.provideWorkflow defaultCodec "awaitableRaceLoser" workflow
+          conf = configure () wf $ do baseConf
+      withWorker conf $ do
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient (C.execute wf.reference "awaitableRaceLoser" opts) `shouldReturn` ("win", True)

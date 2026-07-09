@@ -17,7 +17,7 @@ import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
-import UnliftIO
+import UnliftIO hiding (poll)
 
 
 {- | Some tasks in a Workflow return a handle that can be used to wait for the task to complete.
@@ -42,6 +42,57 @@ class Cancel h where
 
   -- | Signal to Temporal that a handle representing an async action should be cancelled.
   cancel :: RequireCallStack => h -> CancelResult h
+
+
+{- | Handles with a single result 'IVar', which can therefore be reified as a
+'Pending' for 'poll'\/'select'.
+
+Anything convertible to a 'Pending' is trivially waitable, so every 'Awaitable'
+instance is a 'Wait' instance.
+
+The reverse is not true: a handle that blocks on more than one IVar is 'Wait'
+but not 'Awaitable' (e.g. 'ChildWorkflowHandle').
+-}
+class Wait h => Awaitable h where
+  type Awaited h :: Type
+  toPending :: h -> Pending (Awaited h)
+
+
+{- | The canonical 'wait' for an 'Awaitable' handle; 'Wait' instances that are
+also 'Awaitable' should typically only have to write @wait = awaitableWait@.
+-}
+awaitableWait :: (RequireCallStack, Awaitable h) => h -> Workflow (Awaited h)
+awaitableWait h = do
+  updateCallStackW
+  awaitPending (toPending h)
+
+
+-- | A 'Pending' is itself waitable: 'wait' blocks on it and decodes.
+instance Wait (Pending a) where
+  type WaitResult (Pending a) = Workflow a
+  wait = awaitableWait
+
+
+-- | 'toPending' on a 'Pending' is the identity, so 'poll'\/'select' accept a
+-- bare 'Pending' (e.g. one built with 'fmap'), not only handles.
+instance Awaitable (Pending a) where
+  type Awaited (Pending a) = a
+  toPending = id
+
+
+{- | Return whichever of two awaitable handles resolves first; the handle that
+does not return keeps running (see 'Temporal.Workflow.race' if you need
+cancellation).
+
+Left-biased when both handles return simultaneously.
+-}
+select :: (Awaitable x, Awaitable y) => x -> y -> Workflow (Either (Awaited x) (Awaited y))
+select x y = selectPending (toPending x) (toPending y)
+
+
+-- | Non-blocking peek at an awaitable handle: 'Just' if it has already resolved.
+poll :: Awaitable h => h -> Workflow (Maybe (Awaited h))
+poll = pollPending . toPending
 
 
 instance Wait (Task a) where
