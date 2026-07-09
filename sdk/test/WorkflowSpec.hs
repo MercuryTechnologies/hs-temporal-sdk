@@ -45,25 +45,34 @@ spec = withTestServer_ tests
 tests :: SpecWith TestEnv
 tests = do
   describe "Deadlock detection" $ do
-    -- Pending: the deadlock timeout wraps only applyJobs, not fiber execution,
-    -- so a non-suspending loop hangs instead of being detected.
-    xit "detects a non-suspending infinite-loop workflow body as a deadlock" $ \TestEnv {..} -> do
-      let workflow :: MyWorkflow ()
-          workflow = do
+    -- Pending: the deadlock timeout wraps the whole activation step, but async
+    -- 'timeout' cannot interrupt CPU-bound workflow code — a 500ms timeout does
+    -- not fire during a multi-second non-suspending loop (GHC does not deliver
+    -- the async exception into the tight loop). Reliable detection needs a
+    -- watchdog that fails the task without interrupting the runaway computation.
+    xit "fails the workflow task when a non-suspending loop exhausts the deadlock timeout" $ \TestEnv {..} -> do
+      -- Capture a valid history from a normal run under the workflow type.
+      let normalWf = W.provideWorkflow defaultCodec "deadlockLoop" (pure () :: MyWorkflow ())
+          normalConf = configure () normalWf baseConf
+      history <- withWorker normalConf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          h <- C.start normalWf.reference (W.WorkflowId uuid) opts
+          C.waitWorkflowResult h
+          C.fetchHistory h
+      -- Replay that history against a non-suspending body under the same type.
+      -- The loop never yields, so the deadlock timeout must fail the task.
+      let loopWf = W.provideWorkflow defaultCodec "deadlockLoop" $ do
             counter <- W.newStateVar (0 :: Int)
-            -- Never suspends, so never yields to the scheduler.
-            forever (W.modifyStateVar counter (+ 1))
-          wf = W.provideWorkflow defaultCodec "deadlockLoop" workflow
-          conf = configure () wf $ do
+            forever (W.modifyStateVar counter (+ 1)) :: MyWorkflow ()
+          loopConf = configure () loopWf $ do
             baseConf
             setDeadlockTimeout (Just 500_000)
-      let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
-      outcome <-
-        timeout 15_000_000 $
-          (Catch.try (withWorker conf $ useClient (C.start wf.reference "deadlockLoopWf" opts >>= C.waitWorkflowResult)) :: IO (Either SomeException ()))
+      outcome <- timeout 15_000_000 (runReplayHistory globalRuntime loopConf history)
       case outcome of
-        Just (Left e) -> show e `shouldContain` "eadlock"
-        Just (Right _) -> expectationFailure "workflow completed despite a non-suspending infinite loop"
+        Just (Left e) -> Text.unpack e.message `shouldContain` "eadlock"
+        Just (Right ()) -> expectationFailure "replay completed despite a non-suspending infinite loop"
         Nothing -> expectationFailure "deadlock not detected within the outer bound"
 
   describe "Workflow Basics" $ do
