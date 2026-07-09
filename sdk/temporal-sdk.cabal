@@ -26,6 +26,7 @@ library
       Temporal.Client.Schedule
       Temporal.Client.TestService
       Temporal.Common.Logging
+      Temporal.Contrib.BoundedConcurrency
       Temporal.Contrib.OpenTelemetry
       Temporal.Duration
       Temporal.EphemeralServer
@@ -161,6 +162,7 @@ test-suite temporal-sdk-tests
   main-is: Main.hs
   other-modules:
       ActivitySpec
+      BoundedConcurrencySpec
       CancellationSpec
       ChildWorkflowSpec
       Common
