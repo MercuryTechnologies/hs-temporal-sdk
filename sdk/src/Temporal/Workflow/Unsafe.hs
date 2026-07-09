@@ -59,7 +59,7 @@ Temporal SDK:
 * For side effects, use 'Workflow.sideEffect'
 -}
 performUnsafeNonDeterministicIO :: IO a -> Workflow a
-performUnsafeNonDeterministicIO m = Workflow (\_ -> Done <$> liftIO m)
+performUnsafeNonDeterministicIO m = Workflow (\_ -> liftIO m)
 {-# INLINE performUnsafeNonDeterministicIO #-}
 
 

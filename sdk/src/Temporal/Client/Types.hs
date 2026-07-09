@@ -426,13 +426,22 @@ data SignalWithStartWorkflowInput = SignalWithStartWorkflowInput
   }
 
 
+data SignalWorkflowInput = SignalWorkflowInput
+  { signalWorkflowWorkflowId :: WorkflowId
+  , signalWorkflowRunId :: Maybe RunId
+  , signalWorkflowSignalName :: Text
+  , signalWorkflowArgs :: Vector Payload
+  , signalWorkflowHeaders :: Map Text Payload
+  }
+
+
 data ClientInterceptors = ClientInterceptors
   { start :: WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> (WorkflowType -> WorkflowId -> StartWorkflowOptions -> Vector Payload -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , queryWorkflow :: QueryWorkflowInput -> (QueryWorkflowInput -> IO (Either QueryRejected Payload)) -> IO (Either QueryRejected Payload)
   , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO (WorkflowHandle Payload)) -> IO (WorkflowHandle Payload)
   , updateWorkflow :: UpdateWorkflowInput -> (UpdateWorkflowInput -> IO (UpdateHandle Payload)) -> IO (UpdateHandle Payload)
+  , signal :: SignalWorkflowInput -> (SignalWorkflowInput -> IO ()) -> IO ()
   -- TODO
-  -- signal
   -- terminate
   -- cancel
   -- describe
@@ -446,6 +455,7 @@ instance Semigroup ClientInterceptors where
       , queryWorkflow = \i next -> a.queryWorkflow i $ \i' -> b.queryWorkflow i' next
       , signalWithStart = \i next -> a.signalWithStart i $ \i' -> b.signalWithStart i' next
       , updateWorkflow = \i next -> a.updateWorkflow i $ \i' -> b.updateWorkflow i' next
+      , signal = \i next -> a.signal i $ \i' -> b.signal i' next
       }
 
 
@@ -456,11 +466,9 @@ instance Monoid ClientInterceptors where
       (\i next -> next i)
       (\i next -> next i)
       (\i next -> next i)
+      (\i next -> next i)
 
--- , signal :: SignalWorkflowInput -> (SignalWorkflowInput -> IO ()) -> IO ()
---   -- , signalWithStart :: SignalWithStartWorkflowInput -> (SignalWithStartWorkflowInput -> IO ()) -> IO ()
---   -- , query :: QueryWorkflowInput -> (QueryWorkflowInput -> IO ()) -> IO ()
+-- Remaining interceptor hooks that could be added:
 --   -- , terminate :: TerminateWorkflowInput -> (TerminateWorkflowInput -> IO ()) -> IO ()
 --   -- , cancel :: CancelWorkflowInput -> (CancelWorkflowInput -> IO ()) -> IO ()
 --   -- , describe :: DescribeWorkflowInput -> (DescribeWorkflowInput -> IO ()) -> IO ()
---   }

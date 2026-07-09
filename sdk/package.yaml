@@ -10,7 +10,6 @@ dependencies:
 - proto-lens-protobuf-types
 - temporal-api-protos
 - temporal-sdk-core
-- atomic-primops
 - bytestring
 - discover-instances
 - mtl
@@ -95,7 +94,6 @@ library:
   - Temporal.Common
   - Temporal.Common.Async
   - Temporal.Common.TimeoutType
-  - Temporal.Coroutine
   - Temporal.Workflow.Definition
   - Temporal.WorkflowInstance
   - Temporal.Workflow.Worker
@@ -105,7 +103,6 @@ library:
   - Temporal.Activity.Types
   - Temporal.Workflow.Unsafe.Handle
   - Temporal.Workflow.Internal.Instance
-  - Temporal.Workflow.Internal.Monad
   - Temporal.Workflow.Signal
   - Temporal.Workflow.Query
   - Temporal.Workflow.Types
@@ -149,24 +146,3 @@ tests:
       - resourcet
     main: Main.hs
     source-dirs: test
-    other-modules:
-      Spec,
-      ClientHistorySpec,
-      ContinueAsNewSpec,
-      DurationSpec,
-      IntegrationSpec,
-      IntegrationSpec.HangingWorkflow,
-      IntegrationSpec.NoOpWorkflow,
-      IntegrationSpec.TimeoutsInWorkflows,
-      IntegrationSpec.Updates,
-      LocalActivitySpec,
-      MockActivityEnvironmentSpec,
-      IntegrationSpec.TimeSkipping,
-      Common,
-      RegisterWorkflowsSpec,
-      ReplaySpec,
-      ScheduleSpec,
-      SignalSpec,
-      TestHelpers,
-      THCompiles,
-      WorkerTunerSpec

@@ -8,7 +8,7 @@ module Temporal.Workflow.Internal.Instance (
   Reversed,
   fromReversed,
   push,
-  flushCommands,
+  drainCommands,
   nextExternalCancelSequence,
   nextChildWorkflowSequence,
   nextExternalSignalSequence,
@@ -19,7 +19,7 @@ module Temporal.Workflow.Internal.Instance (
 ) where
 
 import Control.Monad.Reader
-import Data.Atomics (atomicModifyIORefCAS)
+import qualified Data.HashSet as HashSet
 import Data.ProtoLens
 import qualified Data.Text as T
 import GHC.Stack
@@ -37,81 +37,86 @@ runInstanceM :: WorkflowInstance -> InstanceM a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker
 
 
-flushCommands :: HasCallStack => InstanceM ()
-flushCommands = do
+-- | Drain the accumulated commands into a successful activation completion.
+drainCommands :: HasCallStack => InstanceM Core.WorkflowActivationCompletion
+drainCommands = do
   inst <- ask
   info <- readIORef inst.workflowInstanceInfo
-  cmds <- atomically $ do
-    currentCmds <- readTVar inst.workflowCommands
-    writeTVar inst.workflowCommands $ Reversed []
-    pure currentCmds
+  knownFlags <- readIORef inst.workflowKnownFlags
+  cmds <- readIORef inst.workflowCommands
+  writeIORef inst.workflowCommands $ Reversed []
   let completionSuccessful :: Core.Success
-      completionSuccessful = defMessage & Completion.commands .~ fromReversed cmds
+      completionSuccessful =
+        defMessage
+          & Completion.commands .~ fromReversed cmds
+          & Completion.usedInternalFlags .~ HashSet.toList knownFlags
       completionMessage :: Core.WorkflowActivationCompletion
       completionMessage =
         defMessage
           & Completion.runId .~ rawRunId info.runId
           & Completion.successful .~ completionSuccessful
-  Logging.logDebug ("flushCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
-  res <- liftIO $ inst.workflowCompleteActivation completionMessage
-  case res of
-    Left err -> do
-      Logging.logError ("flushCommands: failed: " <> T.pack (show err))
-      throwIO err
-    Right () -> pure ()
+  Logging.logDebug ("drainCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
+  pure completionMessage
 
 
 nextExternalCancelSequence :: InstanceM Sequence
 nextExternalCancelSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = externalCancel seqs
-    in (seqs {externalCancel = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {externalCancel = succ seq'}
 
 
 nextChildWorkflowSequence :: InstanceM Sequence
 nextChildWorkflowSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = childWorkflow seqs
-    in (seqs {childWorkflow = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {childWorkflow = succ seq'}
 
 
 nextExternalSignalSequence :: InstanceM Sequence
 nextExternalSignalSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = externalSignal seqs
-    in (seqs {externalSignal = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {externalSignal = succ seq'}
 
 
 nextTimerSequence :: InstanceM Sequence
 nextTimerSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = timer seqs
-    in (seqs {timer = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {timer = succ seq'}
 
 
 nextActivitySequence :: InstanceM Sequence
 nextActivitySequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = activity seqs
-    in (seqs {activity = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {activity = succ seq'}
 
 
 nextConditionSequence :: InstanceM Sequence
 nextConditionSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = condition seqs
-    in (seqs {condition = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {condition = succ seq'}
 
 
 nextNexusOperationSequence :: InstanceM Sequence
 nextNexusOperationSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = nexusOperation seqs
-    in (seqs {nexusOperation = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {nexusOperation = succ seq'}
