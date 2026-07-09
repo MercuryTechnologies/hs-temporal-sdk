@@ -146,7 +146,3 @@ tests:
       - resourcet
     main: Main.hs
     source-dirs: test
-    # other-modules deliberately omitted: hpack infers every module under
-    # test/ automatically, so new hspec-discover specs are always listed
-    # (a stale explicit list breaks fourmolu extension detection and
-    # cabal's change tracking for unlisted modules).
