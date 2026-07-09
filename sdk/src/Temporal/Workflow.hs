@@ -175,6 +175,7 @@ module Temporal.Workflow (
   independently,
   biselect,
   biselectOpt,
+  biselectOptNoCancel,
   yield,
 
   -- * Interacting with running Workflows
@@ -323,7 +324,7 @@ import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Common.TimeoutType
-import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, nanoseconds, seconds)
+import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, seconds)
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.SearchAttributes
@@ -1712,18 +1713,88 @@ biselectOpt
   -> Workflow l
   -> Workflow r
   -> Workflow t
-biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
+biselectOpt = biselectOptWith Cancel
+
+
+{- | A non-cancelling 'biselectOpt': when one side short-circuits the result,
+the other side's continuation is dropped silently rather than cancelled, so no
+finalizers are run on it and the underlying async operation keeps going.
+
+This is the primitive for a @select@\/@poll@, whose semantics are "return
+whichever of these finishes first, but keep the rest running", as opposed to
+'race', where the loser is genuinely abandoned and should run its finalizers.
+
+Caveats:
+
+  * The dropped loser is re-run from scratch if you poll again, so the argument
+    workflows must be re-runnable up to their first suspension: any effect they
+    perform before blocking (e.g. starting an activity) is repeated on each
+    call. In practice the arguments are plain @wait@s on already-started
+    handles, which only read an 'IVar'.
+  * A loser dropped while blocked on a tracked 'IVar' leaves a stale entry
+    until the same handle is awaited again; a repeated poll re-records and
+    eventually clears it.
+-}
+biselectOptNoCancel
+  :: forall l r a b c t
+   . RequireCallStack
+  => (l -> Either a b)
+  -> (r -> Either a c)
+  -> (a -> t)
+  -> ((b, c) -> t)
+  -> Workflow l
+  -> Workflow r
+  -> Workflow t
+biselectOptNoCancel = biselectOptWith Drop
+
+
+{- | How 'biselectOptWith' handles the losing branch once the other side
+short-circuits the combined result.
+-}
+data Disposition
+  = -- | Cancel the loser so its @bracket@\/@finally@ finalizers run, by
+    -- resuming it with a synthetic 'WorkflowFiberCancelled'; this provides the
+    -- semantics expected of 'race'\/'biselect' and truly abandons the loser.
+    -- 
+    -- __NOTE__: Depends on 'sdkFlagRaceLoserCancellation' being set.
+    Cancel
+  | -- | Silently drop the loser's continuation without running finalizers;
+    -- this provides the semantics expected of @select@\/@poll@ functions.
+    --
+    -- The loser's underlying async operation is unaffected and its handle can
+    -- still be awaited afterwards.
+    Drop
+  deriving stock (Eq)
+
+
+{-# INLINE biselectOptWith #-}
+biselectOptWith
+  :: forall l r a b c t
+   . RequireCallStack
+  => Disposition
+  -> (l -> Either a b)
+  -> (r -> Either a c)
+  -> (a -> t)
+  -> ((b, c) -> t)
+  -> Workflow l
+  -> Workflow r
+  -> Workflow t
+biselectOptWith disposition discrimA discrimB left right wfL wfR = Workflow $ \env -> do
   let
-    -- Cancel a side whose result we no longer need, gated on the
-    -- race-loser-cancellation SDK flag (see 'sdkFlagRaceLoserCancellation').
-    -- A history recorded before the flag existed takes the disabled branch:
-    -- the loser is dropped silently and @step@ is not even forced, exactly as
-    -- the SDK behaved before. When enabled we force @step@ (starting a
-    -- not-yet-started loser, as 'Control.Concurrent.Async.race' forks both
-    -- sides) and, if it is blocked, deliver a synthetic
+    -- Dispose of a side whose result we no longer need.
+    --
+    -- With 'Drop' the loser is abandoned silently and @step@ is not even
+    -- forced.
+    --
+    -- With 'Cancel' the disposition is dependent on the
+    -- 'sdkFlagRaceLoserCancellation' flag; a history recorded before the flag
+    -- existed takes the disabled branch and drops the loser silently, exactly
+    -- as the SDK behaved before.
+    --
+    -- When enabled we force @step@ and, if it is blocked, deliver a synthetic
     -- 'WorkflowFiberCancelled' so its finalizers run (see 'cancelSubFiber').
     cancelSide :: forall x. InstanceM (SubStatus x) -> InstanceM ()
-    cancelSide step = do
+    cancelSide step = when (disposition == Cancel) $ do
       enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
       when enabled $ do
         s <- step
@@ -1731,9 +1802,9 @@ biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
           SubBlocked ivar k -> cancelSubFiber env ivar k
           _ -> pure ()
     -- Like 'cancelSide', but for a loser we already hold as a blocked
-    -- continuation (so there is nothing to force). Same flag gate.
+    -- continuation.
     cancelBlocked :: forall x w. IVar w -> (ResultVal w -> IO (Status x)) -> InstanceM ()
-    cancelBlocked ivar k = do
+    cancelBlocked ivar k = when (disposition == Cancel) $ do
       enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
       when enabled $ cancelSubFiber env ivar k
     -- Each round: step the left side first (resuming it only if the IVar it
