@@ -4,7 +4,6 @@
 module Temporal.Workflow.Internal.Monad where
 
 import Control.Applicative
-import Control.Concurrent.Async
 import Control.Monad
 import Control.Exception.Base (NoMatchingContinuationPrompt (..))
 import qualified Control.Monad.Catch as Catch
@@ -46,7 +45,6 @@ import System.Random.Stateful (FrozenGen (..), RandomGenM (..), StatefulGen (..)
 #endif
                               )
 import Temporal.Common
-import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Types
@@ -563,6 +561,52 @@ fiber may suspend again. Each continuation must be resumed at most once.
 data Status a
   = SDone a
   | forall v. SBlocked {-# UNPACK #-} !(IVar v) (ResultVal v -> IO (Status a))
+
+
+{- | A run either finished, or suspended awaiting the next activation's
+results.
+
+Run-level analogue of 'Status': a suspended run is a first-class continuation
+captured with 'control0' (see 'Temporal.Workflow.Eval.awaitActivationVia'),
+resumed at most once with the activation results it was waiting for.
+-}
+data RunStatus a
+  = RunDone a
+  | RunBlocked ([ActivationResult] -> IO (RunStatus a))
+
+
+{- | Values that were blocking waiting for an activation, and have now been
+unblocked.
+
+The driver fills these 'IVar's from an activation's resolution jobs to resume
+the run.
+-}
+data ActivationResult
+  = forall a.
+    ActivationResult
+      (ResultVal a)
+      !(IVar a)
+
+
+{- | The paused state of a run between activations, advanced by
+'Temporal.WorkflowInstance.runActivation'.
+
+The enclosing 'MVar' doubles as the per-run lock: taking it serialises the
+activations of one run.
+
+A run begins 'ExecNotStarted', holding the thunk that sets up execution and runs
+to the first suspension; each step then parks the one-shot resume continuation
+('ExecPaused'), records terminal completion ('ExecDone'), or records a fault
+('ExecPoisoned') that fails subsequent activations.
+
+The continuation is one-shot, so a faulted step must move to 'ExecPoisoned'
+rather than reinstate 'ExecPaused'.
+-}
+data ExecState a
+  = ExecNotStarted (IO (RunStatus a))
+  | ExecPaused ([ActivationResult] -> IO (RunStatus a))
+  | ExecDone
+  | ExecPoisoned SomeException
 
 
 {- | Like 'Status', but for sub-fibers run inside another fiber
@@ -1084,14 +1128,14 @@ data WorkflowInstance = WorkflowInstance
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowIVarCounter :: {-# UNPACK #-} !(IORef Word64)
   , workflowBlockedStacks :: {-# UNPACK #-} !(IORef (HashMap Word64 CallStack))
-  , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
   , workflowVault :: {-# UNPACK #-} !Vault
-  , -- These are how the instance gets its work done
-    activationChannel :: {-# UNPACK #-} !(TQueue Core.WorkflowActivation)
-  , executionThread :: {-# UNPACK #-} !(IORef (Async ()))
+  , -- | The run's paused state, advanced one activation at a time by
+    -- 'Temporal.WorkflowInstance.runActivation'. The 'MVar' serialises a
+    -- run's activations.
+    executionState :: {-# UNPACK #-} !(MVar (ExecState (WorkflowExitVariant Payload)))
   , inboundInterceptor :: {-# UNPACK #-} !WorkflowInboundInterceptor
   , outboundInterceptor :: {-# UNPACK #-} !WorkflowOutboundInterceptor
   , -- Improves error reporting

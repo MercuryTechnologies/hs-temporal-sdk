@@ -32,14 +32,6 @@ withRunId arg = do
   return ("[runId=" <> rawRunId info.runId <> "] " <> arg)
 
 
--- | A run either finished, or suspended awaiting the next activation's results.
---
--- Run-level analogue of 'Status'.
-data RunStatus a
-  = RunDone a
-  | RunBlocked ([ActivationResult] -> IO (RunStatus a))
-
-
 -- | Suspend the run until the driver supplies the next activation's results.
 --
 -- Run-level analogue of 'suspendVia'.
@@ -58,19 +50,6 @@ awaitActivationVia tag = do
     `UnliftIO.catch` \NoMatchingContinuationPrompt ->
       throwIO $
         RuntimeError "A workflow run awaited an activation outside the run scheduler. Please report this as a bug in hs-temporal-sdk."
-
-
-{- | Values that were blocking waiting for an activation, and have now
-been unblocked.
-
-The worker feeds these into a suspended workflow after converting workflow
-activation results; this unblocks the relevant computations.
--}
-data ActivationResult
-  = forall a.
-    ActivationResult
-      (ResultVal a)
-      !(IVar a)
 
 
 -- How this works:

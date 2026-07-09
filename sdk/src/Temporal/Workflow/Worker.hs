@@ -124,8 +124,6 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
         -- TODO should we do anything else on shutdown?
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
           Logging.logDebug "Poller shutting down"
-          runningWorkflows <- liftIO $ ListT.toList $ StmMap.listTNonAtomic $ worker.runningWorkflows
-          mapConcurrently_ (cancel <=< readIORef . executionThread . snd) runningWorkflows
           pure False
         (Left err) -> do
           Logging.logError $ Text.pack $ show err
@@ -157,10 +155,8 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     then do
       mInst <- createOrFetchWorkflowInstance
       forM_ mInst $ \inst -> do
-        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'initializeWorkflow)) (activation ^. Activation.jobs)
-        case withoutStart of
-          [] -> pure ()
-          otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
+        completion <- liftIO $ runActivation inst activation
+        liftIO (Core.completeWorkflowActivation workerCore completion >>= either throwIO pure)
     else do
       Logging.logDebug "Workflow does not need to run."
       let completionMessage =
@@ -309,9 +305,6 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   Just (WorkflowDefinition _ f) -> do
                     inst <-
                       create
-                        ( \wf -> do
-                            Core.completeWorkflowActivation workerCore wf
-                        )
                         f
                         worker.workerDeadlockTimeout
                         worker.workerErrorConverters
@@ -346,8 +339,12 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                   pure $ do
                     setStatus s $ Error msg
                     Logging.logDebug msg
-                Just wf -> do
-                  pure $ do
-                    cancel =<< readIORef wf.executionThread
+                Just _wf -> do
+                  -- The instance is dropped from the cache here; its paused
+                  -- continuation is abandoned to the GC.
+                  --
+                  -- Eviction is not cancellation, so parked fibers' finalizers
+                  -- do not run.
+                  pure $
                     Logging.logDebug $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()

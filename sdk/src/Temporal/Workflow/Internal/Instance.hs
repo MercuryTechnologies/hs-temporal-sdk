@@ -8,7 +8,7 @@ module Temporal.Workflow.Internal.Instance (
   Reversed,
   fromReversed,
   push,
-  flushCommands,
+  drainCommands,
   nextExternalCancelSequence,
   nextChildWorkflowSequence,
   nextExternalSignalSequence,
@@ -38,8 +38,9 @@ runInstanceM :: WorkflowInstance -> InstanceM a -> IO a
 runInstanceM worker m = runReaderT (unInstanceM m) worker
 
 
-flushCommands :: HasCallStack => InstanceM ()
-flushCommands = do
+-- | Drain the accumulated commands into a successful activation completion.
+drainCommands :: HasCallStack => InstanceM Core.WorkflowActivationCompletion
+drainCommands = do
   inst <- ask
   info <- readIORef inst.workflowInstanceInfo
   knownFlags <- readIORef inst.workflowKnownFlags
@@ -57,13 +58,8 @@ flushCommands = do
         defMessage
           & Completion.runId .~ rawRunId info.runId
           & Completion.successful .~ completionSuccessful
-  Logging.logDebug ("flushCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
-  res <- liftIO $ inst.workflowCompleteActivation completionMessage
-  case res of
-    Left err -> do
-      Logging.logError ("flushCommands: failed: " <> T.pack (show err))
-      throwIO err
-    Right () -> pure ()
+  Logging.logDebug ("drainCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
+  pure completionMessage
 
 
 nextExternalCancelSequence :: InstanceM Sequence
