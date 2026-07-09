@@ -17,7 +17,8 @@ rather than leaking onto the workflow's main fiber.
 module OpenTelemetrySpec where
 
 import Control.Concurrent.Async (async)
-import Control.Exception (SomeException, finally)
+import Control.Exception (Exception, SomeException, finally)
+import qualified Control.Monad.Catch as Catch
 import Data.IORef
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -29,6 +30,7 @@ import RequireCallStack (provideCallStack)
 import Temporal.Activity
 import qualified Temporal.Client as C
 import Temporal.Duration
+import Temporal.Exception (UpdateFailure (..))
 import Temporal.Worker
 import qualified Temporal.Workflow as W
 import Test.Hspec
@@ -94,6 +96,14 @@ shouldBeChildOf child parent = do
   spanId parentCtx `shouldBe` spanId (spanContext parent)
 
 
+-- | Thrown by the suspending update handler in the throw-across-suspension test.
+data OtelHandlerBoom = OtelHandlerBoom
+  deriving stock (Show)
+
+
+instance Exception OtelHandlerBoom
+
+
 spec :: Spec
 spec = aroundAll_ withCaptureTracerProvider $ withTestServer_ tests
 
@@ -148,6 +158,60 @@ tests = describe "OpenTelemetry spans" $ do
     startActivity `shouldBeChildOf` handleUpdate
     -- And the activity execution continues that same trace.
     runActivity `shouldBeChildOf` startActivity
+
+  it "closes and marks the HandleUpdate span Error when a suspending update handler throws after resuming" $ \TestEnv {..} -> do
+    drainSpans
+    let updateDef :: W.KnownUpdate '[Int] Int SomeException
+        updateDef = W.KnownUpdate {knownUpdateCodec = defaultCodec, knownUpdateName = "otelThrowingUpdate"}
+        completeSig = W.KnownSignal @'[] "otelCompleteThrow" defaultCodec
+        workflow :: MyWorkflow Int
+        workflow = do
+          gate <- W.newStateVar False
+          started <- W.newStateVar False
+          done <- W.newStateVar False
+          W.setSignalHandler completeSig $ W.writeStateVar done True
+          W.setUpdateHandler
+            updateDef
+            ( \_ -> do
+                -- First step is not a throw: record arrival, then SUSPEND on the
+                -- gate so the throw below rides the fiber's captured continuation
+                -- across a suspend/resume.
+                W.writeStateVar started True
+                W.waitCondition (W.readStateVar gate)
+                Catch.throwM OtelHandlerBoom
+            )
+            Nothing
+          -- Only open the gate once the handler has run its first step and
+          -- parked, guaranteeing it suspended before it throws.
+          W.waitCondition (W.readStateVar started)
+          W.writeStateVar gate True
+          -- Keep the workflow alive until the client signals completion, so the
+          -- failing update is reported while the workflow is still running.
+          W.waitCondition (W.readStateVar done)
+          pure 99
+        wf = W.provideWorkflow defaultCodec "otelThrowingUpdateWorkflow" workflow
+        conf = provideCallStack $ configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+          updateOpts = C.UpdateOptions {updateId = "otel-throw-update", updateHeaders = mempty}
+      (updateOutcome, wr) <- useClient do
+        h <- C.start wf.reference "otelThrowingUpdateWf" opts
+        outcome <- Catch.try (C.executeUpdate h updateDef updateOpts 7)
+        C.signal h completeSig C.defaultSignalOptions
+        wfResult <- C.waitWorkflowResult h
+        pure (outcome :: Either UpdateFailure Int, wfResult)
+      -- The update must surface as a failure to the client...
+      updateOutcome `shouldSatisfy` \case
+        Left (UpdateFailure _) -> True
+        Right _ -> False
+      -- ...while the workflow itself keeps running and completes normally.
+      wr `shouldBe` 99
+    -- The span is ended in the generalBracket release even though the handler
+    -- threw after resuming, and the ExitCaseException path marks it Error.
+    handleUpdate <- spanNamed "HandleUpdate:otelThrowingUpdate"
+    case spanStatus handleUpdate of
+      Error msg -> Text.unpack msg `shouldContain` "OtelHandlerBoom"
+      other -> expectationFailure $ "expected Error span status, got " <> show other
 
   it "parents signal handler spans to the client's SignalWorkflow span" $ \TestEnv {..} -> do
     drainSpans

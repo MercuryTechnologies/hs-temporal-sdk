@@ -297,9 +297,11 @@ injectWorkflowSignalOrUpdate signal = do
 
 {- | Run one fiber step under the fiber's own OpenTelemetry context.
 
-Fibers interleave on a single thread (and may resume on a different thread
-after an activation), so the thread-local OTel context cannot be trusted
-across steps. Instead each fiber owns a context slot: it is attached before
+Fibers for one workflow instance all interleave cooperatively on that
+instance's single dedicated GHC thread, so a fiber never migrates threads;
+but because sibling fibers share that thread, the thread-local OTel context
+left behind by one fiber cannot be trusted by the next. Instead each fiber
+owns a context slot: it is attached before
 the step, snapshotted back after the step (whether the fiber completed or
 suspended), and the ambient context is restored for the scheduler. A fiber
 that has not run yet inherits the ambient context of its first step, which

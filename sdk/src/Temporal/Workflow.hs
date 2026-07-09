@@ -1714,18 +1714,41 @@ biselectOpt
   -> Workflow t
 biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
   let
+    -- Cancel a side whose result we no longer need, gated on the
+    -- race-loser-cancellation SDK flag (see 'sdkFlagRaceLoserCancellation').
+    -- A history recorded before the flag existed takes the disabled branch:
+    -- the loser is dropped silently and @step@ is not even forced, exactly as
+    -- the SDK behaved before. When enabled we force @step@ (starting a
+    -- not-yet-started loser, as 'Control.Concurrent.Async.race' forks both
+    -- sides) and, if it is blocked, deliver a synthetic
+    -- 'WorkflowFiberCancelled' so its finalizers run (see 'cancelSubFiber').
+    cancelSide :: forall x. InstanceM (SubStatus x) -> InstanceM ()
+    cancelSide step = do
+      enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
+      when enabled $ do
+        s <- step
+        case s of
+          SubBlocked ivar k -> cancelSubFiber env ivar k
+          _ -> pure ()
+    -- Like 'cancelSide', but for a loser we already hold as a blocked
+    -- continuation (so there is nothing to force). Same flag gate.
+    cancelBlocked :: forall x w. IVar w -> (ResultVal w -> IO (Status x)) -> InstanceM ()
+    cancelBlocked ivar k = do
+      enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
+      when enabled $ cancelSubFiber env ivar k
     -- Each round: step the left side first (resuming it only if the IVar it
     -- was blocked on has been filled), then, unless the left side
     -- short-circuited, step the right side. When both sides remain blocked,
     -- park unit jobs on both blocked IVars that fill a fresh
     -- synchronisation IVar 'i', and block the parent on 'i' so that it
-    -- wakes up whenever either side's IVar is filled.
+    -- wakes up whenever either side's IVar is filled. Whenever one side wins
+    -- or throws, the still-running other side is cancelled.
     go :: InstanceM (SubStatus l) -> InstanceM (SubStatus r) -> InstanceM t
     go stepA stepB = do
       sa <- stepA
       case sa of
         SubDone ea -> case discrimA ea of
-          Left a -> pure (left a)
+          Left a -> cancelSide stepB *> pure (left a)
           Right b -> do
             sb <- stepB
             case sb of
@@ -1738,18 +1761,18 @@ biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
                 case discrimB eb of
                   Left a -> pure (left a)
                   Right c -> pure (right (b, c))
-        SubThrown e -> throwWorkflow e
+        SubThrown e -> cancelSide stepB *> throwWorkflow e
         SubBlocked ia ka -> do
           sb <- stepB
           case sb of
             SubDone eb -> case discrimB eb of
-              Left a -> pure (left a)
+              Left a -> cancelBlocked ia ka *> pure (left a)
               Right c -> do
                 ea <- driveSubFiber env ia ka
                 case discrimA ea of
                   Left a -> pure (left a)
                   Right b -> pure (right (b, c))
-            SubThrown e -> throwWorkflow e
+            SubThrown e -> cancelBlocked ia ka *> throwWorkflow e
             SubBlocked ib kb -> do
               i <- newIVar
               parkTask (fiberContEnv env) (fiberLocals env) (FreshTask (return ())) i ia

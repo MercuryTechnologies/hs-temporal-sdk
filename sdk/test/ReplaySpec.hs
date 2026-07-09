@@ -1,9 +1,14 @@
 module ReplaySpec where
 
 import Control.Monad (void, when)
+import qualified Control.Monad.Catch as Catch
 import Data.Either (isLeft, isRight)
 import Data.ProtoLens.Encoding (encodeMessage)
 import qualified Data.Text as Text
+import Data.Word (Word32)
+import Lens.Family2 ((&), (.~), (^.))
+import qualified Proto.Temporal.Api.History.V1.Message_Fields as HistoryF
+import qualified Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields as SdkMetaF
 import RequireCallStack (provideCallStack)
 import System.Directory (getTemporaryDirectory, removeFile)
 import Temporal.Activity
@@ -306,3 +311,99 @@ tests = describe "Workflow Replay" $ do
     specify "rejects garbage proto bytes" $ \_env -> do
       result <- Core.historyProtoToJson "not valid protobuf at all"
       result `shouldSatisfy` isLeft
+
+  describe "race loser cancellation SDK flag" $ do
+    -- Contract: a live run of @race winner loser@ whose dropped loser has a
+    -- finalizer records the race-loser-cancellation SDK flag (id 1) in
+    -- history, so replays of that history keep the new behavior. The winner
+    -- sleeps a timer so the race resolves in a LATER workflow task; the flag
+    -- is used (and its id recorded) in that task's completion.
+    specify "records flag id 1 in history when a race drops a loser with a finalizer" $ \TestEnv {..} -> do
+      let workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "flag-emit-race-wf" $ provideCallStack $ do
+            gate <- W.newStateVar False
+            cleanupRan <- W.newStateVar False
+            let winner :: MyWorkflow ()
+                winner = W.sleep (milliseconds 5)
+                loser :: MyWorkflow ()
+                loser =
+                  W.waitCondition (W.readStateVar gate)
+                    `Catch.finally` W.writeStateVar cleanupRan True
+            _ <- winner `W.race` loser
+            pure ()
+          conf = provideCallStack $ configure () workflow baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      -- Every langUsedFlags list carried by a WorkflowTaskCompleted event's
+      -- sdkMetadata; flag id 1 must appear in at least one of them.
+      let recordedFlags =
+            concat
+              [ meta ^. SdkMetaF.langUsedFlags
+              | ev <- history ^. HistoryF.events
+              , Just attrs <- [ev ^. HistoryF.maybe'workflowTaskCompletedEventAttributes]
+              , Just meta <- [attrs ^. HistoryF.maybe'sdkMetadata]
+              ]
+      recordedFlags `shouldSatisfy` elem (1 :: Word32)
+
+    -- Contract: the flag is LOAD-BEARING on replay. When the loser's finalizer
+    -- schedules a (compensation) activity, cancelling the loser shows up in
+    -- history as an ActivityTaskScheduled. With flag id 1 present the SDK
+    -- reproduces the cancellation and schedules that activity, so replay is
+    -- consistent (Right). Strip flag id 1 from every WorkflowTaskCompleted
+    -- event and the SDK no longer knows the flag on replay: it takes the OLD
+    -- (pre-flag) behavior, drops the loser silently, and never schedules the
+    -- compensation activity the recorded history contains -> non-determinism
+    -- (Left). A genuine pre-flag history looks exactly like the stripped one
+    -- (no id 1 AND no compensation), so it deterministically gets the old
+    -- behavior: the migration is safe.
+    specify "flag id 1 gates whether the loser's compensation activity replays" $ \TestEnv {..} -> do
+      let actOpts = W.defaultStartActivityOptions $ W.StartToClose $ seconds 10
+          workflow :: W.ProvidedWorkflow (W.Workflow ())
+          workflow = W.provideWorkflow JSON "flag-gate-replay-wf" $ provideCallStack $ do
+            gate <- W.newStateVar False
+            let winner :: MyWorkflow ()
+                winner = W.sleep (milliseconds 5)
+                loser :: MyWorkflow ()
+                loser =
+                  Catch.bracket
+                    (pure ())
+                    (\_ -> void (W.executeActivity replayActivityDef.reference actOpts))
+                    (\_ -> W.waitCondition (W.readStateVar gate))
+            _ <- winner `W.race` loser
+            pure ()
+          conf = provideCallStack $ configure () (replayActivityDef, workflow) baseConf
+
+      history <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient $ do
+          wfHandle <- C.start workflow (W.WorkflowId uuid) opts
+          C.waitWorkflowResult wfHandle
+          C.fetchHistory wfHandle
+
+      -- (a) With flag id 1 present, the cancellation (and its compensation
+      -- activity) replays consistently.
+      withFlag <- runReplayHistory globalRuntime conf history
+      withFlag `shouldSatisfy` isRight
+
+      -- (b) Strip all lang flags (id 1 included) from every
+      -- WorkflowTaskCompleted event's sdkMetadata, leaving everything else
+      -- (including the recorded compensation activity) untouched.
+      let stripEvent ev = case ev ^. HistoryF.maybe'workflowTaskCompletedEventAttributes of
+            Nothing -> ev
+            Just attrs -> case attrs ^. HistoryF.maybe'sdkMetadata of
+              Nothing -> ev
+              Just meta ->
+                ev
+                  & HistoryF.maybe'workflowTaskCompletedEventAttributes
+                    .~ Just (attrs & HistoryF.maybe'sdkMetadata .~ Just (meta & SdkMetaF.langUsedFlags .~ []))
+          strippedHistory = history & HistoryF.events .~ map stripEvent (history ^. HistoryF.events)
+      withoutFlag <- runReplayHistory globalRuntime conf strippedHistory
+      withoutFlag `shouldSatisfy` isLeft

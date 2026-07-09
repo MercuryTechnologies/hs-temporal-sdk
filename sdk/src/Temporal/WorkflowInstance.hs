@@ -37,6 +37,7 @@ import Data.ProtoLens
 import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.HashSet as HashSet
 import qualified Data.Text as Text
 import Data.Time.Clock.System (SystemTime (..))
 import Data.Vault.Strict (Vault)
@@ -141,6 +142,7 @@ create
           }
     workflowTime <- newIORef $ MkSystemTime 0 0
     workflowIsReplaying <- newIORef False
+    workflowKnownFlags <- newIORef mempty
     workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty mempty
     workflowCommands <- newTVarIO $ Reversed []
     workflowSignalHandlers <- newIORef mempty
@@ -349,6 +351,7 @@ activate act suspension = do
   let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   writeIORef inst.workflowIsReplaying (act ^. Activation.isReplaying)
+  modifyIORef' inst.workflowKnownFlags (HashSet.union (HashSet.fromList (act ^. Activation.availableInternalFlags)))
   eResult <- case inst.workflowDeadlockTimeout of
     Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
     Just timeoutDuration -> do
