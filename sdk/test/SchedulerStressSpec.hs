@@ -107,9 +107,10 @@ tests = describe "Scheduler stress" $ do
           let protected :: MyWorkflow Text
               protected =
                 Catch.catch
-                  (do
-                    W.waitCondition (W.readStateVar st)
-                    error "post-resume boom")
+                  ( do
+                      W.waitCondition (W.readStateVar st)
+                      error "post-resume boom"
+                  )
                   (\(_ :: SomeException) -> pure "fallback")
               sibling :: MyWorkflow Text
               sibling = do
@@ -148,3 +149,57 @@ tests = describe "Scheduler stress" $ do
     withWorker conf $ do
       let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
       useClient (C.execute wf.reference "schedStressRaceDrop" opts) `shouldReturn` n
+
+  specify "a biselect cancelled as a race loser propagates cancellation and runs its finalizer" $ \TestEnv {..} -> do
+    -- When a 'biselect' is itself the losing side of an outer 'race', its
+    -- parent fiber is suspended on the wakeup IVar inside the both-blocked
+    -- branch.
+    --
+    -- Cancelling that loser must deliver the synthetic 'WorkflowFiberCancelled'
+    -- THROUGH the wakeup suspend so the loser unwinds and its 'finally' runs.
+    let workflow :: MyWorkflow Bool
+        workflow = do
+          ran <- W.newStateVar False
+          let blocked :: MyWorkflow (Either () ())
+              blocked = W.waitCondition (pure False) >> pure (Left ())
+              innerBiselect :: MyWorkflow (Either () ((), ()))
+              innerBiselect = W.biselect blocked blocked
+              loser :: MyWorkflow (Either () ((), ()))
+              loser = innerBiselect `Catch.finally` W.writeStateVar ran True
+              winner :: MyWorkflow ()
+              winner = W.sleep (milliseconds 5)
+          _ <- winner `W.race` loser
+          W.readStateVar ran
+        wf = W.provideWorkflow defaultCodec "schedStressBiselectCancel" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+      useClient (C.execute wf.reference "schedStressBiselectCancel" opts) `shouldReturn` True
+
+  specify "cancelling a biselect as a race loser runs BOTH children's finalizers" $ \TestEnv {..} -> do
+    -- Cancelling a 'biselect' loser must cancel the two sub-fibers it is
+    -- waiting on, not just unwind the biselect itself; this means that the
+    -- children's finalizers MUST run.
+    let workflow :: MyWorkflow (Bool, Bool)
+        workflow = do
+          ranA <- W.newStateVar False
+          ranB <- W.newStateVar False
+          let childA :: MyWorkflow (Either () ())
+              childA =
+                (W.waitCondition (pure False) >> pure (Left ()))
+                  `Catch.finally` W.writeStateVar ranA True
+              childB :: MyWorkflow (Either () ())
+              childB =
+                (W.waitCondition (pure False) >> pure (Left ()))
+                  `Catch.finally` W.writeStateVar ranB True
+              loser :: MyWorkflow (Either () ((), ()))
+              loser = W.biselect childA childB
+              winner :: MyWorkflow ()
+              winner = W.sleep (milliseconds 5)
+          _ <- winner `W.race` loser
+          (,) <$> W.readStateVar ranA <*> W.readStateVar ranB
+        wf = W.provideWorkflow defaultCodec "schedStressBiselectChildFinalizers" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOptsWithTimeout taskQueue (seconds 60)
+      useClient (C.execute wf.reference "schedStressBiselectChildFinalizers" opts) `shouldReturn` (True, True)

@@ -1,6 +1,6 @@
 module ReplaySpec where
 
-import Control.Monad (void, when)
+import Control.Monad (replicateM_, void, when)
 import qualified Control.Monad.Catch as Catch
 import Data.Either (isLeft, isRight)
 import Data.ProtoLens.Encoding (encodeMessage)
@@ -407,3 +407,74 @@ tests = describe "Workflow Replay" $ do
           strippedHistory = history & HistoryF.events .~ map stripEvent (history ^. HistoryF.events)
       withoutFlag <- runReplayHistory globalRuntime conf strippedHistory
       withoutFlag `shouldSatisfy` isLeft
+
+  -- NOTE: We can't inspect an IVar's waiter list directly, so we test against
+  -- replay history: any reordering desyncs replay & returns a 'Left'.
+  describe "biselect/race gate indirection" $ do
+    specify "race: deterministically left-biased on simultaneous successful returns" $ \TestEnv {..} -> do
+      let wf :: W.ProvidedWorkflow (W.Workflow (Either Int Int))
+          wf =
+            W.provideWorkflow JSON "pr1-race-tie-wf" $
+              provideCallStack $
+                W.race
+                  (replicateM_ 3 (W.sleep (milliseconds 10)) >> pure (1 :: Int))
+                  (replicateM_ 3 (W.sleep (milliseconds 10)) >> pure (2 :: Int))
+          conf = provideCallStack $ configure () wf baseConf
+      (result, history) <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient $ do
+          h <- C.start wf (W.WorkflowId uuid) opts
+          r <- C.waitWorkflowResult h
+          hist <- C.fetchHistory h
+          pure (r, hist)
+      result `shouldBe` Left 1
+      replay <- runReplayHistory globalRuntime conf history
+      replay `shouldSatisfy` isRight
+
+    specify "biselect: deterministically replays multiple rounds of biased results" $ \TestEnv {..} -> do
+      let wf :: W.ProvidedWorkflow (W.Workflow (Either () (Int, Int)))
+          wf =
+            W.provideWorkflow JSON "pr1-biselect-wf" $
+              provideCallStack $
+                W.biselect
+                  (replicateM_ 2 (W.sleep (milliseconds 10)) >> pure (Right 1 :: Either () Int))
+                  (replicateM_ 2 (W.sleep (milliseconds 10)) >> pure (Right 2 :: Either () Int))
+          conf = provideCallStack $ configure () wf baseConf
+      (result, history) <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient $ do
+          h <- C.start wf (W.WorkflowId uuid) opts
+          r <- C.waitWorkflowResult h
+          hist <- C.fetchHistory h
+          pure (r, hist)
+      result `shouldBe` Right (1, 2)
+      replay <- runReplayHistory globalRuntime conf history
+      replay `shouldSatisfy` isRight
+
+    specify "repeated 'race' calls against blocked tasks are deterministic" $ \TestEnv {..} -> do
+      let n = 20 :: Int
+          wf :: W.ProvidedWorkflow (W.Workflow Int)
+          wf = W.provideWorkflow JSON "pr1-many-races-wf" $ provideCallStack $ do
+            let go :: Int -> MyWorkflow Int
+                go i
+                  | i >= n = pure i
+                  | otherwise = do
+                      r <- W.race (W.sleep (milliseconds 1)) (W.waitCondition (pure False))
+                      case r of
+                        Left () -> go (i + 1)
+                        Right () -> pure (negate 1)
+            go 0
+          conf = provideCallStack $ configure () wf baseConf
+      (result, history) <- withWorker conf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 30)
+        useClient $ do
+          h <- C.start wf (W.WorkflowId uuid) opts
+          r <- C.waitWorkflowResult h
+          hist <- C.fetchHistory h
+          pure (r, hist)
+      result `shouldBe` n
+      replay <- runReplayHistory globalRuntime conf history
+      replay `shouldSatisfy` isRight
