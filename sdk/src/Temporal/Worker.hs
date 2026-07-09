@@ -104,6 +104,7 @@ module Temporal.Worker (
   Core.TunerConfig (..),
   Core.SlotSupplierConfig (..),
   Core.ResourceBasedTunerConfig (..),
+
   -- ** Custom slot supplier
   Core.CustomSlotSupplier (..),
   Core.SlotReservationContext (..),
@@ -122,45 +123,43 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
+import qualified Data.ByteString as BS
 import Data.Either (lefts)
 import Data.Foldable
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.ProtoLens (encodeMessage)
+import Data.Maybe (fromMaybe, isJust)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.UUID as UUID
 import Data.UUID.V4 (nextRandom)
 import Data.Word
-import Lens.Family2
 import OpenTelemetry.Trace.Core hiding (inSpan)
 import qualified OpenTelemetry.Trace.Core as OT
 import OpenTelemetry.Trace.Monad
-import Proto.Temporal.Api.History.V1.Message (History)
-import Proto.Temporal.Api.History.V1.Message_Fields (maybe'workflowExecutionStartedEventAttributes, vec'events, workflowId)
-import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import Proto.Encode (encodeMessage)
+import Proto.Temporal.Api.History.V1.Message (History (..), HistoryEvent (..), HistoryEvent'Attributes (..), WorkflowExecutionStartedEventAttributes (..))
+import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation hiding (id)
 import RequireCallStack
 import qualified StmContainers.Map as StmMap
 import System.IO.Unsafe
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
-import qualified Temporal.Nexus.Worker as Nexus
 import Temporal.Common
 import Temporal.Common.Async
-import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
-import qualified Data.ByteString as BS
 import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Interceptor
+import qualified Temporal.Nexus.Worker as Nexus
 import Temporal.Payload (PayloadProcessor (..))
 import Temporal.Runtime
 import Temporal.Worker.Types
 import Temporal.Workflow.Definition
+import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Workflow.Worker as Workflow
 import UnliftIO
 
@@ -377,11 +376,13 @@ setMaxOutstandingNexusTasks n = modifyCore $ \conf ->
     { Core.maxOutstandingNexusTasks = Just n
     }
 
+
 unsetMaxOutstandingNexusTasks :: ConfigM actEnv ()
 unsetMaxOutstandingNexusTasks = modifyCore $ \conf ->
   conf
     { Core.maxOutstandingNexusTasks = Nothing
     }
+
 
 setMaxConcurrentWorkflowTaskPolls :: Word64 -> ConfigM actEnv ()
 setMaxConcurrentWorkflowTaskPolls n = modifyCore $ \conf ->
@@ -434,10 +435,11 @@ setMaxHeartbeatThrottleIntervalMillis n = modifyCore $ \conf ->
     }
 
 
--- | Default interval for throttling activity heartbeats in case
--- ActivityOptions.heartbeat_timeout is unset.
--- When the timeout is set in the ActivityOptions,
--- throttling is set to @heartbeat_timeout * 0.8@.
+{- | Default interval for throttling activity heartbeats in case
+ActivityOptions.heartbeat_timeout is unset.
+When the timeout is set in the ActivityOptions,
+throttling is set to @heartbeat_timeout * 0.8@.
+-}
 setDefaultHeartbeatThrottleIntervalMillis :: Word64 -> ConfigM actEnv ()
 setDefaultHeartbeatThrottleIntervalMillis n = modifyCore $ \conf ->
   conf
@@ -553,7 +555,8 @@ Haskell the ability to have multiple Worker Entities in a single Worker Process.
 
 A single Worker Entity can listen to only a single Task Queue. But if a Worker Process has multiple Worker Entities, the Worker Process could be listening to multiple Task Queues.
 -}
-data Worker env = forall ty.
+data Worker env
+  = forall ty.
   Core.KnownWorkerType ty =>
   Worker
   { workerType :: !(Core.SWorkerType ty)
@@ -642,7 +645,11 @@ the worker execution still works as expected.
 runReplayHistory :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> History -> m (Either ReplayHistoryFailure ())
 runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(worker, pusher) -> do
   evictions <- subscribeToEvictions worker
-  let mWfId = history ^? vec'events . traverse . maybe'workflowExecutionStartedEventAttributes . traverse . workflowId . to T.encodeUtf8
+  let startedWorkflowId event = case event.attributes of
+        Just (HistoryEvent'Attributes'WorkflowExecutionStartedEventAttributes attrs) ->
+          T.encodeUtf8 <$> attrs.workflowId
+        _ -> Nothing
+      mWfId = join $ startedWorkflowId <$> find (isJust . startedWorkflowId) history.events
   wfId <- maybe (throwIO $ userError "No workflow ID found in history") pure mWfId
   Logging.logDebug $ "Pushing history for workflow ID " <> T.pack (show wfId)
   Logging.logDebug $ T.pack $ show history
@@ -658,7 +665,7 @@ runReplayHistory rt conf history = runWorkerContext conf $ UnliftIO.bracket (sta
 
 
 {- | Run a worker in replay mode from raw protobuf bytes.
-Skips the proto-lens decode\/encode round-trip — the bytes go straight to the Rust SDK.
+Skips the Haskell decode\/encode round-trip — the bytes go straight to the Rust SDK.
 Use with 'Temporal.Replay.readHistoryProtobufFile' when you already have the workflow ID.
 -}
 runReplayHistoryProto :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> WorkflowId -> BS.ByteString -> m (Either ReplayHistoryFailure ())
@@ -679,8 +686,7 @@ runReplayHistoryProto rt conf (WorkflowId wfId) protoBytes = runWorkerContext co
 
 {- | Run a worker in replay mode from a JSON-encoded history.
 Use this with histories exported from the Temporal UI or CLI, which use protobuf
-canonical JSON encoding. The JSON is deserialized on the Rust side, bypassing
-proto-lens's incomplete protobuf JSON support.
+canonical JSON encoding. The JSON is deserialized on the Rust side.
 -}
 runReplayHistoryJson :: (MonadUnliftIO m, MonadCatch m) => Runtime -> WorkerConfig actEnv -> WorkflowId -> BS.ByteString -> m (Either ReplayHistoryFailure ())
 runReplayHistoryJson rt conf (WorkflowId wfId) historyJson = runWorkerContext conf $ UnliftIO.bracket (startReplayWorker rt conf) (\(worker, pusher) -> liftIO (Core.closeHistory pusher) *> shutdown worker) $ \(worker, pusher) -> do
@@ -829,10 +835,11 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       then Logging.logDebug "No nexus services registered, skipping nexus worker loop"
       else do
         Logging.logDebug "Starting nexus worker loop"
-        let nexusWorker = Nexus.NexusWorker
-              { Nexus.workerCore = workerCore
-              , Nexus.nexusServices = services
-              }
+        let nexusWorker =
+              Nexus.NexusWorker
+                { Nexus.workerCore = workerCore
+                , Nexus.nexusServices = services
+                }
         res <- UnliftIO.try $ Nexus.execute nexusWorker
         case res of
           Left (e :: SomeException) ->
@@ -974,13 +981,13 @@ subscribeToEvictionsSTM worker = dupTChan worker.workerEvictionEmitter
 
 
 evictionMessage :: Workflow.EvictionWithRunID -> Text
-evictionMessage Workflow.EvictionWithRunID {eviction} = eviction ^. Activation.message
+evictionMessage Workflow.EvictionWithRunID {eviction} = fromMaybe "" eviction.message
 
 
 evictionWasNonRecoverable :: Workflow.EvictionWithRunID -> Bool
-evictionWasNonRecoverable Workflow.EvictionWithRunID {eviction} = case eviction ^. Activation.reason of
-  RemoveFromCache'FATAL -> True
-  RemoveFromCache'NONDETERMINISM -> True
+evictionWasNonRecoverable Workflow.EvictionWithRunID {eviction} = case eviction.reason of
+  Just RemoveFromCache'EvictionReason'Fatal -> True
+  Just RemoveFromCache'EvictionReason'Nondeterminism -> True
   _ -> False
 
 

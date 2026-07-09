@@ -1,126 +1,157 @@
-{- This file was auto-generated from temporal/api/operatorservice/v1/service.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Operatorservice.V1.Service (
-        OperatorService(..)
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Api.Annotations
-import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse
-data OperatorService = OperatorService {}
-instance Data.ProtoLens.Service.Types.Service OperatorService where
-  type ServiceName OperatorService = "OperatorService"
-  type ServicePackage OperatorService = "temporal.api.operatorservice.v1"
-  type ServiceMethods OperatorService = '["addOrUpdateRemoteCluster",
-                                          "addSearchAttributes",
-                                          "createNexusEndpoint",
-                                          "deleteNamespace",
-                                          "deleteNexusEndpoint",
-                                          "getNexusEndpoint",
-                                          "listClusters",
-                                          "listNexusEndpoints",
-                                          "listSearchAttributes",
-                                          "removeRemoteCluster",
-                                          "removeSearchAttributes",
-                                          "updateNexusEndpoint"]
-  packedServiceDescriptor _
-    = "\n\
-      \\SIOperatorService\DC2\146\SOH\n\
-      \\DC3AddSearchAttributes\DC2;.temporal.api.operatorservice.v1.AddSearchAttributesRequest\SUB<.temporal.api.operatorservice.v1.AddSearchAttributesResponse\"\NUL\DC2\155\SOH\n\
-      \\SYNRemoveSearchAttributes\DC2>.temporal.api.operatorservice.v1.RemoveSearchAttributesRequest\SUB?.temporal.api.operatorservice.v1.RemoveSearchAttributesResponse\"\NUL\DC2\130\STX\n\
-      \\DC4ListSearchAttributes\DC2<.temporal.api.operatorservice.v1.ListSearchAttributesRequest\SUB=.temporal.api.operatorservice.v1.ListSearchAttributesResponse\"m\130\211\228\147\STXg\DC21/cluster/namespaces/{namespace}/search-attributesZ2\DC20/api/v1/namespaces/{namespace}/search-attributes\DC2\134\SOH\n\
-      \\SIDeleteNamespace\DC27.temporal.api.operatorservice.v1.DeleteNamespaceRequest\SUB8.temporal.api.operatorservice.v1.DeleteNamespaceResponse\"\NUL\DC2\161\SOH\n\
-      \\CANAddOrUpdateRemoteCluster\DC2@.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterRequest\SUBA.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterResponse\"\NUL\DC2\146\SOH\n\
-      \\DC3RemoveRemoteCluster\DC2;.temporal.api.operatorservice.v1.RemoveRemoteClusterRequest\SUB<.temporal.api.operatorservice.v1.RemoveRemoteClusterResponse\"\NUL\DC2}\n\
-      \\fListClusters\DC24.temporal.api.operatorservice.v1.ListClustersRequest\SUB5.temporal.api.operatorservice.v1.ListClustersResponse\"\NUL\DC2\206\SOH\n\
-      \\DLEGetNexusEndpoint\DC28.temporal.api.operatorservice.v1.GetNexusEndpointRequest\SUB9.temporal.api.operatorservice.v1.GetNexusEndpointResponse\"E\130\211\228\147\STX?\DC2\GS/cluster/nexus/endpoints/{id}Z\RS\DC2\FS/api/v1/nexus/endpoints/{id}\DC2\211\SOH\n\
-      \\DC3CreateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.CreateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.CreateNexusEndpointResponse\"A\130\211\228\147\STX;\"\CAN/cluster/nexus/endpoints:\SOH*Z\FS\"\ETB/api/v1/nexus/endpoints:\SOH*\DC2\235\SOH\n\
-      \\DC3UpdateNexusEndpoint\DC2;.temporal.api.operatorservice.v1.UpdateNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.UpdateNexusEndpointResponse\"Y\130\211\228\147\STXS\"$/cluster/nexus/endpoints/{id}/update:\SOH*Z(\"#/api/v1/nexus/endpoints/{id}/update:\SOH*\DC2\215\SOH\n\
-      \\DC3DeleteNexusEndpoint\DC2;.temporal.api.operatorservice.v1.DeleteNexusEndpointRequest\SUB<.temporal.api.operatorservice.v1.DeleteNexusEndpointResponse\"E\130\211\228\147\STX?*\GS/cluster/nexus/endpoints/{id}Z\RS*\FS/api/v1/nexus/endpoints/{id}\DC2\202\SOH\n\
-      \\DC2ListNexusEndpoints\DC2:.temporal.api.operatorservice.v1.ListNexusEndpointsRequest\SUB;.temporal.api.operatorservice.v1.ListNexusEndpointsResponse\";\130\211\228\147\STX5\DC2\CAN/cluster/nexus/endpointsZ\EM\DC2\ETB/api/v1/nexus/endpoints"
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "addSearchAttributes" where
-  type MethodName OperatorService "addSearchAttributes" = "AddSearchAttributes"
-  type MethodInput OperatorService "addSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.AddSearchAttributesRequest
-  type MethodOutput OperatorService "addSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.AddSearchAttributesResponse
-  type MethodStreamingType OperatorService "addSearchAttributes" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "removeSearchAttributes" where
-  type MethodName OperatorService "removeSearchAttributes" = "RemoveSearchAttributes"
-  type MethodInput OperatorService "removeSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.RemoveSearchAttributesRequest
-  type MethodOutput OperatorService "removeSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.RemoveSearchAttributesResponse
-  type MethodStreamingType OperatorService "removeSearchAttributes" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "listSearchAttributes" where
-  type MethodName OperatorService "listSearchAttributes" = "ListSearchAttributes"
-  type MethodInput OperatorService "listSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListSearchAttributesRequest
-  type MethodOutput OperatorService "listSearchAttributes" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListSearchAttributesResponse
-  type MethodStreamingType OperatorService "listSearchAttributes" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "deleteNamespace" where
-  type MethodName OperatorService "deleteNamespace" = "DeleteNamespace"
-  type MethodInput OperatorService "deleteNamespace" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.DeleteNamespaceRequest
-  type MethodOutput OperatorService "deleteNamespace" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.DeleteNamespaceResponse
-  type MethodStreamingType OperatorService "deleteNamespace" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "addOrUpdateRemoteCluster" where
-  type MethodName OperatorService "addOrUpdateRemoteCluster" = "AddOrUpdateRemoteCluster"
-  type MethodInput OperatorService "addOrUpdateRemoteCluster" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.AddOrUpdateRemoteClusterRequest
-  type MethodOutput OperatorService "addOrUpdateRemoteCluster" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.AddOrUpdateRemoteClusterResponse
-  type MethodStreamingType OperatorService "addOrUpdateRemoteCluster" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "removeRemoteCluster" where
-  type MethodName OperatorService "removeRemoteCluster" = "RemoveRemoteCluster"
-  type MethodInput OperatorService "removeRemoteCluster" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.RemoveRemoteClusterRequest
-  type MethodOutput OperatorService "removeRemoteCluster" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.RemoveRemoteClusterResponse
-  type MethodStreamingType OperatorService "removeRemoteCluster" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "listClusters" where
-  type MethodName OperatorService "listClusters" = "ListClusters"
-  type MethodInput OperatorService "listClusters" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListClustersRequest
-  type MethodOutput OperatorService "listClusters" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListClustersResponse
-  type MethodStreamingType OperatorService "listClusters" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "getNexusEndpoint" where
-  type MethodName OperatorService "getNexusEndpoint" = "GetNexusEndpoint"
-  type MethodInput OperatorService "getNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.GetNexusEndpointRequest
-  type MethodOutput OperatorService "getNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.GetNexusEndpointResponse
-  type MethodStreamingType OperatorService "getNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "createNexusEndpoint" where
-  type MethodName OperatorService "createNexusEndpoint" = "CreateNexusEndpoint"
-  type MethodInput OperatorService "createNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.CreateNexusEndpointRequest
-  type MethodOutput OperatorService "createNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.CreateNexusEndpointResponse
-  type MethodStreamingType OperatorService "createNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "updateNexusEndpoint" where
-  type MethodName OperatorService "updateNexusEndpoint" = "UpdateNexusEndpoint"
-  type MethodInput OperatorService "updateNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.UpdateNexusEndpointRequest
-  type MethodOutput OperatorService "updateNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.UpdateNexusEndpointResponse
-  type MethodStreamingType OperatorService "updateNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "deleteNexusEndpoint" where
-  type MethodName OperatorService "deleteNexusEndpoint" = "DeleteNexusEndpoint"
-  type MethodInput OperatorService "deleteNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.DeleteNexusEndpointRequest
-  type MethodOutput OperatorService "deleteNexusEndpoint" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.DeleteNexusEndpointResponse
-  type MethodStreamingType OperatorService "deleteNexusEndpoint" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl OperatorService "listNexusEndpoints" where
-  type MethodName OperatorService "listNexusEndpoints" = "ListNexusEndpoints"
-  type MethodInput OperatorService "listNexusEndpoints" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListNexusEndpointsRequest
-  type MethodOutput OperatorService "listNexusEndpoints" = Proto.Temporal.Api.Operatorservice.V1.RequestResponse.ListNexusEndpointsResponse
-  type MethodStreamingType OperatorService "listNexusEndpoints" = 'Data.ProtoLens.Service.Types.NonStreaming
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.operatorservice.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Operatorservice.V1.Service where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+import Proto.Temporal.Api.Operatorservice.V1.RequestResponse
+import Proto.Google.Protobuf.Empty (Empty)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x2d\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2f\x76\x31\x2f\x73\x65\x72\x76\x69\x63\x65\x2e\x70\x72\x6f\x74\x6f\x12\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x1a\x36\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2f\x76\x31\x2f\x72\x65\x71\x75\x65\x73\x74\x5f\x72\x65\x73\x70\x6f\x6e\x73\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x1c\x67\x6f\x6f\x67\x6c\x65\x2f\x61\x70\x69\x2f\x61\x6e\x6e\x6f\x74\x61\x74\x69\x6f\x6e\x73\x2e\x70\x72\x6f\x74\x6f\x32\xe2\x0d\x0a\x0f\x4f\x70\x65\x72\x61\x74\x6f\x72\x53\x65\x72\x76\x69\x63\x65\x12\x90\x01\x0a\x13\x41\x64\x64\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x12\x3b\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x41\x64\x64\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x52\x65\x71\x75\x65\x73\x74\x1a\x3c\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x41\x64\x64\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x99\x01\x0a\x16\x52\x65\x6d\x6f\x76\x65\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x12\x3e\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x52\x65\x6d\x6f\x76\x65\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x52\x65\x71\x75\x65\x73\x74\x1a\x3f\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x52\x65\x6d\x6f\x76\x65\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x93\x01\x0a\x14\x4c\x69\x73\x74\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x12\x3c\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x69\x73\x74\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x52\x65\x71\x75\x65\x73\x74\x1a\x3d\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x69\x73\x74\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x84\x01\x0a\x0f\x44\x65\x6c\x65\x74\x65\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x12\x37\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x44\x65\x6c\x65\x74\x65\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x52\x65\x71\x75\x65\x73\x74\x1a\x38\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x44\x65\x6c\x65\x74\x65\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x9f\x01\x0a\x18\x41\x64\x64\x4f\x72\x55\x70\x64\x61\x74\x65\x52\x65\x6d\x6f\x74\x65\x43\x6c\x75\x73\x74\x65\x72\x12\x40\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x41\x64\x64\x4f\x72\x55\x70\x64\x61\x74\x65\x52\x65\x6d\x6f\x74\x65\x43\x6c\x75\x73\x74\x65\x72\x52\x65\x71\x75\x65\x73\x74\x1a\x41\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x41\x64\x64\x4f\x72\x55\x70\x64\x61\x74\x65\x52\x65\x6d\x6f\x74\x65\x43\x6c\x75\x73\x74\x65\x72\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x90\x01\x0a\x13\x52\x65\x6d\x6f\x76\x65\x52\x65\x6d\x6f\x74\x65\x43\x6c\x75\x73\x74\x65\x72\x12\x3b\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x52\x65\x6d\x6f\x76\x65\x52\x65\x6d\x6f\x74\x65\x43\x6c\x75\x73\x74\x65\x72\x52\x65\x71\x75\x65\x73\x74\x1a\x3c\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x52\x65\x6d\x6f\x76\x65\x52\x65\x6d\x6f\x74\x65\x43\x6c\x75\x73\x74\x65\x72\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x7b\x0a\x0c\x4c\x69\x73\x74\x43\x6c\x75\x73\x74\x65\x72\x73\x12\x34\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x69\x73\x74\x43\x6c\x75\x73\x74\x65\x72\x73\x52\x65\x71\x75\x65\x73\x74\x1a\x35\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x69\x73\x74\x43\x6c\x75\x73\x74\x65\x72\x73\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x87\x01\x0a\x10\x47\x65\x74\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x12\x38\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x47\x65\x74\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x71\x75\x65\x73\x74\x1a\x39\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x47\x65\x74\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x90\x01\x0a\x13\x43\x72\x65\x61\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x12\x3b\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x43\x72\x65\x61\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x71\x75\x65\x73\x74\x1a\x3c\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x43\x72\x65\x61\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x90\x01\x0a\x13\x55\x70\x64\x61\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x12\x3b\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x55\x70\x64\x61\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x71\x75\x65\x73\x74\x1a\x3c\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x55\x70\x64\x61\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x90\x01\x0a\x13\x44\x65\x6c\x65\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x12\x3b\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x44\x65\x6c\x65\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x71\x75\x65\x73\x74\x1a\x3c\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x44\x65\x6c\x65\x74\x65\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x8d\x01\x0a\x12\x4c\x69\x73\x74\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x73\x12\x3a\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x69\x73\x74\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x73\x52\x65\x71\x75\x65\x73\x74\x1a\x3b\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6f\x70\x65\x72\x61\x74\x6f\x72\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x69\x73\x74\x4e\x65\x78\x75\x73\x45\x6e\x64\x70\x6f\x69\x6e\x74\x73\x52\x65\x73\x70\x6f\x6e\x73\x65\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+-- | gRPC service @temporal.api.operatorservice.v1.OperatorService@.
+--
+-- Methods:
+-- * AddSearchAttributes (.temporal.api.operatorservice.v1.AddSearchAttributesRequest -> .temporal.api.operatorservice.v1.AddSearchAttributesResponse)
+-- * RemoveSearchAttributes (.temporal.api.operatorservice.v1.RemoveSearchAttributesRequest -> .temporal.api.operatorservice.v1.RemoveSearchAttributesResponse)
+-- * ListSearchAttributes (.temporal.api.operatorservice.v1.ListSearchAttributesRequest -> .temporal.api.operatorservice.v1.ListSearchAttributesResponse)
+-- * DeleteNamespace (.temporal.api.operatorservice.v1.DeleteNamespaceRequest -> .temporal.api.operatorservice.v1.DeleteNamespaceResponse)
+-- * AddOrUpdateRemoteCluster (.temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterRequest -> .temporal.api.operatorservice.v1.AddOrUpdateRemoteClusterResponse)
+-- * RemoveRemoteCluster (.temporal.api.operatorservice.v1.RemoveRemoteClusterRequest -> .temporal.api.operatorservice.v1.RemoveRemoteClusterResponse)
+-- * ListClusters (.temporal.api.operatorservice.v1.ListClustersRequest -> .temporal.api.operatorservice.v1.ListClustersResponse)
+-- * GetNexusEndpoint (.temporal.api.operatorservice.v1.GetNexusEndpointRequest -> .temporal.api.operatorservice.v1.GetNexusEndpointResponse)
+-- * CreateNexusEndpoint (.temporal.api.operatorservice.v1.CreateNexusEndpointRequest -> .temporal.api.operatorservice.v1.CreateNexusEndpointResponse)
+-- * UpdateNexusEndpoint (.temporal.api.operatorservice.v1.UpdateNexusEndpointRequest -> .temporal.api.operatorservice.v1.UpdateNexusEndpointResponse)
+-- * DeleteNexusEndpoint (.temporal.api.operatorservice.v1.DeleteNexusEndpointRequest -> .temporal.api.operatorservice.v1.DeleteNexusEndpointResponse)
+-- * ListNexusEndpoints (.temporal.api.operatorservice.v1.ListNexusEndpointsRequest -> .temporal.api.operatorservice.v1.ListNexusEndpointsResponse)
+-- | Server handler record for @OperatorService@.
+-- Each field is a handler function for one RPC method.
+-- Implement all fields to create a server.
+data OperatorServiceServer m = OperatorServiceServer
+  { addsearchattributesHandler :: AddSearchAttributesRequest -> m AddSearchAttributesResponse
+  , removesearchattributesHandler :: RemoveSearchAttributesRequest -> m RemoveSearchAttributesResponse
+  , listsearchattributesHandler :: ListSearchAttributesRequest -> m ListSearchAttributesResponse
+  , deletenamespaceHandler :: DeleteNamespaceRequest -> m DeleteNamespaceResponse
+  , addorupdateremoteclusterHandler :: AddOrUpdateRemoteClusterRequest -> m AddOrUpdateRemoteClusterResponse
+  , removeremoteclusterHandler :: RemoveRemoteClusterRequest -> m RemoveRemoteClusterResponse
+  , listclustersHandler :: ListClustersRequest -> m ListClustersResponse
+  , getnexusendpointHandler :: GetNexusEndpointRequest -> m GetNexusEndpointResponse
+  , createnexusendpointHandler :: CreateNexusEndpointRequest -> m CreateNexusEndpointResponse
+  , updatenexusendpointHandler :: UpdateNexusEndpointRequest -> m UpdateNexusEndpointResponse
+  , deletenexusendpointHandler :: DeleteNexusEndpointRequest -> m DeleteNexusEndpointResponse
+  , listnexusendpointsHandler :: ListNexusEndpointsRequest -> m ListNexusEndpointsResponse
+  }
+
+-- | Client stub record for @OperatorService@.
+-- Each field is a function for calling one RPC method.
+data OperatorServiceClient m = OperatorServiceClient
+  { addsearchattributes :: AddSearchAttributesRequest -> m AddSearchAttributesResponse
+  , removesearchattributes :: RemoveSearchAttributesRequest -> m RemoveSearchAttributesResponse
+  , listsearchattributes :: ListSearchAttributesRequest -> m ListSearchAttributesResponse
+  , deletenamespace :: DeleteNamespaceRequest -> m DeleteNamespaceResponse
+  , addorupdateremotecluster :: AddOrUpdateRemoteClusterRequest -> m AddOrUpdateRemoteClusterResponse
+  , removeremotecluster :: RemoveRemoteClusterRequest -> m RemoveRemoteClusterResponse
+  , listclusters :: ListClustersRequest -> m ListClustersResponse
+  , getnexusendpoint :: GetNexusEndpointRequest -> m GetNexusEndpointResponse
+  , createnexusendpoint :: CreateNexusEndpointRequest -> m CreateNexusEndpointResponse
+  , updatenexusendpoint :: UpdateNexusEndpointRequest -> m UpdateNexusEndpointResponse
+  , deletenexusendpoint :: DeleteNexusEndpointRequest -> m DeleteNexusEndpointResponse
+  , listnexusendpoints :: ListNexusEndpointsRequest -> m ListNexusEndpointsResponse
+  }
+
+-- | Method metadata for @OperatorService@.
+data OperatorServiceMethod
+  = AddSearchAttributesMethod
+  | RemoveSearchAttributesMethod
+  | ListSearchAttributesMethod
+  | DeleteNamespaceMethod
+  | AddOrUpdateRemoteClusterMethod
+  | RemoveRemoteClusterMethod
+  | ListClustersMethod
+  | GetNexusEndpointMethod
+  | CreateNexusEndpointMethod
+  | UpdateNexusEndpointMethod
+  | DeleteNexusEndpointMethod
+  | ListNexusEndpointsMethod
+  deriving stock (Show, Eq, Ord, Enum, Bounded)
+
+operatorserviceMethodName :: OperatorServiceMethod -> Text
+operatorserviceMethodName AddSearchAttributesMethod = "AddSearchAttributes"
+operatorserviceMethodName RemoveSearchAttributesMethod = "RemoveSearchAttributes"
+operatorserviceMethodName ListSearchAttributesMethod = "ListSearchAttributes"
+operatorserviceMethodName DeleteNamespaceMethod = "DeleteNamespace"
+operatorserviceMethodName AddOrUpdateRemoteClusterMethod = "AddOrUpdateRemoteCluster"
+operatorserviceMethodName RemoveRemoteClusterMethod = "RemoveRemoteCluster"
+operatorserviceMethodName ListClustersMethod = "ListClusters"
+operatorserviceMethodName GetNexusEndpointMethod = "GetNexusEndpoint"
+operatorserviceMethodName CreateNexusEndpointMethod = "CreateNexusEndpoint"
+operatorserviceMethodName UpdateNexusEndpointMethod = "UpdateNexusEndpoint"
+operatorserviceMethodName DeleteNexusEndpointMethod = "DeleteNexusEndpoint"
+operatorserviceMethodName ListNexusEndpointsMethod = "ListNexusEndpoints"
+
+-- | Fully-qualified service name: @OperatorService@
+operatorserviceServiceName :: Text
+operatorserviceServiceName = "OperatorService"
+
+-- | All method paths for @OperatorService@.
+operatorserviceMethodPaths :: [Text]
+operatorserviceMethodPaths = ["/OperatorService/AddSearchAttributes","/OperatorService/RemoveSearchAttributes","/OperatorService/ListSearchAttributes","/OperatorService/DeleteNamespace","/OperatorService/AddOrUpdateRemoteCluster","/OperatorService/RemoveRemoteCluster","/OperatorService/ListClusters","/OperatorService/GetNexusEndpoint","/OperatorService/CreateNexusEndpoint","/OperatorService/UpdateNexusEndpoint","/OperatorService/DeleteNexusEndpoint","/OperatorService/ListNexusEndpoints"]

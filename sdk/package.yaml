@@ -6,8 +6,7 @@ description:  Temporal is a durable execution system that transparently makes yo
 
 dependencies:
 - base >= 4.7 && < 5
-- proto-lens
-- proto-lens-protobuf-types
+- wireform-proto
 - temporal-api-protos
 - temporal-sdk-core
 - atomic-primops
@@ -142,7 +141,7 @@ tests:
       - transformers
       - time
       - unliftio
-      - proto-lens
+      - wireform-proto
       - containers
       - require-callstack
       - hs-opentelemetry-sdk

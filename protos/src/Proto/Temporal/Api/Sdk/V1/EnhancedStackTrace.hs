@@ -1,1424 +1,737 @@
-{- This file was auto-generated from temporal/api/sdk/v1/enhanced_stack_trace.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace (
-        EnhancedStackTrace(), EnhancedStackTrace'SourcesEntry(),
-        StackTrace(), StackTraceFileLocation(), StackTraceFileSlice(),
-        StackTraceSDKInfo()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.sdk' @:: Lens' EnhancedStackTrace StackTraceSDKInfo@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.maybe'sdk' @:: Lens' EnhancedStackTrace (Prelude.Maybe StackTraceSDKInfo)@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.sources' @:: Lens' EnhancedStackTrace (Data.Map.Map Data.Text.Text StackTraceFileSlice)@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.stacks' @:: Lens' EnhancedStackTrace [StackTrace]@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.vec'stacks' @:: Lens' EnhancedStackTrace (Data.Vector.Vector StackTrace)@ -}
-data EnhancedStackTrace
-  = EnhancedStackTrace'_constructor {_EnhancedStackTrace'sdk :: !(Prelude.Maybe StackTraceSDKInfo),
-                                     _EnhancedStackTrace'sources :: !(Data.Map.Map Data.Text.Text StackTraceFileSlice),
-                                     _EnhancedStackTrace'stacks :: !(Data.Vector.Vector StackTrace),
-                                     _EnhancedStackTrace'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show EnhancedStackTrace where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace "sdk" StackTraceSDKInfo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'sdk
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'sdk = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace "maybe'sdk" (Prelude.Maybe StackTraceSDKInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'sdk
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'sdk = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace "sources" (Data.Map.Map Data.Text.Text StackTraceFileSlice) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'sources
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'sources = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace "stacks" [StackTrace] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'stacks
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'stacks = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace "vec'stacks" (Data.Vector.Vector StackTrace) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'stacks
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'stacks = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message EnhancedStackTrace where
-  messageName _
-    = Data.Text.pack "temporal.api.sdk.v1.EnhancedStackTrace"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2EnhancedStackTrace\DC28\n\
-      \\ETXsdk\CAN\SOH \SOH(\v2&.temporal.api.sdk.v1.StackTraceSDKInfoR\ETXsdk\DC2N\n\
-      \\asources\CAN\STX \ETX(\v24.temporal.api.sdk.v1.EnhancedStackTrace.SourcesEntryR\asources\DC27\n\
-      \\ACKstacks\CAN\ETX \ETX(\v2\US.temporal.api.sdk.v1.StackTraceR\ACKstacks\SUBd\n\
-      \\fSourcesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2>\n\
-      \\ENQvalue\CAN\STX \SOH(\v2(.temporal.api.sdk.v1.StackTraceFileSliceR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        sdk__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "sdk"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor StackTraceSDKInfo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'sdk")) ::
-              Data.ProtoLens.FieldDescriptor EnhancedStackTrace
-        sources__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "sources"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor EnhancedStackTrace'SourcesEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"sources")) ::
-              Data.ProtoLens.FieldDescriptor EnhancedStackTrace
-        stacks__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "stacks"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor StackTrace)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"stacks")) ::
-              Data.ProtoLens.FieldDescriptor EnhancedStackTrace
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, sdk__field_descriptor),
-           (Data.ProtoLens.Tag 2, sources__field_descriptor),
-           (Data.ProtoLens.Tag 3, stacks__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _EnhancedStackTrace'_unknownFields
-        (\ x__ y__ -> x__ {_EnhancedStackTrace'_unknownFields = y__})
-  defMessage
-    = EnhancedStackTrace'_constructor
-        {_EnhancedStackTrace'sdk = Prelude.Nothing,
-         _EnhancedStackTrace'sources = Data.Map.empty,
-         _EnhancedStackTrace'stacks = Data.Vector.Generic.empty,
-         _EnhancedStackTrace'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          EnhancedStackTrace
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld StackTrace
-             -> Data.ProtoLens.Encoding.Bytes.Parser EnhancedStackTrace
-        loop x mutable'stacks
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'stacks <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                         (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                            mutable'stacks)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'stacks") frozen'stacks x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "sdk"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"sdk") y x)
-                                  mutable'stacks
-                        18
-                          -> do !(entry :: EnhancedStackTrace'SourcesEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                                 (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                     Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                       (Prelude.fromIntegral
-                                                                                          len)
-                                                                                       Data.ProtoLens.parseMessage)
-                                                                                 "sources"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"sources")
-                                        (\ !t -> Data.Map.insert key value t) x)
-                                     mutable'stacks)
-                        26
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "stacks"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'stacks y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'stacks
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'stacks <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                  Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'stacks)
-          "EnhancedStackTrace"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'sdk") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (Data.Monoid.mconcat
-                   (Prelude.map
-                      (\ _v
-                         -> (Data.Monoid.<>)
-                              (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                              ((Prelude..)
-                                 (\ bs
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                 Data.ProtoLens.encodeMessage
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                    (Lens.Family2.set
-                                       (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                       (Data.ProtoLens.defMessage ::
-                                          EnhancedStackTrace'SourcesEntry)))))
-                      (Data.Map.toList
-                         (Lens.Family2.view (Data.ProtoLens.Field.field @"sources") _x))))
-                ((Data.Monoid.<>)
-                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                      (\ _v
-                         -> (Data.Monoid.<>)
-                              (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                              ((Prelude..)
-                                 (\ bs
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                 Data.ProtoLens.encodeMessage _v))
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'stacks") _x))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData EnhancedStackTrace where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_EnhancedStackTrace'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_EnhancedStackTrace'sdk x__)
-                (Control.DeepSeq.deepseq
-                   (_EnhancedStackTrace'sources x__)
-                   (Control.DeepSeq.deepseq (_EnhancedStackTrace'stacks x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.key' @:: Lens' EnhancedStackTrace'SourcesEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.value' @:: Lens' EnhancedStackTrace'SourcesEntry StackTraceFileSlice@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.maybe'value' @:: Lens' EnhancedStackTrace'SourcesEntry (Prelude.Maybe StackTraceFileSlice)@ -}
-data EnhancedStackTrace'SourcesEntry
-  = EnhancedStackTrace'SourcesEntry'_constructor {_EnhancedStackTrace'SourcesEntry'key :: !Data.Text.Text,
-                                                  _EnhancedStackTrace'SourcesEntry'value :: !(Prelude.Maybe StackTraceFileSlice),
-                                                  _EnhancedStackTrace'SourcesEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show EnhancedStackTrace'SourcesEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace'SourcesEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'SourcesEntry'key
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'SourcesEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace'SourcesEntry "value" StackTraceFileSlice where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'SourcesEntry'value
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'SourcesEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField EnhancedStackTrace'SourcesEntry "maybe'value" (Prelude.Maybe StackTraceFileSlice) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _EnhancedStackTrace'SourcesEntry'value
-           (\ x__ y__ -> x__ {_EnhancedStackTrace'SourcesEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message EnhancedStackTrace'SourcesEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.sdk.v1.EnhancedStackTrace.SourcesEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\fSourcesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2>\n\
-      \\ENQvalue\CAN\STX \SOH(\v2(.temporal.api.sdk.v1.StackTraceFileSliceR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor EnhancedStackTrace'SourcesEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor StackTraceFileSlice)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor EnhancedStackTrace'SourcesEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _EnhancedStackTrace'SourcesEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_EnhancedStackTrace'SourcesEntry'_unknownFields = y__})
-  defMessage
-    = EnhancedStackTrace'SourcesEntry'_constructor
-        {_EnhancedStackTrace'SourcesEntry'key = Data.ProtoLens.fieldDefault,
-         _EnhancedStackTrace'SourcesEntry'value = Prelude.Nothing,
-         _EnhancedStackTrace'SourcesEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          EnhancedStackTrace'SourcesEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser EnhancedStackTrace'SourcesEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SourcesEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData EnhancedStackTrace'SourcesEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_EnhancedStackTrace'SourcesEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_EnhancedStackTrace'SourcesEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_EnhancedStackTrace'SourcesEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.locations' @:: Lens' StackTrace [StackTraceFileLocation]@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.vec'locations' @:: Lens' StackTrace (Data.Vector.Vector StackTraceFileLocation)@ -}
-data StackTrace
-  = StackTrace'_constructor {_StackTrace'locations :: !(Data.Vector.Vector StackTraceFileLocation),
-                             _StackTrace'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show StackTrace where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField StackTrace "locations" [StackTraceFileLocation] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTrace'locations
-           (\ x__ y__ -> x__ {_StackTrace'locations = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField StackTrace "vec'locations" (Data.Vector.Vector StackTraceFileLocation) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTrace'locations
-           (\ x__ y__ -> x__ {_StackTrace'locations = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message StackTrace where
-  messageName _ = Data.Text.pack "temporal.api.sdk.v1.StackTrace"
-  packedMessageDescriptor _
-    = "\n\
-      \\n\
-      \StackTrace\DC2I\n\
-      \\tlocations\CAN\SOH \ETX(\v2+.temporal.api.sdk.v1.StackTraceFileLocationR\tlocations"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        locations__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "locations"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor StackTraceFileLocation)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"locations")) ::
-              Data.ProtoLens.FieldDescriptor StackTrace
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, locations__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _StackTrace'_unknownFields
-        (\ x__ y__ -> x__ {_StackTrace'_unknownFields = y__})
-  defMessage
-    = StackTrace'_constructor
-        {_StackTrace'locations = Data.Vector.Generic.empty,
-         _StackTrace'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          StackTrace
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld StackTraceFileLocation
-             -> Data.ProtoLens.Encoding.Bytes.Parser StackTrace
-        loop x mutable'locations
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'locations <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                               mutable'locations)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'locations") frozen'locations x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "locations"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'locations y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'locations
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'locations <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                     Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'locations)
-          "StackTrace"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                (\ _v
-                   -> (Data.Monoid.<>)
-                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                        ((Prelude..)
-                           (\ bs
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage _v))
-                (Lens.Family2.view
-                   (Data.ProtoLens.Field.field @"vec'locations") _x))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData StackTrace where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_StackTrace'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_StackTrace'locations x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.filePath' @:: Lens' StackTraceFileLocation Data.Text.Text@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.line' @:: Lens' StackTraceFileLocation Data.Int.Int32@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.column' @:: Lens' StackTraceFileLocation Data.Int.Int32@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.functionName' @:: Lens' StackTraceFileLocation Data.Text.Text@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.internalCode' @:: Lens' StackTraceFileLocation Prelude.Bool@ -}
-data StackTraceFileLocation
-  = StackTraceFileLocation'_constructor {_StackTraceFileLocation'filePath :: !Data.Text.Text,
-                                         _StackTraceFileLocation'line :: !Data.Int.Int32,
-                                         _StackTraceFileLocation'column :: !Data.Int.Int32,
-                                         _StackTraceFileLocation'functionName :: !Data.Text.Text,
-                                         _StackTraceFileLocation'internalCode :: !Prelude.Bool,
-                                         _StackTraceFileLocation'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show StackTraceFileLocation where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField StackTraceFileLocation "filePath" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileLocation'filePath
-           (\ x__ y__ -> x__ {_StackTraceFileLocation'filePath = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StackTraceFileLocation "line" Data.Int.Int32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileLocation'line
-           (\ x__ y__ -> x__ {_StackTraceFileLocation'line = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StackTraceFileLocation "column" Data.Int.Int32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileLocation'column
-           (\ x__ y__ -> x__ {_StackTraceFileLocation'column = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StackTraceFileLocation "functionName" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileLocation'functionName
-           (\ x__ y__ -> x__ {_StackTraceFileLocation'functionName = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StackTraceFileLocation "internalCode" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileLocation'internalCode
-           (\ x__ y__ -> x__ {_StackTraceFileLocation'internalCode = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message StackTraceFileLocation where
-  messageName _
-    = Data.Text.pack "temporal.api.sdk.v1.StackTraceFileLocation"
-  packedMessageDescriptor _
-    = "\n\
-      \\SYNStackTraceFileLocation\DC2\ESC\n\
-      \\tfile_path\CAN\SOH \SOH(\tR\bfilePath\DC2\DC2\n\
-      \\EOTline\CAN\STX \SOH(\ENQR\EOTline\DC2\SYN\n\
-      \\ACKcolumn\CAN\ETX \SOH(\ENQR\ACKcolumn\DC2#\n\
-      \\rfunction_name\CAN\EOT \SOH(\tR\ffunctionName\DC2#\n\
-      \\rinternal_code\CAN\ENQ \SOH(\bR\finternalCode"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        filePath__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "file_path"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"filePath")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileLocation
-        line__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "line"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"line")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileLocation
-        column__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "column"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"column")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileLocation
-        functionName__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "function_name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"functionName")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileLocation
-        internalCode__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "internal_code"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"internalCode")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileLocation
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, filePath__field_descriptor),
-           (Data.ProtoLens.Tag 2, line__field_descriptor),
-           (Data.ProtoLens.Tag 3, column__field_descriptor),
-           (Data.ProtoLens.Tag 4, functionName__field_descriptor),
-           (Data.ProtoLens.Tag 5, internalCode__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _StackTraceFileLocation'_unknownFields
-        (\ x__ y__ -> x__ {_StackTraceFileLocation'_unknownFields = y__})
-  defMessage
-    = StackTraceFileLocation'_constructor
-        {_StackTraceFileLocation'filePath = Data.ProtoLens.fieldDefault,
-         _StackTraceFileLocation'line = Data.ProtoLens.fieldDefault,
-         _StackTraceFileLocation'column = Data.ProtoLens.fieldDefault,
-         _StackTraceFileLocation'functionName = Data.ProtoLens.fieldDefault,
-         _StackTraceFileLocation'internalCode = Data.ProtoLens.fieldDefault,
-         _StackTraceFileLocation'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          StackTraceFileLocation
-          -> Data.ProtoLens.Encoding.Bytes.Parser StackTraceFileLocation
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "file_path"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"filePath") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "line"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"line") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "column"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"column") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "function_name"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"functionName") y x)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "internal_code"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"internalCode") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "StackTraceFileLocation"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"filePath") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"line") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"column") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"functionName") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view (Data.ProtoLens.Field.field @"internalCode") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (\ b -> if b then 1 else 0) _v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData StackTraceFileLocation where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_StackTraceFileLocation'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_StackTraceFileLocation'filePath x__)
-                (Control.DeepSeq.deepseq
-                   (_StackTraceFileLocation'line x__)
-                   (Control.DeepSeq.deepseq
-                      (_StackTraceFileLocation'column x__)
-                      (Control.DeepSeq.deepseq
-                         (_StackTraceFileLocation'functionName x__)
-                         (Control.DeepSeq.deepseq
-                            (_StackTraceFileLocation'internalCode x__) ())))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.lineOffset' @:: Lens' StackTraceFileSlice Data.Word.Word32@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.content' @:: Lens' StackTraceFileSlice Data.Text.Text@ -}
-data StackTraceFileSlice
-  = StackTraceFileSlice'_constructor {_StackTraceFileSlice'lineOffset :: !Data.Word.Word32,
-                                      _StackTraceFileSlice'content :: !Data.Text.Text,
-                                      _StackTraceFileSlice'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show StackTraceFileSlice where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField StackTraceFileSlice "lineOffset" Data.Word.Word32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileSlice'lineOffset
-           (\ x__ y__ -> x__ {_StackTraceFileSlice'lineOffset = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StackTraceFileSlice "content" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceFileSlice'content
-           (\ x__ y__ -> x__ {_StackTraceFileSlice'content = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message StackTraceFileSlice where
-  messageName _
-    = Data.Text.pack "temporal.api.sdk.v1.StackTraceFileSlice"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC3StackTraceFileSlice\DC2\US\n\
-      \\vline_offset\CAN\SOH \SOH(\rR\n\
-      \lineOffset\DC2\CAN\n\
-      \\acontent\CAN\STX \SOH(\tR\acontent"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        lineOffset__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "line_offset"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"lineOffset")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileSlice
-        content__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "content"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"content")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceFileSlice
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, lineOffset__field_descriptor),
-           (Data.ProtoLens.Tag 2, content__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _StackTraceFileSlice'_unknownFields
-        (\ x__ y__ -> x__ {_StackTraceFileSlice'_unknownFields = y__})
-  defMessage
-    = StackTraceFileSlice'_constructor
-        {_StackTraceFileSlice'lineOffset = Data.ProtoLens.fieldDefault,
-         _StackTraceFileSlice'content = Data.ProtoLens.fieldDefault,
-         _StackTraceFileSlice'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          StackTraceFileSlice
-          -> Data.ProtoLens.Encoding.Bytes.Parser StackTraceFileSlice
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "line_offset"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"lineOffset") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "content"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"content") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "StackTraceFileSlice"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"lineOffset") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"content") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData StackTraceFileSlice where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_StackTraceFileSlice'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_StackTraceFileSlice'lineOffset x__)
-                (Control.DeepSeq.deepseq (_StackTraceFileSlice'content x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.name' @:: Lens' StackTraceSDKInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace_Fields.version' @:: Lens' StackTraceSDKInfo Data.Text.Text@ -}
-data StackTraceSDKInfo
-  = StackTraceSDKInfo'_constructor {_StackTraceSDKInfo'name :: !Data.Text.Text,
-                                    _StackTraceSDKInfo'version :: !Data.Text.Text,
-                                    _StackTraceSDKInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show StackTraceSDKInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField StackTraceSDKInfo "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceSDKInfo'name
-           (\ x__ y__ -> x__ {_StackTraceSDKInfo'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField StackTraceSDKInfo "version" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _StackTraceSDKInfo'version
-           (\ x__ y__ -> x__ {_StackTraceSDKInfo'version = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message StackTraceSDKInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.sdk.v1.StackTraceSDKInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1StackTraceSDKInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2\CAN\n\
-      \\aversion\CAN\STX \SOH(\tR\aversion"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceSDKInfo
-        version__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "version"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
-              Data.ProtoLens.FieldDescriptor StackTraceSDKInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, name__field_descriptor),
-           (Data.ProtoLens.Tag 2, version__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _StackTraceSDKInfo'_unknownFields
-        (\ x__ y__ -> x__ {_StackTraceSDKInfo'_unknownFields = y__})
-  defMessage
-    = StackTraceSDKInfo'_constructor
-        {_StackTraceSDKInfo'name = Data.ProtoLens.fieldDefault,
-         _StackTraceSDKInfo'version = Data.ProtoLens.fieldDefault,
-         _StackTraceSDKInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          StackTraceSDKInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser StackTraceSDKInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "version"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "StackTraceSDKInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData StackTraceSDKInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_StackTraceSDKInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_StackTraceSDKInfo'name x__)
-                (Control.DeepSeq.deepseq (_StackTraceSDKInfo'version x__) ()))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \.temporal/api/sdk/v1/enhanced_stack_trace.proto\DC2\DC3temporal.api.sdk.v1\"\189\STX\n\
-    \\DC2EnhancedStackTrace\DC28\n\
-    \\ETXsdk\CAN\SOH \SOH(\v2&.temporal.api.sdk.v1.StackTraceSDKInfoR\ETXsdk\DC2N\n\
-    \\asources\CAN\STX \ETX(\v24.temporal.api.sdk.v1.EnhancedStackTrace.SourcesEntryR\asources\DC27\n\
-    \\ACKstacks\CAN\ETX \ETX(\v2\US.temporal.api.sdk.v1.StackTraceR\ACKstacks\SUBd\n\
-    \\fSourcesEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2>\n\
-    \\ENQvalue\CAN\STX \SOH(\v2(.temporal.api.sdk.v1.StackTraceFileSliceR\ENQvalue:\STX8\SOH\"A\n\
-    \\DC1StackTraceSDKInfo\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2\CAN\n\
-    \\aversion\CAN\STX \SOH(\tR\aversion\"P\n\
-    \\DC3StackTraceFileSlice\DC2\US\n\
-    \\vline_offset\CAN\SOH \SOH(\rR\n\
-    \lineOffset\DC2\CAN\n\
-    \\acontent\CAN\STX \SOH(\tR\acontent\"\171\SOH\n\
-    \\SYNStackTraceFileLocation\DC2\ESC\n\
-    \\tfile_path\CAN\SOH \SOH(\tR\bfilePath\DC2\DC2\n\
-    \\EOTline\CAN\STX \SOH(\ENQR\EOTline\DC2\SYN\n\
-    \\ACKcolumn\CAN\ETX \SOH(\ENQR\ACKcolumn\DC2#\n\
-    \\rfunction_name\CAN\EOT \SOH(\tR\ffunctionName\DC2#\n\
-    \\rinternal_code\CAN\ENQ \SOH(\bR\finternalCode\"W\n\
-    \\n\
-    \StackTrace\DC2I\n\
-    \\tlocations\CAN\SOH \ETX(\v2+.temporal.api.sdk.v1.StackTraceFileLocationR\tlocationsB\133\SOH\n\
-    \\SYNio.temporal.api.sdk.v1B\ETBEnhancedStackTraceProtoP\SOHZ\GSgo.temporal.io/api/sdk/v1;sdk\170\STX\NAKTemporalio.Api.Sdk.V1\234\STX\CANTemporalio::Api::Sdk::V1J\142\SYN\n\
-    \\ACK\DC2\EOT\NUL\NULI\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\FS\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL4\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL4\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL/\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL/\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL8\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL8\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL1\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL1\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL2\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL2\n\
-    \\\\n\
-    \\STX\EOT\NUL\DC2\EOT\f\NUL\NAK\SOH\SUBP Internal structure used to create worker stack traces with references to code.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\f\b\SUB\n\
-    \W\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SO\EOT\RS\SUBJ Information pertaining to the SDK that the trace has been captured from.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\SO\EOT\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SO\SYN\EM\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SO\FS\GS\n\
-    \5\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC1\EOT1\SUB( Mapping of file path to file contents.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC1\EOT$\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC1%,\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC1/0\n\
-    \-\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC4\EOT#\SUB  Collection of stacks captured.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\EOT\DC2\ETX\DC4\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\DC4\r\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC4\CAN\RS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC4!\"\n\
-    \\209\SOH\n\
-    \\STX\EOT\SOH\DC2\EOT\SUB\NUL \SOH\SUB\196\SOH Information pertaining to the SDK that the trace has been captured from.\n\
-    \ (-- api-linter: core::0123::resource-annotation=disabled\n\
-    \     aip.dev/not-precedent: Naming SDK version is optional. --)\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\SUB\b\EM\n\
-    \\RS\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\FS\EOT\DC4\SUB\DC1 Name of the SDK\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\FS\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\FS\v\SI\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\FS\DC2\DC3\n\
-    \(\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\US\EOT\ETB\SUB\ESC Version string of the SDK\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\US\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\US\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\US\NAK\SYN\n\
-    \\DEL\n\
-    \\STX\EOT\STX\DC2\EOT#\NUL,\SOH\SUBs \"Slice\" of a file starting at line_offset -- a line offset and code fragment corresponding to the worker's stack.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX#\b\ESC\n\
-    \\175\STX\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX(\EOT\ESC\SUB\161\STX Only used (possibly) to trim the file without breaking syntax highlighting. This is not optional, unlike\n\
-    \ the `line` property of a `StackTraceFileLocation`.\n\
-    \ (-- api-linter: core::0141::forbidden-types=disabled\n\
-    \     aip.dev/not-precedent: These really shouldn't have negative values. --)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX(\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX(\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX(\EM\SUB\n\
-    \O\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX+\EOT\ETB\SUBB Slice of a file with the respective OS-specific line terminator.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX+\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX+\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX+\NAK\SYN\n\
-    \\192\SOH\n\
-    \\STX\EOT\ETX\DC2\EOT0\NULC\SOH\SUB\179\SOH More specific location details of a file: its path, precise line and column numbers if applicable, and function name if available.\n\
-    \ In essence, a pointer to a location in a file\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX0\b\RS\n\
-    \\138\SOH\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX3\EOT\EM\SUB} Path to source file (absolute or relative).\n\
-    \ If the paths are relative, ensure that they are all relative to the same root.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX3\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX3\v\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX3\ETB\CAN\n\
-    \\142\SOH\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETX7\EOT\DC3\SUB\128\SOH Optional; If possible, SDK should send this -- this is required for displaying the code location.\n\
-    \ If not provided, set to -1.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX7\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX7\n\
-    \\SO\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX7\DC1\DC2\n\
-    \X\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETX;\EOT\NAK\SUBK Optional; if possible, SDK should send this.\n\
-    \ If not provided, set to -1.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETX;\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETX;\n\
-    \\DLE\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETX;\DC3\DC4\n\
-    \m\n\
-    \\EOT\EOT\ETX\STX\ETX\DC2\ETX?\EOT\GS\SUB` Function name this line belongs to, if applicable.\n\
-    \ Used for falling back to stack trace view.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETX?\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETX?\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETX?\ESC\FS\n\
-    \d\n\
-    \\EOT\EOT\ETX\STX\EOT\DC2\ETXB\EOT\ESC\SUBW Flag to communicate whether a location should be hidden by default in the stack view.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ENQ\DC2\ETXB\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETXB\t\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETXB\EM\SUB\n\
-    \F\n\
-    \\STX\EOT\EOT\DC2\EOTF\NULI\SOH\SUB: Collection of FileLocation messages from a single stack.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXF\b\DC2\n\
-    \a\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXH\EOT2\SUBT Collection of `FileLocation`s, each for a stack frame that comprise a stack trace.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\EOT\DC2\ETXH\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXH\r#\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXH$-\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXH01b\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.sdk.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Sdk.V1.EnhancedStackTrace where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x73\x64\x6b\x2f\x76\x31\x2f\x65\x6e\x68\x61\x6e\x63\x65\x64\x5f\x73\x74\x61\x63\x6b\x5f\x74\x72\x61\x63\x65\x2e\x70\x72\x6f\x74\x6f\x12\x13\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x73\x64\x6b\x2e\x76\x31\x22\x93\x02\x0a\x12\x45\x6e\x68\x61\x6e\x63\x65\x64\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x12\x32\x0a\x03\x73\x64\x6b\x18\x01\x20\x01\x28\x0b\x32\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x73\x64\x6b\x2e\x76\x31\x2e\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x53\x44\x4b\x49\x6e\x66\x6f\x12\x44\x0a\x07\x73\x6f\x75\x72\x63\x65\x73\x18\x02\x20\x03\x28\x0b\x32\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x73\x64\x6b\x2e\x76\x31\x2e\x45\x6e\x68\x61\x6e\x63\x65\x64\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x2e\x53\x6f\x75\x72\x63\x65\x73\x45\x6e\x74\x72\x79\x12\x2e\x0a\x06\x73\x74\x61\x63\x6b\x73\x18\x03\x20\x03\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x73\x64\x6b\x2e\x76\x31\x2e\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x1a\x53\x0a\x0c\x53\x6f\x75\x72\x63\x65\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x36\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x27\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x73\x64\x6b\x2e\x76\x31\x2e\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x46\x69\x6c\x65\x53\x6c\x69\x63\x65\x22\x32\x0a\x11\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x53\x44\x4b\x49\x6e\x66\x6f\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x0f\x0a\x07\x76\x65\x72\x73\x69\x6f\x6e\x18\x02\x20\x01\x28\x09\x22\x3b\x0a\x13\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x46\x69\x6c\x65\x53\x6c\x69\x63\x65\x12\x13\x0a\x0b\x6c\x69\x6e\x65\x5f\x6f\x66\x66\x73\x65\x74\x18\x01\x20\x01\x28\x0d\x12\x0f\x0a\x07\x63\x6f\x6e\x74\x65\x6e\x74\x18\x02\x20\x01\x28\x09\x22\x77\x0a\x16\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x46\x69\x6c\x65\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x12\x11\x0a\x09\x66\x69\x6c\x65\x5f\x70\x61\x74\x68\x18\x01\x20\x01\x28\x09\x12\x0c\x0a\x04\x6c\x69\x6e\x65\x18\x02\x20\x01\x28\x05\x12\x0e\x0a\x06\x63\x6f\x6c\x75\x6d\x6e\x18\x03\x20\x01\x28\x05\x12\x15\x0a\x0d\x66\x75\x6e\x63\x74\x69\x6f\x6e\x5f\x6e\x61\x6d\x65\x18\x04\x20\x01\x28\x09\x12\x15\x0a\x0d\x69\x6e\x74\x65\x72\x6e\x61\x6c\x5f\x63\x6f\x64\x65\x18\x05\x20\x01\x28\x08\x22\x4b\x0a\x0a\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x12\x3d\x0a\x09\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x73\x18\x01\x20\x03\x28\x0b\x32\x2a\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x73\x64\x6b\x2e\x76\x31\x2e\x53\x74\x61\x63\x6b\x54\x72\x61\x63\x65\x46\x69\x6c\x65\x4c\x6f\x63\x61\x74\x69\x6f\x6e\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data EnhancedStackTrace = EnhancedStackTrace
+  { sdk :: !(Maybe StackTraceSDKInfo)
+  , sources :: !(V.Vector EnhancedStackTrace'SourcesEntry)
+  , stacks :: !(V.Vector StackTrace)
+  , enhancedStackTraceUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data EnhancedStackTrace'SourcesEntry = EnhancedStackTrace'SourcesEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe StackTraceFileSlice)
+  , enhancedStackTraceSourcesEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultEnhancedStackTrace'SourcesEntry :: EnhancedStackTrace'SourcesEntry
+defaultEnhancedStackTrace'SourcesEntry = EnhancedStackTrace'SourcesEntry
+  { key = Nothing
+  , value = Nothing
+  , enhancedStackTraceSourcesEntryUnknownFields = []
+  }
+
+instance MessageEncode EnhancedStackTrace'SourcesEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.enhancedStackTraceSourcesEntryUnknownFields
+
+instance MessageSize EnhancedStackTrace'SourcesEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.enhancedStackTraceSourcesEntryUnknownFields
+
+instance MessageDecode EnhancedStackTrace'SourcesEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (EnhancedStackTrace'SourcesEntry {key = acc_0, value = acc_1, enhancedStackTraceSourcesEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage EnhancedStackTrace'SourcesEntry where
+  protoMessageName _ = "temporal.api.sdk.v1.EnhancedStackTrace.SourcesEntry"
+  protoPackageName _ = "temporal.api.sdk.v1"
+  protoDefaultValue = defaultEnhancedStackTrace'SourcesEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: EnhancedStackTrace'SourcesEntry) -> m.key
+        , fdSet = \v (m :: EnhancedStackTrace'SourcesEntry) -> (m { key = v } :: EnhancedStackTrace'SourcesEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.sdk.v1.StackTraceFileSlice"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: EnhancedStackTrace'SourcesEntry) -> m.value
+        , fdSet = \v (m :: EnhancedStackTrace'SourcesEntry) -> (m { value = v } :: EnhancedStackTrace'SourcesEntry)
+        })
+    ]
+
+instance IsMessage EnhancedStackTrace'SourcesEntry
+
+instance Aeson.ToJSON EnhancedStackTrace'SourcesEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON EnhancedStackTrace'SourcesEntry where
+  parseJSON = Aeson.withObject "EnhancedStackTrace'SourcesEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultEnhancedStackTrace'SourcesEntry
+      { key = maybe (defaultEnhancedStackTrace'SourcesEntry.key) Prelude.id fld_key
+      , value = maybe (defaultEnhancedStackTrace'SourcesEntry.value) Prelude.id fld_value
+      , enhancedStackTraceSourcesEntryUnknownFields = []
+      } :: EnhancedStackTrace'SourcesEntry)
+
+instance Hashable EnhancedStackTrace'SourcesEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions EnhancedStackTrace'SourcesEntry where
+  messageUnknownFields msg = msg.enhancedStackTraceSourcesEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { enhancedStackTraceSourcesEntryUnknownFields = ufs }
+
+instance Semigroup EnhancedStackTrace'SourcesEntry where
+  a <> b = EnhancedStackTrace'SourcesEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , enhancedStackTraceSourcesEntryUnknownFields = a.enhancedStackTraceSourcesEntryUnknownFields <> b.enhancedStackTraceSourcesEntryUnknownFields
+    }
+
+instance Monoid EnhancedStackTrace'SourcesEntry where
+  mempty = defaultEnhancedStackTrace'SourcesEntry
+
+defaultEnhancedStackTrace :: EnhancedStackTrace
+defaultEnhancedStackTrace = EnhancedStackTrace
+  { sdk = Nothing
+  , sources = V.empty
+  , stacks = V.empty
+  , enhancedStackTraceUnknownFields = []
+  }
+
+instance MessageEncode EnhancedStackTrace where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.sdk)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 18 sz (buildMessage v)) mempty msg.sources
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 26 sz (buildMessage v)) mempty msg.stacks
+    <> encodeUnknownFields msg.enhancedStackTraceUnknownFields
+
+instance MessageSize EnhancedStackTrace where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.sdk)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.sources)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.stacks)
+    + unknownFieldsSize msg.enhancedStackTraceUnknownFields
+
+instance MessageDecode EnhancedStackTrace where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing V.empty V.empty []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (EnhancedStackTrace {sdk = acc_0, sources = acc_1, stacks = acc_2, enhancedStackTraceUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (acc_1 <> V.singleton v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (acc_2 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage EnhancedStackTrace where
+  protoMessageName _ = "temporal.api.sdk.v1.EnhancedStackTrace"
+  protoPackageName _ = "temporal.api.sdk.v1"
+  protoDefaultValue = defaultEnhancedStackTrace
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "sdk"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.sdk.v1.StackTraceSDKInfo"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: EnhancedStackTrace) -> m.sdk
+        , fdSet = \v (m :: EnhancedStackTrace) -> (m { sdk = v } :: EnhancedStackTrace)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "sources"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.sdk.v1.EnhancedStackTrace.SourcesEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: EnhancedStackTrace) -> m.sources
+        , fdSet = \v (m :: EnhancedStackTrace) -> (m { sources = v } :: EnhancedStackTrace)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "stacks"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.sdk.v1.StackTrace"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: EnhancedStackTrace) -> m.stacks
+        , fdSet = \v (m :: EnhancedStackTrace) -> (m { stacks = v } :: EnhancedStackTrace)
+        })
+    ]
+
+instance IsMessage EnhancedStackTrace
+
+instance Aeson.ToJSON EnhancedStackTrace where
+  toJSON msg = jsonObject
+      [ "sdk" .=: msg.sdk
+      , "sources" .=: msg.sources
+      , "stacks" .=: msg.stacks
+      ]
+
+instance Aeson.FromJSON EnhancedStackTrace where
+  parseJSON = Aeson.withObject "EnhancedStackTrace" $ \obj -> do
+    fld_sdk <- parseFieldMaybe obj "sdk"
+    fld_sources <- parseFieldMaybe obj "sources"
+    fld_stacks <- parseFieldMaybe obj "stacks"
+    pure (defaultEnhancedStackTrace
+      { sdk = maybe (defaultEnhancedStackTrace.sdk) Prelude.id fld_sdk
+      , sources = maybe (defaultEnhancedStackTrace.sources) Prelude.id fld_sources
+      , stacks = maybe (defaultEnhancedStackTrace.stacks) Prelude.id fld_stacks
+      , enhancedStackTraceUnknownFields = []
+      } :: EnhancedStackTrace)
+
+instance Hashable EnhancedStackTrace where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (salt) msg.sdk) msg.sources) msg.stacks
+
+instance Proto.Extension.HasExtensions EnhancedStackTrace where
+  messageUnknownFields msg = msg.enhancedStackTraceUnknownFields
+  setMessageUnknownFields !ufs msg = msg { enhancedStackTraceUnknownFields = ufs }
+
+instance Semigroup EnhancedStackTrace where
+  a <> b = EnhancedStackTrace
+    { sdk = case b.sdk of { Nothing -> a.sdk; x -> x }
+    , sources = a.sources <> b.sources
+    , stacks = a.stacks <> b.stacks
+    , enhancedStackTraceUnknownFields = a.enhancedStackTraceUnknownFields <> b.enhancedStackTraceUnknownFields
+    }
+
+instance Monoid EnhancedStackTrace where
+  mempty = defaultEnhancedStackTrace
+
+data StackTraceSDKInfo = StackTraceSDKInfo
+  { name :: !(Maybe Text)
+  , version :: !(Maybe Text)
+  , stackTraceSDKInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultStackTraceSDKInfo :: StackTraceSDKInfo
+defaultStackTraceSDKInfo = StackTraceSDKInfo
+  { name = Nothing
+  , version = Nothing
+  , stackTraceSDKInfoUnknownFields = []
+  }
+
+instance MessageEncode StackTraceSDKInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> (maybe mempty (\v -> archString 18 v) msg.version)
+    <> encodeUnknownFields msg.stackTraceSDKInfoUnknownFields
+
+instance MessageSize StackTraceSDKInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + (maybe 0 (\v -> archStringSize v) msg.version)
+    + unknownFieldsSize msg.stackTraceSDKInfoUnknownFields
+
+instance MessageDecode StackTraceSDKInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (StackTraceSDKInfo {name = acc_0, version = acc_1, stackTraceSDKInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage StackTraceSDKInfo where
+  protoMessageName _ = "temporal.api.sdk.v1.StackTraceSDKInfo"
+  protoPackageName _ = "temporal.api.sdk.v1"
+  protoDefaultValue = defaultStackTraceSDKInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceSDKInfo) -> m.name
+        , fdSet = \v (m :: StackTraceSDKInfo) -> (m { name = v } :: StackTraceSDKInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "version"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceSDKInfo) -> m.version
+        , fdSet = \v (m :: StackTraceSDKInfo) -> (m { version = v } :: StackTraceSDKInfo)
+        })
+    ]
+
+instance IsMessage StackTraceSDKInfo
+
+instance Aeson.ToJSON StackTraceSDKInfo where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+      , "version" .=: msg.version
+      ]
+
+instance Aeson.FromJSON StackTraceSDKInfo where
+  parseJSON = Aeson.withObject "StackTraceSDKInfo" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    fld_version <- parseFieldMaybe obj "version"
+    pure (defaultStackTraceSDKInfo
+      { name = maybe (defaultStackTraceSDKInfo.name) Prelude.id fld_name
+      , version = maybe (defaultStackTraceSDKInfo.version) Prelude.id fld_version
+      , stackTraceSDKInfoUnknownFields = []
+      } :: StackTraceSDKInfo)
+
+instance Hashable StackTraceSDKInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.name) msg.version
+
+instance Proto.Extension.HasExtensions StackTraceSDKInfo where
+  messageUnknownFields msg = msg.stackTraceSDKInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { stackTraceSDKInfoUnknownFields = ufs }
+
+instance Semigroup StackTraceSDKInfo where
+  a <> b = StackTraceSDKInfo
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , version = case b.version of { Nothing -> a.version; x -> x }
+    , stackTraceSDKInfoUnknownFields = a.stackTraceSDKInfoUnknownFields <> b.stackTraceSDKInfoUnknownFields
+    }
+
+instance Monoid StackTraceSDKInfo where
+  mempty = defaultStackTraceSDKInfo
+
+data StackTraceFileSlice = StackTraceFileSlice
+  { lineOffset :: !(Maybe Word32)
+  , content :: !(Maybe Text)
+  , stackTraceFileSliceUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultStackTraceFileSlice :: StackTraceFileSlice
+defaultStackTraceFileSlice = StackTraceFileSlice
+  { lineOffset = Nothing
+  , content = Nothing
+  , stackTraceFileSliceUnknownFields = []
+  }
+
+instance MessageEncode StackTraceFileSlice where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral v)) msg.lineOffset)
+    <> (maybe mempty (\v -> archString 18 v) msg.content)
+    <> encodeUnknownFields msg.stackTraceFileSliceUnknownFields
+
+instance MessageSize StackTraceFileSlice where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.lineOffset)
+    + (maybe 0 (\v -> archStringSize v) msg.content)
+    + unknownFieldsSize msg.stackTraceFileSliceUnknownFields
+
+instance MessageDecode StackTraceFileSlice where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (StackTraceFileSlice {lineOffset = acc_0, content = acc_1, stackTraceFileSliceUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage StackTraceFileSlice where
+  protoMessageName _ = "temporal.api.sdk.v1.StackTraceFileSlice"
+  protoPackageName _ = "temporal.api.sdk.v1"
+  protoDefaultValue = defaultStackTraceFileSlice
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "line_offset"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType UInt32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileSlice) -> m.lineOffset
+        , fdSet = \v (m :: StackTraceFileSlice) -> (m { lineOffset = v } :: StackTraceFileSlice)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "content"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileSlice) -> m.content
+        , fdSet = \v (m :: StackTraceFileSlice) -> (m { content = v } :: StackTraceFileSlice)
+        })
+    ]
+
+instance IsMessage StackTraceFileSlice
+
+instance Aeson.ToJSON StackTraceFileSlice where
+  toJSON msg = jsonObject
+      [ "lineOffset" .=: msg.lineOffset
+      , "content" .=: msg.content
+      ]
+
+instance Aeson.FromJSON StackTraceFileSlice where
+  parseJSON = Aeson.withObject "StackTraceFileSlice" $ \obj -> do
+    fld_lineOffset <- parseFieldMaybe obj "lineOffset"
+    fld_content <- parseFieldMaybe obj "content"
+    pure (defaultStackTraceFileSlice
+      { lineOffset = maybe (defaultStackTraceFileSlice.lineOffset) Prelude.id fld_lineOffset
+      , content = maybe (defaultStackTraceFileSlice.content) Prelude.id fld_content
+      , stackTraceFileSliceUnknownFields = []
+      } :: StackTraceFileSlice)
+
+instance Hashable StackTraceFileSlice where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.lineOffset) msg.content
+
+instance Proto.Extension.HasExtensions StackTraceFileSlice where
+  messageUnknownFields msg = msg.stackTraceFileSliceUnknownFields
+  setMessageUnknownFields !ufs msg = msg { stackTraceFileSliceUnknownFields = ufs }
+
+instance Semigroup StackTraceFileSlice where
+  a <> b = StackTraceFileSlice
+    { lineOffset = case b.lineOffset of { Nothing -> a.lineOffset; x -> x }
+    , content = case b.content of { Nothing -> a.content; x -> x }
+    , stackTraceFileSliceUnknownFields = a.stackTraceFileSliceUnknownFields <> b.stackTraceFileSliceUnknownFields
+    }
+
+instance Monoid StackTraceFileSlice where
+  mempty = defaultStackTraceFileSlice
+
+data StackTraceFileLocation = StackTraceFileLocation
+  { filePath :: !(Maybe Text)
+  , line :: !(Maybe Int32)
+  , column :: !(Maybe Int32)
+  , functionName :: !(Maybe Text)
+  , internalCode :: !(Maybe Bool)
+  , stackTraceFileLocationUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultStackTraceFileLocation :: StackTraceFileLocation
+defaultStackTraceFileLocation = StackTraceFileLocation
+  { filePath = Nothing
+  , line = Nothing
+  , column = Nothing
+  , functionName = Nothing
+  , internalCode = Nothing
+  , stackTraceFileLocationUnknownFields = []
+  }
+
+instance MessageEncode StackTraceFileLocation where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.filePath)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral v)) msg.line)
+    <> (maybe mempty (\v -> archVarint 24 (fromIntegral v)) msg.column)
+    <> (maybe mempty (\v -> archString 34 v) msg.functionName)
+    <> (maybe mempty (\v -> archBool 40 v) msg.internalCode)
+    <> encodeUnknownFields msg.stackTraceFileLocationUnknownFields
+
+instance MessageSize StackTraceFileLocation where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.filePath)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.line)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.column)
+    + (maybe 0 (\v -> archStringSize v) msg.functionName)
+    + (maybe 0 (\v -> archBoolSize) msg.internalCode)
+    + unknownFieldsSize msg.stackTraceFileLocationUnknownFields
+
+instance MessageDecode StackTraceFileLocation where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (StackTraceFileLocation {filePath = acc_0, line = acc_1, column = acc_2, functionName = acc_3, internalCode = acc_4, stackTraceFileLocationUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          2 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          3 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage StackTraceFileLocation where
+  protoMessageName _ = "temporal.api.sdk.v1.StackTraceFileLocation"
+  protoPackageName _ = "temporal.api.sdk.v1"
+  protoDefaultValue = defaultStackTraceFileLocation
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "file_path"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileLocation) -> m.filePath
+        , fdSet = \v (m :: StackTraceFileLocation) -> (m { filePath = v } :: StackTraceFileLocation)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "line"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType Int32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileLocation) -> m.line
+        , fdSet = \v (m :: StackTraceFileLocation) -> (m { line = v } :: StackTraceFileLocation)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "column"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType Int32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileLocation) -> m.column
+        , fdSet = \v (m :: StackTraceFileLocation) -> (m { column = v } :: StackTraceFileLocation)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "function_name"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileLocation) -> m.functionName
+        , fdSet = \v (m :: StackTraceFileLocation) -> (m { functionName = v } :: StackTraceFileLocation)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "internal_code"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: StackTraceFileLocation) -> m.internalCode
+        , fdSet = \v (m :: StackTraceFileLocation) -> (m { internalCode = v } :: StackTraceFileLocation)
+        })
+    ]
+
+instance IsMessage StackTraceFileLocation
+
+instance Aeson.ToJSON StackTraceFileLocation where
+  toJSON msg = jsonObject
+      [ "filePath" .=: msg.filePath
+      , "line" .=: msg.line
+      , "column" .=: msg.column
+      , "functionName" .=: msg.functionName
+      , "internalCode" .=: msg.internalCode
+      ]
+
+instance Aeson.FromJSON StackTraceFileLocation where
+  parseJSON = Aeson.withObject "StackTraceFileLocation" $ \obj -> do
+    fld_filePath <- parseFieldMaybe obj "filePath"
+    fld_line <- parseFieldMaybe obj "line"
+    fld_column <- parseFieldMaybe obj "column"
+    fld_functionName <- parseFieldMaybe obj "functionName"
+    fld_internalCode <- parseFieldMaybe obj "internalCode"
+    pure (defaultStackTraceFileLocation
+      { filePath = maybe (defaultStackTraceFileLocation.filePath) Prelude.id fld_filePath
+      , line = maybe (defaultStackTraceFileLocation.line) Prelude.id fld_line
+      , column = maybe (defaultStackTraceFileLocation.column) Prelude.id fld_column
+      , functionName = maybe (defaultStackTraceFileLocation.functionName) Prelude.id fld_functionName
+      , internalCode = maybe (defaultStackTraceFileLocation.internalCode) Prelude.id fld_internalCode
+      , stackTraceFileLocationUnknownFields = []
+      } :: StackTraceFileLocation)
+
+instance Hashable StackTraceFileLocation where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.filePath) msg.line) msg.column) msg.functionName) msg.internalCode
+
+instance Proto.Extension.HasExtensions StackTraceFileLocation where
+  messageUnknownFields msg = msg.stackTraceFileLocationUnknownFields
+  setMessageUnknownFields !ufs msg = msg { stackTraceFileLocationUnknownFields = ufs }
+
+instance Semigroup StackTraceFileLocation where
+  a <> b = StackTraceFileLocation
+    { filePath = case b.filePath of { Nothing -> a.filePath; x -> x }
+    , line = case b.line of { Nothing -> a.line; x -> x }
+    , column = case b.column of { Nothing -> a.column; x -> x }
+    , functionName = case b.functionName of { Nothing -> a.functionName; x -> x }
+    , internalCode = case b.internalCode of { Nothing -> a.internalCode; x -> x }
+    , stackTraceFileLocationUnknownFields = a.stackTraceFileLocationUnknownFields <> b.stackTraceFileLocationUnknownFields
+    }
+
+instance Monoid StackTraceFileLocation where
+  mempty = defaultStackTraceFileLocation
+
+data StackTrace = StackTrace
+  { locations :: !(V.Vector StackTraceFileLocation)
+  , stackTraceUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultStackTrace :: StackTrace
+defaultStackTrace = StackTrace
+  { locations = V.empty
+  , stackTraceUnknownFields = []
+  }
+
+instance MessageEncode StackTrace where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.locations
+    <> encodeUnknownFields msg.stackTraceUnknownFields
+
+instance MessageSize StackTrace where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.locations)
+    + unknownFieldsSize msg.stackTraceUnknownFields
+
+instance MessageDecode StackTrace where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (StackTrace {locations = acc_0, stackTraceUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage StackTrace where
+  protoMessageName _ = "temporal.api.sdk.v1.StackTrace"
+  protoPackageName _ = "temporal.api.sdk.v1"
+  protoDefaultValue = defaultStackTrace
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "locations"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.sdk.v1.StackTraceFileLocation"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: StackTrace) -> m.locations
+        , fdSet = \v (m :: StackTrace) -> (m { locations = v } :: StackTrace)
+        })
+    ]
+
+instance IsMessage StackTrace
+
+instance Aeson.ToJSON StackTrace where
+  toJSON msg = jsonObject
+      [ "locations" .=: msg.locations
+
+      ]
+
+instance Aeson.FromJSON StackTrace where
+  parseJSON = Aeson.withObject "StackTrace" $ \obj -> do
+    fld_locations <- parseFieldMaybe obj "locations"
+    pure (defaultStackTrace
+      { locations = maybe (defaultStackTrace.locations) Prelude.id fld_locations
+      , stackTraceUnknownFields = []
+      } :: StackTrace)
+
+instance Hashable StackTrace where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.locations
+
+instance Proto.Extension.HasExtensions StackTrace where
+  messageUnknownFields msg = msg.stackTraceUnknownFields
+  setMessageUnknownFields !ufs msg = msg { stackTraceUnknownFields = ufs }
+
+instance Semigroup StackTrace where
+  a <> b = StackTrace
+    { locations = a.locations <> b.locations
+    , stackTraceUnknownFields = a.stackTraceUnknownFields <> b.stackTraceUnknownFields
+    }
+
+instance Monoid StackTrace where
+  mempty = defaultStackTrace

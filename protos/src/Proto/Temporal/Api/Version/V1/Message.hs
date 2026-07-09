@@ -1,904 +1,450 @@
-{- This file was auto-generated from temporal/api/version/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Version.V1.Message (
-        Alert(), ReleaseInfo(), VersionInfo()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Enums.V1.Common
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.message' @:: Lens' Alert Data.Text.Text@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.severity' @:: Lens' Alert Proto.Temporal.Api.Enums.V1.Common.Severity@ -}
-data Alert
-  = Alert'_constructor {_Alert'message :: !Data.Text.Text,
-                        _Alert'severity :: !Proto.Temporal.Api.Enums.V1.Common.Severity,
-                        _Alert'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Alert where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Alert "message" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Alert'message (\ x__ y__ -> x__ {_Alert'message = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Alert "severity" Proto.Temporal.Api.Enums.V1.Common.Severity where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Alert'severity (\ x__ y__ -> x__ {_Alert'severity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Alert where
-  messageName _ = Data.Text.pack "temporal.api.version.v1.Alert"
-  packedMessageDescriptor _
-    = "\n\
-      \\ENQAlert\DC2\CAN\n\
-      \\amessage\CAN\SOH \SOH(\tR\amessage\DC2;\n\
-      \\bseverity\CAN\STX \SOH(\SO2\US.temporal.api.enums.v1.SeverityR\bseverity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        message__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "message"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"message")) ::
-              Data.ProtoLens.FieldDescriptor Alert
-        severity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "severity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Common.Severity)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"severity")) ::
-              Data.ProtoLens.FieldDescriptor Alert
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, message__field_descriptor),
-           (Data.ProtoLens.Tag 2, severity__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Alert'_unknownFields
-        (\ x__ y__ -> x__ {_Alert'_unknownFields = y__})
-  defMessage
-    = Alert'_constructor
-        {_Alert'message = Data.ProtoLens.fieldDefault,
-         _Alert'severity = Data.ProtoLens.fieldDefault,
-         _Alert'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Alert -> Data.ProtoLens.Encoding.Bytes.Parser Alert
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "message"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"message") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "severity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"severity") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Alert"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"message") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"severity") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Alert where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Alert'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Alert'message x__)
-                (Control.DeepSeq.deepseq (_Alert'severity x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.version' @:: Lens' ReleaseInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.releaseTime' @:: Lens' ReleaseInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.maybe'releaseTime' @:: Lens' ReleaseInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.notes' @:: Lens' ReleaseInfo Data.Text.Text@ -}
-data ReleaseInfo
-  = ReleaseInfo'_constructor {_ReleaseInfo'version :: !Data.Text.Text,
-                              _ReleaseInfo'releaseTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                              _ReleaseInfo'notes :: !Data.Text.Text,
-                              _ReleaseInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ReleaseInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ReleaseInfo "version" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ReleaseInfo'version
-           (\ x__ y__ -> x__ {_ReleaseInfo'version = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ReleaseInfo "releaseTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ReleaseInfo'releaseTime
-           (\ x__ y__ -> x__ {_ReleaseInfo'releaseTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ReleaseInfo "maybe'releaseTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ReleaseInfo'releaseTime
-           (\ x__ y__ -> x__ {_ReleaseInfo'releaseTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ReleaseInfo "notes" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ReleaseInfo'notes (\ x__ y__ -> x__ {_ReleaseInfo'notes = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ReleaseInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.version.v1.ReleaseInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\vReleaseInfo\DC2\CAN\n\
-      \\aversion\CAN\SOH \SOH(\tR\aversion\DC2=\n\
-      \\frelease_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\vreleaseTime\DC2\DC4\n\
-      \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        version__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "version"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
-              Data.ProtoLens.FieldDescriptor ReleaseInfo
-        releaseTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "release_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'releaseTime")) ::
-              Data.ProtoLens.FieldDescriptor ReleaseInfo
-        notes__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "notes"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"notes")) ::
-              Data.ProtoLens.FieldDescriptor ReleaseInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, version__field_descriptor),
-           (Data.ProtoLens.Tag 2, releaseTime__field_descriptor),
-           (Data.ProtoLens.Tag 3, notes__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ReleaseInfo'_unknownFields
-        (\ x__ y__ -> x__ {_ReleaseInfo'_unknownFields = y__})
-  defMessage
-    = ReleaseInfo'_constructor
-        {_ReleaseInfo'version = Data.ProtoLens.fieldDefault,
-         _ReleaseInfo'releaseTime = Prelude.Nothing,
-         _ReleaseInfo'notes = Data.ProtoLens.fieldDefault,
-         _ReleaseInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ReleaseInfo -> Data.ProtoLens.Encoding.Bytes.Parser ReleaseInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "version"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "release_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"releaseTime") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "notes"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"notes") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ReleaseInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'releaseTime") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"notes") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData ReleaseInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ReleaseInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ReleaseInfo'version x__)
-                (Control.DeepSeq.deepseq
-                   (_ReleaseInfo'releaseTime x__)
-                   (Control.DeepSeq.deepseq (_ReleaseInfo'notes x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.current' @:: Lens' VersionInfo ReleaseInfo@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.maybe'current' @:: Lens' VersionInfo (Prelude.Maybe ReleaseInfo)@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.recommended' @:: Lens' VersionInfo ReleaseInfo@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.maybe'recommended' @:: Lens' VersionInfo (Prelude.Maybe ReleaseInfo)@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.instructions' @:: Lens' VersionInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.alerts' @:: Lens' VersionInfo [Alert]@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.vec'alerts' @:: Lens' VersionInfo (Data.Vector.Vector Alert)@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.lastUpdateTime' @:: Lens' VersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Version.V1.Message_Fields.maybe'lastUpdateTime' @:: Lens' VersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data VersionInfo
-  = VersionInfo'_constructor {_VersionInfo'current :: !(Prelude.Maybe ReleaseInfo),
-                              _VersionInfo'recommended :: !(Prelude.Maybe ReleaseInfo),
-                              _VersionInfo'instructions :: !Data.Text.Text,
-                              _VersionInfo'alerts :: !(Data.Vector.Vector Alert),
-                              _VersionInfo'lastUpdateTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                              _VersionInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show VersionInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField VersionInfo "current" ReleaseInfo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'current
-           (\ x__ y__ -> x__ {_VersionInfo'current = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField VersionInfo "maybe'current" (Prelude.Maybe ReleaseInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'current
-           (\ x__ y__ -> x__ {_VersionInfo'current = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionInfo "recommended" ReleaseInfo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'recommended
-           (\ x__ y__ -> x__ {_VersionInfo'recommended = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField VersionInfo "maybe'recommended" (Prelude.Maybe ReleaseInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'recommended
-           (\ x__ y__ -> x__ {_VersionInfo'recommended = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionInfo "instructions" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'instructions
-           (\ x__ y__ -> x__ {_VersionInfo'instructions = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionInfo "alerts" [Alert] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'alerts (\ x__ y__ -> x__ {_VersionInfo'alerts = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField VersionInfo "vec'alerts" (Data.Vector.Vector Alert) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'alerts (\ x__ y__ -> x__ {_VersionInfo'alerts = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionInfo "lastUpdateTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'lastUpdateTime
-           (\ x__ y__ -> x__ {_VersionInfo'lastUpdateTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField VersionInfo "maybe'lastUpdateTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionInfo'lastUpdateTime
-           (\ x__ y__ -> x__ {_VersionInfo'lastUpdateTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message VersionInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.version.v1.VersionInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\vVersionInfo\DC2>\n\
-      \\acurrent\CAN\SOH \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\acurrent\DC2F\n\
-      \\vrecommended\CAN\STX \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\vrecommended\DC2\"\n\
-      \\finstructions\CAN\ETX \SOH(\tR\finstructions\DC26\n\
-      \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2D\n\
-      \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        current__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor ReleaseInfo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'current")) ::
-              Data.ProtoLens.FieldDescriptor VersionInfo
-        recommended__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "recommended"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor ReleaseInfo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'recommended")) ::
-              Data.ProtoLens.FieldDescriptor VersionInfo
-        instructions__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "instructions"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"instructions")) ::
-              Data.ProtoLens.FieldDescriptor VersionInfo
-        alerts__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "alerts"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Alert)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"alerts")) ::
-              Data.ProtoLens.FieldDescriptor VersionInfo
-        lastUpdateTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_update_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastUpdateTime")) ::
-              Data.ProtoLens.FieldDescriptor VersionInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, current__field_descriptor),
-           (Data.ProtoLens.Tag 2, recommended__field_descriptor),
-           (Data.ProtoLens.Tag 3, instructions__field_descriptor),
-           (Data.ProtoLens.Tag 4, alerts__field_descriptor),
-           (Data.ProtoLens.Tag 5, lastUpdateTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _VersionInfo'_unknownFields
-        (\ x__ y__ -> x__ {_VersionInfo'_unknownFields = y__})
-  defMessage
-    = VersionInfo'_constructor
-        {_VersionInfo'current = Prelude.Nothing,
-         _VersionInfo'recommended = Prelude.Nothing,
-         _VersionInfo'instructions = Data.ProtoLens.fieldDefault,
-         _VersionInfo'alerts = Data.Vector.Generic.empty,
-         _VersionInfo'lastUpdateTime = Prelude.Nothing,
-         _VersionInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          VersionInfo
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Alert
-             -> Data.ProtoLens.Encoding.Bytes.Parser VersionInfo
-        loop x mutable'alerts
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'alerts <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                         (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                            mutable'alerts)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'alerts") frozen'alerts x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "current"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"current") y x)
-                                  mutable'alerts
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "recommended"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"recommended") y x)
-                                  mutable'alerts
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "instructions"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"instructions") y x)
-                                  mutable'alerts
-                        34
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "alerts"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'alerts y)
-                                loop x v
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_update_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastUpdateTime") y x)
-                                  mutable'alerts
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'alerts
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'alerts <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                  Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'alerts)
-          "VersionInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'current") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'recommended") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view (Data.ProtoLens.Field.field @"instructions") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   ((Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                         (\ _v
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                 ((Prelude..)
-                                    (\ bs
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                    Data.ProtoLens.encodeMessage _v))
-                         (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'alerts") _x))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view
-                                (Data.ProtoLens.Field.field @"maybe'lastUpdateTime") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just _v)
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage _v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData VersionInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_VersionInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_VersionInfo'current x__)
-                (Control.DeepSeq.deepseq
-                   (_VersionInfo'recommended x__)
-                   (Control.DeepSeq.deepseq
-                      (_VersionInfo'instructions x__)
-                      (Control.DeepSeq.deepseq
-                         (_VersionInfo'alerts x__)
-                         (Control.DeepSeq.deepseq (_VersionInfo'lastUpdateTime x__) ())))))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \%temporal/api/version/v1/message.proto\DC2\ETBtemporal.api.version.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB\"temporal/api/enums/v1/common.proto\"|\n\
-    \\vReleaseInfo\DC2\CAN\n\
-    \\aversion\CAN\SOH \SOH(\tR\aversion\DC2=\n\
-    \\frelease_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\vreleaseTime\DC2\DC4\n\
-    \\ENQnotes\CAN\ETX \SOH(\tR\ENQnotes\"^\n\
-    \\ENQAlert\DC2\CAN\n\
-    \\amessage\CAN\SOH \SOH(\tR\amessage\DC2;\n\
-    \\bseverity\CAN\STX \SOH(\SO2\US.temporal.api.enums.v1.SeverityR\bseverity\"\183\STX\n\
-    \\vVersionInfo\DC2>\n\
-    \\acurrent\CAN\SOH \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\acurrent\DC2F\n\
-    \\vrecommended\CAN\STX \SOH(\v2$.temporal.api.version.v1.ReleaseInfoR\vrecommended\DC2\"\n\
-    \\finstructions\CAN\ETX \SOH(\tR\finstructions\DC26\n\
-    \\ACKalerts\CAN\EOT \ETX(\v2\RS.temporal.api.version.v1.AlertR\ACKalerts\DC2D\n\
-    \\DLElast_update_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOlastUpdateTimeB\142\SOH\n\
-    \\SUBio.temporal.api.version.v1B\fMessageProtoP\SOHZ%go.temporal.io/api/version/v1;version\170\STX\EMTemporalio.Api.Version.V1\234\STX\FSTemporalio::Api::Version::V1J\157\b\n\
-    \\ACK\DC2\EOT\NUL\NUL\"\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL \n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL<\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL<\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL3\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL3\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL5\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL5\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL6\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL6\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL)\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\f\NUL,\n\
-    \R\n\
-    \\STX\EOT\NUL\DC2\EOT\SI\NUL\DC3\SOH\SUBF ReleaseInfo contains information about specific version of temporal.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b\DC3\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DLE\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DLE\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DLE\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DLE\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC1\EOT/\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC1\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC1\RS*\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC1-.\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC2\EOT\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\DC2\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC2\v\DLE\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC2\DC3\DC4\n\
-    \7\n\
-    \\STX\EOT\SOH\DC2\EOT\SYN\NUL\EM\SOH\SUB+ Alert contains notification and severity.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\SYN\b\r\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ETB\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\ETB\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ETB\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ETB\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\CAN\EOT0\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\CAN\EOT\"\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\CAN#+\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\CAN./\n\
-    \\133\SOH\n\
-    \\STX\EOT\STX\DC2\EOT\FS\NUL\"\SOH\SUBy VersionInfo contains details about current and recommended release versions as well as alerts and upgrade instructions.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\FS\b\DC3\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\GS\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\GS\EOT\SI\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\GS\DLE\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\GS\SUB\ESC\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX\RS\EOT \n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX\RS\EOT\SI\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\RS\DLE\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\RS\RS\US\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX\US\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX\US\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX\US\v\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX\US\SUB\ESC\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX \EOT\RS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\EOT\DC2\ETX \EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETX \r\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX \DC3\EM\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX \FS\GS\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX!\EOT3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ACK\DC2\ETX!\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX!\RS.\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX!12b\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.version.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Version.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+import qualified Proto.Temporal.Api.Enums.V1.Common as TE_Enums_V1_Common
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x76\x65\x72\x73\x69\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x17\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x76\x65\x72\x73\x69\x6f\x6e\x2e\x76\x31\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x22\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x22\x5e\x0a\x0b\x52\x65\x6c\x65\x61\x73\x65\x49\x6e\x66\x6f\x12\x0f\x0a\x07\x76\x65\x72\x73\x69\x6f\x6e\x18\x01\x20\x01\x28\x09\x12\x2f\x0a\x0c\x72\x65\x6c\x65\x61\x73\x65\x5f\x74\x69\x6d\x65\x18\x02\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x0d\x0a\x05\x6e\x6f\x74\x65\x73\x18\x03\x20\x01\x28\x09\x22\x4a\x0a\x05\x41\x6c\x65\x72\x74\x12\x0f\x0a\x07\x6d\x65\x73\x73\x61\x67\x65\x18\x01\x20\x01\x28\x09\x12\x30\x0a\x08\x73\x65\x76\x65\x72\x69\x74\x79\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x53\x65\x76\x65\x72\x69\x74\x79\x22\xf7\x01\x0a\x0b\x56\x65\x72\x73\x69\x6f\x6e\x49\x6e\x66\x6f\x12\x34\x0a\x07\x63\x75\x72\x72\x65\x6e\x74\x18\x01\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x76\x65\x72\x73\x69\x6f\x6e\x2e\x76\x31\x2e\x52\x65\x6c\x65\x61\x73\x65\x49\x6e\x66\x6f\x12\x38\x0a\x0b\x72\x65\x63\x6f\x6d\x6d\x65\x6e\x64\x65\x64\x18\x02\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x76\x65\x72\x73\x69\x6f\x6e\x2e\x76\x31\x2e\x52\x65\x6c\x65\x61\x73\x65\x49\x6e\x66\x6f\x12\x14\x0a\x0c\x69\x6e\x73\x74\x72\x75\x63\x74\x69\x6f\x6e\x73\x18\x03\x20\x01\x28\x09\x12\x2d\x0a\x06\x61\x6c\x65\x72\x74\x73\x18\x04\x20\x03\x28\x0b\x32\x1d\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x76\x65\x72\x73\x69\x6f\x6e\x2e\x76\x31\x2e\x41\x6c\x65\x72\x74\x12\x33\x0a\x10\x6c\x61\x73\x74\x5f\x75\x70\x64\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x05\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data ReleaseInfo = ReleaseInfo
+  { version :: !(Maybe Text)
+  , releaseTime :: !(Maybe PB_Timestamp.Timestamp)
+  , notes :: !(Maybe Text)
+  , releaseInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultReleaseInfo :: ReleaseInfo
+defaultReleaseInfo = ReleaseInfo
+  { version = Nothing
+  , releaseTime = Nothing
+  , notes = Nothing
+  , releaseInfoUnknownFields = []
+  }
+
+instance MessageEncode ReleaseInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.version)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.releaseTime)
+    <> (maybe mempty (\v -> archString 26 v) msg.notes)
+    <> encodeUnknownFields msg.releaseInfoUnknownFields
+
+instance MessageSize ReleaseInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.version)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.releaseTime)
+    + (maybe 0 (\v -> archStringSize v) msg.notes)
+    + unknownFieldsSize msg.releaseInfoUnknownFields
+
+instance MessageDecode ReleaseInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (ReleaseInfo {version = acc_0, releaseTime = acc_1, notes = acc_2, releaseInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage ReleaseInfo where
+  protoMessageName _ = "temporal.api.version.v1.ReleaseInfo"
+  protoPackageName _ = "temporal.api.version.v1"
+  protoDefaultValue = defaultReleaseInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "version"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ReleaseInfo) -> m.version
+        , fdSet = \v (m :: ReleaseInfo) -> (m { version = v } :: ReleaseInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "release_time"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ReleaseInfo) -> m.releaseTime
+        , fdSet = \v (m :: ReleaseInfo) -> (m { releaseTime = v } :: ReleaseInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "notes"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ReleaseInfo) -> m.notes
+        , fdSet = \v (m :: ReleaseInfo) -> (m { notes = v } :: ReleaseInfo)
+        })
+    ]
+
+instance IsMessage ReleaseInfo
+
+instance Aeson.ToJSON ReleaseInfo where
+  toJSON msg = jsonObject
+      [ "version" .=: msg.version
+      , "releaseTime" .=: msg.releaseTime
+      , "notes" .=: msg.notes
+      ]
+
+instance Aeson.FromJSON ReleaseInfo where
+  parseJSON = Aeson.withObject "ReleaseInfo" $ \obj -> do
+    fld_version <- parseFieldMaybe obj "version"
+    fld_releaseTime <- parseFieldMaybe obj "releaseTime"
+    fld_notes <- parseFieldMaybe obj "notes"
+    pure (defaultReleaseInfo
+      { version = maybe (defaultReleaseInfo.version) Prelude.id fld_version
+      , releaseTime = maybe (defaultReleaseInfo.releaseTime) Prelude.id fld_releaseTime
+      , notes = maybe (defaultReleaseInfo.notes) Prelude.id fld_notes
+      , releaseInfoUnknownFields = []
+      } :: ReleaseInfo)
+
+instance Hashable ReleaseInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.version) msg.releaseTime) msg.notes
+
+instance Proto.Extension.HasExtensions ReleaseInfo where
+  messageUnknownFields msg = msg.releaseInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { releaseInfoUnknownFields = ufs }
+
+instance Semigroup ReleaseInfo where
+  a <> b = ReleaseInfo
+    { version = case b.version of { Nothing -> a.version; x -> x }
+    , releaseTime = case b.releaseTime of { Nothing -> a.releaseTime; x -> x }
+    , notes = case b.notes of { Nothing -> a.notes; x -> x }
+    , releaseInfoUnknownFields = a.releaseInfoUnknownFields <> b.releaseInfoUnknownFields
+    }
+
+instance Monoid ReleaseInfo where
+  mempty = defaultReleaseInfo
+
+data Alert = Alert
+  { message :: !(Maybe Text)
+  , severity :: !(Maybe TE_Enums_V1_Common.Severity)
+  , alertUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultAlert :: Alert
+defaultAlert = Alert
+  { message = Nothing
+  , severity = Nothing
+  , alertUnknownFields = []
+  }
+
+instance MessageEncode Alert where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.message)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.severity)
+    <> encodeUnknownFields msg.alertUnknownFields
+
+instance MessageSize Alert where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.message)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.severity)
+    + unknownFieldsSize msg.alertUnknownFields
+
+instance MessageDecode Alert where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Alert {message = acc_0, severity = acc_1, alertUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Alert where
+  protoMessageName _ = "temporal.api.version.v1.Alert"
+  protoPackageName _ = "temporal.api.version.v1"
+  protoDefaultValue = defaultAlert
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "message"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Alert) -> m.message
+        , fdSet = \v (m :: Alert) -> (m { message = v } :: Alert)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "severity"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.Severity"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Alert) -> m.severity
+        , fdSet = \v (m :: Alert) -> (m { severity = v } :: Alert)
+        })
+    ]
+
+instance IsMessage Alert
+
+instance Aeson.ToJSON Alert where
+  toJSON msg = jsonObject
+      [ "message" .=: msg.message
+      , "severity" .=: msg.severity
+      ]
+
+instance Aeson.FromJSON Alert where
+  parseJSON = Aeson.withObject "Alert" $ \obj -> do
+    fld_message <- parseFieldMaybe obj "message"
+    fld_severity <- parseFieldMaybe obj "severity"
+    pure (defaultAlert
+      { message = maybe (defaultAlert.message) Prelude.id fld_message
+      , severity = maybe (defaultAlert.severity) Prelude.id fld_severity
+      , alertUnknownFields = []
+      } :: Alert)
+
+instance Hashable Alert where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.message) msg.severity
+
+instance Proto.Extension.HasExtensions Alert where
+  messageUnknownFields msg = msg.alertUnknownFields
+  setMessageUnknownFields !ufs msg = msg { alertUnknownFields = ufs }
+
+instance Semigroup Alert where
+  a <> b = Alert
+    { message = case b.message of { Nothing -> a.message; x -> x }
+    , severity = case b.severity of { Nothing -> a.severity; x -> x }
+    , alertUnknownFields = a.alertUnknownFields <> b.alertUnknownFields
+    }
+
+instance Monoid Alert where
+  mempty = defaultAlert
+
+data VersionInfo = VersionInfo
+  { current :: !(Maybe ReleaseInfo)
+  , recommended :: !(Maybe ReleaseInfo)
+  , instructions :: !(Maybe Text)
+  , alerts :: !(V.Vector Alert)
+  , lastUpdateTime :: !(Maybe PB_Timestamp.Timestamp)
+  , versionInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultVersionInfo :: VersionInfo
+defaultVersionInfo = VersionInfo
+  { current = Nothing
+  , recommended = Nothing
+  , instructions = Nothing
+  , alerts = V.empty
+  , lastUpdateTime = Nothing
+  , versionInfoUnknownFields = []
+  }
+
+instance MessageEncode VersionInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.current)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.recommended)
+    <> (maybe mempty (\v -> archString 26 v) msg.instructions)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 34 sz (buildMessage v)) mempty msg.alerts
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.lastUpdateTime)
+    <> encodeUnknownFields msg.versionInfoUnknownFields
+
+instance MessageSize VersionInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.current)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.recommended)
+    + (maybe 0 (\v -> archStringSize v) msg.instructions)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.alerts)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.lastUpdateTime)
+    + unknownFieldsSize msg.versionInfoUnknownFields
+
+instance MessageDecode VersionInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing V.empty Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (VersionInfo {current = acc_0, recommended = acc_1, instructions = acc_2, alerts = acc_3, lastUpdateTime = acc_4, versionInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (acc_3 <> V.singleton v) acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage VersionInfo where
+  protoMessageName _ = "temporal.api.version.v1.VersionInfo"
+  protoPackageName _ = "temporal.api.version.v1"
+  protoDefaultValue = defaultVersionInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "current"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.version.v1.ReleaseInfo"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionInfo) -> m.current
+        , fdSet = \v (m :: VersionInfo) -> (m { current = v } :: VersionInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "recommended"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.version.v1.ReleaseInfo"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionInfo) -> m.recommended
+        , fdSet = \v (m :: VersionInfo) -> (m { recommended = v } :: VersionInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "instructions"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionInfo) -> m.instructions
+        , fdSet = \v (m :: VersionInfo) -> (m { instructions = v } :: VersionInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "alerts"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.version.v1.Alert"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: VersionInfo) -> m.alerts
+        , fdSet = \v (m :: VersionInfo) -> (m { alerts = v } :: VersionInfo)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "last_update_time"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionInfo) -> m.lastUpdateTime
+        , fdSet = \v (m :: VersionInfo) -> (m { lastUpdateTime = v } :: VersionInfo)
+        })
+    ]
+
+instance IsMessage VersionInfo
+
+instance Aeson.ToJSON VersionInfo where
+  toJSON msg = jsonObject
+      [ "current" .=: msg.current
+      , "recommended" .=: msg.recommended
+      , "instructions" .=: msg.instructions
+      , "alerts" .=: msg.alerts
+      , "lastUpdateTime" .=: msg.lastUpdateTime
+      ]
+
+instance Aeson.FromJSON VersionInfo where
+  parseJSON = Aeson.withObject "VersionInfo" $ \obj -> do
+    fld_current <- parseFieldMaybe obj "current"
+    fld_recommended <- parseFieldMaybe obj "recommended"
+    fld_instructions <- parseFieldMaybe obj "instructions"
+    fld_alerts <- parseFieldMaybe obj "alerts"
+    fld_lastUpdateTime <- parseFieldMaybe obj "lastUpdateTime"
+    pure (defaultVersionInfo
+      { current = maybe (defaultVersionInfo.current) Prelude.id fld_current
+      , recommended = maybe (defaultVersionInfo.recommended) Prelude.id fld_recommended
+      , instructions = maybe (defaultVersionInfo.instructions) Prelude.id fld_instructions
+      , alerts = maybe (defaultVersionInfo.alerts) Prelude.id fld_alerts
+      , lastUpdateTime = maybe (defaultVersionInfo.lastUpdateTime) Prelude.id fld_lastUpdateTime
+      , versionInfoUnknownFields = []
+      } :: VersionInfo)
+
+instance Hashable VersionInfo where
+  hashWithSalt salt msg = hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.current) msg.recommended) msg.instructions) msg.alerts) msg.lastUpdateTime
+
+instance Proto.Extension.HasExtensions VersionInfo where
+  messageUnknownFields msg = msg.versionInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { versionInfoUnknownFields = ufs }
+
+instance Semigroup VersionInfo where
+  a <> b = VersionInfo
+    { current = case b.current of { Nothing -> a.current; x -> x }
+    , recommended = case b.recommended of { Nothing -> a.recommended; x -> x }
+    , instructions = case b.instructions of { Nothing -> a.instructions; x -> x }
+    , alerts = a.alerts <> b.alerts
+    , lastUpdateTime = case b.lastUpdateTime of { Nothing -> a.lastUpdateTime; x -> x }
+    , versionInfoUnknownFields = a.versionInfoUnknownFields <> b.versionInfoUnknownFields
+    }
+
+instance Monoid VersionInfo where
+  mempty = defaultVersionInfo

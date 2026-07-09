@@ -1,1130 +1,646 @@
-{- This file was auto-generated from temporal/sdk/core/core_interface.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Sdk.Core.CoreInterface (
-        ActivityHeartbeat(), ActivitySlotInfo(), ActivityTaskCompletion(),
-        LocalActivitySlotInfo(), NexusSlotInfo(), WorkflowSlotInfo()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Empty
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult
-import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask
-import qualified Proto.Temporal.Sdk.Core.Common.Common
-import qualified Proto.Temporal.Sdk.Core.ExternalData.ExternalData
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands
-import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.taskToken' @:: Lens' ActivityHeartbeat Data.ByteString.ByteString@
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.details' @:: Lens' ActivityHeartbeat [Proto.Temporal.Api.Common.V1.Message.Payload]@
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.vec'details' @:: Lens' ActivityHeartbeat (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data ActivityHeartbeat
-  = ActivityHeartbeat'_constructor {_ActivityHeartbeat'taskToken :: !Data.ByteString.ByteString,
-                                    _ActivityHeartbeat'details :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload),
-                                    _ActivityHeartbeat'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityHeartbeat where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ActivityHeartbeat "taskToken" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityHeartbeat'taskToken
-           (\ x__ y__ -> x__ {_ActivityHeartbeat'taskToken = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityHeartbeat "details" [Proto.Temporal.Api.Common.V1.Message.Payload] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityHeartbeat'details
-           (\ x__ y__ -> x__ {_ActivityHeartbeat'details = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField ActivityHeartbeat "vec'details" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityHeartbeat'details
-           (\ x__ y__ -> x__ {_ActivityHeartbeat'details = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ActivityHeartbeat where
-  messageName _ = Data.Text.pack "coresdk.ActivityHeartbeat"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1ActivityHeartbeat\DC2\GS\n\
-      \\n\
-      \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC29\n\
-      \\adetails\CAN\STX \ETX(\v2\US.temporal.api.common.v1.PayloadR\adetails"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        taskToken__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "task_token"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"taskToken")) ::
-              Data.ProtoLens.FieldDescriptor ActivityHeartbeat
-        details__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "details"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"details")) ::
-              Data.ProtoLens.FieldDescriptor ActivityHeartbeat
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, taskToken__field_descriptor),
-           (Data.ProtoLens.Tag 2, details__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityHeartbeat'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityHeartbeat'_unknownFields = y__})
-  defMessage
-    = ActivityHeartbeat'_constructor
-        {_ActivityHeartbeat'taskToken = Data.ProtoLens.fieldDefault,
-         _ActivityHeartbeat'details = Data.Vector.Generic.empty,
-         _ActivityHeartbeat'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityHeartbeat
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.Payload
-             -> Data.ProtoLens.Encoding.Bytes.Parser ActivityHeartbeat
-        loop x mutable'details
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'details <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                          (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                             mutable'details)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'details") frozen'details x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "task_token"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"taskToken") y x)
-                                  mutable'details
-                        18
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "details"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'details y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'details
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'details <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                   Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'details)
-          "ActivityHeartbeat"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"taskToken") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((\ bs
-                          -> (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
-                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         _v))
-             ((Data.Monoid.<>)
-                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage _v))
-                   (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'details") _x))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData ActivityHeartbeat where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityHeartbeat'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ActivityHeartbeat'taskToken x__)
-                (Control.DeepSeq.deepseq (_ActivityHeartbeat'details x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.activityType' @:: Lens' ActivitySlotInfo Data.Text.Text@ -}
-data ActivitySlotInfo
-  = ActivitySlotInfo'_constructor {_ActivitySlotInfo'activityType :: !Data.Text.Text,
-                                   _ActivitySlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivitySlotInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ActivitySlotInfo "activityType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivitySlotInfo'activityType
-           (\ x__ y__ -> x__ {_ActivitySlotInfo'activityType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ActivitySlotInfo where
-  messageName _ = Data.Text.pack "coresdk.ActivitySlotInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DLEActivitySlotInfo\DC2#\n\
-      \\ractivity_type\CAN\SOH \SOH(\tR\factivityType"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        activityType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"activityType")) ::
-              Data.ProtoLens.FieldDescriptor ActivitySlotInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, activityType__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivitySlotInfo'_unknownFields
-        (\ x__ y__ -> x__ {_ActivitySlotInfo'_unknownFields = y__})
-  defMessage
-    = ActivitySlotInfo'_constructor
-        {_ActivitySlotInfo'activityType = Data.ProtoLens.fieldDefault,
-         _ActivitySlotInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivitySlotInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser ActivitySlotInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "activity_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityType") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivitySlotInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"activityType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData ActivitySlotInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivitySlotInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_ActivitySlotInfo'activityType x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.taskToken' @:: Lens' ActivityTaskCompletion Data.ByteString.ByteString@
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.result' @:: Lens' ActivityTaskCompletion Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult@
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.maybe'result' @:: Lens' ActivityTaskCompletion (Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult)@ -}
-data ActivityTaskCompletion
-  = ActivityTaskCompletion'_constructor {_ActivityTaskCompletion'taskToken :: !Data.ByteString.ByteString,
-                                         _ActivityTaskCompletion'result :: !(Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult),
-                                         _ActivityTaskCompletion'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityTaskCompletion where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ActivityTaskCompletion "taskToken" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTaskCompletion'taskToken
-           (\ x__ y__ -> x__ {_ActivityTaskCompletion'taskToken = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityTaskCompletion "result" Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTaskCompletion'result
-           (\ x__ y__ -> x__ {_ActivityTaskCompletion'result = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityTaskCompletion "maybe'result" (Prelude.Maybe Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTaskCompletion'result
-           (\ x__ y__ -> x__ {_ActivityTaskCompletion'result = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ActivityTaskCompletion where
-  messageName _ = Data.Text.pack "coresdk.ActivityTaskCompletion"
-  packedMessageDescriptor _
-    = "\n\
-      \\SYNActivityTaskCompletion\DC2\GS\n\
-      \\n\
-      \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC2H\n\
-      \\ACKresult\CAN\STX \SOH(\v20.coresdk.activity_result.ActivityExecutionResultR\ACKresult"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        taskToken__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "task_token"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"taskToken")) ::
-              Data.ProtoLens.FieldDescriptor ActivityTaskCompletion
-        result__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "result"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult.ActivityExecutionResult)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'result")) ::
-              Data.ProtoLens.FieldDescriptor ActivityTaskCompletion
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, taskToken__field_descriptor),
-           (Data.ProtoLens.Tag 2, result__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityTaskCompletion'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityTaskCompletion'_unknownFields = y__})
-  defMessage
-    = ActivityTaskCompletion'_constructor
-        {_ActivityTaskCompletion'taskToken = Data.ProtoLens.fieldDefault,
-         _ActivityTaskCompletion'result = Prelude.Nothing,
-         _ActivityTaskCompletion'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityTaskCompletion
-          -> Data.ProtoLens.Encoding.Bytes.Parser ActivityTaskCompletion
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "task_token"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"taskToken") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "result"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"result") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityTaskCompletion"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"taskToken") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((\ bs
-                          -> (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
-                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'result") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData ActivityTaskCompletion where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityTaskCompletion'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ActivityTaskCompletion'taskToken x__)
-                (Control.DeepSeq.deepseq (_ActivityTaskCompletion'result x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.activityType' @:: Lens' LocalActivitySlotInfo Data.Text.Text@ -}
-data LocalActivitySlotInfo
-  = LocalActivitySlotInfo'_constructor {_LocalActivitySlotInfo'activityType :: !Data.Text.Text,
-                                        _LocalActivitySlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show LocalActivitySlotInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField LocalActivitySlotInfo "activityType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivitySlotInfo'activityType
-           (\ x__ y__ -> x__ {_LocalActivitySlotInfo'activityType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message LocalActivitySlotInfo where
-  messageName _ = Data.Text.pack "coresdk.LocalActivitySlotInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\NAKLocalActivitySlotInfo\DC2#\n\
-      \\ractivity_type\CAN\SOH \SOH(\tR\factivityType"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        activityType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"activityType")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivitySlotInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, activityType__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _LocalActivitySlotInfo'_unknownFields
-        (\ x__ y__ -> x__ {_LocalActivitySlotInfo'_unknownFields = y__})
-  defMessage
-    = LocalActivitySlotInfo'_constructor
-        {_LocalActivitySlotInfo'activityType = Data.ProtoLens.fieldDefault,
-         _LocalActivitySlotInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          LocalActivitySlotInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser LocalActivitySlotInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "activity_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityType") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "LocalActivitySlotInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"activityType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData LocalActivitySlotInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_LocalActivitySlotInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_LocalActivitySlotInfo'activityType x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.service' @:: Lens' NexusSlotInfo Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.operation' @:: Lens' NexusSlotInfo Data.Text.Text@ -}
-data NexusSlotInfo
-  = NexusSlotInfo'_constructor {_NexusSlotInfo'service :: !Data.Text.Text,
-                                _NexusSlotInfo'operation :: !Data.Text.Text,
-                                _NexusSlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NexusSlotInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NexusSlotInfo "service" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NexusSlotInfo'service
-           (\ x__ y__ -> x__ {_NexusSlotInfo'service = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NexusSlotInfo "operation" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NexusSlotInfo'operation
-           (\ x__ y__ -> x__ {_NexusSlotInfo'operation = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NexusSlotInfo where
-  messageName _ = Data.Text.pack "coresdk.NexusSlotInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\rNexusSlotInfo\DC2\CAN\n\
-      \\aservice\CAN\SOH \SOH(\tR\aservice\DC2\FS\n\
-      \\toperation\CAN\STX \SOH(\tR\toperation"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        service__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "service"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"service")) ::
-              Data.ProtoLens.FieldDescriptor NexusSlotInfo
-        operation__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "operation"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"operation")) ::
-              Data.ProtoLens.FieldDescriptor NexusSlotInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, service__field_descriptor),
-           (Data.ProtoLens.Tag 2, operation__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NexusSlotInfo'_unknownFields
-        (\ x__ y__ -> x__ {_NexusSlotInfo'_unknownFields = y__})
-  defMessage
-    = NexusSlotInfo'_constructor
-        {_NexusSlotInfo'service = Data.ProtoLens.fieldDefault,
-         _NexusSlotInfo'operation = Data.ProtoLens.fieldDefault,
-         _NexusSlotInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NexusSlotInfo -> Data.ProtoLens.Encoding.Bytes.Parser NexusSlotInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "service"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"service") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "operation"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operation") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "NexusSlotInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"service") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"operation") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData NexusSlotInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NexusSlotInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_NexusSlotInfo'service x__)
-                (Control.DeepSeq.deepseq (_NexusSlotInfo'operation x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.workflowType' @:: Lens' WorkflowSlotInfo Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.CoreInterface_Fields.isSticky' @:: Lens' WorkflowSlotInfo Prelude.Bool@ -}
-data WorkflowSlotInfo
-  = WorkflowSlotInfo'_constructor {_WorkflowSlotInfo'workflowType :: !Data.Text.Text,
-                                   _WorkflowSlotInfo'isSticky :: !Prelude.Bool,
-                                   _WorkflowSlotInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowSlotInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowSlotInfo "workflowType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowSlotInfo'workflowType
-           (\ x__ y__ -> x__ {_WorkflowSlotInfo'workflowType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowSlotInfo "isSticky" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowSlotInfo'isSticky
-           (\ x__ y__ -> x__ {_WorkflowSlotInfo'isSticky = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowSlotInfo where
-  messageName _ = Data.Text.pack "coresdk.WorkflowSlotInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DLEWorkflowSlotInfo\DC2#\n\
-      \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\ESC\n\
-      \\tis_sticky\CAN\STX \SOH(\bR\bisSticky"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workflowType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowType")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowSlotInfo
-        isSticky__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_sticky"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isSticky")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowSlotInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, workflowType__field_descriptor),
-           (Data.ProtoLens.Tag 2, isSticky__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowSlotInfo'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowSlotInfo'_unknownFields = y__})
-  defMessage
-    = WorkflowSlotInfo'_constructor
-        {_WorkflowSlotInfo'workflowType = Data.ProtoLens.fieldDefault,
-         _WorkflowSlotInfo'isSticky = Data.ProtoLens.fieldDefault,
-         _WorkflowSlotInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowSlotInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowSlotInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowType") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_sticky"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isSticky") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowSlotInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isSticky") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData WorkflowSlotInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowSlotInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowSlotInfo'workflowType x__)
-                (Control.DeepSeq.deepseq (_WorkflowSlotInfo'isSticky x__) ()))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \&temporal/sdk/core/core_interface.proto\DC2\acoresdk\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB$temporal/api/common/v1/message.proto\SUB7temporal/sdk/core/activity_result/activity_result.proto\SUB3temporal/sdk/core/activity_task/activity_task.proto\SUB%temporal/sdk/core/common/common.proto\SUB3temporal/sdk/core/external_data/external_data.proto\SUB?temporal/sdk/core/workflow_activation/workflow_activation.proto\SUB;temporal/sdk/core/workflow_commands/workflow_commands.proto\SUB?temporal/sdk/core/workflow_completion/workflow_completion.proto\"m\n\
-    \\DC1ActivityHeartbeat\DC2\GS\n\
-    \\n\
-    \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC29\n\
-    \\adetails\CAN\STX \ETX(\v2\US.temporal.api.common.v1.PayloadR\adetails\"\129\SOH\n\
-    \\SYNActivityTaskCompletion\DC2\GS\n\
-    \\n\
-    \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC2H\n\
-    \\ACKresult\CAN\STX \SOH(\v20.coresdk.activity_result.ActivityExecutionResultR\ACKresult\"T\n\
-    \\DLEWorkflowSlotInfo\DC2#\n\
-    \\rworkflow_type\CAN\SOH \SOH(\tR\fworkflowType\DC2\ESC\n\
-    \\tis_sticky\CAN\STX \SOH(\bR\bisSticky\"7\n\
-    \\DLEActivitySlotInfo\DC2#\n\
-    \\ractivity_type\CAN\SOH \SOH(\tR\factivityType\"<\n\
-    \\NAKLocalActivitySlotInfo\DC2#\n\
-    \\ractivity_type\CAN\SOH \SOH(\tR\factivityType\"G\n\
-    \\rNexusSlotInfo\DC2\CAN\n\
-    \\aservice\CAN\SOH \SOH(\tR\aservice\DC2\FS\n\
-    \\toperation\CAN\STX \SOH(\tR\toperationB3\234\STX0Temporalio::Internal::Bridge::Api::CoreInterfaceJ\233\n\
-    \\n\
-    \\ACK\DC2\EOT\NUL\NUL4\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\DLE\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NULI\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NULI\n\
-    \\130\STX\n\
-    \\STX\ETX\NUL\DC2\ETX\b\NUL(\SUB\246\SOH Note: Intellij will think the Google imports don't work because of the slightly odd nature of\n\
-    \ the include paths. You can make it work by going to the \"Protobuf Support\" settings section\n\
-    \ and adding the \"api_upstream\" subdir as an include path.\n\
-    \\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\t\NUL%\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\n\
-    \\NUL)\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\v\NUL.\n\
-    \\t\n\
-    \\STX\ETX\EOT\DC2\ETX\f\NULA\n\
-    \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX\r\NUL=\n\
-    \\t\n\
-    \\STX\ETX\ACK\DC2\ETX\SO\NUL/\n\
-    \\t\n\
-    \\STX\ETX\a\DC2\ETX\SI\NUL=\n\
-    \\t\n\
-    \\STX\ETX\b\DC2\ETX\DLE\NULI\n\
-    \\t\n\
-    \\STX\ETX\t\DC2\ETX\DC1\NULE\n\
-    \\t\n\
-    \\STX\ETX\n\
-    \\DC2\ETX\DC2\NULI\n\
-    \?\n\
-    \\STX\EOT\NUL\DC2\EOT\NAK\NUL\CAN\SOH\SUB3 A request as given to `record_activity_heartbeat`\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\NAK\b\EM\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SYN\EOT\EM\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\SYN\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SYN\n\
-    \\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SYN\ETB\CAN\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\ETB\EOT8\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\EOT\DC2\ETX\ETB\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\ETB\r+\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\ETB,3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\ETB67\n\
-    \<\n\
-    \\STX\EOT\SOH\DC2\EOT\ESC\NUL\RS\SOH\SUB0 A request as given to `complete_activity_task`\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\ESC\b\RS\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\FS\EOT\EM\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\FS\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\FS\n\
-    \\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\FS\ETB\CAN\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\GS\EOT7\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\GS\EOT+\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\GS,2\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\GS56\n\
-    \1\n\
-    \\STX\EOT\STX\DC2\EOT!\NUL$\SOH\SUB% Info about workflow task slot usage\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX!\b\CAN\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\"\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\"\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\"\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\"\ESC\FS\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX#\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX#\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX#\t\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX#\NAK\SYN\n\
-    \1\n\
-    \\STX\EOT\ETX\DC2\EOT'\NUL)\SOH\SUB% Info about activity task slot usage\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX'\b\CAN\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX(\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX(\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX(\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX(\ESC\FS\n\
-    \2\n\
-    \\STX\EOT\EOT\DC2\EOT,\NUL.\SOH\SUB& Info about local activity slot usage\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX,\b\GS\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX-\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX-\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX-\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX-\ESC\FS\n\
-    \.\n\
-    \\STX\EOT\ENQ\DC2\EOT1\NUL4\SOH\SUB\" Info about nexus task slot usage\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX1\b\NAK\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX2\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX2\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX2\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX2\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX3\EOT\EM\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETX3\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX3\v\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX3\ETB\CANb\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @coresdk@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Sdk.Core.CoreInterface where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as TE_Sdk_Core_ActivityResult_ActivityResult
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x63\x6f\x72\x65\x5f\x69\x6e\x74\x65\x72\x66\x61\x63\x65\x2e\x70\x72\x6f\x74\x6f\x12\x07\x63\x6f\x72\x65\x73\x64\x6b\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1b\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x65\x6d\x70\x74\x79\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x37\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x70\x72\x6f\x74\x6f\x1a\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x70\x72\x6f\x74\x6f\x1a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x65\x78\x74\x65\x72\x6e\x61\x6c\x5f\x64\x61\x74\x61\x2f\x65\x78\x74\x65\x72\x6e\x61\x6c\x5f\x64\x61\x74\x61\x2e\x70\x72\x6f\x74\x6f\x1a\x3f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x61\x63\x74\x69\x76\x61\x74\x69\x6f\x6e\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x61\x63\x74\x69\x76\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x3b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x63\x6f\x6d\x6d\x61\x6e\x64\x73\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x63\x6f\x6d\x6d\x61\x6e\x64\x73\x2e\x70\x72\x6f\x74\x6f\x1a\x3f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x63\x6f\x6d\x70\x6c\x65\x74\x69\x6f\x6e\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x63\x6f\x6d\x70\x6c\x65\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x22\x58\x0a\x11\x41\x63\x74\x69\x76\x69\x74\x79\x48\x65\x61\x72\x74\x62\x65\x61\x74\x12\x12\x0a\x0a\x74\x61\x73\x6b\x5f\x74\x6f\x6b\x65\x6e\x18\x01\x20\x01\x28\x0c\x12\x2f\x0a\x07\x64\x65\x74\x61\x69\x6c\x73\x18\x02\x20\x03\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x6d\x0a\x16\x41\x63\x74\x69\x76\x69\x74\x79\x54\x61\x73\x6b\x43\x6f\x6d\x70\x6c\x65\x74\x69\x6f\x6e\x12\x12\x0a\x0a\x74\x61\x73\x6b\x5f\x74\x6f\x6b\x65\x6e\x18\x01\x20\x01\x28\x0c\x12\x3f\x0a\x06\x72\x65\x73\x75\x6c\x74\x18\x02\x20\x01\x28\x0b\x32\x2f\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x41\x63\x74\x69\x76\x69\x74\x79\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x52\x65\x73\x75\x6c\x74\x22\x3c\x0a\x10\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x53\x6c\x6f\x74\x49\x6e\x66\x6f\x12\x15\x0a\x0d\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x09\x12\x11\x0a\x09\x69\x73\x5f\x73\x74\x69\x63\x6b\x79\x18\x02\x20\x01\x28\x08\x22\x29\x0a\x10\x41\x63\x74\x69\x76\x69\x74\x79\x53\x6c\x6f\x74\x49\x6e\x66\x6f\x12\x15\x0a\x0d\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x09\x22\x2e\x0a\x15\x4c\x6f\x63\x61\x6c\x41\x63\x74\x69\x76\x69\x74\x79\x53\x6c\x6f\x74\x49\x6e\x66\x6f\x12\x15\x0a\x0d\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x09\x22\x33\x0a\x0d\x4e\x65\x78\x75\x73\x53\x6c\x6f\x74\x49\x6e\x66\x6f\x12\x0f\x0a\x07\x73\x65\x72\x76\x69\x63\x65\x18\x01\x20\x01\x28\x09\x12\x11\x0a\x09\x6f\x70\x65\x72\x61\x74\x69\x6f\x6e\x18\x02\x20\x01\x28\x09\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data ActivityHeartbeat = ActivityHeartbeat
+  { taskToken :: !(Maybe ByteString)
+  , details :: !(V.Vector TE_Common_V1_Message.Payload)
+  , activityHeartbeatUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultActivityHeartbeat :: ActivityHeartbeat
+defaultActivityHeartbeat = ActivityHeartbeat
+  { taskToken = Nothing
+  , details = V.empty
+  , activityHeartbeatUnknownFields = []
+  }
+
+instance MessageEncode ActivityHeartbeat where
+  buildMessage msg =
+    (maybe mempty (\v -> archBytes 10 v) msg.taskToken)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 18 sz (buildMessage v)) mempty msg.details
+    <> encodeUnknownFields msg.activityHeartbeatUnknownFields
+
+instance MessageSize ActivityHeartbeat where
+  messageSize msg =
+    (maybe 0 (\v -> archBytesSize v) msg.taskToken)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.details)
+    + unknownFieldsSize msg.activityHeartbeatUnknownFields
+
+instance MessageDecode ActivityHeartbeat where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing V.empty []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (ActivityHeartbeat {taskToken = acc_0, details = acc_1, activityHeartbeatUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBytes
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (acc_1 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityHeartbeat where
+  protoMessageName _ = "coresdk.ActivityHeartbeat"
+  protoPackageName _ = "coresdk"
+  protoDefaultValue = defaultActivityHeartbeat
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "task_token"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityHeartbeat) -> m.taskToken
+        , fdSet = \v (m :: ActivityHeartbeat) -> (m { taskToken = v } :: ActivityHeartbeat)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "details"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: ActivityHeartbeat) -> m.details
+        , fdSet = \v (m :: ActivityHeartbeat) -> (m { details = v } :: ActivityHeartbeat)
+        })
+    ]
+
+instance IsMessage ActivityHeartbeat
+
+instance Aeson.ToJSON ActivityHeartbeat where
+  toJSON msg = jsonObject
+      [ "taskToken" .=: (fmap protoBytesToJSON msg.taskToken)
+      , "details" .=: msg.details
+      ]
+
+instance Aeson.FromJSON ActivityHeartbeat where
+  parseJSON = Aeson.withObject "ActivityHeartbeat" $ \obj -> do
+    fld_taskToken <- parseBytesFieldMaybe obj "taskToken"
+    fld_details <- parseFieldMaybe obj "details"
+    pure (defaultActivityHeartbeat
+      { taskToken = fld_taskToken
+      , details = maybe (defaultActivityHeartbeat.details) Prelude.id fld_details
+      , activityHeartbeatUnknownFields = []
+      } :: ActivityHeartbeat)
+
+instance Hashable ActivityHeartbeat where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (hashWithSalt (salt) msg.taskToken) msg.details
+
+instance Proto.Extension.HasExtensions ActivityHeartbeat where
+  messageUnknownFields msg = msg.activityHeartbeatUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityHeartbeatUnknownFields = ufs }
+
+instance Semigroup ActivityHeartbeat where
+  a <> b = ActivityHeartbeat
+    { taskToken = case b.taskToken of { Nothing -> a.taskToken; x -> x }
+    , details = a.details <> b.details
+    , activityHeartbeatUnknownFields = a.activityHeartbeatUnknownFields <> b.activityHeartbeatUnknownFields
+    }
+
+instance Monoid ActivityHeartbeat where
+  mempty = defaultActivityHeartbeat
+
+data ActivityTaskCompletion = ActivityTaskCompletion
+  { taskToken :: !(Maybe ByteString)
+  , result :: !(Maybe TE_Sdk_Core_ActivityResult_ActivityResult.ActivityExecutionResult)
+  , activityTaskCompletionUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultActivityTaskCompletion :: ActivityTaskCompletion
+defaultActivityTaskCompletion = ActivityTaskCompletion
+  { taskToken = Nothing
+  , result = Nothing
+  , activityTaskCompletionUnknownFields = []
+  }
+
+instance MessageEncode ActivityTaskCompletion where
+  buildMessage msg =
+    (maybe mempty (\v -> archBytes 10 v) msg.taskToken)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.result)
+    <> encodeUnknownFields msg.activityTaskCompletionUnknownFields
+
+instance MessageSize ActivityTaskCompletion where
+  messageSize msg =
+    (maybe 0 (\v -> archBytesSize v) msg.taskToken)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.result)
+    + unknownFieldsSize msg.activityTaskCompletionUnknownFields
+
+instance MessageDecode ActivityTaskCompletion where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (ActivityTaskCompletion {taskToken = acc_0, result = acc_1, activityTaskCompletionUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBytes
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityTaskCompletion where
+  protoMessageName _ = "coresdk.ActivityTaskCompletion"
+  protoPackageName _ = "coresdk"
+  protoDefaultValue = defaultActivityTaskCompletion
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "task_token"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityTaskCompletion) -> m.taskToken
+        , fdSet = \v (m :: ActivityTaskCompletion) -> (m { taskToken = v } :: ActivityTaskCompletion)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "result"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "coresdk.activity_result.ActivityExecutionResult"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityTaskCompletion) -> m.result
+        , fdSet = \v (m :: ActivityTaskCompletion) -> (m { result = v } :: ActivityTaskCompletion)
+        })
+    ]
+
+instance IsMessage ActivityTaskCompletion
+
+instance Aeson.ToJSON ActivityTaskCompletion where
+  toJSON msg = jsonObject
+      [ "taskToken" .=: (fmap protoBytesToJSON msg.taskToken)
+      , "result" .=: msg.result
+      ]
+
+instance Aeson.FromJSON ActivityTaskCompletion where
+  parseJSON = Aeson.withObject "ActivityTaskCompletion" $ \obj -> do
+    fld_taskToken <- parseBytesFieldMaybe obj "taskToken"
+    fld_result <- parseFieldMaybe obj "result"
+    pure (defaultActivityTaskCompletion
+      { taskToken = fld_taskToken
+      , result = maybe (defaultActivityTaskCompletion.result) Prelude.id fld_result
+      , activityTaskCompletionUnknownFields = []
+      } :: ActivityTaskCompletion)
+
+instance Hashable ActivityTaskCompletion where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.taskToken) msg.result
+
+instance Proto.Extension.HasExtensions ActivityTaskCompletion where
+  messageUnknownFields msg = msg.activityTaskCompletionUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityTaskCompletionUnknownFields = ufs }
+
+instance Semigroup ActivityTaskCompletion where
+  a <> b = ActivityTaskCompletion
+    { taskToken = case b.taskToken of { Nothing -> a.taskToken; x -> x }
+    , result = case b.result of { Nothing -> a.result; x -> x }
+    , activityTaskCompletionUnknownFields = a.activityTaskCompletionUnknownFields <> b.activityTaskCompletionUnknownFields
+    }
+
+instance Monoid ActivityTaskCompletion where
+  mempty = defaultActivityTaskCompletion
+
+data WorkflowSlotInfo = WorkflowSlotInfo
+  { workflowType :: !(Maybe Text)
+  , isSticky :: !(Maybe Bool)
+  , workflowSlotInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowSlotInfo :: WorkflowSlotInfo
+defaultWorkflowSlotInfo = WorkflowSlotInfo
+  { workflowType = Nothing
+  , isSticky = Nothing
+  , workflowSlotInfoUnknownFields = []
+  }
+
+instance MessageEncode WorkflowSlotInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.workflowType)
+    <> (maybe mempty (\v -> archBool 16 v) msg.isSticky)
+    <> encodeUnknownFields msg.workflowSlotInfoUnknownFields
+
+instance MessageSize WorkflowSlotInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.workflowType)
+    + (maybe 0 (\v -> archBoolSize) msg.isSticky)
+    + unknownFieldsSize msg.workflowSlotInfoUnknownFields
+
+instance MessageDecode WorkflowSlotInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (WorkflowSlotInfo {workflowType = acc_0, isSticky = acc_1, workflowSlotInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowSlotInfo where
+  protoMessageName _ = "coresdk.WorkflowSlotInfo"
+  protoPackageName _ = "coresdk"
+  protoDefaultValue = defaultWorkflowSlotInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "workflow_type"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowSlotInfo) -> m.workflowType
+        , fdSet = \v (m :: WorkflowSlotInfo) -> (m { workflowType = v } :: WorkflowSlotInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "is_sticky"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowSlotInfo) -> m.isSticky
+        , fdSet = \v (m :: WorkflowSlotInfo) -> (m { isSticky = v } :: WorkflowSlotInfo)
+        })
+    ]
+
+instance IsMessage WorkflowSlotInfo
+
+instance Aeson.ToJSON WorkflowSlotInfo where
+  toJSON msg = jsonObject
+      [ "workflowType" .=: msg.workflowType
+      , "isSticky" .=: msg.isSticky
+      ]
+
+instance Aeson.FromJSON WorkflowSlotInfo where
+  parseJSON = Aeson.withObject "WorkflowSlotInfo" $ \obj -> do
+    fld_workflowType <- parseFieldMaybe obj "workflowType"
+    fld_isSticky <- parseFieldMaybe obj "isSticky"
+    pure (defaultWorkflowSlotInfo
+      { workflowType = maybe (defaultWorkflowSlotInfo.workflowType) Prelude.id fld_workflowType
+      , isSticky = maybe (defaultWorkflowSlotInfo.isSticky) Prelude.id fld_isSticky
+      , workflowSlotInfoUnknownFields = []
+      } :: WorkflowSlotInfo)
+
+instance Hashable WorkflowSlotInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.workflowType) msg.isSticky
+
+instance Proto.Extension.HasExtensions WorkflowSlotInfo where
+  messageUnknownFields msg = msg.workflowSlotInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowSlotInfoUnknownFields = ufs }
+
+instance Semigroup WorkflowSlotInfo where
+  a <> b = WorkflowSlotInfo
+    { workflowType = case b.workflowType of { Nothing -> a.workflowType; x -> x }
+    , isSticky = case b.isSticky of { Nothing -> a.isSticky; x -> x }
+    , workflowSlotInfoUnknownFields = a.workflowSlotInfoUnknownFields <> b.workflowSlotInfoUnknownFields
+    }
+
+instance Monoid WorkflowSlotInfo where
+  mempty = defaultWorkflowSlotInfo
+
+data ActivitySlotInfo = ActivitySlotInfo
+  { activityType :: !(Maybe Text)
+  , activitySlotInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultActivitySlotInfo :: ActivitySlotInfo
+defaultActivitySlotInfo = ActivitySlotInfo
+  { activityType = Nothing
+  , activitySlotInfoUnknownFields = []
+  }
+
+instance MessageEncode ActivitySlotInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.activityType)
+    <> encodeUnknownFields msg.activitySlotInfoUnknownFields
+
+instance MessageSize ActivitySlotInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.activityType)
+    + unknownFieldsSize msg.activitySlotInfoUnknownFields
+
+instance MessageDecode ActivitySlotInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (ActivitySlotInfo {activityType = acc_0, activitySlotInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage ActivitySlotInfo where
+  protoMessageName _ = "coresdk.ActivitySlotInfo"
+  protoPackageName _ = "coresdk"
+  protoDefaultValue = defaultActivitySlotInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "activity_type"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivitySlotInfo) -> m.activityType
+        , fdSet = \v (m :: ActivitySlotInfo) -> (m { activityType = v } :: ActivitySlotInfo)
+        })
+    ]
+
+instance IsMessage ActivitySlotInfo
+
+instance Aeson.ToJSON ActivitySlotInfo where
+  toJSON msg = jsonObject
+      [ "activityType" .=: msg.activityType
+
+      ]
+
+instance Aeson.FromJSON ActivitySlotInfo where
+  parseJSON = Aeson.withObject "ActivitySlotInfo" $ \obj -> do
+    fld_activityType <- parseFieldMaybe obj "activityType"
+    pure (defaultActivitySlotInfo
+      { activityType = maybe (defaultActivitySlotInfo.activityType) Prelude.id fld_activityType
+      , activitySlotInfoUnknownFields = []
+      } :: ActivitySlotInfo)
+
+instance Hashable ActivitySlotInfo where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.activityType
+
+instance Proto.Extension.HasExtensions ActivitySlotInfo where
+  messageUnknownFields msg = msg.activitySlotInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activitySlotInfoUnknownFields = ufs }
+
+instance Semigroup ActivitySlotInfo where
+  a <> b = ActivitySlotInfo
+    { activityType = case b.activityType of { Nothing -> a.activityType; x -> x }
+    , activitySlotInfoUnknownFields = a.activitySlotInfoUnknownFields <> b.activitySlotInfoUnknownFields
+    }
+
+instance Monoid ActivitySlotInfo where
+  mempty = defaultActivitySlotInfo
+
+data LocalActivitySlotInfo = LocalActivitySlotInfo
+  { activityType :: !(Maybe Text)
+  , localActivitySlotInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLocalActivitySlotInfo :: LocalActivitySlotInfo
+defaultLocalActivitySlotInfo = LocalActivitySlotInfo
+  { activityType = Nothing
+  , localActivitySlotInfoUnknownFields = []
+  }
+
+instance MessageEncode LocalActivitySlotInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.activityType)
+    <> encodeUnknownFields msg.localActivitySlotInfoUnknownFields
+
+instance MessageSize LocalActivitySlotInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.activityType)
+    + unknownFieldsSize msg.localActivitySlotInfoUnknownFields
+
+instance MessageDecode LocalActivitySlotInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (LocalActivitySlotInfo {activityType = acc_0, localActivitySlotInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage LocalActivitySlotInfo where
+  protoMessageName _ = "coresdk.LocalActivitySlotInfo"
+  protoPackageName _ = "coresdk"
+  protoDefaultValue = defaultLocalActivitySlotInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "activity_type"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivitySlotInfo) -> m.activityType
+        , fdSet = \v (m :: LocalActivitySlotInfo) -> (m { activityType = v } :: LocalActivitySlotInfo)
+        })
+    ]
+
+instance IsMessage LocalActivitySlotInfo
+
+instance Aeson.ToJSON LocalActivitySlotInfo where
+  toJSON msg = jsonObject
+      [ "activityType" .=: msg.activityType
+
+      ]
+
+instance Aeson.FromJSON LocalActivitySlotInfo where
+  parseJSON = Aeson.withObject "LocalActivitySlotInfo" $ \obj -> do
+    fld_activityType <- parseFieldMaybe obj "activityType"
+    pure (defaultLocalActivitySlotInfo
+      { activityType = maybe (defaultLocalActivitySlotInfo.activityType) Prelude.id fld_activityType
+      , localActivitySlotInfoUnknownFields = []
+      } :: LocalActivitySlotInfo)
+
+instance Hashable LocalActivitySlotInfo where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.activityType
+
+instance Proto.Extension.HasExtensions LocalActivitySlotInfo where
+  messageUnknownFields msg = msg.localActivitySlotInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { localActivitySlotInfoUnknownFields = ufs }
+
+instance Semigroup LocalActivitySlotInfo where
+  a <> b = LocalActivitySlotInfo
+    { activityType = case b.activityType of { Nothing -> a.activityType; x -> x }
+    , localActivitySlotInfoUnknownFields = a.localActivitySlotInfoUnknownFields <> b.localActivitySlotInfoUnknownFields
+    }
+
+instance Monoid LocalActivitySlotInfo where
+  mempty = defaultLocalActivitySlotInfo
+
+data NexusSlotInfo = NexusSlotInfo
+  { service :: !(Maybe Text)
+  , operation :: !(Maybe Text)
+  , nexusSlotInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultNexusSlotInfo :: NexusSlotInfo
+defaultNexusSlotInfo = NexusSlotInfo
+  { service = Nothing
+  , operation = Nothing
+  , nexusSlotInfoUnknownFields = []
+  }
+
+instance MessageEncode NexusSlotInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.service)
+    <> (maybe mempty (\v -> archString 18 v) msg.operation)
+    <> encodeUnknownFields msg.nexusSlotInfoUnknownFields
+
+instance MessageSize NexusSlotInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.service)
+    + (maybe 0 (\v -> archStringSize v) msg.operation)
+    + unknownFieldsSize msg.nexusSlotInfoUnknownFields
+
+instance MessageDecode NexusSlotInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (NexusSlotInfo {service = acc_0, operation = acc_1, nexusSlotInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage NexusSlotInfo where
+  protoMessageName _ = "coresdk.NexusSlotInfo"
+  protoPackageName _ = "coresdk"
+  protoDefaultValue = defaultNexusSlotInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "service"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NexusSlotInfo) -> m.service
+        , fdSet = \v (m :: NexusSlotInfo) -> (m { service = v } :: NexusSlotInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "operation"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NexusSlotInfo) -> m.operation
+        , fdSet = \v (m :: NexusSlotInfo) -> (m { operation = v } :: NexusSlotInfo)
+        })
+    ]
+
+instance IsMessage NexusSlotInfo
+
+instance Aeson.ToJSON NexusSlotInfo where
+  toJSON msg = jsonObject
+      [ "service" .=: msg.service
+      , "operation" .=: msg.operation
+      ]
+
+instance Aeson.FromJSON NexusSlotInfo where
+  parseJSON = Aeson.withObject "NexusSlotInfo" $ \obj -> do
+    fld_service <- parseFieldMaybe obj "service"
+    fld_operation <- parseFieldMaybe obj "operation"
+    pure (defaultNexusSlotInfo
+      { service = maybe (defaultNexusSlotInfo.service) Prelude.id fld_service
+      , operation = maybe (defaultNexusSlotInfo.operation) Prelude.id fld_operation
+      , nexusSlotInfoUnknownFields = []
+      } :: NexusSlotInfo)
+
+instance Hashable NexusSlotInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.service) msg.operation
+
+instance Proto.Extension.HasExtensions NexusSlotInfo where
+  messageUnknownFields msg = msg.nexusSlotInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { nexusSlotInfoUnknownFields = ufs }
+
+instance Semigroup NexusSlotInfo where
+  a <> b = NexusSlotInfo
+    { service = case b.service of { Nothing -> a.service; x -> x }
+    , operation = case b.operation of { Nothing -> a.operation; x -> x }
+    , nexusSlotInfoUnknownFields = a.nexusSlotInfoUnknownFields <> b.nexusSlotInfoUnknownFields
+    }
+
+instance Monoid NexusSlotInfo where
+  mempty = defaultNexusSlotInfo

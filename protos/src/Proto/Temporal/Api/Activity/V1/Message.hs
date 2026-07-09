@@ -1,558 +1,247 @@
-{- This file was auto-generated from temporal/api/activity/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Activity.V1.Message (
-        ActivityOptions()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Api.Taskqueue.V1.Message
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.taskQueue' @:: Lens' ActivityOptions Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.maybe'taskQueue' @:: Lens' ActivityOptions (Prelude.Maybe Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue)@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.scheduleToCloseTimeout' @:: Lens' ActivityOptions Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.maybe'scheduleToCloseTimeout' @:: Lens' ActivityOptions (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.scheduleToStartTimeout' @:: Lens' ActivityOptions Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.maybe'scheduleToStartTimeout' @:: Lens' ActivityOptions (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.startToCloseTimeout' @:: Lens' ActivityOptions Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.maybe'startToCloseTimeout' @:: Lens' ActivityOptions (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.heartbeatTimeout' @:: Lens' ActivityOptions Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.maybe'heartbeatTimeout' @:: Lens' ActivityOptions (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.retryPolicy' @:: Lens' ActivityOptions Proto.Temporal.Api.Common.V1.Message.RetryPolicy@
-         * 'Proto.Temporal.Api.Activity.V1.Message_Fields.maybe'retryPolicy' @:: Lens' ActivityOptions (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy)@ -}
-data ActivityOptions
-  = ActivityOptions'_constructor {_ActivityOptions'taskQueue :: !(Prelude.Maybe Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue),
-                                  _ActivityOptions'scheduleToCloseTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                  _ActivityOptions'scheduleToStartTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                  _ActivityOptions'startToCloseTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                  _ActivityOptions'heartbeatTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                  _ActivityOptions'retryPolicy :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy),
-                                  _ActivityOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityOptions where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ActivityOptions "taskQueue" Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'taskQueue
-           (\ x__ y__ -> x__ {_ActivityOptions'taskQueue = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityOptions "maybe'taskQueue" (Prelude.Maybe Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'taskQueue
-           (\ x__ y__ -> x__ {_ActivityOptions'taskQueue = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityOptions "scheduleToCloseTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'scheduleToCloseTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'scheduleToCloseTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityOptions "maybe'scheduleToCloseTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'scheduleToCloseTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'scheduleToCloseTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityOptions "scheduleToStartTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'scheduleToStartTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'scheduleToStartTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityOptions "maybe'scheduleToStartTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'scheduleToStartTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'scheduleToStartTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityOptions "startToCloseTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'startToCloseTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'startToCloseTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityOptions "maybe'startToCloseTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'startToCloseTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'startToCloseTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityOptions "heartbeatTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'heartbeatTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'heartbeatTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityOptions "maybe'heartbeatTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'heartbeatTimeout
-           (\ x__ y__ -> x__ {_ActivityOptions'heartbeatTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityOptions "retryPolicy" Proto.Temporal.Api.Common.V1.Message.RetryPolicy where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'retryPolicy
-           (\ x__ y__ -> x__ {_ActivityOptions'retryPolicy = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField ActivityOptions "maybe'retryPolicy" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityOptions'retryPolicy
-           (\ x__ y__ -> x__ {_ActivityOptions'retryPolicy = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ActivityOptions where
-  messageName _
-    = Data.Text.pack "temporal.api.activity.v1.ActivityOptions"
-  packedMessageDescriptor _
-    = "\n\
-      \\SIActivityOptions\DC2C\n\
-      \\n\
-      \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2T\n\
-      \\EMschedule_to_close_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToCloseTimeout\DC2T\n\
-      \\EMschedule_to_start_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeout\DC2N\n\
-      \\SYNstart_to_close_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
-      \\DC1heartbeat_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
-      \\fretry_policy\CAN\ACK \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        taskQueue__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "task_queue"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Taskqueue.V1.Message.TaskQueue)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'taskQueue")) ::
-              Data.ProtoLens.FieldDescriptor ActivityOptions
-        scheduleToCloseTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "schedule_to_close_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'scheduleToCloseTimeout")) ::
-              Data.ProtoLens.FieldDescriptor ActivityOptions
-        scheduleToStartTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "schedule_to_start_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'scheduleToStartTimeout")) ::
-              Data.ProtoLens.FieldDescriptor ActivityOptions
-        startToCloseTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "start_to_close_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'startToCloseTimeout")) ::
-              Data.ProtoLens.FieldDescriptor ActivityOptions
-        heartbeatTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "heartbeat_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'heartbeatTimeout")) ::
-              Data.ProtoLens.FieldDescriptor ActivityOptions
-        retryPolicy__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "retry_policy"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.RetryPolicy)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'retryPolicy")) ::
-              Data.ProtoLens.FieldDescriptor ActivityOptions
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, taskQueue__field_descriptor),
-           (Data.ProtoLens.Tag 2, scheduleToCloseTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 3, scheduleToStartTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 4, startToCloseTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 5, heartbeatTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 6, retryPolicy__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityOptions'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityOptions'_unknownFields = y__})
-  defMessage
-    = ActivityOptions'_constructor
-        {_ActivityOptions'taskQueue = Prelude.Nothing,
-         _ActivityOptions'scheduleToCloseTimeout = Prelude.Nothing,
-         _ActivityOptions'scheduleToStartTimeout = Prelude.Nothing,
-         _ActivityOptions'startToCloseTimeout = Prelude.Nothing,
-         _ActivityOptions'heartbeatTimeout = Prelude.Nothing,
-         _ActivityOptions'retryPolicy = Prelude.Nothing,
-         _ActivityOptions'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityOptions
-          -> Data.ProtoLens.Encoding.Bytes.Parser ActivityOptions
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "task_queue"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"taskQueue") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "schedule_to_close_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"scheduleToCloseTimeout") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "schedule_to_start_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"scheduleToStartTimeout") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "start_to_close_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"startToCloseTimeout") y x)
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "heartbeat_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"heartbeatTimeout") y x)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "retry_policy"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"retryPolicy") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityOptions"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'taskQueue") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'scheduleToCloseTimeout") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'scheduleToStartTimeout") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'startToCloseTimeout") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view
-                                (Data.ProtoLens.Field.field @"maybe'heartbeatTimeout") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just _v)
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage _v))
-                         ((Data.Monoid.<>)
-                            (case
-                                 Lens.Family2.view
-                                   (Data.ProtoLens.Field.field @"maybe'retryPolicy") _x
-                             of
-                               Prelude.Nothing -> Data.Monoid.mempty
-                               (Prelude.Just _v)
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                      ((Prelude..)
-                                         (\ bs
-                                            -> (Data.Monoid.<>)
-                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                    (Prelude.fromIntegral
-                                                       (Data.ByteString.length bs)))
-                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                         Data.ProtoLens.encodeMessage _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
-instance Control.DeepSeq.NFData ActivityOptions where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityOptions'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ActivityOptions'taskQueue x__)
-                (Control.DeepSeq.deepseq
-                   (_ActivityOptions'scheduleToCloseTimeout x__)
-                   (Control.DeepSeq.deepseq
-                      (_ActivityOptions'scheduleToStartTimeout x__)
-                      (Control.DeepSeq.deepseq
-                         (_ActivityOptions'startToCloseTimeout x__)
-                         (Control.DeepSeq.deepseq
-                            (_ActivityOptions'heartbeatTimeout x__)
-                            (Control.DeepSeq.deepseq
-                               (_ActivityOptions'retryPolicy x__) ()))))))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \&temporal/api/activity/v1/message.proto\DC2\CANtemporal.api.activity.v1\SUB$temporal/api/common/v1/message.proto\SUB'temporal/api/taskqueue/v1/message.proto\SUB\RSgoogle/protobuf/duration.proto\"\226\ETX\n\
-    \\SIActivityOptions\DC2C\n\
-    \\n\
-    \task_queue\CAN\SOH \SOH(\v2$.temporal.api.taskqueue.v1.TaskQueueR\ttaskQueue\DC2T\n\
-    \\EMschedule_to_close_timeout\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToCloseTimeout\DC2T\n\
-    \\EMschedule_to_start_timeout\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToStartTimeout\DC2N\n\
-    \\SYNstart_to_close_timeout\CAN\EOT \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
-    \\DC1heartbeat_timeout\CAN\ENQ \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
-    \\fretry_policy\CAN\ACK \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicyB\147\SOH\n\
-    \\ESCio.temporal.api.activity.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/activity/v1;activity\170\STX\SUBTemporalio.Api.Activity.V1\234\STX\GSTemporalio::Api::Activity::V1J\209\f\n\
-    \\ACK\DC2\EOT\NUL\NUL,\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL!\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL>\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL>\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL4\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL4\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL6\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL6\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL7\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL7\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL.\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\f\NUL1\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\SO\NUL(\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT\DLE\NUL,\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\DLE\b\ETB\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC1\EOT7\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC1\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC1(2\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC156\n\
-    \\186\STX\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\CAN\EOT;\SUB\172\STX Indicates how long the caller is willing to wait for an activity completion. Limits how long\n\
-    \ retries will be attempted. Either this or `start_to_close_timeout` must be specified.\n\
-    \\n\
-    \ (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\CAN\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\CAN\GS6\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\CAN9:\n\
-    \\158\ETX\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX \EOT;\SUB\144\ETX Limits time an activity task can stay in a task queue before a worker picks it up. This\n\
-    \ timeout is always non retryable, as all a retry would achieve is to put it back into the same\n\
-    \ queue. Defaults to `schedule_to_close_timeout` or workflow execution timeout if not\n\
-    \ specified.\n\
-    \\n\
-    \ (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX \EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX \GS6\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX 9:\n\
-    \\186\STX\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX'\EOT8\SUB\172\STX Maximum time an activity is allowed to execute after being picked up by a worker. This\n\
-    \ timeout is always retryable. Either this or `schedule_to_close_timeout` must be\n\
-    \ specified.\n\
-    \\n\
-    \ (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: \"to\" is used to indicate interval. --)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX'\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX'\GS3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX'67\n\
-    \K\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX)\EOT3\SUB> Maximum permitted time between successful worker heartbeats.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX)\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX)\GS.\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX)12\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX+\EOT8\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ACK\DC2\ETX+\EOT&\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX+'3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX+67b\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.activity.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Activity.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message as TE_Taskqueue_V1_Message
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x18\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x2e\x76\x31\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x27\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x74\x61\x73\x6b\x71\x75\x65\x75\x65\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x22\xed\x02\x0a\x0f\x41\x63\x74\x69\x76\x69\x74\x79\x4f\x70\x74\x69\x6f\x6e\x73\x12\x37\x0a\x0a\x74\x61\x73\x6b\x5f\x71\x75\x65\x75\x65\x18\x01\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x61\x73\x6b\x71\x75\x65\x75\x65\x2e\x76\x31\x2e\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x12\x3b\x0a\x19\x73\x63\x68\x65\x64\x75\x6c\x65\x5f\x74\x6f\x5f\x63\x6c\x6f\x73\x65\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x02\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x3b\x0a\x19\x73\x63\x68\x65\x64\x75\x6c\x65\x5f\x74\x6f\x5f\x73\x74\x61\x72\x74\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x03\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x38\x0a\x16\x73\x74\x61\x72\x74\x5f\x74\x6f\x5f\x63\x6c\x6f\x73\x65\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x04\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x33\x0a\x11\x68\x65\x61\x72\x74\x62\x65\x61\x74\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x05\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x38\x0a\x0c\x72\x65\x74\x72\x79\x5f\x70\x6f\x6c\x69\x63\x79\x18\x06\x20\x01\x28\x0b\x32\x22\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x52\x65\x74\x72\x79\x50\x6f\x6c\x69\x63\x79\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data ActivityOptions = ActivityOptions
+  { taskQueue :: !(Maybe TE_Taskqueue_V1_Message.TaskQueue)
+  , scheduleToCloseTimeout :: !(Maybe PB_Duration.Duration)
+  , scheduleToStartTimeout :: !(Maybe PB_Duration.Duration)
+  , startToCloseTimeout :: !(Maybe PB_Duration.Duration)
+  , heartbeatTimeout :: !(Maybe PB_Duration.Duration)
+  , retryPolicy :: !(Maybe TE_Common_V1_Message.RetryPolicy)
+  , activityOptionsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultActivityOptions :: ActivityOptions
+defaultActivityOptions = ActivityOptions
+  { taskQueue = Nothing
+  , scheduleToCloseTimeout = Nothing
+  , scheduleToStartTimeout = Nothing
+  , startToCloseTimeout = Nothing
+  , heartbeatTimeout = Nothing
+  , retryPolicy = Nothing
+  , activityOptionsUnknownFields = []
+  }
+
+instance MessageEncode ActivityOptions where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.taskQueue)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.scheduleToCloseTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.scheduleToStartTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.startToCloseTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.heartbeatTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 50 sz (buildMessage v)) msg.retryPolicy)
+    <> encodeUnknownFields msg.activityOptionsUnknownFields
+
+instance MessageSize ActivityOptions where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.taskQueue)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.scheduleToCloseTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.scheduleToStartTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.startToCloseTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.heartbeatTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.retryPolicy)
+    + unknownFieldsSize msg.activityOptionsUnknownFields
+
+instance MessageDecode ActivityOptions where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_unknown_ = withTagM
+        (pure (ActivityOptions {taskQueue = acc_0, scheduleToCloseTimeout = acc_1, scheduleToStartTimeout = acc_2, startToCloseTimeout = acc_3, heartbeatTimeout = acc_4, retryPolicy = acc_5, activityOptionsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityOptions where
+  protoMessageName _ = "temporal.api.activity.v1.ActivityOptions"
+  protoPackageName _ = "temporal.api.activity.v1"
+  protoDefaultValue = defaultActivityOptions
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "task_queue"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.taskqueue.v1.TaskQueue"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityOptions) -> m.taskQueue
+        , fdSet = \v (m :: ActivityOptions) -> (m { taskQueue = v } :: ActivityOptions)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "schedule_to_close_timeout"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityOptions) -> m.scheduleToCloseTimeout
+        , fdSet = \v (m :: ActivityOptions) -> (m { scheduleToCloseTimeout = v } :: ActivityOptions)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "schedule_to_start_timeout"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityOptions) -> m.scheduleToStartTimeout
+        , fdSet = \v (m :: ActivityOptions) -> (m { scheduleToStartTimeout = v } :: ActivityOptions)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "start_to_close_timeout"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityOptions) -> m.startToCloseTimeout
+        , fdSet = \v (m :: ActivityOptions) -> (m { startToCloseTimeout = v } :: ActivityOptions)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "heartbeat_timeout"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityOptions) -> m.heartbeatTimeout
+        , fdSet = \v (m :: ActivityOptions) -> (m { heartbeatTimeout = v } :: ActivityOptions)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "retry_policy"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "temporal.api.common.v1.RetryPolicy"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityOptions) -> m.retryPolicy
+        , fdSet = \v (m :: ActivityOptions) -> (m { retryPolicy = v } :: ActivityOptions)
+        })
+    ]
+
+instance IsMessage ActivityOptions
+
+instance Aeson.ToJSON ActivityOptions where
+  toJSON msg = jsonObject
+      [ "taskQueue" .=: msg.taskQueue
+      , "scheduleToCloseTimeout" .=: msg.scheduleToCloseTimeout
+      , "scheduleToStartTimeout" .=: msg.scheduleToStartTimeout
+      , "startToCloseTimeout" .=: msg.startToCloseTimeout
+      , "heartbeatTimeout" .=: msg.heartbeatTimeout
+      , "retryPolicy" .=: msg.retryPolicy
+      ]
+
+instance Aeson.FromJSON ActivityOptions where
+  parseJSON = Aeson.withObject "ActivityOptions" $ \obj -> do
+    fld_taskQueue <- parseFieldMaybe obj "taskQueue"
+    fld_scheduleToCloseTimeout <- parseFieldMaybe obj "scheduleToCloseTimeout"
+    fld_scheduleToStartTimeout <- parseFieldMaybe obj "scheduleToStartTimeout"
+    fld_startToCloseTimeout <- parseFieldMaybe obj "startToCloseTimeout"
+    fld_heartbeatTimeout <- parseFieldMaybe obj "heartbeatTimeout"
+    fld_retryPolicy <- parseFieldMaybe obj "retryPolicy"
+    pure (defaultActivityOptions
+      { taskQueue = maybe (defaultActivityOptions.taskQueue) Prelude.id fld_taskQueue
+      , scheduleToCloseTimeout = maybe (defaultActivityOptions.scheduleToCloseTimeout) Prelude.id fld_scheduleToCloseTimeout
+      , scheduleToStartTimeout = maybe (defaultActivityOptions.scheduleToStartTimeout) Prelude.id fld_scheduleToStartTimeout
+      , startToCloseTimeout = maybe (defaultActivityOptions.startToCloseTimeout) Prelude.id fld_startToCloseTimeout
+      , heartbeatTimeout = maybe (defaultActivityOptions.heartbeatTimeout) Prelude.id fld_heartbeatTimeout
+      , retryPolicy = maybe (defaultActivityOptions.retryPolicy) Prelude.id fld_retryPolicy
+      , activityOptionsUnknownFields = []
+      } :: ActivityOptions)
+
+instance Hashable ActivityOptions where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.taskQueue) msg.scheduleToCloseTimeout) msg.scheduleToStartTimeout) msg.startToCloseTimeout) msg.heartbeatTimeout) msg.retryPolicy
+
+instance Proto.Extension.HasExtensions ActivityOptions where
+  messageUnknownFields msg = msg.activityOptionsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityOptionsUnknownFields = ufs }
+
+instance Semigroup ActivityOptions where
+  a <> b = ActivityOptions
+    { taskQueue = case b.taskQueue of { Nothing -> a.taskQueue; x -> x }
+    , scheduleToCloseTimeout = case b.scheduleToCloseTimeout of { Nothing -> a.scheduleToCloseTimeout; x -> x }
+    , scheduleToStartTimeout = case b.scheduleToStartTimeout of { Nothing -> a.scheduleToStartTimeout; x -> x }
+    , startToCloseTimeout = case b.startToCloseTimeout of { Nothing -> a.startToCloseTimeout; x -> x }
+    , heartbeatTimeout = case b.heartbeatTimeout of { Nothing -> a.heartbeatTimeout; x -> x }
+    , retryPolicy = case b.retryPolicy of { Nothing -> a.retryPolicy; x -> x }
+    , activityOptionsUnknownFields = a.activityOptionsUnknownFields <> b.activityOptionsUnknownFields
+    }
+
+instance Monoid ActivityOptions where
+  mempty = defaultActivityOptions

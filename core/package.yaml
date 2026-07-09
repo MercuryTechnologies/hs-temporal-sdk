@@ -54,7 +54,7 @@ library:
     - lens-family
     - monad-logger
     - network-bsd
-    - proto-lens
+    - wireform-proto
     - unliftio
     - uuid
     # local dependencies

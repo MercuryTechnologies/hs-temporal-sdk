@@ -1,31 +1,49 @@
-{- This file was auto-generated from temporal/api/testservice/v1/service.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists -Wno-name-shadowing #-}
+
 module Proto.Temporal.Api.Testservice.V1.Service_Fields where
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Empty
-import qualified Proto.Temporal.Api.Testservice.V1.RequestResponse
+
+import Proto.Compat.HasField ()
+import Proto.Lens qualified as Lens
+
+getcurrenttime = Lens.field @"getcurrenttime"
+maybe'getcurrenttime = Lens.field @"getcurrenttime"
+vec'getcurrenttime = Lens.field @"getcurrenttime"
+getcurrenttimeHandler = Lens.field @"getcurrenttimeHandler"
+maybe'getcurrenttimeHandler = Lens.field @"getcurrenttimeHandler"
+vec'getcurrenttimeHandler = Lens.field @"getcurrenttimeHandler"
+locktimeskipping = Lens.field @"locktimeskipping"
+maybe'locktimeskipping = Lens.field @"locktimeskipping"
+vec'locktimeskipping = Lens.field @"locktimeskipping"
+locktimeskippingHandler = Lens.field @"locktimeskippingHandler"
+maybe'locktimeskippingHandler = Lens.field @"locktimeskippingHandler"
+vec'locktimeskippingHandler = Lens.field @"locktimeskippingHandler"
+sleep = Lens.field @"sleep"
+maybe'sleep = Lens.field @"sleep"
+vec'sleep = Lens.field @"sleep"
+sleepHandler = Lens.field @"sleepHandler"
+maybe'sleepHandler = Lens.field @"sleepHandler"
+vec'sleepHandler = Lens.field @"sleepHandler"
+sleepuntil = Lens.field @"sleepuntil"
+maybe'sleepuntil = Lens.field @"sleepuntil"
+vec'sleepuntil = Lens.field @"sleepuntil"
+sleepuntilHandler = Lens.field @"sleepuntilHandler"
+maybe'sleepuntilHandler = Lens.field @"sleepuntilHandler"
+vec'sleepuntilHandler = Lens.field @"sleepuntilHandler"
+unlocktimeskipping = Lens.field @"unlocktimeskipping"
+maybe'unlocktimeskipping = Lens.field @"unlocktimeskipping"
+vec'unlocktimeskipping = Lens.field @"unlocktimeskipping"
+unlocktimeskippingHandler = Lens.field @"unlocktimeskippingHandler"
+maybe'unlocktimeskippingHandler = Lens.field @"unlocktimeskippingHandler"
+vec'unlocktimeskippingHandler = Lens.field @"unlocktimeskippingHandler"
+unlocktimeskippingwithsleep = Lens.field @"unlocktimeskippingwithsleep"
+maybe'unlocktimeskippingwithsleep = Lens.field @"unlocktimeskippingwithsleep"
+vec'unlocktimeskippingwithsleep = Lens.field @"unlocktimeskippingwithsleep"
+unlocktimeskippingwithsleepHandler = Lens.field @"unlocktimeskippingwithsleepHandler"
+maybe'unlocktimeskippingwithsleepHandler = Lens.field @"unlocktimeskippingwithsleepHandler"
+vec'unlocktimeskippingwithsleepHandler = Lens.field @"unlocktimeskippingwithsleepHandler"

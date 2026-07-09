@@ -10,7 +10,7 @@ import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
 import Data.Aeson (toJSON)
 import Data.Int (Int64)
-import Data.ProtoLens (defMessage)
+
 import Data.Time.Clock.System (SystemTime(..))
 import Data.Word (Word32)
 import Data.Map.Strict (Map)
@@ -927,7 +927,7 @@ tests = do
         executions <-
           useClient $
             runConduit $
-              C.scanWorkflowExecutions (defMessage & RR.pageSize .~ 100)
+              C.scanWorkflowExecutions (mempty & RR.pageSize .~ 100)
                 .| sinkList
         let W.WorkflowId wfIdStr = wfId
             found = any (\info -> (info ^. WFInfo.execution . Common.workflowId) == wfIdStr) executions

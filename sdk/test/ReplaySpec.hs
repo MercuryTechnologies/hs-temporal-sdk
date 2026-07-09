@@ -2,7 +2,7 @@ module ReplaySpec where
 
 import Control.Monad (void, when)
 import Data.Either (isLeft, isRight)
-import Data.ProtoLens.Encoding (encodeMessage)
+import Proto.Encode (encodeMessage)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
 import System.Directory (getTemporaryDirectory, removeFile)

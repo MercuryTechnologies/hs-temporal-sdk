@@ -1,6126 +1,2509 @@
-{- This file was auto-generated from temporal/api/deployment/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Deployment.V1.Message (
-        Deployment(), DeploymentInfo(), DeploymentInfo'MetadataEntry(),
-        DeploymentInfo'TaskQueueInfo(), DeploymentListInfo(),
-        RoutingConfig(), UpdateDeploymentMetadata(),
-        UpdateDeploymentMetadata'UpsertEntriesEntry(),
-        VersionDrainageInfo(), VersionMetadata(),
-        VersionMetadata'EntriesEntry(), WorkerDeploymentInfo(),
-        WorkerDeploymentInfo'WorkerDeploymentVersionSummary(),
-        WorkerDeploymentOptions(), WorkerDeploymentVersion(),
-        WorkerDeploymentVersionInfo(),
-        WorkerDeploymentVersionInfo'VersionTaskQueueInfo()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Api.Enums.V1.Deployment
-import qualified Proto.Temporal.Api.Enums.V1.TaskQueue
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.seriesName' @:: Lens' Deployment Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.buildId' @:: Lens' Deployment Data.Text.Text@ -}
-data Deployment
-  = Deployment'_constructor {_Deployment'seriesName :: !Data.Text.Text,
-                             _Deployment'buildId :: !Data.Text.Text,
-                             _Deployment'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Deployment where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Deployment "seriesName" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Deployment'seriesName
-           (\ x__ y__ -> x__ {_Deployment'seriesName = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Deployment "buildId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Deployment'buildId (\ x__ y__ -> x__ {_Deployment'buildId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Deployment where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.Deployment"
-  packedMessageDescriptor _
-    = "\n\
-      \\n\
-      \Deployment\DC2\US\n\
-      \\vseries_name\CAN\SOH \SOH(\tR\n\
-      \seriesName\DC2\EM\n\
-      \\bbuild_id\CAN\STX \SOH(\tR\abuildId"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        seriesName__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "series_name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"seriesName")) ::
-              Data.ProtoLens.FieldDescriptor Deployment
-        buildId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "build_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
-              Data.ProtoLens.FieldDescriptor Deployment
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, seriesName__field_descriptor),
-           (Data.ProtoLens.Tag 2, buildId__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Deployment'_unknownFields
-        (\ x__ y__ -> x__ {_Deployment'_unknownFields = y__})
-  defMessage
-    = Deployment'_constructor
-        {_Deployment'seriesName = Data.ProtoLens.fieldDefault,
-         _Deployment'buildId = Data.ProtoLens.fieldDefault,
-         _Deployment'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Deployment -> Data.ProtoLens.Encoding.Bytes.Parser Deployment
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "series_name"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"seriesName") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Deployment"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"seriesName") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Deployment where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Deployment'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Deployment'seriesName x__)
-                (Control.DeepSeq.deepseq (_Deployment'buildId x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deployment' @:: Lens' DeploymentInfo Deployment@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'deployment' @:: Lens' DeploymentInfo (Prelude.Maybe Deployment)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.createTime' @:: Lens' DeploymentInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'createTime' @:: Lens' DeploymentInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.taskQueueInfos' @:: Lens' DeploymentInfo [DeploymentInfo'TaskQueueInfo]@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.vec'taskQueueInfos' @:: Lens' DeploymentInfo (Data.Vector.Vector DeploymentInfo'TaskQueueInfo)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.metadata' @:: Lens' DeploymentInfo (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.isCurrent' @:: Lens' DeploymentInfo Prelude.Bool@ -}
-data DeploymentInfo
-  = DeploymentInfo'_constructor {_DeploymentInfo'deployment :: !(Prelude.Maybe Deployment),
-                                 _DeploymentInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                 _DeploymentInfo'taskQueueInfos :: !(Data.Vector.Vector DeploymentInfo'TaskQueueInfo),
-                                 _DeploymentInfo'metadata :: !(Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload),
-                                 _DeploymentInfo'isCurrent :: !Prelude.Bool,
-                                 _DeploymentInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show DeploymentInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField DeploymentInfo "deployment" Deployment where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'deployment
-           (\ x__ y__ -> x__ {_DeploymentInfo'deployment = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DeploymentInfo "maybe'deployment" (Prelude.Maybe Deployment) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'deployment
-           (\ x__ y__ -> x__ {_DeploymentInfo'deployment = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'createTime
-           (\ x__ y__ -> x__ {_DeploymentInfo'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DeploymentInfo "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'createTime
-           (\ x__ y__ -> x__ {_DeploymentInfo'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo "taskQueueInfos" [DeploymentInfo'TaskQueueInfo] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'taskQueueInfos
-           (\ x__ y__ -> x__ {_DeploymentInfo'taskQueueInfos = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField DeploymentInfo "vec'taskQueueInfos" (Data.Vector.Vector DeploymentInfo'TaskQueueInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'taskQueueInfos
-           (\ x__ y__ -> x__ {_DeploymentInfo'taskQueueInfos = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo "metadata" (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'metadata
-           (\ x__ y__ -> x__ {_DeploymentInfo'metadata = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo "isCurrent" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'isCurrent
-           (\ x__ y__ -> x__ {_DeploymentInfo'isCurrent = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message DeploymentInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.DeploymentInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\SODeploymentInfo\DC2F\n\
-      \\n\
-      \deployment\CAN\SOH \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
-      \deployment\DC2;\n\
-      \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2b\n\
-      \\DLEtask_queue_infos\CAN\ETX \ETX(\v28.temporal.api.deployment.v1.DeploymentInfo.TaskQueueInfoR\SOtaskQueueInfos\DC2T\n\
-      \\bmetadata\CAN\EOT \ETX(\v28.temporal.api.deployment.v1.DeploymentInfo.MetadataEntryR\bmetadata\DC2\GS\n\
-      \\n\
-      \is_current\CAN\ENQ \SOH(\bR\tisCurrent\SUB\\\n\
-      \\rMetadataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\SUB\165\SOH\n\
-      \\rTaskQueueInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-      \\EOTtype\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueTypeR\EOTtype\DC2F\n\
-      \\DC1first_poller_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIfirstPollerTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        deployment__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Deployment)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'deployment")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo
-        taskQueueInfos__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "task_queue_infos"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor DeploymentInfo'TaskQueueInfo)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"taskQueueInfos")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo
-        metadata__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "metadata"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor DeploymentInfo'MetadataEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"metadata")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo
-        isCurrent__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_current"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isCurrent")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, deployment__field_descriptor),
-           (Data.ProtoLens.Tag 2, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 3, taskQueueInfos__field_descriptor),
-           (Data.ProtoLens.Tag 4, metadata__field_descriptor),
-           (Data.ProtoLens.Tag 5, isCurrent__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _DeploymentInfo'_unknownFields
-        (\ x__ y__ -> x__ {_DeploymentInfo'_unknownFields = y__})
-  defMessage
-    = DeploymentInfo'_constructor
-        {_DeploymentInfo'deployment = Prelude.Nothing,
-         _DeploymentInfo'createTime = Prelude.Nothing,
-         _DeploymentInfo'taskQueueInfos = Data.Vector.Generic.empty,
-         _DeploymentInfo'metadata = Data.Map.empty,
-         _DeploymentInfo'isCurrent = Data.ProtoLens.fieldDefault,
-         _DeploymentInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          DeploymentInfo
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld DeploymentInfo'TaskQueueInfo
-             -> Data.ProtoLens.Encoding.Bytes.Parser DeploymentInfo
-        loop x mutable'taskQueueInfos
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'taskQueueInfos <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                 (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                    mutable'taskQueueInfos)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'taskQueueInfos")
-                              frozen'taskQueueInfos x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "deployment"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"deployment") y x)
-                                  mutable'taskQueueInfos
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                                  mutable'taskQueueInfos
-                        26
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "task_queue_infos"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'taskQueueInfos y)
-                                loop x v
-                        34
-                          -> do !(entry :: DeploymentInfo'MetadataEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                              (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                  Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                    (Prelude.fromIntegral
-                                                                                       len)
-                                                                                    Data.ProtoLens.parseMessage)
-                                                                              "metadata"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"metadata")
-                                        (\ !t -> Data.Map.insert key value t) x)
-                                     mutable'taskQueueInfos)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_current"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isCurrent") y x)
-                                  mutable'taskQueueInfos
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'taskQueueInfos
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'taskQueueInfos <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                          Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'taskQueueInfos)
-          "DeploymentInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'deployment") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                      (\ _v
-                         -> (Data.Monoid.<>)
-                              (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                              ((Prelude..)
-                                 (\ bs
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                 Data.ProtoLens.encodeMessage _v))
-                      (Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"vec'taskQueueInfos") _x))
-                   ((Data.Monoid.<>)
-                      (Data.Monoid.mconcat
-                         (Prelude.map
-                            (\ _v
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                    ((Prelude..)
-                                       (\ bs
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                  (Prelude.fromIntegral
-                                                     (Data.ByteString.length bs)))
-                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                       Data.ProtoLens.encodeMessage
-                                       (Lens.Family2.set
-                                          (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                          (Lens.Family2.set
-                                             (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                             (Data.ProtoLens.defMessage ::
-                                                DeploymentInfo'MetadataEntry)))))
-                            (Data.Map.toList
-                               (Lens.Family2.view (Data.ProtoLens.Field.field @"metadata") _x))))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isCurrent") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (\ b -> if b then 1 else 0) _v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData DeploymentInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_DeploymentInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_DeploymentInfo'deployment x__)
-                (Control.DeepSeq.deepseq
-                   (_DeploymentInfo'createTime x__)
-                   (Control.DeepSeq.deepseq
-                      (_DeploymentInfo'taskQueueInfos x__)
-                      (Control.DeepSeq.deepseq
-                         (_DeploymentInfo'metadata x__)
-                         (Control.DeepSeq.deepseq (_DeploymentInfo'isCurrent x__) ())))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.key' @:: Lens' DeploymentInfo'MetadataEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.value' @:: Lens' DeploymentInfo'MetadataEntry Proto.Temporal.Api.Common.V1.Message.Payload@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'value' @:: Lens' DeploymentInfo'MetadataEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data DeploymentInfo'MetadataEntry
-  = DeploymentInfo'MetadataEntry'_constructor {_DeploymentInfo'MetadataEntry'key :: !Data.Text.Text,
-                                               _DeploymentInfo'MetadataEntry'value :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
-                                               _DeploymentInfo'MetadataEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show DeploymentInfo'MetadataEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField DeploymentInfo'MetadataEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'MetadataEntry'key
-           (\ x__ y__ -> x__ {_DeploymentInfo'MetadataEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo'MetadataEntry "value" Proto.Temporal.Api.Common.V1.Message.Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'MetadataEntry'value
-           (\ x__ y__ -> x__ {_DeploymentInfo'MetadataEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DeploymentInfo'MetadataEntry "maybe'value" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'MetadataEntry'value
-           (\ x__ y__ -> x__ {_DeploymentInfo'MetadataEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message DeploymentInfo'MetadataEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.DeploymentInfo.MetadataEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\rMetadataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo'MetadataEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo'MetadataEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _DeploymentInfo'MetadataEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_DeploymentInfo'MetadataEntry'_unknownFields = y__})
-  defMessage
-    = DeploymentInfo'MetadataEntry'_constructor
-        {_DeploymentInfo'MetadataEntry'key = Data.ProtoLens.fieldDefault,
-         _DeploymentInfo'MetadataEntry'value = Prelude.Nothing,
-         _DeploymentInfo'MetadataEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          DeploymentInfo'MetadataEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser DeploymentInfo'MetadataEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "MetadataEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData DeploymentInfo'MetadataEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_DeploymentInfo'MetadataEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_DeploymentInfo'MetadataEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_DeploymentInfo'MetadataEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.name' @:: Lens' DeploymentInfo'TaskQueueInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.type'' @:: Lens' DeploymentInfo'TaskQueueInfo Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.firstPollerTime' @:: Lens' DeploymentInfo'TaskQueueInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'firstPollerTime' @:: Lens' DeploymentInfo'TaskQueueInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data DeploymentInfo'TaskQueueInfo
-  = DeploymentInfo'TaskQueueInfo'_constructor {_DeploymentInfo'TaskQueueInfo'name :: !Data.Text.Text,
-                                               _DeploymentInfo'TaskQueueInfo'type' :: !Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType,
-                                               _DeploymentInfo'TaskQueueInfo'firstPollerTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                               _DeploymentInfo'TaskQueueInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show DeploymentInfo'TaskQueueInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField DeploymentInfo'TaskQueueInfo "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'TaskQueueInfo'name
-           (\ x__ y__ -> x__ {_DeploymentInfo'TaskQueueInfo'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo'TaskQueueInfo "type'" Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'TaskQueueInfo'type'
-           (\ x__ y__ -> x__ {_DeploymentInfo'TaskQueueInfo'type' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentInfo'TaskQueueInfo "firstPollerTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'TaskQueueInfo'firstPollerTime
-           (\ x__ y__
-              -> x__ {_DeploymentInfo'TaskQueueInfo'firstPollerTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DeploymentInfo'TaskQueueInfo "maybe'firstPollerTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentInfo'TaskQueueInfo'firstPollerTime
-           (\ x__ y__
-              -> x__ {_DeploymentInfo'TaskQueueInfo'firstPollerTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message DeploymentInfo'TaskQueueInfo where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.DeploymentInfo.TaskQueueInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\rTaskQueueInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-      \\EOTtype\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueTypeR\EOTtype\DC2F\n\
-      \\DC1first_poller_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIfirstPollerTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo'TaskQueueInfo
-        type'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"type'")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo'TaskQueueInfo
-        firstPollerTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "first_poller_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'firstPollerTime")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentInfo'TaskQueueInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, name__field_descriptor),
-           (Data.ProtoLens.Tag 2, type'__field_descriptor),
-           (Data.ProtoLens.Tag 3, firstPollerTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _DeploymentInfo'TaskQueueInfo'_unknownFields
-        (\ x__ y__
-           -> x__ {_DeploymentInfo'TaskQueueInfo'_unknownFields = y__})
-  defMessage
-    = DeploymentInfo'TaskQueueInfo'_constructor
-        {_DeploymentInfo'TaskQueueInfo'name = Data.ProtoLens.fieldDefault,
-         _DeploymentInfo'TaskQueueInfo'type' = Data.ProtoLens.fieldDefault,
-         _DeploymentInfo'TaskQueueInfo'firstPollerTime = Prelude.Nothing,
-         _DeploymentInfo'TaskQueueInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          DeploymentInfo'TaskQueueInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser DeploymentInfo'TaskQueueInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "type"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"type'") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "first_poller_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"firstPollerTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "TaskQueueInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"type'") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'firstPollerTime") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData DeploymentInfo'TaskQueueInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_DeploymentInfo'TaskQueueInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_DeploymentInfo'TaskQueueInfo'name x__)
-                (Control.DeepSeq.deepseq
-                   (_DeploymentInfo'TaskQueueInfo'type' x__)
-                   (Control.DeepSeq.deepseq
-                      (_DeploymentInfo'TaskQueueInfo'firstPollerTime x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deployment' @:: Lens' DeploymentListInfo Deployment@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'deployment' @:: Lens' DeploymentListInfo (Prelude.Maybe Deployment)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.createTime' @:: Lens' DeploymentListInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'createTime' @:: Lens' DeploymentListInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.isCurrent' @:: Lens' DeploymentListInfo Prelude.Bool@ -}
-data DeploymentListInfo
-  = DeploymentListInfo'_constructor {_DeploymentListInfo'deployment :: !(Prelude.Maybe Deployment),
-                                     _DeploymentListInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                     _DeploymentListInfo'isCurrent :: !Prelude.Bool,
-                                     _DeploymentListInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show DeploymentListInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField DeploymentListInfo "deployment" Deployment where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentListInfo'deployment
-           (\ x__ y__ -> x__ {_DeploymentListInfo'deployment = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DeploymentListInfo "maybe'deployment" (Prelude.Maybe Deployment) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentListInfo'deployment
-           (\ x__ y__ -> x__ {_DeploymentListInfo'deployment = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentListInfo "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentListInfo'createTime
-           (\ x__ y__ -> x__ {_DeploymentListInfo'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DeploymentListInfo "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentListInfo'createTime
-           (\ x__ y__ -> x__ {_DeploymentListInfo'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DeploymentListInfo "isCurrent" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DeploymentListInfo'isCurrent
-           (\ x__ y__ -> x__ {_DeploymentListInfo'isCurrent = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message DeploymentListInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.DeploymentListInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2DeploymentListInfo\DC2F\n\
-      \\n\
-      \deployment\CAN\SOH \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
-      \deployment\DC2;\n\
-      \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2\GS\n\
-      \\n\
-      \is_current\CAN\ETX \SOH(\bR\tisCurrent"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        deployment__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Deployment)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'deployment")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentListInfo
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentListInfo
-        isCurrent__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_current"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isCurrent")) ::
-              Data.ProtoLens.FieldDescriptor DeploymentListInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, deployment__field_descriptor),
-           (Data.ProtoLens.Tag 2, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 3, isCurrent__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _DeploymentListInfo'_unknownFields
-        (\ x__ y__ -> x__ {_DeploymentListInfo'_unknownFields = y__})
-  defMessage
-    = DeploymentListInfo'_constructor
-        {_DeploymentListInfo'deployment = Prelude.Nothing,
-         _DeploymentListInfo'createTime = Prelude.Nothing,
-         _DeploymentListInfo'isCurrent = Data.ProtoLens.fieldDefault,
-         _DeploymentListInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          DeploymentListInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser DeploymentListInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "deployment"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"deployment") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_current"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isCurrent") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "DeploymentListInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'deployment") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isCurrent") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                               _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData DeploymentListInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_DeploymentListInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_DeploymentListInfo'deployment x__)
-                (Control.DeepSeq.deepseq
-                   (_DeploymentListInfo'createTime x__)
-                   (Control.DeepSeq.deepseq (_DeploymentListInfo'isCurrent x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.currentDeploymentVersion' @:: Lens' RoutingConfig WorkerDeploymentVersion@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'currentDeploymentVersion' @:: Lens' RoutingConfig (Prelude.Maybe WorkerDeploymentVersion)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.currentVersion' @:: Lens' RoutingConfig Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingDeploymentVersion' @:: Lens' RoutingConfig WorkerDeploymentVersion@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'rampingDeploymentVersion' @:: Lens' RoutingConfig (Prelude.Maybe WorkerDeploymentVersion)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingVersion' @:: Lens' RoutingConfig Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingVersionPercentage' @:: Lens' RoutingConfig Prelude.Float@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.currentVersionChangedTime' @:: Lens' RoutingConfig Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'currentVersionChangedTime' @:: Lens' RoutingConfig (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingVersionChangedTime' @:: Lens' RoutingConfig Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'rampingVersionChangedTime' @:: Lens' RoutingConfig (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingVersionPercentageChangedTime' @:: Lens' RoutingConfig Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'rampingVersionPercentageChangedTime' @:: Lens' RoutingConfig (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data RoutingConfig
-  = RoutingConfig'_constructor {_RoutingConfig'currentDeploymentVersion :: !(Prelude.Maybe WorkerDeploymentVersion),
-                                _RoutingConfig'currentVersion :: !Data.Text.Text,
-                                _RoutingConfig'rampingDeploymentVersion :: !(Prelude.Maybe WorkerDeploymentVersion),
-                                _RoutingConfig'rampingVersion :: !Data.Text.Text,
-                                _RoutingConfig'rampingVersionPercentage :: !Prelude.Float,
-                                _RoutingConfig'currentVersionChangedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                _RoutingConfig'rampingVersionChangedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                _RoutingConfig'rampingVersionPercentageChangedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                _RoutingConfig'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show RoutingConfig where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField RoutingConfig "currentDeploymentVersion" WorkerDeploymentVersion where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'currentDeploymentVersion
-           (\ x__ y__ -> x__ {_RoutingConfig'currentDeploymentVersion = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RoutingConfig "maybe'currentDeploymentVersion" (Prelude.Maybe WorkerDeploymentVersion) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'currentDeploymentVersion
-           (\ x__ y__ -> x__ {_RoutingConfig'currentDeploymentVersion = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "currentVersion" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'currentVersion
-           (\ x__ y__ -> x__ {_RoutingConfig'currentVersion = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "rampingDeploymentVersion" WorkerDeploymentVersion where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingDeploymentVersion
-           (\ x__ y__ -> x__ {_RoutingConfig'rampingDeploymentVersion = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RoutingConfig "maybe'rampingDeploymentVersion" (Prelude.Maybe WorkerDeploymentVersion) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingDeploymentVersion
-           (\ x__ y__ -> x__ {_RoutingConfig'rampingDeploymentVersion = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "rampingVersion" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingVersion
-           (\ x__ y__ -> x__ {_RoutingConfig'rampingVersion = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "rampingVersionPercentage" Prelude.Float where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingVersionPercentage
-           (\ x__ y__ -> x__ {_RoutingConfig'rampingVersionPercentage = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "currentVersionChangedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'currentVersionChangedTime
-           (\ x__ y__
-              -> x__ {_RoutingConfig'currentVersionChangedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RoutingConfig "maybe'currentVersionChangedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'currentVersionChangedTime
-           (\ x__ y__
-              -> x__ {_RoutingConfig'currentVersionChangedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "rampingVersionChangedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingVersionChangedTime
-           (\ x__ y__
-              -> x__ {_RoutingConfig'rampingVersionChangedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RoutingConfig "maybe'rampingVersionChangedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingVersionChangedTime
-           (\ x__ y__
-              -> x__ {_RoutingConfig'rampingVersionChangedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RoutingConfig "rampingVersionPercentageChangedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingVersionPercentageChangedTime
-           (\ x__ y__
-              -> x__ {_RoutingConfig'rampingVersionPercentageChangedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RoutingConfig "maybe'rampingVersionPercentageChangedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RoutingConfig'rampingVersionPercentageChangedTime
-           (\ x__ y__
-              -> x__ {_RoutingConfig'rampingVersionPercentageChangedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message RoutingConfig where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.RoutingConfig"
-  packedMessageDescriptor _
-    = "\n\
-      \\rRoutingConfig\DC2q\n\
-      \\SUBcurrent_deployment_version\CAN\a \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANcurrentDeploymentVersion\DC2+\n\
-      \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersionB\STX\CAN\SOH\DC2q\n\
-      \\SUBramping_deployment_version\CAN\t \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANrampingDeploymentVersion\DC2+\n\
-      \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersionB\STX\CAN\SOH\DC2<\n\
-      \\SUBramping_version_percentage\CAN\ETX \SOH(\STXR\CANrampingVersionPercentage\DC2[\n\
-      \\FScurrent_version_changed_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\EMcurrentVersionChangedTime\DC2[\n\
-      \\FSramping_version_changed_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\EMrampingVersionChangedTime\DC2p\n\
-      \'ramping_version_percentage_changed_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR#rampingVersionPercentageChangedTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        currentDeploymentVersion__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_deployment_version"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkerDeploymentVersion)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'currentDeploymentVersion")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        currentVersion__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_version"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"currentVersion")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        rampingDeploymentVersion__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_deployment_version"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkerDeploymentVersion)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'rampingDeploymentVersion")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        rampingVersion__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_version"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"rampingVersion")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        rampingVersionPercentage__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_version_percentage"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"rampingVersionPercentage")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        currentVersionChangedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_version_changed_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'currentVersionChangedTime")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        rampingVersionChangedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_version_changed_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'rampingVersionChangedTime")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-        rampingVersionPercentageChangedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_version_percentage_changed_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field
-                    @"maybe'rampingVersionPercentageChangedTime")) ::
-              Data.ProtoLens.FieldDescriptor RoutingConfig
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 7, 
-            currentDeploymentVersion__field_descriptor),
-           (Data.ProtoLens.Tag 1, currentVersion__field_descriptor),
-           (Data.ProtoLens.Tag 9, rampingDeploymentVersion__field_descriptor),
-           (Data.ProtoLens.Tag 2, rampingVersion__field_descriptor),
-           (Data.ProtoLens.Tag 3, rampingVersionPercentage__field_descriptor),
-           (Data.ProtoLens.Tag 4, 
-            currentVersionChangedTime__field_descriptor),
-           (Data.ProtoLens.Tag 5, 
-            rampingVersionChangedTime__field_descriptor),
-           (Data.ProtoLens.Tag 6, 
-            rampingVersionPercentageChangedTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _RoutingConfig'_unknownFields
-        (\ x__ y__ -> x__ {_RoutingConfig'_unknownFields = y__})
-  defMessage
-    = RoutingConfig'_constructor
-        {_RoutingConfig'currentDeploymentVersion = Prelude.Nothing,
-         _RoutingConfig'currentVersion = Data.ProtoLens.fieldDefault,
-         _RoutingConfig'rampingDeploymentVersion = Prelude.Nothing,
-         _RoutingConfig'rampingVersion = Data.ProtoLens.fieldDefault,
-         _RoutingConfig'rampingVersionPercentage = Data.ProtoLens.fieldDefault,
-         _RoutingConfig'currentVersionChangedTime = Prelude.Nothing,
-         _RoutingConfig'rampingVersionChangedTime = Prelude.Nothing,
-         _RoutingConfig'rampingVersionPercentageChangedTime = Prelude.Nothing,
-         _RoutingConfig'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          RoutingConfig -> Data.ProtoLens.Encoding.Bytes.Parser RoutingConfig
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        58
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "current_deployment_version"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentDeploymentVersion") y x)
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "current_version"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentVersion") y x)
-                        74
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "ramping_deployment_version"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampingDeploymentVersion") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "ramping_version"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampingVersion") y x)
-                        29
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
-                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
-                                       "ramping_version_percentage"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampingVersionPercentage") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "current_version_changed_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentVersionChangedTime") y x)
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "ramping_version_changed_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampingVersionChangedTime") y x)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "ramping_version_percentage_changed_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field
-                                        @"rampingVersionPercentageChangedTime")
-                                     y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "RoutingConfig"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'currentDeploymentVersion") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"currentVersion") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'rampingDeploymentVersion") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"rampingVersion") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"rampingVersionPercentage") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putFixed32
-                                     Data.ProtoLens.Encoding.Bytes.floatToWord _v))
-                         ((Data.Monoid.<>)
-                            (case
-                                 Lens.Family2.view
-                                   (Data.ProtoLens.Field.field @"maybe'currentVersionChangedTime")
-                                   _x
-                             of
-                               Prelude.Nothing -> Data.Monoid.mempty
-                               (Prelude.Just _v)
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                      ((Prelude..)
-                                         (\ bs
-                                            -> (Data.Monoid.<>)
-                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                    (Prelude.fromIntegral
-                                                       (Data.ByteString.length bs)))
-                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                         Data.ProtoLens.encodeMessage _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field
-                                         @"maybe'rampingVersionChangedTime")
-                                      _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
-                               ((Data.Monoid.<>)
-                                  (case
-                                       Lens.Family2.view
-                                         (Data.ProtoLens.Field.field
-                                            @"maybe'rampingVersionPercentageChangedTime")
-                                         _x
-                                   of
-                                     Prelude.Nothing -> Data.Monoid.mempty
-                                     (Prelude.Just _v)
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                            ((Prelude..)
-                                               (\ bs
-                                                  -> (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                          (Prelude.fromIntegral
-                                                             (Data.ByteString.length bs)))
-                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                               Data.ProtoLens.encodeMessage _v))
-                                  (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                     (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))))
-instance Control.DeepSeq.NFData RoutingConfig where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_RoutingConfig'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_RoutingConfig'currentDeploymentVersion x__)
-                (Control.DeepSeq.deepseq
-                   (_RoutingConfig'currentVersion x__)
-                   (Control.DeepSeq.deepseq
-                      (_RoutingConfig'rampingDeploymentVersion x__)
-                      (Control.DeepSeq.deepseq
-                         (_RoutingConfig'rampingVersion x__)
-                         (Control.DeepSeq.deepseq
-                            (_RoutingConfig'rampingVersionPercentage x__)
-                            (Control.DeepSeq.deepseq
-                               (_RoutingConfig'currentVersionChangedTime x__)
-                               (Control.DeepSeq.deepseq
-                                  (_RoutingConfig'rampingVersionChangedTime x__)
-                                  (Control.DeepSeq.deepseq
-                                     (_RoutingConfig'rampingVersionPercentageChangedTime x__)
-                                     ()))))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.upsertEntries' @:: Lens' UpdateDeploymentMetadata (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.removeEntries' @:: Lens' UpdateDeploymentMetadata [Data.Text.Text]@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.vec'removeEntries' @:: Lens' UpdateDeploymentMetadata (Data.Vector.Vector Data.Text.Text)@ -}
-data UpdateDeploymentMetadata
-  = UpdateDeploymentMetadata'_constructor {_UpdateDeploymentMetadata'upsertEntries :: !(Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload),
-                                           _UpdateDeploymentMetadata'removeEntries :: !(Data.Vector.Vector Data.Text.Text),
-                                           _UpdateDeploymentMetadata'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show UpdateDeploymentMetadata where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField UpdateDeploymentMetadata "upsertEntries" (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateDeploymentMetadata'upsertEntries
-           (\ x__ y__ -> x__ {_UpdateDeploymentMetadata'upsertEntries = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField UpdateDeploymentMetadata "removeEntries" [Data.Text.Text] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateDeploymentMetadata'removeEntries
-           (\ x__ y__ -> x__ {_UpdateDeploymentMetadata'removeEntries = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField UpdateDeploymentMetadata "vec'removeEntries" (Data.Vector.Vector Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateDeploymentMetadata'removeEntries
-           (\ x__ y__ -> x__ {_UpdateDeploymentMetadata'removeEntries = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message UpdateDeploymentMetadata where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.UpdateDeploymentMetadata"
-  packedMessageDescriptor _
-    = "\n\
-      \\CANUpdateDeploymentMetadata\DC2n\n\
-      \\SOupsert_entries\CAN\SOH \ETX(\v2G.temporal.api.deployment.v1.UpdateDeploymentMetadata.UpsertEntriesEntryR\rupsertEntries\DC2%\n\
-      \\SOremove_entries\CAN\STX \ETX(\tR\rremoveEntries\SUBa\n\
-      \\DC2UpsertEntriesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        upsertEntries__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "upsert_entries"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor UpdateDeploymentMetadata'UpsertEntriesEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"upsertEntries")) ::
-              Data.ProtoLens.FieldDescriptor UpdateDeploymentMetadata
-        removeEntries__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "remove_entries"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"removeEntries")) ::
-              Data.ProtoLens.FieldDescriptor UpdateDeploymentMetadata
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, upsertEntries__field_descriptor),
-           (Data.ProtoLens.Tag 2, removeEntries__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _UpdateDeploymentMetadata'_unknownFields
-        (\ x__ y__ -> x__ {_UpdateDeploymentMetadata'_unknownFields = y__})
-  defMessage
-    = UpdateDeploymentMetadata'_constructor
-        {_UpdateDeploymentMetadata'upsertEntries = Data.Map.empty,
-         _UpdateDeploymentMetadata'removeEntries = Data.Vector.Generic.empty,
-         _UpdateDeploymentMetadata'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          UpdateDeploymentMetadata
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Data.Text.Text
-             -> Data.ProtoLens.Encoding.Bytes.Parser UpdateDeploymentMetadata
-        loop x mutable'removeEntries
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'removeEntries <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                   mutable'removeEntries)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'removeEntries")
-                              frozen'removeEntries x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: UpdateDeploymentMetadata'UpsertEntriesEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                                             (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                                 Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                                   (Prelude.fromIntegral
-                                                                                                      len)
-                                                                                                   Data.ProtoLens.parseMessage)
-                                                                                             "upsert_entries"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"upsertEntries")
-                                        (\ !t -> Data.Map.insert key value t) x)
-                                     mutable'removeEntries)
-                        18
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.getText
-                                              (Prelude.fromIntegral len))
-                                        "remove_entries"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'removeEntries y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'removeEntries
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'removeEntries <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                         Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'removeEntries)
-          "UpdateDeploymentMetadata"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage ::
-                                       UpdateDeploymentMetadata'UpsertEntriesEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"upsertEntries") _x))))
-             ((Data.Monoid.<>)
-                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.Text.Encoding.encodeUtf8 _v))
-                   (Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"vec'removeEntries") _x))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData UpdateDeploymentMetadata where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_UpdateDeploymentMetadata'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_UpdateDeploymentMetadata'upsertEntries x__)
-                (Control.DeepSeq.deepseq
-                   (_UpdateDeploymentMetadata'removeEntries x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.key' @:: Lens' UpdateDeploymentMetadata'UpsertEntriesEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.value' @:: Lens' UpdateDeploymentMetadata'UpsertEntriesEntry Proto.Temporal.Api.Common.V1.Message.Payload@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'value' @:: Lens' UpdateDeploymentMetadata'UpsertEntriesEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data UpdateDeploymentMetadata'UpsertEntriesEntry
-  = UpdateDeploymentMetadata'UpsertEntriesEntry'_constructor {_UpdateDeploymentMetadata'UpsertEntriesEntry'key :: !Data.Text.Text,
-                                                              _UpdateDeploymentMetadata'UpsertEntriesEntry'value :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
-                                                              _UpdateDeploymentMetadata'UpsertEntriesEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show UpdateDeploymentMetadata'UpsertEntriesEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField UpdateDeploymentMetadata'UpsertEntriesEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateDeploymentMetadata'UpsertEntriesEntry'key
-           (\ x__ y__
-              -> x__ {_UpdateDeploymentMetadata'UpsertEntriesEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField UpdateDeploymentMetadata'UpsertEntriesEntry "value" Proto.Temporal.Api.Common.V1.Message.Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateDeploymentMetadata'UpsertEntriesEntry'value
-           (\ x__ y__
-              -> x__ {_UpdateDeploymentMetadata'UpsertEntriesEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField UpdateDeploymentMetadata'UpsertEntriesEntry "maybe'value" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateDeploymentMetadata'UpsertEntriesEntry'value
-           (\ x__ y__
-              -> x__ {_UpdateDeploymentMetadata'UpsertEntriesEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message UpdateDeploymentMetadata'UpsertEntriesEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.UpdateDeploymentMetadata.UpsertEntriesEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2UpsertEntriesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor UpdateDeploymentMetadata'UpsertEntriesEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor UpdateDeploymentMetadata'UpsertEntriesEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _UpdateDeploymentMetadata'UpsertEntriesEntry'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_UpdateDeploymentMetadata'UpsertEntriesEntry'_unknownFields = y__})
-  defMessage
-    = UpdateDeploymentMetadata'UpsertEntriesEntry'_constructor
-        {_UpdateDeploymentMetadata'UpsertEntriesEntry'key = Data.ProtoLens.fieldDefault,
-         _UpdateDeploymentMetadata'UpsertEntriesEntry'value = Prelude.Nothing,
-         _UpdateDeploymentMetadata'UpsertEntriesEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          UpdateDeploymentMetadata'UpsertEntriesEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser UpdateDeploymentMetadata'UpsertEntriesEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "UpsertEntriesEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData UpdateDeploymentMetadata'UpsertEntriesEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_UpdateDeploymentMetadata'UpsertEntriesEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_UpdateDeploymentMetadata'UpsertEntriesEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_UpdateDeploymentMetadata'UpsertEntriesEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.status' @:: Lens' VersionDrainageInfo Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastChangedTime' @:: Lens' VersionDrainageInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'lastChangedTime' @:: Lens' VersionDrainageInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastCheckedTime' @:: Lens' VersionDrainageInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'lastCheckedTime' @:: Lens' VersionDrainageInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data VersionDrainageInfo
-  = VersionDrainageInfo'_constructor {_VersionDrainageInfo'status :: !Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus,
-                                      _VersionDrainageInfo'lastChangedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                      _VersionDrainageInfo'lastCheckedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                      _VersionDrainageInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show VersionDrainageInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField VersionDrainageInfo "status" Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionDrainageInfo'status
-           (\ x__ y__ -> x__ {_VersionDrainageInfo'status = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionDrainageInfo "lastChangedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionDrainageInfo'lastChangedTime
-           (\ x__ y__ -> x__ {_VersionDrainageInfo'lastChangedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField VersionDrainageInfo "maybe'lastChangedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionDrainageInfo'lastChangedTime
-           (\ x__ y__ -> x__ {_VersionDrainageInfo'lastChangedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionDrainageInfo "lastCheckedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionDrainageInfo'lastCheckedTime
-           (\ x__ y__ -> x__ {_VersionDrainageInfo'lastCheckedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField VersionDrainageInfo "maybe'lastCheckedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionDrainageInfo'lastCheckedTime
-           (\ x__ y__ -> x__ {_VersionDrainageInfo'lastCheckedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message VersionDrainageInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.VersionDrainageInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC3VersionDrainageInfo\DC2D\n\
-      \\ACKstatus\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.VersionDrainageStatusR\ACKstatus\DC2F\n\
-      \\DC1last_changed_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastChangedTime\DC2F\n\
-      \\DC1last_checked_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastCheckedTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        status__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "status"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"status")) ::
-              Data.ProtoLens.FieldDescriptor VersionDrainageInfo
-        lastChangedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_changed_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastChangedTime")) ::
-              Data.ProtoLens.FieldDescriptor VersionDrainageInfo
-        lastCheckedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_checked_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastCheckedTime")) ::
-              Data.ProtoLens.FieldDescriptor VersionDrainageInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, status__field_descriptor),
-           (Data.ProtoLens.Tag 2, lastChangedTime__field_descriptor),
-           (Data.ProtoLens.Tag 3, lastCheckedTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _VersionDrainageInfo'_unknownFields
-        (\ x__ y__ -> x__ {_VersionDrainageInfo'_unknownFields = y__})
-  defMessage
-    = VersionDrainageInfo'_constructor
-        {_VersionDrainageInfo'status = Data.ProtoLens.fieldDefault,
-         _VersionDrainageInfo'lastChangedTime = Prelude.Nothing,
-         _VersionDrainageInfo'lastCheckedTime = Prelude.Nothing,
-         _VersionDrainageInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          VersionDrainageInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser VersionDrainageInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "status"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"status") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_changed_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastChangedTime") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_checked_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastCheckedTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "VersionDrainageInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"status") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                         Prelude.fromEnum _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'lastChangedTime") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'lastCheckedTime") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData VersionDrainageInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_VersionDrainageInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_VersionDrainageInfo'status x__)
-                (Control.DeepSeq.deepseq
-                   (_VersionDrainageInfo'lastChangedTime x__)
-                   (Control.DeepSeq.deepseq
-                      (_VersionDrainageInfo'lastCheckedTime x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.entries' @:: Lens' VersionMetadata (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data VersionMetadata
-  = VersionMetadata'_constructor {_VersionMetadata'entries :: !(Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload),
-                                  _VersionMetadata'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show VersionMetadata where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField VersionMetadata "entries" (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionMetadata'entries
-           (\ x__ y__ -> x__ {_VersionMetadata'entries = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message VersionMetadata where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.VersionMetadata"
-  packedMessageDescriptor _
-    = "\n\
-      \\SIVersionMetadata\DC2R\n\
-      \\aentries\CAN\SOH \ETX(\v28.temporal.api.deployment.v1.VersionMetadata.EntriesEntryR\aentries\SUB[\n\
-      \\fEntriesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        entries__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "entries"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor VersionMetadata'EntriesEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"entries")) ::
-              Data.ProtoLens.FieldDescriptor VersionMetadata
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, entries__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _VersionMetadata'_unknownFields
-        (\ x__ y__ -> x__ {_VersionMetadata'_unknownFields = y__})
-  defMessage
-    = VersionMetadata'_constructor
-        {_VersionMetadata'entries = Data.Map.empty,
-         _VersionMetadata'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          VersionMetadata
-          -> Data.ProtoLens.Encoding.Bytes.Parser VersionMetadata
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: VersionMetadata'EntriesEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                              (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                  Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                    (Prelude.fromIntegral
-                                                                                       len)
-                                                                                    Data.ProtoLens.parseMessage)
-                                                                              "entries"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"entries")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "VersionMetadata"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage :: VersionMetadata'EntriesEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"entries") _x))))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData VersionMetadata where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_VersionMetadata'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_VersionMetadata'entries x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.key' @:: Lens' VersionMetadata'EntriesEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.value' @:: Lens' VersionMetadata'EntriesEntry Proto.Temporal.Api.Common.V1.Message.Payload@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'value' @:: Lens' VersionMetadata'EntriesEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data VersionMetadata'EntriesEntry
-  = VersionMetadata'EntriesEntry'_constructor {_VersionMetadata'EntriesEntry'key :: !Data.Text.Text,
-                                               _VersionMetadata'EntriesEntry'value :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
-                                               _VersionMetadata'EntriesEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show VersionMetadata'EntriesEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField VersionMetadata'EntriesEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionMetadata'EntriesEntry'key
-           (\ x__ y__ -> x__ {_VersionMetadata'EntriesEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField VersionMetadata'EntriesEntry "value" Proto.Temporal.Api.Common.V1.Message.Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionMetadata'EntriesEntry'value
-           (\ x__ y__ -> x__ {_VersionMetadata'EntriesEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField VersionMetadata'EntriesEntry "maybe'value" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _VersionMetadata'EntriesEntry'value
-           (\ x__ y__ -> x__ {_VersionMetadata'EntriesEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message VersionMetadata'EntriesEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.VersionMetadata.EntriesEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\fEntriesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor VersionMetadata'EntriesEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor VersionMetadata'EntriesEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _VersionMetadata'EntriesEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_VersionMetadata'EntriesEntry'_unknownFields = y__})
-  defMessage
-    = VersionMetadata'EntriesEntry'_constructor
-        {_VersionMetadata'EntriesEntry'key = Data.ProtoLens.fieldDefault,
-         _VersionMetadata'EntriesEntry'value = Prelude.Nothing,
-         _VersionMetadata'EntriesEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          VersionMetadata'EntriesEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser VersionMetadata'EntriesEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "EntriesEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData VersionMetadata'EntriesEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_VersionMetadata'EntriesEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_VersionMetadata'EntriesEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_VersionMetadata'EntriesEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.name' @:: Lens' WorkerDeploymentInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.versionSummaries' @:: Lens' WorkerDeploymentInfo [WorkerDeploymentInfo'WorkerDeploymentVersionSummary]@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.vec'versionSummaries' @:: Lens' WorkerDeploymentInfo (Data.Vector.Vector WorkerDeploymentInfo'WorkerDeploymentVersionSummary)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.createTime' @:: Lens' WorkerDeploymentInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'createTime' @:: Lens' WorkerDeploymentInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.routingConfig' @:: Lens' WorkerDeploymentInfo RoutingConfig@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'routingConfig' @:: Lens' WorkerDeploymentInfo (Prelude.Maybe RoutingConfig)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastModifierIdentity' @:: Lens' WorkerDeploymentInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.managerIdentity' @:: Lens' WorkerDeploymentInfo Data.Text.Text@ -}
-data WorkerDeploymentInfo
-  = WorkerDeploymentInfo'_constructor {_WorkerDeploymentInfo'name :: !Data.Text.Text,
-                                       _WorkerDeploymentInfo'versionSummaries :: !(Data.Vector.Vector WorkerDeploymentInfo'WorkerDeploymentVersionSummary),
-                                       _WorkerDeploymentInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                       _WorkerDeploymentInfo'routingConfig :: !(Prelude.Maybe RoutingConfig),
-                                       _WorkerDeploymentInfo'lastModifierIdentity :: !Data.Text.Text,
-                                       _WorkerDeploymentInfo'managerIdentity :: !Data.Text.Text,
-                                       _WorkerDeploymentInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerDeploymentInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'name
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "versionSummaries" [WorkerDeploymentInfo'WorkerDeploymentVersionSummary] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'versionSummaries
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'versionSummaries = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "vec'versionSummaries" (Data.Vector.Vector WorkerDeploymentInfo'WorkerDeploymentVersionSummary) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'versionSummaries
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'versionSummaries = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'createTime
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'createTime
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "routingConfig" RoutingConfig where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'routingConfig
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'routingConfig = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "maybe'routingConfig" (Prelude.Maybe RoutingConfig) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'routingConfig
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'routingConfig = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "lastModifierIdentity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'lastModifierIdentity
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentInfo'lastModifierIdentity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo "managerIdentity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'managerIdentity
-           (\ x__ y__ -> x__ {_WorkerDeploymentInfo'managerIdentity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerDeploymentInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.deployment.v1.WorkerDeploymentInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC4WorkerDeploymentInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2|\n\
-      \\DC1version_summaries\CAN\STX \ETX(\v2O.temporal.api.deployment.v1.WorkerDeploymentInfo.WorkerDeploymentVersionSummaryR\DLEversionSummaries\DC2;\n\
-      \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2P\n\
-      \\SOrouting_config\CAN\EOT \SOH(\v2).temporal.api.deployment.v1.RoutingConfigR\rroutingConfig\DC24\n\
-      \\SYNlast_modifier_identity\CAN\ENQ \SOH(\tR\DC4lastModifierIdentity\DC2)\n\
-      \\DLEmanager_identity\CAN\ACK \SOH(\tR\SImanagerIdentity\SUB\220\ACK\n\
-      \\RSWorkerDeploymentVersionSummary\DC2\FS\n\
-      \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
-      \\ACKstatus\CAN\v \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
-      \\DC2deployment_version\CAN\EOT \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\DC1deploymentVersion\DC2;\n\
-      \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2U\n\
-      \\SIdrainage_status\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.VersionDrainageStatusR\SOdrainageStatus\DC2T\n\
-      \\rdrainage_info\CAN\ENQ \SOH(\v2/.temporal.api.deployment.v1.VersionDrainageInfoR\fdrainageInfo\DC2H\n\
-      \\DC2current_since_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\DLEcurrentSinceTime\DC2H\n\
-      \\DC2ramping_since_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\DLErampingSinceTime\DC2J\n\
-      \\DC3routing_update_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\DC1routingUpdateTime\DC2N\n\
-      \\NAKfirst_activation_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\DC3firstActivationTime\DC2P\n\
-      \\SYNlast_deactivation_time\CAN\n\
-      \ \SOH(\v2\SUB.google.protobuf.TimestampR\DC4lastDeactivationTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
-        versionSummaries__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "version_summaries"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"versionSummaries")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
-        routingConfig__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "routing_config"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor RoutingConfig)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'routingConfig")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
-        lastModifierIdentity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_modifier_identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"lastModifierIdentity")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
-        managerIdentity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "manager_identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"managerIdentity")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, name__field_descriptor),
-           (Data.ProtoLens.Tag 2, versionSummaries__field_descriptor),
-           (Data.ProtoLens.Tag 3, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 4, routingConfig__field_descriptor),
-           (Data.ProtoLens.Tag 5, lastModifierIdentity__field_descriptor),
-           (Data.ProtoLens.Tag 6, managerIdentity__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerDeploymentInfo'_unknownFields
-        (\ x__ y__ -> x__ {_WorkerDeploymentInfo'_unknownFields = y__})
-  defMessage
-    = WorkerDeploymentInfo'_constructor
-        {_WorkerDeploymentInfo'name = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentInfo'versionSummaries = Data.Vector.Generic.empty,
-         _WorkerDeploymentInfo'createTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'routingConfig = Prelude.Nothing,
-         _WorkerDeploymentInfo'lastModifierIdentity = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentInfo'managerIdentity = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerDeploymentInfo
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-             -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentInfo
-        loop x mutable'versionSummaries
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'versionSummaries <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                   (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                      mutable'versionSummaries)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'versionSummaries")
-                              frozen'versionSummaries x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                                  mutable'versionSummaries
-                        18
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "version_summaries"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'versionSummaries y)
-                                loop x v
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                                  mutable'versionSummaries
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "routing_config"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"routingConfig") y x)
-                                  mutable'versionSummaries
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "last_modifier_identity"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastModifierIdentity") y x)
-                                  mutable'versionSummaries
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "manager_identity"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"managerIdentity") y x)
-                                  mutable'versionSummaries
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'versionSummaries
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'versionSummaries <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                            Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'versionSummaries)
-          "WorkerDeploymentInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage _v))
-                   (Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"vec'versionSummaries") _x))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'routingConfig") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"lastModifierIdentity") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                  ((Prelude..)
-                                     (\ bs
-                                        -> (Data.Monoid.<>)
-                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                             (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                     Data.Text.Encoding.encodeUtf8 _v))
-                         ((Data.Monoid.<>)
-                            (let
-                               _v
-                                 = Lens.Family2.view
-                                     (Data.ProtoLens.Field.field @"managerIdentity") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                     ((Prelude..)
-                                        (\ bs
-                                           -> (Data.Monoid.<>)
-                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                   (Prelude.fromIntegral
-                                                      (Data.ByteString.length bs)))
-                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                        Data.Text.Encoding.encodeUtf8 _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
-instance Control.DeepSeq.NFData WorkerDeploymentInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerDeploymentInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerDeploymentInfo'name x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerDeploymentInfo'versionSummaries x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkerDeploymentInfo'createTime x__)
-                      (Control.DeepSeq.deepseq
-                         (_WorkerDeploymentInfo'routingConfig x__)
-                         (Control.DeepSeq.deepseq
-                            (_WorkerDeploymentInfo'lastModifierIdentity x__)
-                            (Control.DeepSeq.deepseq
-                               (_WorkerDeploymentInfo'managerIdentity x__) ()))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.version' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.status' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deploymentVersion' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary WorkerDeploymentVersion@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'deploymentVersion' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe WorkerDeploymentVersion)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.createTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'createTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.drainageStatus' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.drainageInfo' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary VersionDrainageInfo@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'drainageInfo' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe VersionDrainageInfo)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.currentSinceTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'currentSinceTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingSinceTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'rampingSinceTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.routingUpdateTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'routingUpdateTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.firstActivationTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'firstActivationTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastDeactivationTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'lastDeactivationTime' @:: Lens' WorkerDeploymentInfo'WorkerDeploymentVersionSummary (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-  = WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_constructor {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'version :: !Data.Text.Text,
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'status :: !Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus,
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion :: !(Prelude.Maybe WorkerDeploymentVersion),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageStatus :: !Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus,
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo :: !(Prelude.Maybe VersionDrainageInfo),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                                                      _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "version" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'version
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'version = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "status" Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'status
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'status = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "deploymentVersion" WorkerDeploymentVersion where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'deploymentVersion" (Prelude.Maybe WorkerDeploymentVersion) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "drainageStatus" Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageStatus
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageStatus = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "drainageInfo" VersionDrainageInfo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'drainageInfo" (Prelude.Maybe VersionDrainageInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "currentSinceTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'currentSinceTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "rampingSinceTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'rampingSinceTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "routingUpdateTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'routingUpdateTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "firstActivationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'firstActivationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "lastDeactivationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentInfo'WorkerDeploymentVersionSummary "maybe'lastDeactivationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.WorkerDeploymentInfo.WorkerDeploymentVersionSummary"
-  packedMessageDescriptor _
-    = "\n\
-      \\RSWorkerDeploymentVersionSummary\DC2\FS\n\
-      \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
-      \\ACKstatus\CAN\v \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
-      \\DC2deployment_version\CAN\EOT \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\DC1deploymentVersion\DC2;\n\
-      \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2U\n\
-      \\SIdrainage_status\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.VersionDrainageStatusR\SOdrainageStatus\DC2T\n\
-      \\rdrainage_info\CAN\ENQ \SOH(\v2/.temporal.api.deployment.v1.VersionDrainageInfoR\fdrainageInfo\DC2H\n\
-      \\DC2current_since_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\DLEcurrentSinceTime\DC2H\n\
-      \\DC2ramping_since_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\DLErampingSinceTime\DC2J\n\
-      \\DC3routing_update_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\DC1routingUpdateTime\DC2N\n\
-      \\NAKfirst_activation_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\DC3firstActivationTime\DC2P\n\
-      \\SYNlast_deactivation_time\CAN\n\
-      \ \SOH(\v2\SUB.google.protobuf.TimestampR\DC4lastDeactivationTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        version__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "version"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        status__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "status"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"status")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        deploymentVersion__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment_version"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkerDeploymentVersion)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'deploymentVersion")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        drainageStatus__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "drainage_status"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Deployment.VersionDrainageStatus)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"drainageStatus")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        drainageInfo__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "drainage_info"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor VersionDrainageInfo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'drainageInfo")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        currentSinceTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_since_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'currentSinceTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        rampingSinceTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_since_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'rampingSinceTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        routingUpdateTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "routing_update_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'routingUpdateTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        firstActivationTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "first_activation_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'firstActivationTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        lastDeactivationTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_deactivation_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastDeactivationTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, version__field_descriptor),
-           (Data.ProtoLens.Tag 11, status__field_descriptor),
-           (Data.ProtoLens.Tag 4, deploymentVersion__field_descriptor),
-           (Data.ProtoLens.Tag 2, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 3, drainageStatus__field_descriptor),
-           (Data.ProtoLens.Tag 5, drainageInfo__field_descriptor),
-           (Data.ProtoLens.Tag 6, currentSinceTime__field_descriptor),
-           (Data.ProtoLens.Tag 7, rampingSinceTime__field_descriptor),
-           (Data.ProtoLens.Tag 8, routingUpdateTime__field_descriptor),
-           (Data.ProtoLens.Tag 9, firstActivationTime__field_descriptor),
-           (Data.ProtoLens.Tag 10, lastDeactivationTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_unknownFields = y__})
-  defMessage
-    = WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_constructor
-        {_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'version = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'status = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageStatus = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime = Prelude.Nothing,
-         _WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentInfo'WorkerDeploymentVersionSummary
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "version"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
-                        88
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "status"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"status") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "deployment_version"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"deploymentVersion") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "drainage_status"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"drainageStatus") y x)
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "drainage_info"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"drainageInfo") y x)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "current_since_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentSinceTime") y x)
-                        58
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "ramping_since_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampingSinceTime") y x)
-                        66
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "routing_update_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"routingUpdateTime") y x)
-                        74
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "first_activation_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"firstActivationTime") y x)
-                        82
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_deactivation_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastDeactivationTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage)
-          "WorkerDeploymentVersionSummary"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"status") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 88)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'deploymentVersion") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"drainageStatus") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                                  ((Prelude..)
-                                     ((Prelude..)
-                                        Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        Prelude.fromIntegral)
-                                     Prelude.fromEnum _v))
-                         ((Data.Monoid.<>)
-                            (case
-                                 Lens.Family2.view
-                                   (Data.ProtoLens.Field.field @"maybe'drainageInfo") _x
-                             of
-                               Prelude.Nothing -> Data.Monoid.mempty
-                               (Prelude.Just _v)
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                      ((Prelude..)
-                                         (\ bs
-                                            -> (Data.Monoid.<>)
-                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                    (Prelude.fromIntegral
-                                                       (Data.ByteString.length bs)))
-                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                         Data.ProtoLens.encodeMessage _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'currentSinceTime") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
-                               ((Data.Monoid.<>)
-                                  (case
-                                       Lens.Family2.view
-                                         (Data.ProtoLens.Field.field @"maybe'rampingSinceTime") _x
-                                   of
-                                     Prelude.Nothing -> Data.Monoid.mempty
-                                     (Prelude.Just _v)
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                            ((Prelude..)
-                                               (\ bs
-                                                  -> (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                          (Prelude.fromIntegral
-                                                             (Data.ByteString.length bs)))
-                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                               Data.ProtoLens.encodeMessage _v))
-                                  ((Data.Monoid.<>)
-                                     (case
-                                          Lens.Family2.view
-                                            (Data.ProtoLens.Field.field @"maybe'routingUpdateTime")
-                                            _x
-                                      of
-                                        Prelude.Nothing -> Data.Monoid.mempty
-                                        (Prelude.Just _v)
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
-                                               ((Prelude..)
-                                                  (\ bs
-                                                     -> (Data.Monoid.<>)
-                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                             (Prelude.fromIntegral
-                                                                (Data.ByteString.length bs)))
-                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                             bs))
-                                                  Data.ProtoLens.encodeMessage _v))
-                                     ((Data.Monoid.<>)
-                                        (case
-                                             Lens.Family2.view
-                                               (Data.ProtoLens.Field.field
-                                                  @"maybe'firstActivationTime")
-                                               _x
-                                         of
-                                           Prelude.Nothing -> Data.Monoid.mempty
-                                           (Prelude.Just _v)
-                                             -> (Data.Monoid.<>)
-                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
-                                                  ((Prelude..)
-                                                     (\ bs
-                                                        -> (Data.Monoid.<>)
-                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                (Prelude.fromIntegral
-                                                                   (Data.ByteString.length bs)))
-                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                bs))
-                                                     Data.ProtoLens.encodeMessage _v))
-                                        ((Data.Monoid.<>)
-                                           (case
-                                                Lens.Family2.view
-                                                  (Data.ProtoLens.Field.field
-                                                     @"maybe'lastDeactivationTime")
-                                                  _x
-                                            of
-                                              Prelude.Nothing -> Data.Monoid.mempty
-                                              (Prelude.Just _v)
-                                                -> (Data.Monoid.<>)
-                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 82)
-                                                     ((Prelude..)
-                                                        (\ bs
-                                                           -> (Data.Monoid.<>)
-                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                   (Prelude.fromIntegral
-                                                                      (Data.ByteString.length bs)))
-                                                                (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                   bs))
-                                                        Data.ProtoLens.encodeMessage _v))
-                                           (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                              (Lens.Family2.view
-                                                 Data.ProtoLens.unknownFields _x))))))))))))
-instance Control.DeepSeq.NFData WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'_unknownFields
-                x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'version x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'status x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'deploymentVersion
-                         x__)
-                      (Control.DeepSeq.deepseq
-                         (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'createTime
-                            x__)
-                         (Control.DeepSeq.deepseq
-                            (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageStatus
-                               x__)
-                            (Control.DeepSeq.deepseq
-                               (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'drainageInfo
-                                  x__)
-                               (Control.DeepSeq.deepseq
-                                  (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'currentSinceTime
-                                     x__)
-                                  (Control.DeepSeq.deepseq
-                                     (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'rampingSinceTime
-                                        x__)
-                                     (Control.DeepSeq.deepseq
-                                        (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'routingUpdateTime
-                                           x__)
-                                        (Control.DeepSeq.deepseq
-                                           (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'firstActivationTime
-                                              x__)
-                                           (Control.DeepSeq.deepseq
-                                              (_WorkerDeploymentInfo'WorkerDeploymentVersionSummary'lastDeactivationTime
-                                                 x__)
-                                              ())))))))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deploymentName' @:: Lens' WorkerDeploymentOptions Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.buildId' @:: Lens' WorkerDeploymentOptions Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.workerVersioningMode' @:: Lens' WorkerDeploymentOptions Proto.Temporal.Api.Enums.V1.Deployment.WorkerVersioningMode@ -}
-data WorkerDeploymentOptions
-  = WorkerDeploymentOptions'_constructor {_WorkerDeploymentOptions'deploymentName :: !Data.Text.Text,
-                                          _WorkerDeploymentOptions'buildId :: !Data.Text.Text,
-                                          _WorkerDeploymentOptions'workerVersioningMode :: !Proto.Temporal.Api.Enums.V1.Deployment.WorkerVersioningMode,
-                                          _WorkerDeploymentOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerDeploymentOptions where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentOptions "deploymentName" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentOptions'deploymentName
-           (\ x__ y__ -> x__ {_WorkerDeploymentOptions'deploymentName = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentOptions "buildId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentOptions'buildId
-           (\ x__ y__ -> x__ {_WorkerDeploymentOptions'buildId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentOptions "workerVersioningMode" Proto.Temporal.Api.Enums.V1.Deployment.WorkerVersioningMode where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentOptions'workerVersioningMode
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentOptions'workerVersioningMode = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerDeploymentOptions where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.WorkerDeploymentOptions"
-  packedMessageDescriptor _
-    = "\n\
-      \\ETBWorkerDeploymentOptions\DC2'\n\
-      \\SIdeployment_name\CAN\SOH \SOH(\tR\SOdeploymentName\DC2\EM\n\
-      \\bbuild_id\CAN\STX \SOH(\tR\abuildId\DC2a\n\
-      \\SYNworker_versioning_mode\CAN\ETX \SOH(\SO2+.temporal.api.enums.v1.WorkerVersioningModeR\DC4workerVersioningMode"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        deploymentName__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment_name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"deploymentName")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentOptions
-        buildId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "build_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentOptions
-        workerVersioningMode__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "worker_versioning_mode"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Deployment.WorkerVersioningMode)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workerVersioningMode")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentOptions
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, deploymentName__field_descriptor),
-           (Data.ProtoLens.Tag 2, buildId__field_descriptor),
-           (Data.ProtoLens.Tag 3, workerVersioningMode__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerDeploymentOptions'_unknownFields
-        (\ x__ y__ -> x__ {_WorkerDeploymentOptions'_unknownFields = y__})
-  defMessage
-    = WorkerDeploymentOptions'_constructor
-        {_WorkerDeploymentOptions'deploymentName = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentOptions'buildId = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentOptions'workerVersioningMode = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentOptions'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerDeploymentOptions
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentOptions
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "deployment_name"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"deploymentName") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "worker_versioning_mode"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workerVersioningMode") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkerDeploymentOptions"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"deploymentName") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"workerVersioningMode") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                            ((Prelude..)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                               Prelude.fromEnum _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData WorkerDeploymentOptions where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerDeploymentOptions'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerDeploymentOptions'deploymentName x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerDeploymentOptions'buildId x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkerDeploymentOptions'workerVersioningMode x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.buildId' @:: Lens' WorkerDeploymentVersion Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deploymentName' @:: Lens' WorkerDeploymentVersion Data.Text.Text@ -}
-data WorkerDeploymentVersion
-  = WorkerDeploymentVersion'_constructor {_WorkerDeploymentVersion'buildId :: !Data.Text.Text,
-                                          _WorkerDeploymentVersion'deploymentName :: !Data.Text.Text,
-                                          _WorkerDeploymentVersion'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerDeploymentVersion where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersion "buildId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersion'buildId
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersion'buildId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersion "deploymentName" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersion'deploymentName
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersion'deploymentName = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerDeploymentVersion where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.WorkerDeploymentVersion"
-  packedMessageDescriptor _
-    = "\n\
-      \\ETBWorkerDeploymentVersion\DC2\EM\n\
-      \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2'\n\
-      \\SIdeployment_name\CAN\STX \SOH(\tR\SOdeploymentName"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        buildId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "build_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersion
-        deploymentName__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment_name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"deploymentName")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersion
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
-           (Data.ProtoLens.Tag 2, deploymentName__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerDeploymentVersion'_unknownFields
-        (\ x__ y__ -> x__ {_WorkerDeploymentVersion'_unknownFields = y__})
-  defMessage
-    = WorkerDeploymentVersion'_constructor
-        {_WorkerDeploymentVersion'buildId = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersion'deploymentName = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersion'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerDeploymentVersion
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentVersion
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "deployment_name"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"deploymentName") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkerDeploymentVersion"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"deploymentName") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData WorkerDeploymentVersion where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerDeploymentVersion'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerDeploymentVersion'buildId x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerDeploymentVersion'deploymentName x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.version' @:: Lens' WorkerDeploymentVersionInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.status' @:: Lens' WorkerDeploymentVersionInfo Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deploymentVersion' @:: Lens' WorkerDeploymentVersionInfo WorkerDeploymentVersion@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'deploymentVersion' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe WorkerDeploymentVersion)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.deploymentName' @:: Lens' WorkerDeploymentVersionInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.createTime' @:: Lens' WorkerDeploymentVersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'createTime' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.routingChangedTime' @:: Lens' WorkerDeploymentVersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'routingChangedTime' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.currentSinceTime' @:: Lens' WorkerDeploymentVersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'currentSinceTime' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampingSinceTime' @:: Lens' WorkerDeploymentVersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'rampingSinceTime' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.firstActivationTime' @:: Lens' WorkerDeploymentVersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'firstActivationTime' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.lastDeactivationTime' @:: Lens' WorkerDeploymentVersionInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'lastDeactivationTime' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.rampPercentage' @:: Lens' WorkerDeploymentVersionInfo Prelude.Float@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.taskQueueInfos' @:: Lens' WorkerDeploymentVersionInfo [WorkerDeploymentVersionInfo'VersionTaskQueueInfo]@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.vec'taskQueueInfos' @:: Lens' WorkerDeploymentVersionInfo (Data.Vector.Vector WorkerDeploymentVersionInfo'VersionTaskQueueInfo)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.drainageInfo' @:: Lens' WorkerDeploymentVersionInfo VersionDrainageInfo@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'drainageInfo' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe VersionDrainageInfo)@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.metadata' @:: Lens' WorkerDeploymentVersionInfo VersionMetadata@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.maybe'metadata' @:: Lens' WorkerDeploymentVersionInfo (Prelude.Maybe VersionMetadata)@ -}
-data WorkerDeploymentVersionInfo
-  = WorkerDeploymentVersionInfo'_constructor {_WorkerDeploymentVersionInfo'version :: !Data.Text.Text,
-                                              _WorkerDeploymentVersionInfo'status :: !Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus,
-                                              _WorkerDeploymentVersionInfo'deploymentVersion :: !(Prelude.Maybe WorkerDeploymentVersion),
-                                              _WorkerDeploymentVersionInfo'deploymentName :: !Data.Text.Text,
-                                              _WorkerDeploymentVersionInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                              _WorkerDeploymentVersionInfo'routingChangedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                              _WorkerDeploymentVersionInfo'currentSinceTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                              _WorkerDeploymentVersionInfo'rampingSinceTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                              _WorkerDeploymentVersionInfo'firstActivationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                              _WorkerDeploymentVersionInfo'lastDeactivationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                              _WorkerDeploymentVersionInfo'rampPercentage :: !Prelude.Float,
-                                              _WorkerDeploymentVersionInfo'taskQueueInfos :: !(Data.Vector.Vector WorkerDeploymentVersionInfo'VersionTaskQueueInfo),
-                                              _WorkerDeploymentVersionInfo'drainageInfo :: !(Prelude.Maybe VersionDrainageInfo),
-                                              _WorkerDeploymentVersionInfo'metadata :: !(Prelude.Maybe VersionMetadata),
-                                              _WorkerDeploymentVersionInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerDeploymentVersionInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "version" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'version
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersionInfo'version = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "status" Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'status
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersionInfo'status = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "deploymentVersion" WorkerDeploymentVersion where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'deploymentVersion
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'deploymentVersion = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'deploymentVersion" (Prelude.Maybe WorkerDeploymentVersion) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'deploymentVersion
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'deploymentVersion = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "deploymentName" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'deploymentName
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'deploymentName = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'createTime
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersionInfo'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'createTime
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersionInfo'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "routingChangedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'routingChangedTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'routingChangedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'routingChangedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'routingChangedTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'routingChangedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "currentSinceTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'currentSinceTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'currentSinceTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'currentSinceTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'currentSinceTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'currentSinceTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "rampingSinceTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'rampingSinceTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'rampingSinceTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'rampingSinceTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'rampingSinceTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'rampingSinceTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "firstActivationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'firstActivationTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'firstActivationTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'firstActivationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'firstActivationTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'firstActivationTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "lastDeactivationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'lastDeactivationTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'lastDeactivationTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'lastDeactivationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'lastDeactivationTime
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'lastDeactivationTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "rampPercentage" Prelude.Float where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'rampPercentage
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'rampPercentage = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "taskQueueInfos" [WorkerDeploymentVersionInfo'VersionTaskQueueInfo] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'taskQueueInfos
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'taskQueueInfos = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "vec'taskQueueInfos" (Data.Vector.Vector WorkerDeploymentVersionInfo'VersionTaskQueueInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'taskQueueInfos
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'taskQueueInfos = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "drainageInfo" VersionDrainageInfo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'drainageInfo
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'drainageInfo = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'drainageInfo" (Prelude.Maybe VersionDrainageInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'drainageInfo
-           (\ x__ y__
-              -> x__ {_WorkerDeploymentVersionInfo'drainageInfo = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "metadata" VersionMetadata where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'metadata
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersionInfo'metadata = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo "maybe'metadata" (Prelude.Maybe VersionMetadata) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'metadata
-           (\ x__ y__ -> x__ {_WorkerDeploymentVersionInfo'metadata = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerDeploymentVersionInfo where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.WorkerDeploymentVersionInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\ESCWorkerDeploymentVersionInfo\DC2\FS\n\
-      \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
-      \\ACKstatus\CAN\SO \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
-      \\DC2deployment_version\CAN\v \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\DC1deploymentVersion\DC2'\n\
-      \\SIdeployment_name\CAN\STX \SOH(\tR\SOdeploymentName\DC2;\n\
-      \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2L\n\
-      \\DC4routing_changed_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\DC2routingChangedTime\DC2H\n\
-      \\DC2current_since_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DLEcurrentSinceTime\DC2H\n\
-      \\DC2ramping_since_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\DLErampingSinceTime\DC2N\n\
-      \\NAKfirst_activation_time\CAN\f \SOH(\v2\SUB.google.protobuf.TimestampR\DC3firstActivationTime\DC2P\n\
-      \\SYNlast_deactivation_time\CAN\r \SOH(\v2\SUB.google.protobuf.TimestampR\DC4lastDeactivationTime\DC2'\n\
-      \\SIramp_percentage\CAN\a \SOH(\STXR\SOrampPercentage\DC2v\n\
-      \\DLEtask_queue_infos\CAN\b \ETX(\v2L.temporal.api.deployment.v1.WorkerDeploymentVersionInfo.VersionTaskQueueInfoR\SOtaskQueueInfos\DC2T\n\
-      \\rdrainage_info\CAN\t \SOH(\v2/.temporal.api.deployment.v1.VersionDrainageInfoR\fdrainageInfo\DC2G\n\
-      \\bmetadata\CAN\n\
-      \ \SOH(\v2+.temporal.api.deployment.v1.VersionMetadataR\bmetadata\SUBd\n\
-      \\DC4VersionTaskQueueInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-      \\EOTtype\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueTypeR\EOTtype"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        version__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "version"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"version")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        status__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "status"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Deployment.WorkerDeploymentVersionStatus)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"status")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        deploymentVersion__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment_version"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkerDeploymentVersion)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'deploymentVersion")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        deploymentName__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment_name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"deploymentName")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        routingChangedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "routing_changed_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'routingChangedTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        currentSinceTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_since_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'currentSinceTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        rampingSinceTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramping_since_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'rampingSinceTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        firstActivationTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "first_activation_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'firstActivationTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        lastDeactivationTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_deactivation_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastDeactivationTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        rampPercentage__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "ramp_percentage"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"rampPercentage")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        taskQueueInfos__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "task_queue_infos"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkerDeploymentVersionInfo'VersionTaskQueueInfo)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"taskQueueInfos")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        drainageInfo__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "drainage_info"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor VersionDrainageInfo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'drainageInfo")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-        metadata__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "metadata"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor VersionMetadata)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'metadata")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, version__field_descriptor),
-           (Data.ProtoLens.Tag 14, status__field_descriptor),
-           (Data.ProtoLens.Tag 11, deploymentVersion__field_descriptor),
-           (Data.ProtoLens.Tag 2, deploymentName__field_descriptor),
-           (Data.ProtoLens.Tag 3, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 4, routingChangedTime__field_descriptor),
-           (Data.ProtoLens.Tag 5, currentSinceTime__field_descriptor),
-           (Data.ProtoLens.Tag 6, rampingSinceTime__field_descriptor),
-           (Data.ProtoLens.Tag 12, firstActivationTime__field_descriptor),
-           (Data.ProtoLens.Tag 13, lastDeactivationTime__field_descriptor),
-           (Data.ProtoLens.Tag 7, rampPercentage__field_descriptor),
-           (Data.ProtoLens.Tag 8, taskQueueInfos__field_descriptor),
-           (Data.ProtoLens.Tag 9, drainageInfo__field_descriptor),
-           (Data.ProtoLens.Tag 10, metadata__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerDeploymentVersionInfo'_unknownFields
-        (\ x__ y__
-           -> x__ {_WorkerDeploymentVersionInfo'_unknownFields = y__})
-  defMessage
-    = WorkerDeploymentVersionInfo'_constructor
-        {_WorkerDeploymentVersionInfo'version = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersionInfo'status = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersionInfo'deploymentVersion = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'deploymentName = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersionInfo'createTime = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'routingChangedTime = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'currentSinceTime = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'rampingSinceTime = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'firstActivationTime = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'lastDeactivationTime = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'rampPercentage = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersionInfo'taskQueueInfos = Data.Vector.Generic.empty,
-         _WorkerDeploymentVersionInfo'drainageInfo = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'metadata = Prelude.Nothing,
-         _WorkerDeploymentVersionInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerDeploymentVersionInfo
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld WorkerDeploymentVersionInfo'VersionTaskQueueInfo
-             -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentVersionInfo
-        loop x mutable'taskQueueInfos
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'taskQueueInfos <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                 (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                    mutable'taskQueueInfos)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'taskQueueInfos")
-                              frozen'taskQueueInfos x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "version"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"version") y x)
-                                  mutable'taskQueueInfos
-                        112
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "status"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"status") y x)
-                                  mutable'taskQueueInfos
-                        90
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "deployment_version"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"deploymentVersion") y x)
-                                  mutable'taskQueueInfos
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "deployment_name"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"deploymentName") y x)
-                                  mutable'taskQueueInfos
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                                  mutable'taskQueueInfos
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "routing_changed_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"routingChangedTime") y x)
-                                  mutable'taskQueueInfos
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "current_since_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentSinceTime") y x)
-                                  mutable'taskQueueInfos
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "ramping_since_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampingSinceTime") y x)
-                                  mutable'taskQueueInfos
-                        98
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "first_activation_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"firstActivationTime") y x)
-                                  mutable'taskQueueInfos
-                        106
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_deactivation_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastDeactivationTime") y x)
-                                  mutable'taskQueueInfos
-                        61
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
-                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
-                                       "ramp_percentage"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"rampPercentage") y x)
-                                  mutable'taskQueueInfos
-                        66
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "task_queue_infos"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'taskQueueInfos y)
-                                loop x v
-                        74
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "drainage_info"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"drainageInfo") y x)
-                                  mutable'taskQueueInfos
-                        82
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "metadata"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"metadata") y x)
-                                  mutable'taskQueueInfos
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'taskQueueInfos
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'taskQueueInfos <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                          Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'taskQueueInfos)
-          "WorkerDeploymentVersionInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"version") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"status") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 112)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'deploymentVersion") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 90)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"deploymentName") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view
-                                (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just _v)
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage _v))
-                         ((Data.Monoid.<>)
-                            (case
-                                 Lens.Family2.view
-                                   (Data.ProtoLens.Field.field @"maybe'routingChangedTime") _x
-                             of
-                               Prelude.Nothing -> Data.Monoid.mempty
-                               (Prelude.Just _v)
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                      ((Prelude..)
-                                         (\ bs
-                                            -> (Data.Monoid.<>)
-                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                    (Prelude.fromIntegral
-                                                       (Data.ByteString.length bs)))
-                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                         Data.ProtoLens.encodeMessage _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'currentSinceTime") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
-                               ((Data.Monoid.<>)
-                                  (case
-                                       Lens.Family2.view
-                                         (Data.ProtoLens.Field.field @"maybe'rampingSinceTime") _x
-                                   of
-                                     Prelude.Nothing -> Data.Monoid.mempty
-                                     (Prelude.Just _v)
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                            ((Prelude..)
-                                               (\ bs
-                                                  -> (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                          (Prelude.fromIntegral
-                                                             (Data.ByteString.length bs)))
-                                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                               Data.ProtoLens.encodeMessage _v))
-                                  ((Data.Monoid.<>)
-                                     (case
-                                          Lens.Family2.view
-                                            (Data.ProtoLens.Field.field
-                                               @"maybe'firstActivationTime")
-                                            _x
-                                      of
-                                        Prelude.Nothing -> Data.Monoid.mempty
-                                        (Prelude.Just _v)
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 98)
-                                               ((Prelude..)
-                                                  (\ bs
-                                                     -> (Data.Monoid.<>)
-                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                             (Prelude.fromIntegral
-                                                                (Data.ByteString.length bs)))
-                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                             bs))
-                                                  Data.ProtoLens.encodeMessage _v))
-                                     ((Data.Monoid.<>)
-                                        (case
-                                             Lens.Family2.view
-                                               (Data.ProtoLens.Field.field
-                                                  @"maybe'lastDeactivationTime")
-                                               _x
-                                         of
-                                           Prelude.Nothing -> Data.Monoid.mempty
-                                           (Prelude.Just _v)
-                                             -> (Data.Monoid.<>)
-                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 106)
-                                                  ((Prelude..)
-                                                     (\ bs
-                                                        -> (Data.Monoid.<>)
-                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                (Prelude.fromIntegral
-                                                                   (Data.ByteString.length bs)))
-                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                bs))
-                                                     Data.ProtoLens.encodeMessage _v))
-                                        ((Data.Monoid.<>)
-                                           (let
-                                              _v
-                                                = Lens.Family2.view
-                                                    (Data.ProtoLens.Field.field @"rampPercentage")
-                                                    _x
-                                            in
-                                              if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                                  Data.Monoid.mempty
-                                              else
-                                                  (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 61)
-                                                    ((Prelude..)
-                                                       Data.ProtoLens.Encoding.Bytes.putFixed32
-                                                       Data.ProtoLens.Encoding.Bytes.floatToWord
-                                                       _v))
-                                           ((Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                                                 (\ _v
-                                                    -> (Data.Monoid.<>)
-                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                            66)
-                                                         ((Prelude..)
-                                                            (\ bs
-                                                               -> (Data.Monoid.<>)
-                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                       (Prelude.fromIntegral
-                                                                          (Data.ByteString.length
-                                                                             bs)))
-                                                                    (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                       bs))
-                                                            Data.ProtoLens.encodeMessage _v))
-                                                 (Lens.Family2.view
-                                                    (Data.ProtoLens.Field.field
-                                                       @"vec'taskQueueInfos")
-                                                    _x))
-                                              ((Data.Monoid.<>)
-                                                 (case
-                                                      Lens.Family2.view
-                                                        (Data.ProtoLens.Field.field
-                                                           @"maybe'drainageInfo")
-                                                        _x
-                                                  of
-                                                    Prelude.Nothing -> Data.Monoid.mempty
-                                                    (Prelude.Just _v)
-                                                      -> (Data.Monoid.<>)
-                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                              74)
-                                                           ((Prelude..)
-                                                              (\ bs
-                                                                 -> (Data.Monoid.<>)
-                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         (Prelude.fromIntegral
-                                                                            (Data.ByteString.length
-                                                                               bs)))
-                                                                      (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                         bs))
-                                                              Data.ProtoLens.encodeMessage _v))
-                                                 ((Data.Monoid.<>)
-                                                    (case
-                                                         Lens.Family2.view
-                                                           (Data.ProtoLens.Field.field
-                                                              @"maybe'metadata")
-                                                           _x
-                                                     of
-                                                       Prelude.Nothing -> Data.Monoid.mempty
-                                                       (Prelude.Just _v)
-                                                         -> (Data.Monoid.<>)
-                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                 82)
-                                                              ((Prelude..)
-                                                                 (\ bs
-                                                                    -> (Data.Monoid.<>)
-                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            (Prelude.fromIntegral
-                                                                               (Data.ByteString.length
-                                                                                  bs)))
-                                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                            bs))
-                                                                 Data.ProtoLens.encodeMessage _v))
-                                                    (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                       (Lens.Family2.view
-                                                          Data.ProtoLens.unknownFields
-                                                          _x)))))))))))))))
-instance Control.DeepSeq.NFData WorkerDeploymentVersionInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerDeploymentVersionInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerDeploymentVersionInfo'version x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerDeploymentVersionInfo'status x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkerDeploymentVersionInfo'deploymentVersion x__)
-                      (Control.DeepSeq.deepseq
-                         (_WorkerDeploymentVersionInfo'deploymentName x__)
-                         (Control.DeepSeq.deepseq
-                            (_WorkerDeploymentVersionInfo'createTime x__)
-                            (Control.DeepSeq.deepseq
-                               (_WorkerDeploymentVersionInfo'routingChangedTime x__)
-                               (Control.DeepSeq.deepseq
-                                  (_WorkerDeploymentVersionInfo'currentSinceTime x__)
-                                  (Control.DeepSeq.deepseq
-                                     (_WorkerDeploymentVersionInfo'rampingSinceTime x__)
-                                     (Control.DeepSeq.deepseq
-                                        (_WorkerDeploymentVersionInfo'firstActivationTime x__)
-                                        (Control.DeepSeq.deepseq
-                                           (_WorkerDeploymentVersionInfo'lastDeactivationTime x__)
-                                           (Control.DeepSeq.deepseq
-                                              (_WorkerDeploymentVersionInfo'rampPercentage x__)
-                                              (Control.DeepSeq.deepseq
-                                                 (_WorkerDeploymentVersionInfo'taskQueueInfos x__)
-                                                 (Control.DeepSeq.deepseq
-                                                    (_WorkerDeploymentVersionInfo'drainageInfo x__)
-                                                    (Control.DeepSeq.deepseq
-                                                       (_WorkerDeploymentVersionInfo'metadata x__)
-                                                       ()))))))))))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.name' @:: Lens' WorkerDeploymentVersionInfo'VersionTaskQueueInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Deployment.V1.Message_Fields.type'' @:: Lens' WorkerDeploymentVersionInfo'VersionTaskQueueInfo Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType@ -}
-data WorkerDeploymentVersionInfo'VersionTaskQueueInfo
-  = WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_constructor {_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'name :: !Data.Text.Text,
-                                                                   _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'type' :: !Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType,
-                                                                   _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo'VersionTaskQueueInfo "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'name
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerDeploymentVersionInfo'VersionTaskQueueInfo "type'" Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'type'
-           (\ x__ y__
-              -> x__
-                   {_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'type' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.deployment.v1.WorkerDeploymentVersionInfo.VersionTaskQueueInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC4VersionTaskQueueInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-      \\EOTtype\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueTypeR\EOTtype"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo'VersionTaskQueueInfo
-        type'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.TaskQueue.TaskQueueType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"type'")) ::
-              Data.ProtoLens.FieldDescriptor WorkerDeploymentVersionInfo'VersionTaskQueueInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, name__field_descriptor),
-           (Data.ProtoLens.Tag 2, type'__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_unknownFields = y__})
-  defMessage
-    = WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_constructor
-        {_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'name = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'type' = Data.ProtoLens.fieldDefault,
-         _WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerDeploymentVersionInfo'VersionTaskQueueInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerDeploymentVersionInfo'VersionTaskQueueInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "type"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"type'") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "VersionTaskQueueInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"type'") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'_unknownFields
-                x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'name x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerDeploymentVersionInfo'VersionTaskQueueInfo'type' x__) ()))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \(temporal/api/deployment/v1/message.proto\DC2\SUBtemporal.api.deployment.v1\SUB\USgoogle/protobuf/timestamp.proto\SUB&temporal/api/enums/v1/deployment.proto\SUB&temporal/api/enums/v1/task_queue.proto\SUB$temporal/api/common/v1/message.proto\"\192\SOH\n\
-    \\ETBWorkerDeploymentOptions\DC2'\n\
-    \\SIdeployment_name\CAN\SOH \SOH(\tR\SOdeploymentName\DC2\EM\n\
-    \\bbuild_id\CAN\STX \SOH(\tR\abuildId\DC2a\n\
-    \\SYNworker_versioning_mode\CAN\ETX \SOH(\SO2+.temporal.api.enums.v1.WorkerVersioningModeR\DC4workerVersioningMode\"H\n\
-    \\n\
-    \Deployment\DC2\US\n\
-    \\vseries_name\CAN\SOH \SOH(\tR\n\
-    \seriesName\DC2\EM\n\
-    \\bbuild_id\CAN\STX \SOH(\tR\abuildId\"\244\EOT\n\
-    \\SODeploymentInfo\DC2F\n\
-    \\n\
-    \deployment\CAN\SOH \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
-    \deployment\DC2;\n\
-    \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\DC2b\n\
-    \\DLEtask_queue_infos\CAN\ETX \ETX(\v28.temporal.api.deployment.v1.DeploymentInfo.TaskQueueInfoR\SOtaskQueueInfos\DC2T\n\
-    \\bmetadata\CAN\EOT \ETX(\v28.temporal.api.deployment.v1.DeploymentInfo.MetadataEntryR\bmetadata\DC2\GS\n\
-    \\n\
-    \is_current\CAN\ENQ \SOH(\bR\tisCurrent\SUB\\\n\
-    \\rMetadataEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\SUB\165\SOH\n\
-    \\rTaskQueueInfo\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-    \\EOTtype\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueTypeR\EOTtype\DC2F\n\
-    \\DC1first_poller_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIfirstPollerTime\"\148\STX\n\
-    \\CANUpdateDeploymentMetadata\DC2n\n\
-    \\SOupsert_entries\CAN\SOH \ETX(\v2G.temporal.api.deployment.v1.UpdateDeploymentMetadata.UpsertEntriesEntryR\rupsertEntries\DC2%\n\
-    \\SOremove_entries\CAN\STX \ETX(\tR\rremoveEntries\SUBa\n\
-    \\DC2UpsertEntriesEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\184\SOH\n\
-    \\DC2DeploymentListInfo\DC2F\n\
-    \\n\
-    \deployment\CAN\SOH \SOH(\v2&.temporal.api.deployment.v1.DeploymentR\n\
-    \deployment\DC2;\n\
-    \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\DC2\GS\n\
-    \\n\
-    \is_current\CAN\ETX \SOH(\bR\tisCurrent\"\253\b\n\
-    \\ESCWorkerDeploymentVersionInfo\DC2\FS\n\
-    \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
-    \\ACKstatus\CAN\SO \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
-    \\DC2deployment_version\CAN\v \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\DC1deploymentVersion\DC2'\n\
-    \\SIdeployment_name\CAN\STX \SOH(\tR\SOdeploymentName\DC2;\n\
-    \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\DC2L\n\
-    \\DC4routing_changed_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\DC2routingChangedTime\DC2H\n\
-    \\DC2current_since_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\DLEcurrentSinceTime\DC2H\n\
-    \\DC2ramping_since_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\DLErampingSinceTime\DC2N\n\
-    \\NAKfirst_activation_time\CAN\f \SOH(\v2\SUB.google.protobuf.TimestampR\DC3firstActivationTime\DC2P\n\
-    \\SYNlast_deactivation_time\CAN\r \SOH(\v2\SUB.google.protobuf.TimestampR\DC4lastDeactivationTime\DC2'\n\
-    \\SIramp_percentage\CAN\a \SOH(\STXR\SOrampPercentage\DC2v\n\
-    \\DLEtask_queue_infos\CAN\b \ETX(\v2L.temporal.api.deployment.v1.WorkerDeploymentVersionInfo.VersionTaskQueueInfoR\SOtaskQueueInfos\DC2T\n\
-    \\rdrainage_info\CAN\t \SOH(\v2/.temporal.api.deployment.v1.VersionDrainageInfoR\fdrainageInfo\DC2G\n\
-    \\bmetadata\CAN\n\
-    \ \SOH(\v2+.temporal.api.deployment.v1.VersionMetadataR\bmetadata\SUBd\n\
-    \\DC4VersionTaskQueueInfo\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC28\n\
-    \\EOTtype\CAN\STX \SOH(\SO2$.temporal.api.enums.v1.TaskQueueTypeR\EOTtype\"\235\SOH\n\
-    \\DC3VersionDrainageInfo\DC2D\n\
-    \\ACKstatus\CAN\SOH \SOH(\SO2,.temporal.api.enums.v1.VersionDrainageStatusR\ACKstatus\DC2F\n\
-    \\DC1last_changed_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastChangedTime\DC2F\n\
-    \\DC1last_checked_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\SIlastCheckedTime\"\247\t\n\
-    \\DC4WorkerDeploymentInfo\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2|\n\
-    \\DC1version_summaries\CAN\STX \ETX(\v2O.temporal.api.deployment.v1.WorkerDeploymentInfo.WorkerDeploymentVersionSummaryR\DLEversionSummaries\DC2;\n\
-    \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\DC2P\n\
-    \\SOrouting_config\CAN\EOT \SOH(\v2).temporal.api.deployment.v1.RoutingConfigR\rroutingConfig\DC24\n\
-    \\SYNlast_modifier_identity\CAN\ENQ \SOH(\tR\DC4lastModifierIdentity\DC2)\n\
-    \\DLEmanager_identity\CAN\ACK \SOH(\tR\SImanagerIdentity\SUB\220\ACK\n\
-    \\RSWorkerDeploymentVersionSummary\DC2\FS\n\
-    \\aversion\CAN\SOH \SOH(\tR\aversionB\STX\CAN\SOH\DC2L\n\
-    \\ACKstatus\CAN\v \SOH(\SO24.temporal.api.enums.v1.WorkerDeploymentVersionStatusR\ACKstatus\DC2b\n\
-    \\DC2deployment_version\CAN\EOT \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\DC1deploymentVersion\DC2;\n\
-    \\vcreate_time\CAN\STX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\DC2U\n\
-    \\SIdrainage_status\CAN\ETX \SOH(\SO2,.temporal.api.enums.v1.VersionDrainageStatusR\SOdrainageStatus\DC2T\n\
-    \\rdrainage_info\CAN\ENQ \SOH(\v2/.temporal.api.deployment.v1.VersionDrainageInfoR\fdrainageInfo\DC2H\n\
-    \\DC2current_since_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR\DLEcurrentSinceTime\DC2H\n\
-    \\DC2ramping_since_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\DLErampingSinceTime\DC2J\n\
-    \\DC3routing_update_time\CAN\b \SOH(\v2\SUB.google.protobuf.TimestampR\DC1routingUpdateTime\DC2N\n\
-    \\NAKfirst_activation_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\DC3firstActivationTime\DC2P\n\
-    \\SYNlast_deactivation_time\CAN\n\
-    \ \SOH(\v2\SUB.google.protobuf.TimestampR\DC4lastDeactivationTime\"]\n\
-    \\ETBWorkerDeploymentVersion\DC2\EM\n\
-    \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2'\n\
-    \\SIdeployment_name\CAN\STX \SOH(\tR\SOdeploymentName\"\194\SOH\n\
-    \\SIVersionMetadata\DC2R\n\
-    \\aentries\CAN\SOH \ETX(\v28.temporal.api.deployment.v1.VersionMetadata.EntriesEntryR\aentries\SUB[\n\
-    \\fEntriesEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\185\ENQ\n\
-    \\rRoutingConfig\DC2q\n\
-    \\SUBcurrent_deployment_version\CAN\a \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANcurrentDeploymentVersion\DC2+\n\
-    \\SIcurrent_version\CAN\SOH \SOH(\tR\SOcurrentVersionB\STX\CAN\SOH\DC2q\n\
-    \\SUBramping_deployment_version\CAN\t \SOH(\v23.temporal.api.deployment.v1.WorkerDeploymentVersionR\CANrampingDeploymentVersion\DC2+\n\
-    \\SIramping_version\CAN\STX \SOH(\tR\SOrampingVersionB\STX\CAN\SOH\DC2<\n\
-    \\SUBramping_version_percentage\CAN\ETX \SOH(\STXR\CANrampingVersionPercentage\DC2[\n\
-    \\FScurrent_version_changed_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\EMcurrentVersionChangedTime\DC2[\n\
-    \\FSramping_version_changed_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\EMrampingVersionChangedTime\DC2p\n\
-    \'ramping_version_percentage_changed_time\CAN\ACK \SOH(\v2\SUB.google.protobuf.TimestampR#rampingVersionPercentageChangedTimeB\157\SOH\n\
-    \\GSio.temporal.api.deployment.v1B\fMessageProtoP\SOHZ+go.temporal.io/api/deployment/v1;deployment\170\STX\FSTemporalio.Api.Deployment.V1\234\STX\USTemporalio::Api::Deployment::V1J\196t\n\
-    \\a\DC2\ENQ\NUL\NUL\159\STX\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL#\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NULB\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NULB\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL6\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL6\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL8\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL8\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL9\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL9\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL)\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\r\NUL0\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\SO\NUL0\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\SI\NUL.\n\
-    \\194\SOH\n\
-    \\STX\EOT\NUL\DC2\EOT\DC3\NUL\GS\SOH\SUB\181\SOH Worker Deployment options set in SDK that need to be sent to server in every poll.\n\
-    \ Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\DC3\b\US\n\
-    \0\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\NAK\EOT\US\SUB# Required. Worker Deployment name.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\NAK\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\NAK\v\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\NAK\GS\RS\n\
-    \\159\SOH\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\CAN\EOT\CAN\SUB\145\SOH The Build ID of the worker. Required when `worker_versioning_mode==VERSIONED`, in which case,\n\
-    \ the worker will be part of a Deployment Version.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\CAN\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\CAN\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\CAN\SYN\ETB\n\
-    \\140\STX\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\FS\EOTJ\SUB\254\SOH Required. Versioning Mode for this worker. Must be the same for all workers with the\n\
-    \ same `deployment_name` and `build_id` combination, across all Task Queues.\n\
-    \ When `worker_versioning_mode==VERSIONED`, the worker will be part of a Deployment Version.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\FS\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\FS/E\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\FSHI\n\
-    \\255\SOH\n\
-    \\STX\EOT\SOH\DC2\EOT#\NUL-\SOH\SUB\242\SOH `Deployment` identifies a deployment of Temporal workers. The combination of deployment series\n\
-    \ name + build ID serves as the identifier. User can use `WorkerDeploymentOptions` in their worker\n\
-    \ programs to specify these values.\n\
-    \ Deprecated.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX#\b\DC2\n\
-    \\214\STX\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX)\EOT\ESC\SUB\200\STX Different versions of the same worker service/application are related together by having a\n\
-    \ shared series name.\n\
-    \ Out of all deployments of a series, one can be designated as the current deployment, which\n\
-    \ receives new workflow executions and new tasks of workflows with\n\
-    \ `VERSIONING_BEHAVIOR_AUTO_UPGRADE` versioning behavior.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX)\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX)\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX)\EM\SUB\n\
-    \t\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX,\EOT\CAN\SUBg Build ID changes with each version of the worker when the worker program code and/or config\n\
-    \ changes.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX,\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX,\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX,\SYN\ETB\n\
-    \\179\STX\n\
-    \\STX\EOT\STX\DC2\EOT3\NULC\SOH\SUB\166\STX `DeploymentInfo` holds information about a deployment. Deployment information is tracked\n\
-    \ automatically by server as soon as the first poll from that deployment reaches the server. There\n\
-    \ can be multiple task queue workers in a single deployment which are listed in this message.\n\
-    \ Deprecated.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX3\b\SYN\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX4\EOT\RS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX4\EOT\SO\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX4\SI\EM\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX4\FS\GS\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX5\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX5\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX5\RS)\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX5,-\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX6\EOT0\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\EOT\DC2\ETX6\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETX6\r\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX6\ESC+\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX6./\n\
-    \\144\SOH\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX9\EOT=\SUB\130\SOH A user-defined set of key-values. Can be updated as part of write operations to the\n\
-    \ deployment, such as `SetCurrentDeployment`.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ACK\DC2\ETX9\EOT/\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX908\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX9;<\n\
-    \U\n\
-    \\EOT\EOT\STX\STX\EOT\DC2\ETX;\EOT\CAN\SUBH If this deployment is the current deployment of its deployment series.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ENQ\DC2\ETX;\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\SOH\DC2\ETX;\t\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\EOT\ETX\DC2\ETX;\SYN\ETB\n\
-    \\f\n\
-    \\EOT\EOT\STX\ETX\SOH\DC2\EOT=\EOTB\ENQ\n\
-    \\f\n\
-    \\ENQ\EOT\STX\ETX\SOH\SOH\DC2\ETX=\f\EM\n\
-    \\r\n\
-    \\ACK\EOT\STX\ETX\SOH\STX\NUL\DC2\ETX>\b\CAN\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\NUL\ENQ\DC2\ETX>\b\SO\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\NUL\SOH\DC2\ETX>\SI\DC3\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\NUL\ETX\DC2\ETX>\SYN\ETB\n\
-    \\r\n\
-    \\ACK\EOT\STX\ETX\SOH\STX\SOH\DC2\ETX?\b5\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\SOH\ACK\DC2\ETX?\b+\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\SOH\SOH\DC2\ETX?,0\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\SOH\ETX\DC2\ETX?34\n\
-    \Y\n\
-    \\ACK\EOT\STX\ETX\SOH\STX\STX\DC2\ETXA\b8\SUBJ When server saw the first poller for this task queue in this deployment.\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\STX\ACK\DC2\ETXA\b!\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\STX\SOH\DC2\ETXA\"3\n\
-    \\SO\n\
-    \\a\EOT\STX\ETX\SOH\STX\STX\ETX\DC2\ETXA67\n\
-    \m\n\
-    \\STX\EOT\ETX\DC2\EOTG\NULK\SOH\SUBa Used as part of Deployment write APIs to update metadata attached to a deployment.\n\
-    \ Deprecated.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXG\b \n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXH\EOTC\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETXH\EOT/\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXH0>\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXHAB\n\
-    \8\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXJ\EOT'\SUB+ List of keys to remove from the metadata.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\EOT\DC2\ETXJ\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXJ\r\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXJ\DC4\"\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXJ%&\n\
-    \\134\SOH\n\
-    \\STX\EOT\EOT\DC2\EOTP\NULU\SOH\SUBz DeploymentListInfo is an abbreviated set of fields from DeploymentInfo that's returned in\n\
-    \ ListDeployments.\n\
-    \ Deprecated.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXP\b\SUB\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXQ\EOT,\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETXQ\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXQ\GS'\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXQ*+\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXR\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ACK\DC2\ETXR\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXR\RS)\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXR,-\n\
-    \U\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXT\EOT\CAN\SUBH If this deployment is the current deployment of its deployment series.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ENQ\DC2\ETXT\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXT\t\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXT\SYN\ETB\n\
-    \\247\ETX\n\
-    \\STX\EOT\ENQ\DC2\ENQ_\NUL\154\SOH\SOH\SUB\233\ETX A Worker Deployment Version (Version, for short) represents all workers of the same \n\
-    \ code and config within a Deployment. Workers of the same Version are expected to \n\
-    \ behave exactly the same so when executions move between them there are no \n\
-    \ non-determinism issues.\n\
-    \ Worker Deployment Versions are created in Temporal server automatically when \n\
-    \ their first poller arrives to the server.\n\
-    \ Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX_\b#\n\
-    \4\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXa\EOT+\SUB' Deprecated. Use `deployment_version`.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXa\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXa\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXa\NAK\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\b\DC2\ETXa\ETB*\n\
-    \\r\n\
-    \\ACK\EOT\ENQ\STX\NUL\b\ETX\DC2\ETXa\CAN)\n\
-    \;\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXd\EOTD\SUB. The status of the Worker Deployment Version.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXd\EOT7\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXd8>\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXdAC\n\
-    \\CAN\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXg\EOT4\SUB\v Required.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXg\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXg\FS.\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXg13\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXh\EOT\US\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ENQ\DC2\ETXh\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXh\v\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXh\GS\RS\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\EOT\DC2\ETXi\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\ACK\DC2\ETXi\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\SOH\DC2\ETXi\RS)\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\ETX\DC2\ETXi,-\n\
-    \q\n\
-    \\EOT\EOT\ENQ\STX\ENQ\DC2\ETXl\EOT7\SUBd Last time `current_since_time`, `ramping_since_time, or `ramp_percentage` of this version changed.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ENQ\ACK\DC2\ETXl\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ENQ\SOH\DC2\ETXl\RS2\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ENQ\ETX\DC2\ETXl56\n\
-    \\186\SOH\n\
-    \\EOT\EOT\ENQ\STX\ACK\DC2\ETXq\EOT5\SUB\172\SOH (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: 'Since' captures the field semantics despite being a preposition. --)\n\
-    \ Unset if not current.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ACK\ACK\DC2\ETXq\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ACK\SOH\DC2\ETXq\RS0\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ACK\ETX\DC2\ETXq34\n\
-    \\130\STX\n\
-    \\EOT\EOT\ENQ\STX\a\DC2\ETXv\EOT5\SUB\244\SOH (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: 'Since' captures the field semantics despite being a preposition. --)\n\
-    \ Unset if not ramping. Updated when the version first starts ramping, not on each ramp change.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\a\ACK\DC2\ETXv\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\a\SOH\DC2\ETXv\RS0\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\a\ETX\DC2\ETXv34\n\
-    \K\n\
-    \\EOT\EOT\ENQ\STX\b\DC2\ETXy\EOT9\SUB> Timestamp when this version first became current or ramping.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\b\ACK\DC2\ETXy\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\b\SOH\DC2\ETXy\RS3\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\b\ETX\DC2\ETXy68\n\
-    \Q\n\
-    \\EOT\EOT\ENQ\STX\t\DC2\ETX{\EOT:\SUBD Timestamp when this version last stopped being current or ramping.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\t\ACK\DC2\ETX{\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\t\SOH\DC2\ETX{\RS4\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\t\ETX\DC2\ETX{79\n\
-    \\168\SOH\n\
-    \\EOT\EOT\ENQ\STX\n\
-    \\DC2\ETX\DEL\EOT\RS\SUB\154\SOH Range: [0, 100]. Must be zero if the version is not ramping (i.e. `ramping_since_time` is nil).\n\
-    \ Can be in the range [0, 100] if the version is ramping.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\n\
-    \\ENQ\DC2\ETX\DEL\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\n\
-    \\SOH\DC2\ETX\DEL\n\
-    \\EM\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\n\
-    \\ETX\DC2\ETX\DEL\FS\GS\n\
-    \\179\SOH\n\
-    \\EOT\EOT\ENQ\STX\v\DC2\EOT\131\SOH\EOT7\SUB\164\SOH All the Task Queues that have ever polled from this Deployment version.\n\
-    \ Deprecated. Use `version_task_queues` in DescribeWorkerDeploymentVersionResponse instead.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\v\EOT\DC2\EOT\131\SOH\EOT\f\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\v\ACK\DC2\EOT\131\SOH\r!\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\v\SOH\DC2\EOT\131\SOH\"2\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\v\ETX\DC2\EOT\131\SOH56\n\
-    \\SO\n\
-    \\EOT\EOT\ENQ\ETX\NUL\DC2\ACK\132\SOH\EOT\135\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\ETX\NUL\SOH\DC2\EOT\132\SOH\f \n\
-    \\SO\n\
-    \\ACK\EOT\ENQ\ETX\NUL\STX\NUL\DC2\EOT\133\SOH\b\CAN\n\
-    \\SI\n\
-    \\a\EOT\ENQ\ETX\NUL\STX\NUL\ENQ\DC2\EOT\133\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\ENQ\ETX\NUL\STX\NUL\SOH\DC2\EOT\133\SOH\SI\DC3\n\
-    \\SI\n\
-    \\a\EOT\ENQ\ETX\NUL\STX\NUL\ETX\DC2\EOT\133\SOH\SYN\ETB\n\
-    \\SO\n\
-    \\ACK\EOT\ENQ\ETX\NUL\STX\SOH\DC2\EOT\134\SOH\b5\n\
-    \\SI\n\
-    \\a\EOT\ENQ\ETX\NUL\STX\SOH\ACK\DC2\EOT\134\SOH\b+\n\
-    \\SI\n\
-    \\a\EOT\ENQ\ETX\NUL\STX\SOH\SOH\DC2\EOT\134\SOH,0\n\
-    \\SI\n\
-    \\a\EOT\ENQ\ETX\NUL\STX\SOH\ETX\DC2\EOT\134\SOH34\n\
-    \\130\ACK\n\
-    \\EOT\EOT\ENQ\STX\f\DC2\EOT\150\SOH\EOT*\SUB\243\ENQ Helps user determine when it is safe to decommission the workers of this\n\
-    \ Version. Not present when version is current or ramping.\n\
-    \ Current limitations:\n\
-    \ - Not supported for Unversioned mode.\n\
-    \ - Periodically refreshed, may have delays up to few minutes (consult the\n\
-    \   last_checked_time value).\n\
-    \ - Refreshed only when version is not current or ramping AND the status is not\n\
-    \   \"drained\" yet.\n\
-    \ - Once the status is changed to \"drained\", it is not changed until the Version\n\
-    \   becomes Current or Ramping again, at which time the drainage info is cleared.\n\
-    \   This means if the Version is \"drained\" but new workflows are sent to it via\n\
-    \   Pinned Versioning Override, the status does not account for those Pinned-override\n\
-    \   executions and remains \"drained\".\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\f\ACK\DC2\EOT\150\SOH\EOT\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\f\SOH\DC2\EOT\150\SOH\CAN%\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\f\ETX\DC2\EOT\150\SOH()\n\
-    \J\n\
-    \\EOT\EOT\ENQ\STX\r\DC2\EOT\153\SOH\EOT\"\SUB< Arbitrary user-provided metadata attached to this version.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\r\ACK\DC2\EOT\153\SOH\EOT\DC3\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\r\SOH\DC2\EOT\153\SOH\DC4\FS\n\
-    \\r\n\
-    \\ENQ\EOT\ENQ\STX\r\ETX\DC2\EOT\153\SOH\US!\n\
-    \\141\STX\n\
-    \\STX\EOT\ACK\DC2\ACK\159\SOH\NUL\167\SOH\SOH\SUB\254\SOH Information about workflow drainage to help the user determine when it is safe\n\
-    \ to decommission a Version. Not present while version is current or ramping.\n\
-    \ Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\ACK\SOH\DC2\EOT\159\SOH\b\ESC\n\
-    \\195\SOH\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\EOT\162\SOH\EOT.\SUB\180\SOH Set to DRAINING when the version first stops accepting new executions (is no longer current or ramping).\n\
-    \ Set to DRAINED when no more open pinned workflows exist on this version.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\EOT\162\SOH\EOT\"\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\EOT\162\SOH#)\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\EOT\162\SOH,-\n\
-    \6\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\EOT\164\SOH\EOT4\SUB( Last time the drainage status changed.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\EOT\164\SOH\EOT\GS\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\EOT\164\SOH\RS/\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\EOT\164\SOH23\n\
-    \J\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\EOT\166\SOH\EOT4\SUB< Last time the system checked for drainage of this version.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\EOT\166\SOH\EOT\GS\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\EOT\166\SOH\RS/\n\
-    \\r\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\EOT\166\SOH23\n\
-    \\169\EOT\n\
-    \\STX\EOT\a\DC2\ACK\177\SOH\NUL\233\SOH\SOH\SUB\154\EOT A Worker Deployment (Deployment, for short) represents all workers serving \n\
-    \ a shared set of Task Queues. Typically, a Deployment represents one service or \n\
-    \ application.\n\
-    \ A Deployment contains multiple Deployment Versions, each representing a different \n\
-    \ version of workers. (see documentation of WorkerDeploymentVersionInfo)\n\
-    \ Deployment records are created in Temporal server automatically when their\n\
-    \ first poller arrives to the server.\n\
-    \ Experimental. Worker Deployments are experimental and might significantly change in the future.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\a\SOH\DC2\EOT\177\SOH\b\FS\n\
-    \T\n\
-    \\EOT\EOT\a\STX\NUL\DC2\EOT\179\SOH\EOT\DC4\SUBF Identifies a Worker Deployment. Must be unique within the namespace.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\EOT\179\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\EOT\179\SOH\v\SI\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\EOT\179\SOH\DC2\DC3\n\
-    \\131\ETX\n\
-    \\EOT\EOT\a\STX\SOH\DC2\EOT\186\SOH\EOTB\SUB\244\STX Deployment Versions that are currently tracked in this Deployment. A DeploymentVersion will be\n\
-    \ cleaned up automatically if all the following conditions meet:\n\
-    \ - It does not receive new executions (is not current or ramping)\n\
-    \ - It has no active pollers (see WorkerDeploymentVersionInfo.pollers_status) \n\
-    \ - It is drained (see WorkerDeploymentVersionInfo.drainage_status) \n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\EOT\DC2\EOT\186\SOH\EOT\f\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\EOT\186\SOH\r+\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\EOT\186\SOH,=\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\EOT\186\SOH@A\n\
-    \\f\n\
-    \\EOT\EOT\a\STX\STX\DC2\EOT\188\SOH\EOT.\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ACK\DC2\EOT\188\SOH\EOT\GS\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\EOT\188\SOH\RS)\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\EOT\188\SOH,-\n\
-    \\f\n\
-    \\EOT\EOT\a\STX\ETX\DC2\EOT\190\SOH\EOT%\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ACK\DC2\EOT\190\SOH\EOT\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\EOT\190\SOH\DC2 \n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\EOT\190\SOH#$\n\
-    \\223\SOH\n\
-    \\EOT\EOT\a\STX\EOT\DC2\EOT\195\SOH\EOT&\SUB\208\SOH Identity of the last client who modified the configuration of this Deployment. Set to the\n\
-    \ `identity` value sent by APIs such as `SetWorkerDeploymentCurrentVersion` and\n\
-    \ `SetWorkerDeploymentRampingVersion`.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\EOT\195\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\EOT\195\SOH\v!\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\EOT\195\SOH$%\n\
-    \\222\STX\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\EOT\201\SOH\EOT \SUB\207\STX Identity of the client that has the exclusive right to make changes to this Worker Deployment.\n\
-    \ Empty by default.\n\
-    \ If this is set, clients whose identity does not match `manager_identity` will not be able to make changes\n\
-    \ to this Worker Deployment. They can either set their own identity as the manager or unset the field to proceed.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ENQ\DC2\EOT\201\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\EOT\201\SOH\v\ESC\n\
-    \\r\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\EOT\201\SOH\RS\US\n\
-    \\SO\n\
-    \\EOT\EOT\a\ETX\NUL\DC2\ACK\203\SOH\EOT\232\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\a\ETX\NUL\SOH\DC2\EOT\203\SOH\f*\n\
-    \7\n\
-    \\ACK\EOT\a\ETX\NUL\STX\NUL\DC2\EOT\205\SOH\b/\SUB' Deprecated. Use `deployment_version`.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\ENQ\DC2\EOT\205\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\SOH\DC2\EOT\205\SOH\SI\SYN\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\ETX\DC2\EOT\205\SOH\EM\SUB\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\NUL\b\DC2\EOT\205\SOH\ESC.\n\
-    \\DLE\n\
-    \\b\EOT\a\ETX\NUL\STX\NUL\b\ETX\DC2\EOT\205\SOH\FS-\n\
-    \>\n\
-    \\ACK\EOT\a\ETX\NUL\STX\SOH\DC2\EOT\208\SOH\bH\SUB. The status of the Worker Deployment Version.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\ACK\DC2\EOT\208\SOH\b;\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\SOH\DC2\EOT\208\SOH<B\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\SOH\ETX\DC2\EOT\208\SOHEG\n\
-    \\ESC\n\
-    \\ACK\EOT\a\ETX\NUL\STX\STX\DC2\EOT\211\SOH\b7\SUB\v Required.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\STX\ACK\DC2\EOT\211\SOH\b\US\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\STX\SOH\DC2\EOT\211\SOH 2\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\STX\ETX\DC2\EOT\211\SOH56\n\
-    \\SO\n\
-    \\ACK\EOT\a\ETX\NUL\STX\ETX\DC2\EOT\212\SOH\b2\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ETX\ACK\DC2\EOT\212\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ETX\SOH\DC2\EOT\212\SOH\"-\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ETX\ETX\DC2\EOT\212\SOH01\n\
-    \:\n\
-    \\ACK\EOT\a\ETX\NUL\STX\EOT\DC2\EOT\214\SOH\b;\SUB* Deprecated. Use `drainage_info` instead.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\EOT\ACK\DC2\EOT\214\SOH\b&\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\EOT\SOH\DC2\EOT\214\SOH'6\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\EOT\ETX\DC2\EOT\214\SOH9:\n\
-    \\173\SOH\n\
-    \\ACK\EOT\a\ETX\NUL\STX\ENQ\DC2\EOT\217\SOH\b.\SUB\156\SOH Information about workflow drainage to help the user determine when it is safe\n\
-    \ to decommission a Version. Not present while version is current or ramping\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ENQ\ACK\DC2\EOT\217\SOH\b\ESC\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ENQ\SOH\DC2\EOT\217\SOH\FS)\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ENQ\ETX\DC2\EOT\217\SOH,-\n\
-    \\189\SOH\n\
-    \\ACK\EOT\a\ETX\NUL\STX\ACK\DC2\EOT\221\SOH\b9\SUB\172\SOH Unset if not current.\n\
-    \ (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: 'Since' captures the field semantics despite being a preposition. --)\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ACK\ACK\DC2\EOT\221\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ACK\SOH\DC2\EOT\221\SOH\"4\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\ACK\ETX\DC2\EOT\221\SOH78\n\
-    \\133\STX\n\
-    \\ACK\EOT\a\ETX\NUL\STX\a\DC2\EOT\225\SOH\b9\SUB\244\SOH Unset if not ramping. Updated when the version first starts ramping, not on each ramp change.\n\
-    \ (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: 'Since' captures the field semantics despite being a preposition. --)\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\a\ACK\DC2\EOT\225\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\a\SOH\DC2\EOT\225\SOH\"4\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\a\ETX\DC2\EOT\225\SOH78\n\
-    \t\n\
-    \\ACK\EOT\a\ETX\NUL\STX\b\DC2\EOT\227\SOH\b:\SUBd Last time `current_since_time`, `ramping_since_time, or `ramp_percentage` of this version changed.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\b\ACK\DC2\EOT\227\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\b\SOH\DC2\EOT\227\SOH\"5\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\b\ETX\DC2\EOT\227\SOH89\n\
-    \N\n\
-    \\ACK\EOT\a\ETX\NUL\STX\t\DC2\EOT\229\SOH\b<\SUB> Timestamp when this version first became current or ramping.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\t\ACK\DC2\EOT\229\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\t\SOH\DC2\EOT\229\SOH\"7\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\t\ETX\DC2\EOT\229\SOH:;\n\
-    \T\n\
-    \\ACK\EOT\a\ETX\NUL\STX\n\
-    \\DC2\EOT\231\SOH\b>\SUBD Timestamp when this version last stopped being current or ramping.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\n\
-    \\ACK\DC2\EOT\231\SOH\b!\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\n\
-    \\SOH\DC2\EOT\231\SOH\"8\n\
-    \\SI\n\
-    \\a\EOT\a\ETX\NUL\STX\n\
-    \\ETX\DC2\EOT\231\SOH;=\n\
-    \\136\ETX\n\
-    \\STX\EOT\b\DC2\ACK\240\SOH\NUL\249\SOH\SOH\SUB\249\STX A Worker Deployment Version (Version, for short) represents a\n\
-    \ version of workers within a Worker Deployment. (see documentation of WorkerDeploymentVersionInfo)\n\
-    \ Version records are created in Temporal server automatically when their\n\
-    \ first poller arrives to the server.\n\
-    \ Experimental. Worker Deployment Versions are experimental and might significantly change in the future.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\b\SOH\DC2\EOT\240\SOH\b\US\n\
-    \\175\STX\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\245\SOH\EOT\CAN\SUB\160\STX A unique identifier for this Version within the Deployment it is a part of.\n\
-    \ Not necessarily unique within the namespace.\n\
-    \ The combination of `deployment_name` and `build_id` uniquely identifies this\n\
-    \ Version within the namespace, because Deployment names are unique within a namespace.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\245\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\245\SOH\v\DC3\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\245\SOH\SYN\ETB\n\
-    \I\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\248\SOH\EOT\US\SUB; Identifies the Worker Deployment this Version is part of.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\248\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\248\SOH\v\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\248\SOH\GS\RS\n\
-    \\f\n\
-    \\STX\EOT\t\DC2\ACK\251\SOH\NUL\254\SOH\SOH\n\
-    \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\251\SOH\b\ETB\n\
-    \%\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\253\SOH\EOT<\SUB\ETB Arbitrary key-values.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\EOT\253\SOH\EOT/\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\253\SOH07\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\253\SOH:;\n\
-    \\f\n\
-    \\STX\EOT\n\
-    \\DC2\ACK\128\STX\NUL\159\STX\SOH\n\
-    \\v\n\
-    \\ETX\EOT\n\
-    \\SOH\DC2\EOT\128\STX\b\NAK\n\
-    \\151\ENQ\n\
-    \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\134\STX\EOTV\SUB\136\ENQ Specifies which Deployment Version should receive new workflow executions and tasks of\n\
-    \ existing unversioned or AutoUpgrade workflows.\n\
-    \ Nil value means no Version in this Deployment (except Ramping Version, if present) receives traffic other than tasks of previously Pinned workflows. In absence of a Current Version, remaining traffic after any ramp (if set)  goes to unversioned workers (those with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.). \n\
-    \ Note: Current Version is overridden by the Ramping Version for a portion of traffic when ramp percentage\n\
-    \ is non-zero (see `ramping_deployment_version` and `ramping_version_percentage`).\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ACK\DC2\EOT\134\STX\EOT6\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\134\STX7Q\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\134\STXTU\n\
-    \=\n\
-    \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\136\STX\EOT3\SUB/ Deprecated. Use `current_deployment_version`.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\ENQ\DC2\EOT\136\STX\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\136\STX\v\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\136\STX\GS\RS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\b\DC2\EOT\136\STX\US2\n\
-    \\SO\n\
-    \\ACK\EOT\n\
-    \\STX\SOH\b\ETX\DC2\EOT\136\STX 1\n\
-    \\255\ETX\n\
-    \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\143\STX\EOTV\SUB\240\ETX When ramp percentage is non-zero, that portion of traffic is shifted from the Current Version to the Ramping Version.\n\
-    \ Must always be different from `current_deployment_version` unless both are nil.\n\
-    \ Nil value represents all the unversioned workers (those with `UNVERSIONED` (or unspecified) `WorkerVersioningMode`.)\n\
-    \ Note that it is possible to ramp from one Version to another Version, or from unversioned\n\
-    \ workers to a particular Version, or from a particular Version to unversioned workers.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\ACK\DC2\EOT\143\STX\EOT6\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\143\STX7Q\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\143\STXTU\n\
-    \=\n\
-    \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\145\STX\EOT3\SUB/ Deprecated. Use `ramping_deployment_version`.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ENQ\DC2\EOT\145\STX\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\145\STX\v\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\145\STX\GS\RS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\b\DC2\EOT\145\STX\US2\n\
-    \\SO\n\
-    \\ACK\EOT\n\
-    \\STX\ETX\b\ETX\DC2\EOT\145\STX 1\n\
-    \\217\STX\n\
-    \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\151\STX\EOT)\SUB\202\STX Percentage of tasks that are routed to the Ramping Version instead of the Current Version.\n\
-    \ Valid range: [0, 100]. A 100% value means the Ramping Version is receiving full traffic but\n\
-    \ not yet \"promoted\" to be the Current Version, likely due to pending validations.\n\
-    \ A 0% value means the Ramping Version is receiving no traffic.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ENQ\DC2\EOT\151\STX\EOT\t\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\151\STX\n\
-    \$\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\151\STX'(\n\
-    \6\n\
-    \\EOT\EOT\n\
-    \\STX\ENQ\DC2\EOT\153\STX\EOT?\SUB( Last time current version was changed.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ACK\DC2\EOT\153\STX\EOT\GS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\SOH\DC2\EOT\153\STX\RS:\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ETX\DC2\EOT\153\STX=>\n\
-    \g\n\
-    \\EOT\EOT\n\
-    \\STX\ACK\DC2\EOT\155\STX\EOT?\SUBY Last time ramping version was changed. Not updated if only the ramp percentage changes.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ACK\ACK\DC2\EOT\155\STX\EOT\GS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ACK\SOH\DC2\EOT\155\STX\RS:\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ACK\ETX\DC2\EOT\155\STX=>\n\
-    \\159\SOH\n\
-    \\EOT\EOT\n\
-    \\STX\a\DC2\EOT\158\STX\EOTJ\SUB\144\SOH Last time ramping version percentage was changed.\n\
-    \ If ramping version is changed, this is also updated, even if the percentage stays the same.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\a\ACK\DC2\EOT\158\STX\EOT\GS\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\a\SOH\DC2\EOT\158\STX\RSE\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\a\ETX\DC2\EOT\158\STXHIb\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.deployment.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Deployment.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+import qualified Proto.Temporal.Api.Enums.V1.Deployment as TE_Enums_V1_Deployment
+import qualified Proto.Temporal.Api.Enums.V1.TaskQueue as TE_Enums_V1_TaskQueue
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x1a\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x70\x72\x6f\x74\x6f\x1a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x74\x61\x73\x6b\x5f\x71\x75\x65\x75\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x22\x90\x01\x0a\x17\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x4f\x70\x74\x69\x6f\x6e\x73\x12\x17\x0a\x0f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x10\x0a\x08\x62\x75\x69\x6c\x64\x5f\x69\x64\x18\x02\x20\x01\x28\x09\x12\x4a\x0a\x16\x77\x6f\x72\x6b\x65\x72\x5f\x76\x65\x72\x73\x69\x6f\x6e\x69\x6e\x67\x5f\x6d\x6f\x64\x65\x18\x03\x20\x01\x28\x0b\x32\x2a\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x56\x65\x72\x73\x69\x6f\x6e\x69\x6e\x67\x4d\x6f\x64\x65\x22\x33\x0a\x0a\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x12\x13\x0a\x0b\x73\x65\x72\x69\x65\x73\x5f\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x10\x0a\x08\x62\x75\x69\x6c\x64\x5f\x69\x64\x18\x02\x20\x01\x28\x09\x22\x83\x04\x0a\x0e\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x49\x6e\x66\x6f\x12\x39\x0a\x0a\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x18\x01\x20\x01\x28\x0b\x32\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x02\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x51\x0a\x10\x74\x61\x73\x6b\x5f\x71\x75\x65\x75\x65\x5f\x69\x6e\x66\x6f\x73\x18\x03\x20\x03\x28\x0b\x32\x37\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x49\x6e\x66\x6f\x2e\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x49\x6e\x66\x6f\x12\x49\x0a\x08\x6d\x65\x74\x61\x64\x61\x74\x61\x18\x04\x20\x03\x28\x0b\x32\x37\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x49\x6e\x66\x6f\x2e\x4d\x65\x74\x61\x64\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x12\x0a\x0a\x69\x73\x5f\x63\x75\x72\x72\x65\x6e\x74\x18\x05\x20\x01\x28\x08\x1a\x4b\x0a\x0d\x4d\x65\x74\x61\x64\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x1a\x86\x01\x0a\x0d\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x49\x6e\x66\x6f\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x31\x0a\x04\x74\x79\x70\x65\x18\x02\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x54\x79\x70\x65\x12\x34\x0a\x11\x66\x69\x72\x73\x74\x5f\x70\x6f\x6c\x6c\x65\x72\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\xe4\x01\x0a\x18\x55\x70\x64\x61\x74\x65\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x4d\x65\x74\x61\x64\x61\x74\x61\x12\x5e\x0a\x0e\x75\x70\x73\x65\x72\x74\x5f\x65\x6e\x74\x72\x69\x65\x73\x18\x01\x20\x03\x28\x0b\x32\x46\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x55\x70\x64\x61\x74\x65\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x4d\x65\x74\x61\x64\x61\x74\x61\x2e\x55\x70\x73\x65\x72\x74\x45\x6e\x74\x72\x69\x65\x73\x45\x6e\x74\x72\x79\x12\x16\x0a\x0e\x72\x65\x6d\x6f\x76\x65\x5f\x65\x6e\x74\x72\x69\x65\x73\x18\x02\x20\x03\x28\x09\x1a\x50\x0a\x12\x55\x70\x73\x65\x72\x74\x45\x6e\x74\x72\x69\x65\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x93\x01\x0a\x12\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x4c\x69\x73\x74\x49\x6e\x66\x6f\x12\x39\x0a\x0a\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x18\x01\x20\x01\x28\x0b\x32\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x02\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x12\x0a\x0a\x69\x73\x5f\x63\x75\x72\x72\x65\x6e\x74\x18\x03\x20\x01\x28\x08\x22\x86\x07\x0a\x1b\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x49\x6e\x66\x6f\x12\x0f\x0a\x07\x76\x65\x72\x73\x69\x6f\x6e\x18\x01\x20\x01\x28\x09\x12\x43\x0a\x06\x73\x74\x61\x74\x75\x73\x18\x0e\x20\x01\x28\x0b\x32\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x53\x74\x61\x74\x75\x73\x12\x4e\x0a\x12\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x76\x65\x72\x73\x69\x6f\x6e\x18\x0b\x20\x01\x28\x0b\x32\x32\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x12\x17\x0a\x0f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x6e\x61\x6d\x65\x18\x02\x20\x01\x28\x09\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x37\x0a\x14\x72\x6f\x75\x74\x69\x6e\x67\x5f\x63\x68\x61\x6e\x67\x65\x64\x5f\x74\x69\x6d\x65\x18\x04\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x35\x0a\x12\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x69\x6e\x63\x65\x5f\x74\x69\x6d\x65\x18\x05\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x35\x0a\x12\x72\x61\x6d\x70\x69\x6e\x67\x5f\x73\x69\x6e\x63\x65\x5f\x74\x69\x6d\x65\x18\x06\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x38\x0a\x15\x66\x69\x72\x73\x74\x5f\x61\x63\x74\x69\x76\x61\x74\x69\x6f\x6e\x5f\x74\x69\x6d\x65\x18\x0c\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x39\x0a\x16\x6c\x61\x73\x74\x5f\x64\x65\x61\x63\x74\x69\x76\x61\x74\x69\x6f\x6e\x5f\x74\x69\x6d\x65\x18\x0d\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x17\x0a\x0f\x72\x61\x6d\x70\x5f\x70\x65\x72\x63\x65\x6e\x74\x61\x67\x65\x18\x07\x20\x01\x28\x02\x12\x65\x0a\x10\x74\x61\x73\x6b\x5f\x71\x75\x65\x75\x65\x5f\x69\x6e\x66\x6f\x73\x18\x08\x20\x03\x28\x0b\x32\x4b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x49\x6e\x66\x6f\x2e\x56\x65\x72\x73\x69\x6f\x6e\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x49\x6e\x66\x6f\x12\x45\x0a\x0d\x64\x72\x61\x69\x6e\x61\x67\x65\x5f\x69\x6e\x66\x6f\x18\x09\x20\x01\x28\x0b\x32\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x56\x65\x72\x73\x69\x6f\x6e\x44\x72\x61\x69\x6e\x61\x67\x65\x49\x6e\x66\x6f\x12\x3c\x0a\x08\x6d\x65\x74\x61\x64\x61\x74\x61\x18\x0a\x20\x01\x28\x0b\x32\x2a\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x56\x65\x72\x73\x69\x6f\x6e\x4d\x65\x74\x61\x64\x61\x74\x61\x1a\x57\x0a\x14\x56\x65\x72\x73\x69\x6f\x6e\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x49\x6e\x66\x6f\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x31\x0a\x04\x74\x79\x70\x65\x18\x02\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x54\x79\x70\x65\x22\xbe\x01\x0a\x13\x56\x65\x72\x73\x69\x6f\x6e\x44\x72\x61\x69\x6e\x61\x67\x65\x49\x6e\x66\x6f\x12\x3b\x0a\x06\x73\x74\x61\x74\x75\x73\x18\x01\x20\x01\x28\x0b\x32\x2b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x56\x65\x72\x73\x69\x6f\x6e\x44\x72\x61\x69\x6e\x61\x67\x65\x53\x74\x61\x74\x75\x73\x12\x34\x0a\x11\x6c\x61\x73\x74\x5f\x63\x68\x61\x6e\x67\x65\x64\x5f\x74\x69\x6d\x65\x18\x02\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x34\x0a\x11\x6c\x61\x73\x74\x5f\x63\x68\x65\x63\x6b\x65\x64\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\xdc\x07\x0a\x14\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x49\x6e\x66\x6f\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x69\x0a\x11\x76\x65\x72\x73\x69\x6f\x6e\x5f\x73\x75\x6d\x6d\x61\x72\x69\x65\x73\x18\x02\x20\x03\x28\x0b\x32\x4e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x49\x6e\x66\x6f\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x53\x75\x6d\x6d\x61\x72\x79\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x40\x0a\x0e\x72\x6f\x75\x74\x69\x6e\x67\x5f\x63\x6f\x6e\x66\x69\x67\x18\x04\x20\x01\x28\x0b\x32\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x52\x6f\x75\x74\x69\x6e\x67\x43\x6f\x6e\x66\x69\x67\x12\x1e\x0a\x16\x6c\x61\x73\x74\x5f\x6d\x6f\x64\x69\x66\x69\x65\x72\x5f\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x05\x20\x01\x28\x09\x12\x18\x0a\x10\x6d\x61\x6e\x61\x67\x65\x72\x5f\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x06\x20\x01\x28\x09\x1a\x9e\x05\x0a\x1e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x53\x75\x6d\x6d\x61\x72\x79\x12\x0f\x0a\x07\x76\x65\x72\x73\x69\x6f\x6e\x18\x01\x20\x01\x28\x09\x12\x43\x0a\x06\x73\x74\x61\x74\x75\x73\x18\x0b\x20\x01\x28\x0b\x32\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x53\x74\x61\x74\x75\x73\x12\x4e\x0a\x12\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x76\x65\x72\x73\x69\x6f\x6e\x18\x04\x20\x01\x28\x0b\x32\x32\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x02\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x44\x0a\x0f\x64\x72\x61\x69\x6e\x61\x67\x65\x5f\x73\x74\x61\x74\x75\x73\x18\x03\x20\x01\x28\x0b\x32\x2b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x56\x65\x72\x73\x69\x6f\x6e\x44\x72\x61\x69\x6e\x61\x67\x65\x53\x74\x61\x74\x75\x73\x12\x45\x0a\x0d\x64\x72\x61\x69\x6e\x61\x67\x65\x5f\x69\x6e\x66\x6f\x18\x05\x20\x01\x28\x0b\x32\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x56\x65\x72\x73\x69\x6f\x6e\x44\x72\x61\x69\x6e\x61\x67\x65\x49\x6e\x66\x6f\x12\x35\x0a\x12\x63\x75\x72\x72\x65\x6e\x74\x5f\x73\x69\x6e\x63\x65\x5f\x74\x69\x6d\x65\x18\x06\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x35\x0a\x12\x72\x61\x6d\x70\x69\x6e\x67\x5f\x73\x69\x6e\x63\x65\x5f\x74\x69\x6d\x65\x18\x07\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x36\x0a\x13\x72\x6f\x75\x74\x69\x6e\x67\x5f\x75\x70\x64\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x08\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x38\x0a\x15\x66\x69\x72\x73\x74\x5f\x61\x63\x74\x69\x76\x61\x74\x69\x6f\x6e\x5f\x74\x69\x6d\x65\x18\x09\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x39\x0a\x16\x6c\x61\x73\x74\x5f\x64\x65\x61\x63\x74\x69\x76\x61\x74\x69\x6f\x6e\x5f\x74\x69\x6d\x65\x18\x0a\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\x44\x0a\x17\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x12\x10\x0a\x08\x62\x75\x69\x6c\x64\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x12\x17\x0a\x0f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x6e\x61\x6d\x65\x18\x02\x20\x01\x28\x09\x22\xa7\x01\x0a\x0f\x56\x65\x72\x73\x69\x6f\x6e\x4d\x65\x74\x61\x64\x61\x74\x61\x12\x48\x0a\x07\x65\x6e\x74\x72\x69\x65\x73\x18\x01\x20\x03\x28\x0b\x32\x37\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x56\x65\x72\x73\x69\x6f\x6e\x4d\x65\x74\x61\x64\x61\x74\x61\x2e\x45\x6e\x74\x72\x69\x65\x73\x45\x6e\x74\x72\x79\x1a\x4a\x0a\x0c\x45\x6e\x74\x72\x69\x65\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\xe3\x03\x0a\x0d\x52\x6f\x75\x74\x69\x6e\x67\x43\x6f\x6e\x66\x69\x67\x12\x56\x0a\x1a\x63\x75\x72\x72\x65\x6e\x74\x5f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x76\x65\x72\x73\x69\x6f\x6e\x18\x07\x20\x01\x28\x0b\x32\x32\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x12\x17\x0a\x0f\x63\x75\x72\x72\x65\x6e\x74\x5f\x76\x65\x72\x73\x69\x6f\x6e\x18\x01\x20\x01\x28\x09\x12\x56\x0a\x1a\x72\x61\x6d\x70\x69\x6e\x67\x5f\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x76\x65\x72\x73\x69\x6f\x6e\x18\x09\x20\x01\x28\x0b\x32\x32\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x65\x72\x44\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x56\x65\x72\x73\x69\x6f\x6e\x12\x17\x0a\x0f\x72\x61\x6d\x70\x69\x6e\x67\x5f\x76\x65\x72\x73\x69\x6f\x6e\x18\x02\x20\x01\x28\x09\x12\x22\x0a\x1a\x72\x61\x6d\x70\x69\x6e\x67\x5f\x76\x65\x72\x73\x69\x6f\x6e\x5f\x70\x65\x72\x63\x65\x6e\x74\x61\x67\x65\x18\x03\x20\x01\x28\x02\x12\x3f\x0a\x1c\x63\x75\x72\x72\x65\x6e\x74\x5f\x76\x65\x72\x73\x69\x6f\x6e\x5f\x63\x68\x61\x6e\x67\x65\x64\x5f\x74\x69\x6d\x65\x18\x04\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x3f\x0a\x1c\x72\x61\x6d\x70\x69\x6e\x67\x5f\x76\x65\x72\x73\x69\x6f\x6e\x5f\x63\x68\x61\x6e\x67\x65\x64\x5f\x74\x69\x6d\x65\x18\x05\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x4a\x0a\x27\x72\x61\x6d\x70\x69\x6e\x67\x5f\x76\x65\x72\x73\x69\x6f\x6e\x5f\x70\x65\x72\x63\x65\x6e\x74\x61\x67\x65\x5f\x63\x68\x61\x6e\x67\x65\x64\x5f\x74\x69\x6d\x65\x18\x06\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data WorkerDeploymentOptions = WorkerDeploymentOptions
+  { deploymentName :: !(Maybe Text)
+  , buildId :: !(Maybe Text)
+  , workerVersioningMode :: !(Maybe TE_Enums_V1_Deployment.WorkerVersioningMode)
+  , workerDeploymentOptionsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkerDeploymentOptions :: WorkerDeploymentOptions
+defaultWorkerDeploymentOptions = WorkerDeploymentOptions
+  { deploymentName = Nothing
+  , buildId = Nothing
+  , workerVersioningMode = Nothing
+  , workerDeploymentOptionsUnknownFields = []
+  }
+
+instance MessageEncode WorkerDeploymentOptions where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.deploymentName)
+    <> (maybe mempty (\v -> archString 18 v) msg.buildId)
+    <> (maybe mempty (\v -> archVarint 24 (fromIntegral (fromEnum v))) msg.workerVersioningMode)
+    <> encodeUnknownFields msg.workerDeploymentOptionsUnknownFields
+
+instance MessageSize WorkerDeploymentOptions where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.deploymentName)
+    + (maybe 0 (\v -> archStringSize v) msg.buildId)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.workerVersioningMode)
+    + unknownFieldsSize msg.workerDeploymentOptionsUnknownFields
+
+instance MessageDecode WorkerDeploymentOptions where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (WorkerDeploymentOptions {deploymentName = acc_0, buildId = acc_1, workerVersioningMode = acc_2, workerDeploymentOptionsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerDeploymentOptions where
+  protoMessageName _ = "temporal.api.deployment.v1.WorkerDeploymentOptions"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultWorkerDeploymentOptions
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "deployment_name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentOptions) -> m.deploymentName
+        , fdSet = \v (m :: WorkerDeploymentOptions) -> (m { deploymentName = v } :: WorkerDeploymentOptions)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "build_id"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentOptions) -> m.buildId
+        , fdSet = \v (m :: WorkerDeploymentOptions) -> (m { buildId = v } :: WorkerDeploymentOptions)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "worker_versioning_mode"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.WorkerVersioningMode"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentOptions) -> m.workerVersioningMode
+        , fdSet = \v (m :: WorkerDeploymentOptions) -> (m { workerVersioningMode = v } :: WorkerDeploymentOptions)
+        })
+    ]
+
+instance IsMessage WorkerDeploymentOptions
+
+instance Aeson.ToJSON WorkerDeploymentOptions where
+  toJSON msg = jsonObject
+      [ "deploymentName" .=: msg.deploymentName
+      , "buildId" .=: msg.buildId
+      , "workerVersioningMode" .=: msg.workerVersioningMode
+      ]
+
+instance Aeson.FromJSON WorkerDeploymentOptions where
+  parseJSON = Aeson.withObject "WorkerDeploymentOptions" $ \obj -> do
+    fld_deploymentName <- parseFieldMaybe obj "deploymentName"
+    fld_buildId <- parseFieldMaybe obj "buildId"
+    fld_workerVersioningMode <- parseFieldMaybe obj "workerVersioningMode"
+    pure (defaultWorkerDeploymentOptions
+      { deploymentName = maybe (defaultWorkerDeploymentOptions.deploymentName) Prelude.id fld_deploymentName
+      , buildId = maybe (defaultWorkerDeploymentOptions.buildId) Prelude.id fld_buildId
+      , workerVersioningMode = maybe (defaultWorkerDeploymentOptions.workerVersioningMode) Prelude.id fld_workerVersioningMode
+      , workerDeploymentOptionsUnknownFields = []
+      } :: WorkerDeploymentOptions)
+
+instance Hashable WorkerDeploymentOptions where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.deploymentName) msg.buildId) msg.workerVersioningMode
+
+instance Proto.Extension.HasExtensions WorkerDeploymentOptions where
+  messageUnknownFields msg = msg.workerDeploymentOptionsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerDeploymentOptionsUnknownFields = ufs }
+
+instance Semigroup WorkerDeploymentOptions where
+  a <> b = WorkerDeploymentOptions
+    { deploymentName = case b.deploymentName of { Nothing -> a.deploymentName; x -> x }
+    , buildId = case b.buildId of { Nothing -> a.buildId; x -> x }
+    , workerVersioningMode = case b.workerVersioningMode of { Nothing -> a.workerVersioningMode; x -> x }
+    , workerDeploymentOptionsUnknownFields = a.workerDeploymentOptionsUnknownFields <> b.workerDeploymentOptionsUnknownFields
+    }
+
+instance Monoid WorkerDeploymentOptions where
+  mempty = defaultWorkerDeploymentOptions
+
+data Deployment = Deployment
+  { seriesName :: !(Maybe Text)
+  , buildId :: !(Maybe Text)
+  , deploymentUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultDeployment :: Deployment
+defaultDeployment = Deployment
+  { seriesName = Nothing
+  , buildId = Nothing
+  , deploymentUnknownFields = []
+  }
+
+instance MessageEncode Deployment where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.seriesName)
+    <> (maybe mempty (\v -> archString 18 v) msg.buildId)
+    <> encodeUnknownFields msg.deploymentUnknownFields
+
+instance MessageSize Deployment where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.seriesName)
+    + (maybe 0 (\v -> archStringSize v) msg.buildId)
+    + unknownFieldsSize msg.deploymentUnknownFields
+
+instance MessageDecode Deployment where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Deployment {seriesName = acc_0, buildId = acc_1, deploymentUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Deployment where
+  protoMessageName _ = "temporal.api.deployment.v1.Deployment"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultDeployment
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "series_name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Deployment) -> m.seriesName
+        , fdSet = \v (m :: Deployment) -> (m { seriesName = v } :: Deployment)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "build_id"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Deployment) -> m.buildId
+        , fdSet = \v (m :: Deployment) -> (m { buildId = v } :: Deployment)
+        })
+    ]
+
+instance IsMessage Deployment
+
+instance Aeson.ToJSON Deployment where
+  toJSON msg = jsonObject
+      [ "seriesName" .=: msg.seriesName
+      , "buildId" .=: msg.buildId
+      ]
+
+instance Aeson.FromJSON Deployment where
+  parseJSON = Aeson.withObject "Deployment" $ \obj -> do
+    fld_seriesName <- parseFieldMaybe obj "seriesName"
+    fld_buildId <- parseFieldMaybe obj "buildId"
+    pure (defaultDeployment
+      { seriesName = maybe (defaultDeployment.seriesName) Prelude.id fld_seriesName
+      , buildId = maybe (defaultDeployment.buildId) Prelude.id fld_buildId
+      , deploymentUnknownFields = []
+      } :: Deployment)
+
+instance Hashable Deployment where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.seriesName) msg.buildId
+
+instance Proto.Extension.HasExtensions Deployment where
+  messageUnknownFields msg = msg.deploymentUnknownFields
+  setMessageUnknownFields !ufs msg = msg { deploymentUnknownFields = ufs }
+
+instance Semigroup Deployment where
+  a <> b = Deployment
+    { seriesName = case b.seriesName of { Nothing -> a.seriesName; x -> x }
+    , buildId = case b.buildId of { Nothing -> a.buildId; x -> x }
+    , deploymentUnknownFields = a.deploymentUnknownFields <> b.deploymentUnknownFields
+    }
+
+instance Monoid Deployment where
+  mempty = defaultDeployment
+
+data DeploymentInfo = DeploymentInfo
+  { deployment :: !(Maybe Deployment)
+  , createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , taskQueueInfos :: !(V.Vector DeploymentInfo'TaskQueueInfo)
+  , metadata :: !(V.Vector DeploymentInfo'MetadataEntry)
+  , isCurrent :: !(Maybe Bool)
+  , deploymentInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data DeploymentInfo'MetadataEntry = DeploymentInfo'MetadataEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe TE_Common_V1_Message.Payload)
+  , deploymentInfoMetadataEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultDeploymentInfo'MetadataEntry :: DeploymentInfo'MetadataEntry
+defaultDeploymentInfo'MetadataEntry = DeploymentInfo'MetadataEntry
+  { key = Nothing
+  , value = Nothing
+  , deploymentInfoMetadataEntryUnknownFields = []
+  }
+
+instance MessageEncode DeploymentInfo'MetadataEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.deploymentInfoMetadataEntryUnknownFields
+
+instance MessageSize DeploymentInfo'MetadataEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.deploymentInfoMetadataEntryUnknownFields
+
+instance MessageDecode DeploymentInfo'MetadataEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (DeploymentInfo'MetadataEntry {key = acc_0, value = acc_1, deploymentInfoMetadataEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage DeploymentInfo'MetadataEntry where
+  protoMessageName _ = "temporal.api.deployment.v1.DeploymentInfo.MetadataEntry"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultDeploymentInfo'MetadataEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo'MetadataEntry) -> m.key
+        , fdSet = \v (m :: DeploymentInfo'MetadataEntry) -> (m { key = v } :: DeploymentInfo'MetadataEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo'MetadataEntry) -> m.value
+        , fdSet = \v (m :: DeploymentInfo'MetadataEntry) -> (m { value = v } :: DeploymentInfo'MetadataEntry)
+        })
+    ]
+
+instance IsMessage DeploymentInfo'MetadataEntry
+
+instance Aeson.ToJSON DeploymentInfo'MetadataEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON DeploymentInfo'MetadataEntry where
+  parseJSON = Aeson.withObject "DeploymentInfo'MetadataEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultDeploymentInfo'MetadataEntry
+      { key = maybe (defaultDeploymentInfo'MetadataEntry.key) Prelude.id fld_key
+      , value = maybe (defaultDeploymentInfo'MetadataEntry.value) Prelude.id fld_value
+      , deploymentInfoMetadataEntryUnknownFields = []
+      } :: DeploymentInfo'MetadataEntry)
+
+instance Hashable DeploymentInfo'MetadataEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions DeploymentInfo'MetadataEntry where
+  messageUnknownFields msg = msg.deploymentInfoMetadataEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { deploymentInfoMetadataEntryUnknownFields = ufs }
+
+instance Semigroup DeploymentInfo'MetadataEntry where
+  a <> b = DeploymentInfo'MetadataEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , deploymentInfoMetadataEntryUnknownFields = a.deploymentInfoMetadataEntryUnknownFields <> b.deploymentInfoMetadataEntryUnknownFields
+    }
+
+instance Monoid DeploymentInfo'MetadataEntry where
+  mempty = defaultDeploymentInfo'MetadataEntry
+
+data DeploymentInfo'TaskQueueInfo = DeploymentInfo'TaskQueueInfo
+  { name :: !(Maybe Text)
+  , type' :: !(Maybe TE_Enums_V1_TaskQueue.TaskQueueType)
+  , firstPollerTime :: !(Maybe PB_Timestamp.Timestamp)
+  , deploymentInfoTaskQueueInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultDeploymentInfo'TaskQueueInfo :: DeploymentInfo'TaskQueueInfo
+defaultDeploymentInfo'TaskQueueInfo = DeploymentInfo'TaskQueueInfo
+  { name = Nothing
+  , type' = Nothing
+  , firstPollerTime = Nothing
+  , deploymentInfoTaskQueueInfoUnknownFields = []
+  }
+
+instance MessageEncode DeploymentInfo'TaskQueueInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.type')
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.firstPollerTime)
+    <> encodeUnknownFields msg.deploymentInfoTaskQueueInfoUnknownFields
+
+instance MessageSize DeploymentInfo'TaskQueueInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.type')
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.firstPollerTime)
+    + unknownFieldsSize msg.deploymentInfoTaskQueueInfoUnknownFields
+
+instance MessageDecode DeploymentInfo'TaskQueueInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (DeploymentInfo'TaskQueueInfo {name = acc_0, type' = acc_1, firstPollerTime = acc_2, deploymentInfoTaskQueueInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage DeploymentInfo'TaskQueueInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.DeploymentInfo.TaskQueueInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultDeploymentInfo'TaskQueueInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo'TaskQueueInfo) -> m.name
+        , fdSet = \v (m :: DeploymentInfo'TaskQueueInfo) -> (m { name = v } :: DeploymentInfo'TaskQueueInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "type"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.TaskQueueType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo'TaskQueueInfo) -> m.type'
+        , fdSet = \v (m :: DeploymentInfo'TaskQueueInfo) -> (m { type' = v } :: DeploymentInfo'TaskQueueInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "first_poller_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo'TaskQueueInfo) -> m.firstPollerTime
+        , fdSet = \v (m :: DeploymentInfo'TaskQueueInfo) -> (m { firstPollerTime = v } :: DeploymentInfo'TaskQueueInfo)
+        })
+    ]
+
+instance IsMessage DeploymentInfo'TaskQueueInfo
+
+instance Aeson.ToJSON DeploymentInfo'TaskQueueInfo where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+      , "type" .=: msg.type'
+      , "firstPollerTime" .=: msg.firstPollerTime
+      ]
+
+instance Aeson.FromJSON DeploymentInfo'TaskQueueInfo where
+  parseJSON = Aeson.withObject "DeploymentInfo'TaskQueueInfo" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    fld_type' <- parseFieldMaybe obj "type"
+    fld_firstPollerTime <- parseFieldMaybe obj "firstPollerTime"
+    pure (defaultDeploymentInfo'TaskQueueInfo
+      { name = maybe (defaultDeploymentInfo'TaskQueueInfo.name) Prelude.id fld_name
+      , type' = maybe (defaultDeploymentInfo'TaskQueueInfo.type') Prelude.id fld_type'
+      , firstPollerTime = maybe (defaultDeploymentInfo'TaskQueueInfo.firstPollerTime) Prelude.id fld_firstPollerTime
+      , deploymentInfoTaskQueueInfoUnknownFields = []
+      } :: DeploymentInfo'TaskQueueInfo)
+
+instance Hashable DeploymentInfo'TaskQueueInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.name) msg.type') msg.firstPollerTime
+
+instance Proto.Extension.HasExtensions DeploymentInfo'TaskQueueInfo where
+  messageUnknownFields msg = msg.deploymentInfoTaskQueueInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { deploymentInfoTaskQueueInfoUnknownFields = ufs }
+
+instance Semigroup DeploymentInfo'TaskQueueInfo where
+  a <> b = DeploymentInfo'TaskQueueInfo
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , type' = case b.type' of { Nothing -> a.type'; x -> x }
+    , firstPollerTime = case b.firstPollerTime of { Nothing -> a.firstPollerTime; x -> x }
+    , deploymentInfoTaskQueueInfoUnknownFields = a.deploymentInfoTaskQueueInfoUnknownFields <> b.deploymentInfoTaskQueueInfoUnknownFields
+    }
+
+instance Monoid DeploymentInfo'TaskQueueInfo where
+  mempty = defaultDeploymentInfo'TaskQueueInfo
+
+defaultDeploymentInfo :: DeploymentInfo
+defaultDeploymentInfo = DeploymentInfo
+  { deployment = Nothing
+  , createTime = Nothing
+  , taskQueueInfos = V.empty
+  , metadata = V.empty
+  , isCurrent = Nothing
+  , deploymentInfoUnknownFields = []
+  }
+
+instance MessageEncode DeploymentInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.deployment)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.createTime)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 26 sz (buildMessage v)) mempty msg.taskQueueInfos
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 34 sz (buildMessage v)) mempty msg.metadata
+    <> (maybe mempty (\v -> archBool 40 v) msg.isCurrent)
+    <> encodeUnknownFields msg.deploymentInfoUnknownFields
+
+instance MessageSize DeploymentInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.deployment)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.taskQueueInfos)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.metadata)
+    + (maybe 0 (\v -> archBoolSize) msg.isCurrent)
+    + unknownFieldsSize msg.deploymentInfoUnknownFields
+
+instance MessageDecode DeploymentInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing V.empty V.empty Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (DeploymentInfo {deployment = acc_0, createTime = acc_1, taskQueueInfos = acc_2, metadata = acc_3, isCurrent = acc_4, deploymentInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (acc_2 <> V.singleton v) acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (acc_3 <> V.singleton v) acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage DeploymentInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.DeploymentInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultDeploymentInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "deployment"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.Deployment"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo) -> m.deployment
+        , fdSet = \v (m :: DeploymentInfo) -> (m { deployment = v } :: DeploymentInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo) -> m.createTime
+        , fdSet = \v (m :: DeploymentInfo) -> (m { createTime = v } :: DeploymentInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "task_queue_infos"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.DeploymentInfo.TaskQueueInfo"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: DeploymentInfo) -> m.taskQueueInfos
+        , fdSet = \v (m :: DeploymentInfo) -> (m { taskQueueInfos = v } :: DeploymentInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "metadata"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.DeploymentInfo.MetadataEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: DeploymentInfo) -> m.metadata
+        , fdSet = \v (m :: DeploymentInfo) -> (m { metadata = v } :: DeploymentInfo)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "is_current"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentInfo) -> m.isCurrent
+        , fdSet = \v (m :: DeploymentInfo) -> (m { isCurrent = v } :: DeploymentInfo)
+        })
+    ]
+
+instance IsMessage DeploymentInfo
+
+instance Aeson.ToJSON DeploymentInfo where
+  toJSON msg = jsonObject
+      [ "deployment" .=: msg.deployment
+      , "createTime" .=: msg.createTime
+      , "taskQueueInfos" .=: msg.taskQueueInfos
+      , "metadata" .=: msg.metadata
+      , "isCurrent" .=: msg.isCurrent
+      ]
+
+instance Aeson.FromJSON DeploymentInfo where
+  parseJSON = Aeson.withObject "DeploymentInfo" $ \obj -> do
+    fld_deployment <- parseFieldMaybe obj "deployment"
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    fld_taskQueueInfos <- parseFieldMaybe obj "taskQueueInfos"
+    fld_metadata <- parseFieldMaybe obj "metadata"
+    fld_isCurrent <- parseFieldMaybe obj "isCurrent"
+    pure (defaultDeploymentInfo
+      { deployment = maybe (defaultDeploymentInfo.deployment) Prelude.id fld_deployment
+      , createTime = maybe (defaultDeploymentInfo.createTime) Prelude.id fld_createTime
+      , taskQueueInfos = maybe (defaultDeploymentInfo.taskQueueInfos) Prelude.id fld_taskQueueInfos
+      , metadata = maybe (defaultDeploymentInfo.metadata) Prelude.id fld_metadata
+      , isCurrent = maybe (defaultDeploymentInfo.isCurrent) Prelude.id fld_isCurrent
+      , deploymentInfoUnknownFields = []
+      } :: DeploymentInfo)
+
+instance Hashable DeploymentInfo where
+  hashWithSalt salt msg = hashWithSalt (V.foldl' hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.deployment) msg.createTime) msg.taskQueueInfos) msg.metadata) msg.isCurrent
+
+instance Proto.Extension.HasExtensions DeploymentInfo where
+  messageUnknownFields msg = msg.deploymentInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { deploymentInfoUnknownFields = ufs }
+
+instance Semigroup DeploymentInfo where
+  a <> b = DeploymentInfo
+    { deployment = case b.deployment of { Nothing -> a.deployment; x -> x }
+    , createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , taskQueueInfos = a.taskQueueInfos <> b.taskQueueInfos
+    , metadata = a.metadata <> b.metadata
+    , isCurrent = case b.isCurrent of { Nothing -> a.isCurrent; x -> x }
+    , deploymentInfoUnknownFields = a.deploymentInfoUnknownFields <> b.deploymentInfoUnknownFields
+    }
+
+instance Monoid DeploymentInfo where
+  mempty = defaultDeploymentInfo
+
+data UpdateDeploymentMetadata = UpdateDeploymentMetadata
+  { upsertEntries :: !(V.Vector UpdateDeploymentMetadata'UpsertEntriesEntry)
+  , removeEntries :: !(V.Vector Text)
+  , updateDeploymentMetadataUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data UpdateDeploymentMetadata'UpsertEntriesEntry = UpdateDeploymentMetadata'UpsertEntriesEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe TE_Common_V1_Message.Payload)
+  , updateDeploymentMetadataUpsertEntriesEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultUpdateDeploymentMetadata'UpsertEntriesEntry :: UpdateDeploymentMetadata'UpsertEntriesEntry
+defaultUpdateDeploymentMetadata'UpsertEntriesEntry = UpdateDeploymentMetadata'UpsertEntriesEntry
+  { key = Nothing
+  , value = Nothing
+  , updateDeploymentMetadataUpsertEntriesEntryUnknownFields = []
+  }
+
+instance MessageEncode UpdateDeploymentMetadata'UpsertEntriesEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.updateDeploymentMetadataUpsertEntriesEntryUnknownFields
+
+instance MessageSize UpdateDeploymentMetadata'UpsertEntriesEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.updateDeploymentMetadataUpsertEntriesEntryUnknownFields
+
+instance MessageDecode UpdateDeploymentMetadata'UpsertEntriesEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (UpdateDeploymentMetadata'UpsertEntriesEntry {key = acc_0, value = acc_1, updateDeploymentMetadataUpsertEntriesEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage UpdateDeploymentMetadata'UpsertEntriesEntry where
+  protoMessageName _ = "temporal.api.deployment.v1.UpdateDeploymentMetadata.UpsertEntriesEntry"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultUpdateDeploymentMetadata'UpsertEntriesEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateDeploymentMetadata'UpsertEntriesEntry) -> m.key
+        , fdSet = \v (m :: UpdateDeploymentMetadata'UpsertEntriesEntry) -> (m { key = v } :: UpdateDeploymentMetadata'UpsertEntriesEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateDeploymentMetadata'UpsertEntriesEntry) -> m.value
+        , fdSet = \v (m :: UpdateDeploymentMetadata'UpsertEntriesEntry) -> (m { value = v } :: UpdateDeploymentMetadata'UpsertEntriesEntry)
+        })
+    ]
+
+instance IsMessage UpdateDeploymentMetadata'UpsertEntriesEntry
+
+instance Aeson.ToJSON UpdateDeploymentMetadata'UpsertEntriesEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON UpdateDeploymentMetadata'UpsertEntriesEntry where
+  parseJSON = Aeson.withObject "UpdateDeploymentMetadata'UpsertEntriesEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultUpdateDeploymentMetadata'UpsertEntriesEntry
+      { key = maybe (defaultUpdateDeploymentMetadata'UpsertEntriesEntry.key) Prelude.id fld_key
+      , value = maybe (defaultUpdateDeploymentMetadata'UpsertEntriesEntry.value) Prelude.id fld_value
+      , updateDeploymentMetadataUpsertEntriesEntryUnknownFields = []
+      } :: UpdateDeploymentMetadata'UpsertEntriesEntry)
+
+instance Hashable UpdateDeploymentMetadata'UpsertEntriesEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions UpdateDeploymentMetadata'UpsertEntriesEntry where
+  messageUnknownFields msg = msg.updateDeploymentMetadataUpsertEntriesEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { updateDeploymentMetadataUpsertEntriesEntryUnknownFields = ufs }
+
+instance Semigroup UpdateDeploymentMetadata'UpsertEntriesEntry where
+  a <> b = UpdateDeploymentMetadata'UpsertEntriesEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , updateDeploymentMetadataUpsertEntriesEntryUnknownFields = a.updateDeploymentMetadataUpsertEntriesEntryUnknownFields <> b.updateDeploymentMetadataUpsertEntriesEntryUnknownFields
+    }
+
+instance Monoid UpdateDeploymentMetadata'UpsertEntriesEntry where
+  mempty = defaultUpdateDeploymentMetadata'UpsertEntriesEntry
+
+defaultUpdateDeploymentMetadata :: UpdateDeploymentMetadata
+defaultUpdateDeploymentMetadata = UpdateDeploymentMetadata
+  { upsertEntries = V.empty
+  , removeEntries = V.empty
+  , updateDeploymentMetadataUnknownFields = []
+  }
+
+instance MessageEncode UpdateDeploymentMetadata where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.upsertEntries
+    <> V.foldl' (\acc v -> acc <> archString 18 v) mempty msg.removeEntries
+    <> encodeUnknownFields msg.updateDeploymentMetadataUnknownFields
+
+instance MessageSize UpdateDeploymentMetadata where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.upsertEntries)
+    + (V.foldl' (\acc v -> acc + fieldTextSize 2 v) 0 msg.removeEntries)
+    + unknownFieldsSize msg.updateDeploymentMetadataUnknownFields
+
+instance MessageDecode UpdateDeploymentMetadata where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty V.empty []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (UpdateDeploymentMetadata {upsertEntries = acc_0, removeEntries = acc_1, updateDeploymentMetadataUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (acc_1 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage UpdateDeploymentMetadata where
+  protoMessageName _ = "temporal.api.deployment.v1.UpdateDeploymentMetadata"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultUpdateDeploymentMetadata
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "upsert_entries"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.UpdateDeploymentMetadata.UpsertEntriesEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: UpdateDeploymentMetadata) -> m.upsertEntries
+        , fdSet = \v (m :: UpdateDeploymentMetadata) -> (m { upsertEntries = v } :: UpdateDeploymentMetadata)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "remove_entries"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: UpdateDeploymentMetadata) -> m.removeEntries
+        , fdSet = \v (m :: UpdateDeploymentMetadata) -> (m { removeEntries = v } :: UpdateDeploymentMetadata)
+        })
+    ]
+
+instance IsMessage UpdateDeploymentMetadata
+
+instance Aeson.ToJSON UpdateDeploymentMetadata where
+  toJSON msg = jsonObject
+      [ "upsertEntries" .=: msg.upsertEntries
+      , "removeEntries" .=: msg.removeEntries
+      ]
+
+instance Aeson.FromJSON UpdateDeploymentMetadata where
+  parseJSON = Aeson.withObject "UpdateDeploymentMetadata" $ \obj -> do
+    fld_upsertEntries <- parseFieldMaybe obj "upsertEntries"
+    fld_removeEntries <- parseFieldMaybe obj "removeEntries"
+    pure (defaultUpdateDeploymentMetadata
+      { upsertEntries = maybe (defaultUpdateDeploymentMetadata.upsertEntries) Prelude.id fld_upsertEntries
+      , removeEntries = maybe (defaultUpdateDeploymentMetadata.removeEntries) Prelude.id fld_removeEntries
+      , updateDeploymentMetadataUnknownFields = []
+      } :: UpdateDeploymentMetadata)
+
+instance Hashable UpdateDeploymentMetadata where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (V.foldl' hashWithSalt (salt) msg.upsertEntries) msg.removeEntries
+
+instance Proto.Extension.HasExtensions UpdateDeploymentMetadata where
+  messageUnknownFields msg = msg.updateDeploymentMetadataUnknownFields
+  setMessageUnknownFields !ufs msg = msg { updateDeploymentMetadataUnknownFields = ufs }
+
+instance Semigroup UpdateDeploymentMetadata where
+  a <> b = UpdateDeploymentMetadata
+    { upsertEntries = a.upsertEntries <> b.upsertEntries
+    , removeEntries = a.removeEntries <> b.removeEntries
+    , updateDeploymentMetadataUnknownFields = a.updateDeploymentMetadataUnknownFields <> b.updateDeploymentMetadataUnknownFields
+    }
+
+instance Monoid UpdateDeploymentMetadata where
+  mempty = defaultUpdateDeploymentMetadata
+
+data DeploymentListInfo = DeploymentListInfo
+  { deployment :: !(Maybe Deployment)
+  , createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , isCurrent :: !(Maybe Bool)
+  , deploymentListInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultDeploymentListInfo :: DeploymentListInfo
+defaultDeploymentListInfo = DeploymentListInfo
+  { deployment = Nothing
+  , createTime = Nothing
+  , isCurrent = Nothing
+  , deploymentListInfoUnknownFields = []
+  }
+
+instance MessageEncode DeploymentListInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.deployment)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.createTime)
+    <> (maybe mempty (\v -> archBool 24 v) msg.isCurrent)
+    <> encodeUnknownFields msg.deploymentListInfoUnknownFields
+
+instance MessageSize DeploymentListInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.deployment)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + (maybe 0 (\v -> archBoolSize) msg.isCurrent)
+    + unknownFieldsSize msg.deploymentListInfoUnknownFields
+
+instance MessageDecode DeploymentListInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (DeploymentListInfo {deployment = acc_0, createTime = acc_1, isCurrent = acc_2, deploymentListInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage DeploymentListInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.DeploymentListInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultDeploymentListInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "deployment"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.Deployment"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentListInfo) -> m.deployment
+        , fdSet = \v (m :: DeploymentListInfo) -> (m { deployment = v } :: DeploymentListInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentListInfo) -> m.createTime
+        , fdSet = \v (m :: DeploymentListInfo) -> (m { createTime = v } :: DeploymentListInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "is_current"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DeploymentListInfo) -> m.isCurrent
+        , fdSet = \v (m :: DeploymentListInfo) -> (m { isCurrent = v } :: DeploymentListInfo)
+        })
+    ]
+
+instance IsMessage DeploymentListInfo
+
+instance Aeson.ToJSON DeploymentListInfo where
+  toJSON msg = jsonObject
+      [ "deployment" .=: msg.deployment
+      , "createTime" .=: msg.createTime
+      , "isCurrent" .=: msg.isCurrent
+      ]
+
+instance Aeson.FromJSON DeploymentListInfo where
+  parseJSON = Aeson.withObject "DeploymentListInfo" $ \obj -> do
+    fld_deployment <- parseFieldMaybe obj "deployment"
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    fld_isCurrent <- parseFieldMaybe obj "isCurrent"
+    pure (defaultDeploymentListInfo
+      { deployment = maybe (defaultDeploymentListInfo.deployment) Prelude.id fld_deployment
+      , createTime = maybe (defaultDeploymentListInfo.createTime) Prelude.id fld_createTime
+      , isCurrent = maybe (defaultDeploymentListInfo.isCurrent) Prelude.id fld_isCurrent
+      , deploymentListInfoUnknownFields = []
+      } :: DeploymentListInfo)
+
+instance Hashable DeploymentListInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.deployment) msg.createTime) msg.isCurrent
+
+instance Proto.Extension.HasExtensions DeploymentListInfo where
+  messageUnknownFields msg = msg.deploymentListInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { deploymentListInfoUnknownFields = ufs }
+
+instance Semigroup DeploymentListInfo where
+  a <> b = DeploymentListInfo
+    { deployment = case b.deployment of { Nothing -> a.deployment; x -> x }
+    , createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , isCurrent = case b.isCurrent of { Nothing -> a.isCurrent; x -> x }
+    , deploymentListInfoUnknownFields = a.deploymentListInfoUnknownFields <> b.deploymentListInfoUnknownFields
+    }
+
+instance Monoid DeploymentListInfo where
+  mempty = defaultDeploymentListInfo
+
+data WorkerDeploymentVersionInfo = WorkerDeploymentVersionInfo
+  { version :: !(Maybe Text)
+  , status :: !(Maybe TE_Enums_V1_Deployment.WorkerDeploymentVersionStatus)
+  , deploymentVersion :: !(Maybe WorkerDeploymentVersion)
+  , deploymentName :: !(Maybe Text)
+  , createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , routingChangedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , currentSinceTime :: !(Maybe PB_Timestamp.Timestamp)
+  , rampingSinceTime :: !(Maybe PB_Timestamp.Timestamp)
+  , firstActivationTime :: !(Maybe PB_Timestamp.Timestamp)
+  , lastDeactivationTime :: !(Maybe PB_Timestamp.Timestamp)
+  , rampPercentage :: !(Maybe Float)
+  , taskQueueInfos :: !(V.Vector WorkerDeploymentVersionInfo'VersionTaskQueueInfo)
+  , drainageInfo :: !(Maybe VersionDrainageInfo)
+  , metadata :: !(Maybe VersionMetadata)
+  , workerDeploymentVersionInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data WorkerDeploymentVersionInfo'VersionTaskQueueInfo = WorkerDeploymentVersionInfo'VersionTaskQueueInfo
+  { name :: !(Maybe Text)
+  , type' :: !(Maybe TE_Enums_V1_TaskQueue.TaskQueueType)
+  , workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo
+defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo = WorkerDeploymentVersionInfo'VersionTaskQueueInfo
+  { name = Nothing
+  , type' = Nothing
+  , workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields = []
+  }
+
+instance MessageEncode WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.type')
+    <> encodeUnknownFields msg.workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields
+
+instance MessageSize WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.type')
+    + unknownFieldsSize msg.workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields
+
+instance MessageDecode WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (WorkerDeploymentVersionInfo'VersionTaskQueueInfo {name = acc_0, type' = acc_1, workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.WorkerDeploymentVersionInfo.VersionTaskQueueInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo) -> m.name
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo) -> (m { name = v } :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "type"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.TaskQueueType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo) -> m.type'
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo) -> (m { type' = v } :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo)
+        })
+    ]
+
+instance IsMessage WorkerDeploymentVersionInfo'VersionTaskQueueInfo
+
+instance Aeson.ToJSON WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+      , "type" .=: msg.type'
+      ]
+
+instance Aeson.FromJSON WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  parseJSON = Aeson.withObject "WorkerDeploymentVersionInfo'VersionTaskQueueInfo" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    fld_type' <- parseFieldMaybe obj "type"
+    pure (defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo
+      { name = maybe (defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo.name) Prelude.id fld_name
+      , type' = maybe (defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo.type') Prelude.id fld_type'
+      , workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields = []
+      } :: WorkerDeploymentVersionInfo'VersionTaskQueueInfo)
+
+instance Hashable WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.name) msg.type'
+
+instance Proto.Extension.HasExtensions WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  messageUnknownFields msg = msg.workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields = ufs }
+
+instance Semigroup WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  a <> b = WorkerDeploymentVersionInfo'VersionTaskQueueInfo
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , type' = case b.type' of { Nothing -> a.type'; x -> x }
+    , workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields = a.workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields <> b.workerDeploymentVersionInfoVersionTaskQueueInfoUnknownFields
+    }
+
+instance Monoid WorkerDeploymentVersionInfo'VersionTaskQueueInfo where
+  mempty = defaultWorkerDeploymentVersionInfo'VersionTaskQueueInfo
+
+defaultWorkerDeploymentVersionInfo :: WorkerDeploymentVersionInfo
+defaultWorkerDeploymentVersionInfo = WorkerDeploymentVersionInfo
+  { version = Nothing
+  , status = Nothing
+  , deploymentVersion = Nothing
+  , deploymentName = Nothing
+  , createTime = Nothing
+  , routingChangedTime = Nothing
+  , currentSinceTime = Nothing
+  , rampingSinceTime = Nothing
+  , firstActivationTime = Nothing
+  , lastDeactivationTime = Nothing
+  , rampPercentage = Nothing
+  , taskQueueInfos = V.empty
+  , drainageInfo = Nothing
+  , metadata = Nothing
+  , workerDeploymentVersionInfoUnknownFields = []
+  }
+
+instance MessageEncode WorkerDeploymentVersionInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.version)
+    <> (maybe mempty (\v -> archVarint 112 (fromIntegral (fromEnum v))) msg.status)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 90 sz (buildMessage v)) msg.deploymentVersion)
+    <> (maybe mempty (\v -> archString 18 v) msg.deploymentName)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.createTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.routingChangedTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.currentSinceTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 50 sz (buildMessage v)) msg.rampingSinceTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 98 sz (buildMessage v)) msg.firstActivationTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 106 sz (buildMessage v)) msg.lastDeactivationTime)
+    <> (maybe mempty (\v -> archFloat 61 v) msg.rampPercentage)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 66 sz (buildMessage v)) mempty msg.taskQueueInfos
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 74 sz (buildMessage v)) msg.drainageInfo)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 82 sz (buildMessage v)) msg.metadata)
+    <> encodeUnknownFields msg.workerDeploymentVersionInfoUnknownFields
+
+instance MessageSize WorkerDeploymentVersionInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.version)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.status)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.deploymentVersion)
+    + (maybe 0 (\v -> archStringSize v) msg.deploymentName)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.routingChangedTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.currentSinceTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.rampingSinceTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.firstActivationTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.lastDeactivationTime)
+    + (maybe 0 (\v -> archFixed32Size) msg.rampPercentage)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.taskQueueInfos)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.drainageInfo)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.metadata)
+    + unknownFieldsSize msg.workerDeploymentVersionInfoUnknownFields
+
+instance MessageDecode WorkerDeploymentVersionInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing V.empty Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_ = withTagM
+        (pure (WorkerDeploymentVersionInfo {version = acc_0, status = acc_1, deploymentVersion = acc_2, deploymentName = acc_3, createTime = acc_4, routingChangedTime = acc_5, currentSinceTime = acc_6, rampingSinceTime = acc_7, firstActivationTime = acc_8, lastDeactivationTime = acc_9, rampPercentage = acc_10, taskQueueInfos = acc_11, drainageInfo = acc_12, metadata = acc_13, workerDeploymentVersionInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          14 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          11 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just v) acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (Just v) acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          12 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 (Just v) acc_9 acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          13 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 (Just v) acc_10 acc_11 acc_12 acc_13 acc_unknown_
+          7 -> do
+            v <- decodeFieldFloat
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 (Just v) acc_11 acc_12 acc_13 acc_unknown_
+          8 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 (acc_11 <> V.singleton v) acc_12 acc_13 acc_unknown_
+          9 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 (Just v) acc_13 acc_unknown_
+          10 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerDeploymentVersionInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.WorkerDeploymentVersionInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultWorkerDeploymentVersionInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "version"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.version
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { version = v } :: WorkerDeploymentVersionInfo)
+        }), (14, SomeField FieldDescriptor
+        { fdName = "status"
+        , fdNumber = 14
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.WorkerDeploymentVersionStatus"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.status
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { status = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (11, SomeField FieldDescriptor
+        { fdName = "deployment_version"
+        , fdNumber = 11
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.WorkerDeploymentVersion"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.deploymentVersion
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { deploymentVersion = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "deployment_name"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.deploymentName
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { deploymentName = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.createTime
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { createTime = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "routing_changed_time"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.routingChangedTime
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { routingChangedTime = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "current_since_time"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.currentSinceTime
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { currentSinceTime = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "ramping_since_time"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.rampingSinceTime
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { rampingSinceTime = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (12, SomeField FieldDescriptor
+        { fdName = "first_activation_time"
+        , fdNumber = 12
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.firstActivationTime
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { firstActivationTime = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (13, SomeField FieldDescriptor
+        { fdName = "last_deactivation_time"
+        , fdNumber = 13
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.lastDeactivationTime
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { lastDeactivationTime = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "ramp_percentage"
+        , fdNumber = 7
+        , fdTypeDesc = ScalarType FloatField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.rampPercentage
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { rampPercentage = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (8, SomeField FieldDescriptor
+        { fdName = "task_queue_infos"
+        , fdNumber = 8
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.WorkerDeploymentVersionInfo.VersionTaskQueueInfo"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.taskQueueInfos
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { taskQueueInfos = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (9, SomeField FieldDescriptor
+        { fdName = "drainage_info"
+        , fdNumber = 9
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.VersionDrainageInfo"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.drainageInfo
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { drainageInfo = v } :: WorkerDeploymentVersionInfo)
+        })
+    , (10, SomeField FieldDescriptor
+        { fdName = "metadata"
+        , fdNumber = 10
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.VersionMetadata"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersionInfo) -> m.metadata
+        , fdSet = \v (m :: WorkerDeploymentVersionInfo) -> (m { metadata = v } :: WorkerDeploymentVersionInfo)
+        })
+    ]
+
+instance IsMessage WorkerDeploymentVersionInfo
+
+instance Aeson.ToJSON WorkerDeploymentVersionInfo where
+  toJSON msg = jsonObject
+      [ "version" .=: msg.version
+      , "status" .=: msg.status
+      , "deploymentVersion" .=: msg.deploymentVersion
+      , "deploymentName" .=: msg.deploymentName
+      , "createTime" .=: msg.createTime
+      , "routingChangedTime" .=: msg.routingChangedTime
+      , "currentSinceTime" .=: msg.currentSinceTime
+      , "rampingSinceTime" .=: msg.rampingSinceTime
+      , "firstActivationTime" .=: msg.firstActivationTime
+      , "lastDeactivationTime" .=: msg.lastDeactivationTime
+      , "rampPercentage" .=: msg.rampPercentage
+      , "taskQueueInfos" .=: msg.taskQueueInfos
+      , "drainageInfo" .=: msg.drainageInfo
+      , "metadata" .=: msg.metadata
+      ]
+
+instance Aeson.FromJSON WorkerDeploymentVersionInfo where
+  parseJSON = Aeson.withObject "WorkerDeploymentVersionInfo" $ \obj -> do
+    fld_version <- parseFieldMaybe obj "version"
+    fld_status <- parseFieldMaybe obj "status"
+    fld_deploymentVersion <- parseFieldMaybe obj "deploymentVersion"
+    fld_deploymentName <- parseFieldMaybe obj "deploymentName"
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    fld_routingChangedTime <- parseFieldMaybe obj "routingChangedTime"
+    fld_currentSinceTime <- parseFieldMaybe obj "currentSinceTime"
+    fld_rampingSinceTime <- parseFieldMaybe obj "rampingSinceTime"
+    fld_firstActivationTime <- parseFieldMaybe obj "firstActivationTime"
+    fld_lastDeactivationTime <- parseFieldMaybe obj "lastDeactivationTime"
+    fld_rampPercentage <- parseFieldMaybe obj "rampPercentage"
+    fld_taskQueueInfos <- parseFieldMaybe obj "taskQueueInfos"
+    fld_drainageInfo <- parseFieldMaybe obj "drainageInfo"
+    fld_metadata <- parseFieldMaybe obj "metadata"
+    pure (defaultWorkerDeploymentVersionInfo
+      { version = maybe (defaultWorkerDeploymentVersionInfo.version) Prelude.id fld_version
+      , status = maybe (defaultWorkerDeploymentVersionInfo.status) Prelude.id fld_status
+      , deploymentVersion = maybe (defaultWorkerDeploymentVersionInfo.deploymentVersion) Prelude.id fld_deploymentVersion
+      , deploymentName = maybe (defaultWorkerDeploymentVersionInfo.deploymentName) Prelude.id fld_deploymentName
+      , createTime = maybe (defaultWorkerDeploymentVersionInfo.createTime) Prelude.id fld_createTime
+      , routingChangedTime = maybe (defaultWorkerDeploymentVersionInfo.routingChangedTime) Prelude.id fld_routingChangedTime
+      , currentSinceTime = maybe (defaultWorkerDeploymentVersionInfo.currentSinceTime) Prelude.id fld_currentSinceTime
+      , rampingSinceTime = maybe (defaultWorkerDeploymentVersionInfo.rampingSinceTime) Prelude.id fld_rampingSinceTime
+      , firstActivationTime = maybe (defaultWorkerDeploymentVersionInfo.firstActivationTime) Prelude.id fld_firstActivationTime
+      , lastDeactivationTime = maybe (defaultWorkerDeploymentVersionInfo.lastDeactivationTime) Prelude.id fld_lastDeactivationTime
+      , rampPercentage = maybe (defaultWorkerDeploymentVersionInfo.rampPercentage) Prelude.id fld_rampPercentage
+      , taskQueueInfos = maybe (defaultWorkerDeploymentVersionInfo.taskQueueInfos) Prelude.id fld_taskQueueInfos
+      , drainageInfo = maybe (defaultWorkerDeploymentVersionInfo.drainageInfo) Prelude.id fld_drainageInfo
+      , metadata = maybe (defaultWorkerDeploymentVersionInfo.metadata) Prelude.id fld_metadata
+      , workerDeploymentVersionInfoUnknownFields = []
+      } :: WorkerDeploymentVersionInfo)
+
+instance Hashable WorkerDeploymentVersionInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.version) msg.status) msg.deploymentVersion) msg.deploymentName) msg.createTime) msg.routingChangedTime) msg.currentSinceTime) msg.rampingSinceTime) msg.firstActivationTime) msg.lastDeactivationTime) msg.rampPercentage) msg.taskQueueInfos) msg.drainageInfo) msg.metadata
+
+instance Proto.Extension.HasExtensions WorkerDeploymentVersionInfo where
+  messageUnknownFields msg = msg.workerDeploymentVersionInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerDeploymentVersionInfoUnknownFields = ufs }
+
+instance Semigroup WorkerDeploymentVersionInfo where
+  a <> b = WorkerDeploymentVersionInfo
+    { version = case b.version of { Nothing -> a.version; x -> x }
+    , status = case b.status of { Nothing -> a.status; x -> x }
+    , deploymentVersion = case b.deploymentVersion of { Nothing -> a.deploymentVersion; x -> x }
+    , deploymentName = case b.deploymentName of { Nothing -> a.deploymentName; x -> x }
+    , createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , routingChangedTime = case b.routingChangedTime of { Nothing -> a.routingChangedTime; x -> x }
+    , currentSinceTime = case b.currentSinceTime of { Nothing -> a.currentSinceTime; x -> x }
+    , rampingSinceTime = case b.rampingSinceTime of { Nothing -> a.rampingSinceTime; x -> x }
+    , firstActivationTime = case b.firstActivationTime of { Nothing -> a.firstActivationTime; x -> x }
+    , lastDeactivationTime = case b.lastDeactivationTime of { Nothing -> a.lastDeactivationTime; x -> x }
+    , rampPercentage = case b.rampPercentage of { Nothing -> a.rampPercentage; x -> x }
+    , taskQueueInfos = a.taskQueueInfos <> b.taskQueueInfos
+    , drainageInfo = case b.drainageInfo of { Nothing -> a.drainageInfo; x -> x }
+    , metadata = case b.metadata of { Nothing -> a.metadata; x -> x }
+    , workerDeploymentVersionInfoUnknownFields = a.workerDeploymentVersionInfoUnknownFields <> b.workerDeploymentVersionInfoUnknownFields
+    }
+
+instance Monoid WorkerDeploymentVersionInfo where
+  mempty = defaultWorkerDeploymentVersionInfo
+
+data VersionDrainageInfo = VersionDrainageInfo
+  { status :: !(Maybe TE_Enums_V1_Deployment.VersionDrainageStatus)
+  , lastChangedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , lastCheckedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , versionDrainageInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultVersionDrainageInfo :: VersionDrainageInfo
+defaultVersionDrainageInfo = VersionDrainageInfo
+  { status = Nothing
+  , lastChangedTime = Nothing
+  , lastCheckedTime = Nothing
+  , versionDrainageInfoUnknownFields = []
+  }
+
+instance MessageEncode VersionDrainageInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral (fromEnum v))) msg.status)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.lastChangedTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.lastCheckedTime)
+    <> encodeUnknownFields msg.versionDrainageInfoUnknownFields
+
+instance MessageSize VersionDrainageInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.status)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.lastChangedTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.lastCheckedTime)
+    + unknownFieldsSize msg.versionDrainageInfoUnknownFields
+
+instance MessageDecode VersionDrainageInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (VersionDrainageInfo {status = acc_0, lastChangedTime = acc_1, lastCheckedTime = acc_2, versionDrainageInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldEnum
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage VersionDrainageInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.VersionDrainageInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultVersionDrainageInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "status"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.VersionDrainageStatus"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionDrainageInfo) -> m.status
+        , fdSet = \v (m :: VersionDrainageInfo) -> (m { status = v } :: VersionDrainageInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "last_changed_time"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionDrainageInfo) -> m.lastChangedTime
+        , fdSet = \v (m :: VersionDrainageInfo) -> (m { lastChangedTime = v } :: VersionDrainageInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "last_checked_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionDrainageInfo) -> m.lastCheckedTime
+        , fdSet = \v (m :: VersionDrainageInfo) -> (m { lastCheckedTime = v } :: VersionDrainageInfo)
+        })
+    ]
+
+instance IsMessage VersionDrainageInfo
+
+instance Aeson.ToJSON VersionDrainageInfo where
+  toJSON msg = jsonObject
+      [ "status" .=: msg.status
+      , "lastChangedTime" .=: msg.lastChangedTime
+      , "lastCheckedTime" .=: msg.lastCheckedTime
+      ]
+
+instance Aeson.FromJSON VersionDrainageInfo where
+  parseJSON = Aeson.withObject "VersionDrainageInfo" $ \obj -> do
+    fld_status <- parseFieldMaybe obj "status"
+    fld_lastChangedTime <- parseFieldMaybe obj "lastChangedTime"
+    fld_lastCheckedTime <- parseFieldMaybe obj "lastCheckedTime"
+    pure (defaultVersionDrainageInfo
+      { status = maybe (defaultVersionDrainageInfo.status) Prelude.id fld_status
+      , lastChangedTime = maybe (defaultVersionDrainageInfo.lastChangedTime) Prelude.id fld_lastChangedTime
+      , lastCheckedTime = maybe (defaultVersionDrainageInfo.lastCheckedTime) Prelude.id fld_lastCheckedTime
+      , versionDrainageInfoUnknownFields = []
+      } :: VersionDrainageInfo)
+
+instance Hashable VersionDrainageInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.status) msg.lastChangedTime) msg.lastCheckedTime
+
+instance Proto.Extension.HasExtensions VersionDrainageInfo where
+  messageUnknownFields msg = msg.versionDrainageInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { versionDrainageInfoUnknownFields = ufs }
+
+instance Semigroup VersionDrainageInfo where
+  a <> b = VersionDrainageInfo
+    { status = case b.status of { Nothing -> a.status; x -> x }
+    , lastChangedTime = case b.lastChangedTime of { Nothing -> a.lastChangedTime; x -> x }
+    , lastCheckedTime = case b.lastCheckedTime of { Nothing -> a.lastCheckedTime; x -> x }
+    , versionDrainageInfoUnknownFields = a.versionDrainageInfoUnknownFields <> b.versionDrainageInfoUnknownFields
+    }
+
+instance Monoid VersionDrainageInfo where
+  mempty = defaultVersionDrainageInfo
+
+data WorkerDeploymentInfo = WorkerDeploymentInfo
+  { name :: !(Maybe Text)
+  , versionSummaries :: !(V.Vector WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+  , createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , routingConfig :: !(Maybe RoutingConfig)
+  , lastModifierIdentity :: !(Maybe Text)
+  , managerIdentity :: !(Maybe Text)
+  , workerDeploymentInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data WorkerDeploymentInfo'WorkerDeploymentVersionSummary = WorkerDeploymentInfo'WorkerDeploymentVersionSummary
+  { version :: !(Maybe Text)
+  , status :: !(Maybe TE_Enums_V1_Deployment.WorkerDeploymentVersionStatus)
+  , deploymentVersion :: !(Maybe WorkerDeploymentVersion)
+  , createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , drainageStatus :: !(Maybe TE_Enums_V1_Deployment.VersionDrainageStatus)
+  , drainageInfo :: !(Maybe VersionDrainageInfo)
+  , currentSinceTime :: !(Maybe PB_Timestamp.Timestamp)
+  , rampingSinceTime :: !(Maybe PB_Timestamp.Timestamp)
+  , routingUpdateTime :: !(Maybe PB_Timestamp.Timestamp)
+  , firstActivationTime :: !(Maybe PB_Timestamp.Timestamp)
+  , lastDeactivationTime :: !(Maybe PB_Timestamp.Timestamp)
+  , workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary
+defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary = WorkerDeploymentInfo'WorkerDeploymentVersionSummary
+  { version = Nothing
+  , status = Nothing
+  , deploymentVersion = Nothing
+  , createTime = Nothing
+  , drainageStatus = Nothing
+  , drainageInfo = Nothing
+  , currentSinceTime = Nothing
+  , rampingSinceTime = Nothing
+  , routingUpdateTime = Nothing
+  , firstActivationTime = Nothing
+  , lastDeactivationTime = Nothing
+  , workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields = []
+  }
+
+instance MessageEncode WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.version)
+    <> (maybe mempty (\v -> archVarint 88 (fromIntegral (fromEnum v))) msg.status)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.deploymentVersion)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.createTime)
+    <> (maybe mempty (\v -> archVarint 24 (fromIntegral (fromEnum v))) msg.drainageStatus)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.drainageInfo)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 50 sz (buildMessage v)) msg.currentSinceTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 58 sz (buildMessage v)) msg.rampingSinceTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 66 sz (buildMessage v)) msg.routingUpdateTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 74 sz (buildMessage v)) msg.firstActivationTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 82 sz (buildMessage v)) msg.lastDeactivationTime)
+    <> encodeUnknownFields msg.workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields
+
+instance MessageSize WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.version)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.status)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.deploymentVersion)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.drainageStatus)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.drainageInfo)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.currentSinceTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.rampingSinceTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.routingUpdateTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.firstActivationTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.lastDeactivationTime)
+    + unknownFieldsSize msg.workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields
+
+instance MessageDecode WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_ = withTagM
+        (pure (WorkerDeploymentInfo'WorkerDeploymentVersionSummary {version = acc_0, status = acc_1, deploymentVersion = acc_2, createTime = acc_3, drainageStatus = acc_4, drainageInfo = acc_5, currentSinceTime = acc_6, rampingSinceTime = acc_7, routingUpdateTime = acc_8, firstActivationTime = acc_9, lastDeactivationTime = acc_10, workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          11 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          3 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just v) acc_7 acc_8 acc_9 acc_10 acc_unknown_
+          7 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (Just v) acc_8 acc_9 acc_10 acc_unknown_
+          8 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 (Just v) acc_9 acc_10 acc_unknown_
+          9 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 (Just v) acc_10 acc_unknown_
+          10 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  protoMessageName _ = "temporal.api.deployment.v1.WorkerDeploymentInfo.WorkerDeploymentVersionSummary"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "version"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.version
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { version = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        }), (11, SomeField FieldDescriptor
+        { fdName = "status"
+        , fdNumber = 11
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.WorkerDeploymentVersionStatus"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.status
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { status = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "deployment_version"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.WorkerDeploymentVersion"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.deploymentVersion
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { deploymentVersion = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.createTime
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { createTime = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "drainage_status"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.VersionDrainageStatus"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.drainageStatus
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { drainageStatus = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "drainage_info"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.VersionDrainageInfo"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.drainageInfo
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { drainageInfo = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "current_since_time"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.currentSinceTime
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { currentSinceTime = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "ramping_since_time"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.rampingSinceTime
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { rampingSinceTime = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (8, SomeField FieldDescriptor
+        { fdName = "routing_update_time"
+        , fdNumber = 8
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.routingUpdateTime
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { routingUpdateTime = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (9, SomeField FieldDescriptor
+        { fdName = "first_activation_time"
+        , fdNumber = 9
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.firstActivationTime
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { firstActivationTime = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    , (10, SomeField FieldDescriptor
+        { fdName = "last_deactivation_time"
+        , fdNumber = 10
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> m.lastDeactivationTime
+        , fdSet = \v (m :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary) -> (m { lastDeactivationTime = v } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+        })
+    ]
+
+instance IsMessage WorkerDeploymentInfo'WorkerDeploymentVersionSummary
+
+instance Aeson.ToJSON WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  toJSON msg = jsonObject
+      [ "version" .=: msg.version
+      , "status" .=: msg.status
+      , "deploymentVersion" .=: msg.deploymentVersion
+      , "createTime" .=: msg.createTime
+      , "drainageStatus" .=: msg.drainageStatus
+      , "drainageInfo" .=: msg.drainageInfo
+      , "currentSinceTime" .=: msg.currentSinceTime
+      , "rampingSinceTime" .=: msg.rampingSinceTime
+      , "routingUpdateTime" .=: msg.routingUpdateTime
+      , "firstActivationTime" .=: msg.firstActivationTime
+      , "lastDeactivationTime" .=: msg.lastDeactivationTime
+      ]
+
+instance Aeson.FromJSON WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  parseJSON = Aeson.withObject "WorkerDeploymentInfo'WorkerDeploymentVersionSummary" $ \obj -> do
+    fld_version <- parseFieldMaybe obj "version"
+    fld_status <- parseFieldMaybe obj "status"
+    fld_deploymentVersion <- parseFieldMaybe obj "deploymentVersion"
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    fld_drainageStatus <- parseFieldMaybe obj "drainageStatus"
+    fld_drainageInfo <- parseFieldMaybe obj "drainageInfo"
+    fld_currentSinceTime <- parseFieldMaybe obj "currentSinceTime"
+    fld_rampingSinceTime <- parseFieldMaybe obj "rampingSinceTime"
+    fld_routingUpdateTime <- parseFieldMaybe obj "routingUpdateTime"
+    fld_firstActivationTime <- parseFieldMaybe obj "firstActivationTime"
+    fld_lastDeactivationTime <- parseFieldMaybe obj "lastDeactivationTime"
+    pure (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary
+      { version = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.version) Prelude.id fld_version
+      , status = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.status) Prelude.id fld_status
+      , deploymentVersion = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.deploymentVersion) Prelude.id fld_deploymentVersion
+      , createTime = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.createTime) Prelude.id fld_createTime
+      , drainageStatus = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.drainageStatus) Prelude.id fld_drainageStatus
+      , drainageInfo = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.drainageInfo) Prelude.id fld_drainageInfo
+      , currentSinceTime = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.currentSinceTime) Prelude.id fld_currentSinceTime
+      , rampingSinceTime = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.rampingSinceTime) Prelude.id fld_rampingSinceTime
+      , routingUpdateTime = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.routingUpdateTime) Prelude.id fld_routingUpdateTime
+      , firstActivationTime = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.firstActivationTime) Prelude.id fld_firstActivationTime
+      , lastDeactivationTime = maybe (defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary.lastDeactivationTime) Prelude.id fld_lastDeactivationTime
+      , workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields = []
+      } :: WorkerDeploymentInfo'WorkerDeploymentVersionSummary)
+
+instance Hashable WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.version) msg.status) msg.deploymentVersion) msg.createTime) msg.drainageStatus) msg.drainageInfo) msg.currentSinceTime) msg.rampingSinceTime) msg.routingUpdateTime) msg.firstActivationTime) msg.lastDeactivationTime
+
+instance Proto.Extension.HasExtensions WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  messageUnknownFields msg = msg.workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields = ufs }
+
+instance Semigroup WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  a <> b = WorkerDeploymentInfo'WorkerDeploymentVersionSummary
+    { version = case b.version of { Nothing -> a.version; x -> x }
+    , status = case b.status of { Nothing -> a.status; x -> x }
+    , deploymentVersion = case b.deploymentVersion of { Nothing -> a.deploymentVersion; x -> x }
+    , createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , drainageStatus = case b.drainageStatus of { Nothing -> a.drainageStatus; x -> x }
+    , drainageInfo = case b.drainageInfo of { Nothing -> a.drainageInfo; x -> x }
+    , currentSinceTime = case b.currentSinceTime of { Nothing -> a.currentSinceTime; x -> x }
+    , rampingSinceTime = case b.rampingSinceTime of { Nothing -> a.rampingSinceTime; x -> x }
+    , routingUpdateTime = case b.routingUpdateTime of { Nothing -> a.routingUpdateTime; x -> x }
+    , firstActivationTime = case b.firstActivationTime of { Nothing -> a.firstActivationTime; x -> x }
+    , lastDeactivationTime = case b.lastDeactivationTime of { Nothing -> a.lastDeactivationTime; x -> x }
+    , workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields = a.workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields <> b.workerDeploymentInfoWorkerDeploymentVersionSummaryUnknownFields
+    }
+
+instance Monoid WorkerDeploymentInfo'WorkerDeploymentVersionSummary where
+  mempty = defaultWorkerDeploymentInfo'WorkerDeploymentVersionSummary
+
+defaultWorkerDeploymentInfo :: WorkerDeploymentInfo
+defaultWorkerDeploymentInfo = WorkerDeploymentInfo
+  { name = Nothing
+  , versionSummaries = V.empty
+  , createTime = Nothing
+  , routingConfig = Nothing
+  , lastModifierIdentity = Nothing
+  , managerIdentity = Nothing
+  , workerDeploymentInfoUnknownFields = []
+  }
+
+instance MessageEncode WorkerDeploymentInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 18 sz (buildMessage v)) mempty msg.versionSummaries
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.createTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.routingConfig)
+    <> (maybe mempty (\v -> archString 42 v) msg.lastModifierIdentity)
+    <> (maybe mempty (\v -> archString 50 v) msg.managerIdentity)
+    <> encodeUnknownFields msg.workerDeploymentInfoUnknownFields
+
+instance MessageSize WorkerDeploymentInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.versionSummaries)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.routingConfig)
+    + (maybe 0 (\v -> archStringSize v) msg.lastModifierIdentity)
+    + (maybe 0 (\v -> archStringSize v) msg.managerIdentity)
+    + unknownFieldsSize msg.workerDeploymentInfoUnknownFields
+
+instance MessageDecode WorkerDeploymentInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing V.empty Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_unknown_ = withTagM
+        (pure (WorkerDeploymentInfo {name = acc_0, versionSummaries = acc_1, createTime = acc_2, routingConfig = acc_3, lastModifierIdentity = acc_4, managerIdentity = acc_5, workerDeploymentInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (acc_1 <> V.singleton v) acc_2 acc_3 acc_4 acc_5 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_unknown_
+          5 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_unknown_
+          6 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerDeploymentInfo where
+  protoMessageName _ = "temporal.api.deployment.v1.WorkerDeploymentInfo"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultWorkerDeploymentInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo) -> m.name
+        , fdSet = \v (m :: WorkerDeploymentInfo) -> (m { name = v } :: WorkerDeploymentInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "version_summaries"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.WorkerDeploymentInfo.WorkerDeploymentVersionSummary"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: WorkerDeploymentInfo) -> m.versionSummaries
+        , fdSet = \v (m :: WorkerDeploymentInfo) -> (m { versionSummaries = v } :: WorkerDeploymentInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo) -> m.createTime
+        , fdSet = \v (m :: WorkerDeploymentInfo) -> (m { createTime = v } :: WorkerDeploymentInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "routing_config"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.RoutingConfig"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo) -> m.routingConfig
+        , fdSet = \v (m :: WorkerDeploymentInfo) -> (m { routingConfig = v } :: WorkerDeploymentInfo)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "last_modifier_identity"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo) -> m.lastModifierIdentity
+        , fdSet = \v (m :: WorkerDeploymentInfo) -> (m { lastModifierIdentity = v } :: WorkerDeploymentInfo)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "manager_identity"
+        , fdNumber = 6
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentInfo) -> m.managerIdentity
+        , fdSet = \v (m :: WorkerDeploymentInfo) -> (m { managerIdentity = v } :: WorkerDeploymentInfo)
+        })
+    ]
+
+instance IsMessage WorkerDeploymentInfo
+
+instance Aeson.ToJSON WorkerDeploymentInfo where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+      , "versionSummaries" .=: msg.versionSummaries
+      , "createTime" .=: msg.createTime
+      , "routingConfig" .=: msg.routingConfig
+      , "lastModifierIdentity" .=: msg.lastModifierIdentity
+      , "managerIdentity" .=: msg.managerIdentity
+      ]
+
+instance Aeson.FromJSON WorkerDeploymentInfo where
+  parseJSON = Aeson.withObject "WorkerDeploymentInfo" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    fld_versionSummaries <- parseFieldMaybe obj "versionSummaries"
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    fld_routingConfig <- parseFieldMaybe obj "routingConfig"
+    fld_lastModifierIdentity <- parseFieldMaybe obj "lastModifierIdentity"
+    fld_managerIdentity <- parseFieldMaybe obj "managerIdentity"
+    pure (defaultWorkerDeploymentInfo
+      { name = maybe (defaultWorkerDeploymentInfo.name) Prelude.id fld_name
+      , versionSummaries = maybe (defaultWorkerDeploymentInfo.versionSummaries) Prelude.id fld_versionSummaries
+      , createTime = maybe (defaultWorkerDeploymentInfo.createTime) Prelude.id fld_createTime
+      , routingConfig = maybe (defaultWorkerDeploymentInfo.routingConfig) Prelude.id fld_routingConfig
+      , lastModifierIdentity = maybe (defaultWorkerDeploymentInfo.lastModifierIdentity) Prelude.id fld_lastModifierIdentity
+      , managerIdentity = maybe (defaultWorkerDeploymentInfo.managerIdentity) Prelude.id fld_managerIdentity
+      , workerDeploymentInfoUnknownFields = []
+      } :: WorkerDeploymentInfo)
+
+instance Hashable WorkerDeploymentInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (salt) msg.name) msg.versionSummaries) msg.createTime) msg.routingConfig) msg.lastModifierIdentity) msg.managerIdentity
+
+instance Proto.Extension.HasExtensions WorkerDeploymentInfo where
+  messageUnknownFields msg = msg.workerDeploymentInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerDeploymentInfoUnknownFields = ufs }
+
+instance Semigroup WorkerDeploymentInfo where
+  a <> b = WorkerDeploymentInfo
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , versionSummaries = a.versionSummaries <> b.versionSummaries
+    , createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , routingConfig = case b.routingConfig of { Nothing -> a.routingConfig; x -> x }
+    , lastModifierIdentity = case b.lastModifierIdentity of { Nothing -> a.lastModifierIdentity; x -> x }
+    , managerIdentity = case b.managerIdentity of { Nothing -> a.managerIdentity; x -> x }
+    , workerDeploymentInfoUnknownFields = a.workerDeploymentInfoUnknownFields <> b.workerDeploymentInfoUnknownFields
+    }
+
+instance Monoid WorkerDeploymentInfo where
+  mempty = defaultWorkerDeploymentInfo
+
+data WorkerDeploymentVersion = WorkerDeploymentVersion
+  { buildId :: !(Maybe Text)
+  , deploymentName :: !(Maybe Text)
+  , workerDeploymentVersionUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkerDeploymentVersion :: WorkerDeploymentVersion
+defaultWorkerDeploymentVersion = WorkerDeploymentVersion
+  { buildId = Nothing
+  , deploymentName = Nothing
+  , workerDeploymentVersionUnknownFields = []
+  }
+
+instance MessageEncode WorkerDeploymentVersion where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.buildId)
+    <> (maybe mempty (\v -> archString 18 v) msg.deploymentName)
+    <> encodeUnknownFields msg.workerDeploymentVersionUnknownFields
+
+instance MessageSize WorkerDeploymentVersion where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.buildId)
+    + (maybe 0 (\v -> archStringSize v) msg.deploymentName)
+    + unknownFieldsSize msg.workerDeploymentVersionUnknownFields
+
+instance MessageDecode WorkerDeploymentVersion where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (WorkerDeploymentVersion {buildId = acc_0, deploymentName = acc_1, workerDeploymentVersionUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerDeploymentVersion where
+  protoMessageName _ = "temporal.api.deployment.v1.WorkerDeploymentVersion"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultWorkerDeploymentVersion
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "build_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersion) -> m.buildId
+        , fdSet = \v (m :: WorkerDeploymentVersion) -> (m { buildId = v } :: WorkerDeploymentVersion)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "deployment_name"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerDeploymentVersion) -> m.deploymentName
+        , fdSet = \v (m :: WorkerDeploymentVersion) -> (m { deploymentName = v } :: WorkerDeploymentVersion)
+        })
+    ]
+
+instance IsMessage WorkerDeploymentVersion
+
+instance Aeson.ToJSON WorkerDeploymentVersion where
+  toJSON msg = jsonObject
+      [ "buildId" .=: msg.buildId
+      , "deploymentName" .=: msg.deploymentName
+      ]
+
+instance Aeson.FromJSON WorkerDeploymentVersion where
+  parseJSON = Aeson.withObject "WorkerDeploymentVersion" $ \obj -> do
+    fld_buildId <- parseFieldMaybe obj "buildId"
+    fld_deploymentName <- parseFieldMaybe obj "deploymentName"
+    pure (defaultWorkerDeploymentVersion
+      { buildId = maybe (defaultWorkerDeploymentVersion.buildId) Prelude.id fld_buildId
+      , deploymentName = maybe (defaultWorkerDeploymentVersion.deploymentName) Prelude.id fld_deploymentName
+      , workerDeploymentVersionUnknownFields = []
+      } :: WorkerDeploymentVersion)
+
+instance Hashable WorkerDeploymentVersion where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.buildId) msg.deploymentName
+
+instance Proto.Extension.HasExtensions WorkerDeploymentVersion where
+  messageUnknownFields msg = msg.workerDeploymentVersionUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerDeploymentVersionUnknownFields = ufs }
+
+instance Semigroup WorkerDeploymentVersion where
+  a <> b = WorkerDeploymentVersion
+    { buildId = case b.buildId of { Nothing -> a.buildId; x -> x }
+    , deploymentName = case b.deploymentName of { Nothing -> a.deploymentName; x -> x }
+    , workerDeploymentVersionUnknownFields = a.workerDeploymentVersionUnknownFields <> b.workerDeploymentVersionUnknownFields
+    }
+
+instance Monoid WorkerDeploymentVersion where
+  mempty = defaultWorkerDeploymentVersion
+
+data VersionMetadata = VersionMetadata
+  { entries :: !(V.Vector VersionMetadata'EntriesEntry)
+  , versionMetadataUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data VersionMetadata'EntriesEntry = VersionMetadata'EntriesEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe TE_Common_V1_Message.Payload)
+  , versionMetadataEntriesEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultVersionMetadata'EntriesEntry :: VersionMetadata'EntriesEntry
+defaultVersionMetadata'EntriesEntry = VersionMetadata'EntriesEntry
+  { key = Nothing
+  , value = Nothing
+  , versionMetadataEntriesEntryUnknownFields = []
+  }
+
+instance MessageEncode VersionMetadata'EntriesEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.versionMetadataEntriesEntryUnknownFields
+
+instance MessageSize VersionMetadata'EntriesEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.versionMetadataEntriesEntryUnknownFields
+
+instance MessageDecode VersionMetadata'EntriesEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (VersionMetadata'EntriesEntry {key = acc_0, value = acc_1, versionMetadataEntriesEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage VersionMetadata'EntriesEntry where
+  protoMessageName _ = "temporal.api.deployment.v1.VersionMetadata.EntriesEntry"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultVersionMetadata'EntriesEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionMetadata'EntriesEntry) -> m.key
+        , fdSet = \v (m :: VersionMetadata'EntriesEntry) -> (m { key = v } :: VersionMetadata'EntriesEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: VersionMetadata'EntriesEntry) -> m.value
+        , fdSet = \v (m :: VersionMetadata'EntriesEntry) -> (m { value = v } :: VersionMetadata'EntriesEntry)
+        })
+    ]
+
+instance IsMessage VersionMetadata'EntriesEntry
+
+instance Aeson.ToJSON VersionMetadata'EntriesEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON VersionMetadata'EntriesEntry where
+  parseJSON = Aeson.withObject "VersionMetadata'EntriesEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultVersionMetadata'EntriesEntry
+      { key = maybe (defaultVersionMetadata'EntriesEntry.key) Prelude.id fld_key
+      , value = maybe (defaultVersionMetadata'EntriesEntry.value) Prelude.id fld_value
+      , versionMetadataEntriesEntryUnknownFields = []
+      } :: VersionMetadata'EntriesEntry)
+
+instance Hashable VersionMetadata'EntriesEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions VersionMetadata'EntriesEntry where
+  messageUnknownFields msg = msg.versionMetadataEntriesEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { versionMetadataEntriesEntryUnknownFields = ufs }
+
+instance Semigroup VersionMetadata'EntriesEntry where
+  a <> b = VersionMetadata'EntriesEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , versionMetadataEntriesEntryUnknownFields = a.versionMetadataEntriesEntryUnknownFields <> b.versionMetadataEntriesEntryUnknownFields
+    }
+
+instance Monoid VersionMetadata'EntriesEntry where
+  mempty = defaultVersionMetadata'EntriesEntry
+
+defaultVersionMetadata :: VersionMetadata
+defaultVersionMetadata = VersionMetadata
+  { entries = V.empty
+  , versionMetadataUnknownFields = []
+  }
+
+instance MessageEncode VersionMetadata where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.entries
+    <> encodeUnknownFields msg.versionMetadataUnknownFields
+
+instance MessageSize VersionMetadata where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.entries)
+    + unknownFieldsSize msg.versionMetadataUnknownFields
+
+instance MessageDecode VersionMetadata where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (VersionMetadata {entries = acc_0, versionMetadataUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage VersionMetadata where
+  protoMessageName _ = "temporal.api.deployment.v1.VersionMetadata"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultVersionMetadata
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "entries"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.VersionMetadata.EntriesEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: VersionMetadata) -> m.entries
+        , fdSet = \v (m :: VersionMetadata) -> (m { entries = v } :: VersionMetadata)
+        })
+    ]
+
+instance IsMessage VersionMetadata
+
+instance Aeson.ToJSON VersionMetadata where
+  toJSON msg = jsonObject
+      [ "entries" .=: msg.entries
+
+      ]
+
+instance Aeson.FromJSON VersionMetadata where
+  parseJSON = Aeson.withObject "VersionMetadata" $ \obj -> do
+    fld_entries <- parseFieldMaybe obj "entries"
+    pure (defaultVersionMetadata
+      { entries = maybe (defaultVersionMetadata.entries) Prelude.id fld_entries
+      , versionMetadataUnknownFields = []
+      } :: VersionMetadata)
+
+instance Hashable VersionMetadata where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.entries
+
+instance Proto.Extension.HasExtensions VersionMetadata where
+  messageUnknownFields msg = msg.versionMetadataUnknownFields
+  setMessageUnknownFields !ufs msg = msg { versionMetadataUnknownFields = ufs }
+
+instance Semigroup VersionMetadata where
+  a <> b = VersionMetadata
+    { entries = a.entries <> b.entries
+    , versionMetadataUnknownFields = a.versionMetadataUnknownFields <> b.versionMetadataUnknownFields
+    }
+
+instance Monoid VersionMetadata where
+  mempty = defaultVersionMetadata
+
+data RoutingConfig = RoutingConfig
+  { currentDeploymentVersion :: !(Maybe WorkerDeploymentVersion)
+  , currentVersion :: !(Maybe Text)
+  , rampingDeploymentVersion :: !(Maybe WorkerDeploymentVersion)
+  , rampingVersion :: !(Maybe Text)
+  , rampingVersionPercentage :: !(Maybe Float)
+  , currentVersionChangedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , rampingVersionChangedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , rampingVersionPercentageChangedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , routingConfigUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultRoutingConfig :: RoutingConfig
+defaultRoutingConfig = RoutingConfig
+  { currentDeploymentVersion = Nothing
+  , currentVersion = Nothing
+  , rampingDeploymentVersion = Nothing
+  , rampingVersion = Nothing
+  , rampingVersionPercentage = Nothing
+  , currentVersionChangedTime = Nothing
+  , rampingVersionChangedTime = Nothing
+  , rampingVersionPercentageChangedTime = Nothing
+  , routingConfigUnknownFields = []
+  }
+
+instance MessageEncode RoutingConfig where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 58 sz (buildMessage v)) msg.currentDeploymentVersion)
+    <> (maybe mempty (\v -> archString 10 v) msg.currentVersion)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 74 sz (buildMessage v)) msg.rampingDeploymentVersion)
+    <> (maybe mempty (\v -> archString 18 v) msg.rampingVersion)
+    <> (maybe mempty (\v -> archFloat 29 v) msg.rampingVersionPercentage)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.currentVersionChangedTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.rampingVersionChangedTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 50 sz (buildMessage v)) msg.rampingVersionPercentageChangedTime)
+    <> encodeUnknownFields msg.routingConfigUnknownFields
+
+instance MessageSize RoutingConfig where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.currentDeploymentVersion)
+    + (maybe 0 (\v -> archStringSize v) msg.currentVersion)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.rampingDeploymentVersion)
+    + (maybe 0 (\v -> archStringSize v) msg.rampingVersion)
+    + (maybe 0 (\v -> archFixed32Size) msg.rampingVersionPercentage)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.currentVersionChangedTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.rampingVersionChangedTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.rampingVersionPercentageChangedTime)
+    + unknownFieldsSize msg.routingConfigUnknownFields
+
+instance MessageDecode RoutingConfig where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_ = withTagM
+        (pure (RoutingConfig {currentDeploymentVersion = acc_0, currentVersion = acc_1, rampingDeploymentVersion = acc_2, rampingVersion = acc_3, rampingVersionPercentage = acc_4, currentVersionChangedTime = acc_5, rampingVersionChangedTime = acc_6, rampingVersionPercentageChangedTime = acc_7, routingConfigUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          7 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          1 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          9 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          3 -> do
+            v <- decodeFieldFloat
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_7 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_7 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just v) acc_7 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 (uf : acc_unknown_))
+
+instance ProtoMessage RoutingConfig where
+  protoMessageName _ = "temporal.api.deployment.v1.RoutingConfig"
+  protoPackageName _ = "temporal.api.deployment.v1"
+  protoDefaultValue = defaultRoutingConfig
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (7, SomeField FieldDescriptor
+        { fdName = "current_deployment_version"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.WorkerDeploymentVersion"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.currentDeploymentVersion
+        , fdSet = \v (m :: RoutingConfig) -> (m { currentDeploymentVersion = v } :: RoutingConfig)
+        }), (1, SomeField FieldDescriptor
+        { fdName = "current_version"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.currentVersion
+        , fdSet = \v (m :: RoutingConfig) -> (m { currentVersion = v } :: RoutingConfig)
+        })
+    , (9, SomeField FieldDescriptor
+        { fdName = "ramping_deployment_version"
+        , fdNumber = 9
+        , fdTypeDesc = MessageType "temporal.api.deployment.v1.WorkerDeploymentVersion"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.rampingDeploymentVersion
+        , fdSet = \v (m :: RoutingConfig) -> (m { rampingDeploymentVersion = v } :: RoutingConfig)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "ramping_version"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.rampingVersion
+        , fdSet = \v (m :: RoutingConfig) -> (m { rampingVersion = v } :: RoutingConfig)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "ramping_version_percentage"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType FloatField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.rampingVersionPercentage
+        , fdSet = \v (m :: RoutingConfig) -> (m { rampingVersionPercentage = v } :: RoutingConfig)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "current_version_changed_time"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.currentVersionChangedTime
+        , fdSet = \v (m :: RoutingConfig) -> (m { currentVersionChangedTime = v } :: RoutingConfig)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "ramping_version_changed_time"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.rampingVersionChangedTime
+        , fdSet = \v (m :: RoutingConfig) -> (m { rampingVersionChangedTime = v } :: RoutingConfig)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "ramping_version_percentage_changed_time"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RoutingConfig) -> m.rampingVersionPercentageChangedTime
+        , fdSet = \v (m :: RoutingConfig) -> (m { rampingVersionPercentageChangedTime = v } :: RoutingConfig)
+        })
+    ]
+
+instance IsMessage RoutingConfig
+
+instance Aeson.ToJSON RoutingConfig where
+  toJSON msg = jsonObject
+      [ "currentDeploymentVersion" .=: msg.currentDeploymentVersion
+      , "currentVersion" .=: msg.currentVersion
+      , "rampingDeploymentVersion" .=: msg.rampingDeploymentVersion
+      , "rampingVersion" .=: msg.rampingVersion
+      , "rampingVersionPercentage" .=: msg.rampingVersionPercentage
+      , "currentVersionChangedTime" .=: msg.currentVersionChangedTime
+      , "rampingVersionChangedTime" .=: msg.rampingVersionChangedTime
+      , "rampingVersionPercentageChangedTime" .=: msg.rampingVersionPercentageChangedTime
+      ]
+
+instance Aeson.FromJSON RoutingConfig where
+  parseJSON = Aeson.withObject "RoutingConfig" $ \obj -> do
+    fld_currentDeploymentVersion <- parseFieldMaybe obj "currentDeploymentVersion"
+    fld_currentVersion <- parseFieldMaybe obj "currentVersion"
+    fld_rampingDeploymentVersion <- parseFieldMaybe obj "rampingDeploymentVersion"
+    fld_rampingVersion <- parseFieldMaybe obj "rampingVersion"
+    fld_rampingVersionPercentage <- parseFieldMaybe obj "rampingVersionPercentage"
+    fld_currentVersionChangedTime <- parseFieldMaybe obj "currentVersionChangedTime"
+    fld_rampingVersionChangedTime <- parseFieldMaybe obj "rampingVersionChangedTime"
+    fld_rampingVersionPercentageChangedTime <- parseFieldMaybe obj "rampingVersionPercentageChangedTime"
+    pure (defaultRoutingConfig
+      { currentDeploymentVersion = maybe (defaultRoutingConfig.currentDeploymentVersion) Prelude.id fld_currentDeploymentVersion
+      , currentVersion = maybe (defaultRoutingConfig.currentVersion) Prelude.id fld_currentVersion
+      , rampingDeploymentVersion = maybe (defaultRoutingConfig.rampingDeploymentVersion) Prelude.id fld_rampingDeploymentVersion
+      , rampingVersion = maybe (defaultRoutingConfig.rampingVersion) Prelude.id fld_rampingVersion
+      , rampingVersionPercentage = maybe (defaultRoutingConfig.rampingVersionPercentage) Prelude.id fld_rampingVersionPercentage
+      , currentVersionChangedTime = maybe (defaultRoutingConfig.currentVersionChangedTime) Prelude.id fld_currentVersionChangedTime
+      , rampingVersionChangedTime = maybe (defaultRoutingConfig.rampingVersionChangedTime) Prelude.id fld_rampingVersionChangedTime
+      , rampingVersionPercentageChangedTime = maybe (defaultRoutingConfig.rampingVersionPercentageChangedTime) Prelude.id fld_rampingVersionPercentageChangedTime
+      , routingConfigUnknownFields = []
+      } :: RoutingConfig)
+
+instance Hashable RoutingConfig where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.currentDeploymentVersion) msg.currentVersion) msg.rampingDeploymentVersion) msg.rampingVersion) msg.rampingVersionPercentage) msg.currentVersionChangedTime) msg.rampingVersionChangedTime) msg.rampingVersionPercentageChangedTime
+
+instance Proto.Extension.HasExtensions RoutingConfig where
+  messageUnknownFields msg = msg.routingConfigUnknownFields
+  setMessageUnknownFields !ufs msg = msg { routingConfigUnknownFields = ufs }
+
+instance Semigroup RoutingConfig where
+  a <> b = RoutingConfig
+    { currentDeploymentVersion = case b.currentDeploymentVersion of { Nothing -> a.currentDeploymentVersion; x -> x }
+    , currentVersion = case b.currentVersion of { Nothing -> a.currentVersion; x -> x }
+    , rampingDeploymentVersion = case b.rampingDeploymentVersion of { Nothing -> a.rampingDeploymentVersion; x -> x }
+    , rampingVersion = case b.rampingVersion of { Nothing -> a.rampingVersion; x -> x }
+    , rampingVersionPercentage = case b.rampingVersionPercentage of { Nothing -> a.rampingVersionPercentage; x -> x }
+    , currentVersionChangedTime = case b.currentVersionChangedTime of { Nothing -> a.currentVersionChangedTime; x -> x }
+    , rampingVersionChangedTime = case b.rampingVersionChangedTime of { Nothing -> a.rampingVersionChangedTime; x -> x }
+    , rampingVersionPercentageChangedTime = case b.rampingVersionPercentageChangedTime of { Nothing -> a.rampingVersionPercentageChangedTime; x -> x }
+    , routingConfigUnknownFields = a.routingConfigUnknownFields <> b.routingConfigUnknownFields
+    }
+
+instance Monoid RoutingConfig where
+  mempty = defaultRoutingConfig

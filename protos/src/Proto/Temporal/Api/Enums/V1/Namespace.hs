@@ -1,266 +1,194 @@
-{- This file was auto-generated from temporal/api/enums/v1/namespace.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Enums.V1.Namespace (
-        ArchivalState(..), ArchivalState(),
-        ArchivalState'UnrecognizedValue, NamespaceState(..),
-        NamespaceState(), NamespaceState'UnrecognizedValue,
-        ReplicationState(..), ReplicationState(),
-        ReplicationState'UnrecognizedValue
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-newtype ArchivalState'UnrecognizedValue
-  = ArchivalState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data ArchivalState
-  = ARCHIVAL_STATE_UNSPECIFIED |
-    ARCHIVAL_STATE_DISABLED |
-    ARCHIVAL_STATE_ENABLED |
-    ArchivalState'Unrecognized !ArchivalState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum ArchivalState where
-  maybeToEnum 0 = Prelude.Just ARCHIVAL_STATE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just ARCHIVAL_STATE_DISABLED
-  maybeToEnum 2 = Prelude.Just ARCHIVAL_STATE_ENABLED
-  maybeToEnum k
-    = Prelude.Just
-        (ArchivalState'Unrecognized
-           (ArchivalState'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum ARCHIVAL_STATE_UNSPECIFIED = "ARCHIVAL_STATE_UNSPECIFIED"
-  showEnum ARCHIVAL_STATE_DISABLED = "ARCHIVAL_STATE_DISABLED"
-  showEnum ARCHIVAL_STATE_ENABLED = "ARCHIVAL_STATE_ENABLED"
-  showEnum
-    (ArchivalState'Unrecognized (ArchivalState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "ARCHIVAL_STATE_UNSPECIFIED"
-    = Prelude.Just ARCHIVAL_STATE_UNSPECIFIED
-    | (Prelude.==) k "ARCHIVAL_STATE_DISABLED"
-    = Prelude.Just ARCHIVAL_STATE_DISABLED
-    | (Prelude.==) k "ARCHIVAL_STATE_ENABLED"
-    = Prelude.Just ARCHIVAL_STATE_ENABLED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded ArchivalState where
-  minBound = ARCHIVAL_STATE_UNSPECIFIED
-  maxBound = ARCHIVAL_STATE_ENABLED
-instance Prelude.Enum ArchivalState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum ArchivalState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum ARCHIVAL_STATE_UNSPECIFIED = 0
-  fromEnum ARCHIVAL_STATE_DISABLED = 1
-  fromEnum ARCHIVAL_STATE_ENABLED = 2
-  fromEnum
-    (ArchivalState'Unrecognized (ArchivalState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ ARCHIVAL_STATE_ENABLED
-    = Prelude.error
-        "ArchivalState.succ: bad argument ARCHIVAL_STATE_ENABLED. This value would be out of bounds."
-  succ ARCHIVAL_STATE_UNSPECIFIED = ARCHIVAL_STATE_DISABLED
-  succ ARCHIVAL_STATE_DISABLED = ARCHIVAL_STATE_ENABLED
-  succ (ArchivalState'Unrecognized _)
-    = Prelude.error
-        "ArchivalState.succ: bad argument: unrecognized value"
-  pred ARCHIVAL_STATE_UNSPECIFIED
-    = Prelude.error
-        "ArchivalState.pred: bad argument ARCHIVAL_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred ARCHIVAL_STATE_DISABLED = ARCHIVAL_STATE_UNSPECIFIED
-  pred ARCHIVAL_STATE_ENABLED = ARCHIVAL_STATE_DISABLED
-  pred (ArchivalState'Unrecognized _)
-    = Prelude.error
-        "ArchivalState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault ArchivalState where
-  fieldDefault = ARCHIVAL_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData ArchivalState where
-  rnf x__ = Prelude.seq x__ ()
-newtype NamespaceState'UnrecognizedValue
-  = NamespaceState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.enums.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Enums.V1.Namespace where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2a\x8c\x01\x0a\x0e\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x53\x74\x61\x74\x65\x12\x1d\x0a\x1b\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1e\x0a\x1a\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x53\x54\x41\x54\x45\x5f\x52\x45\x47\x49\x53\x54\x45\x52\x45\x44\x10\x01\x12\x1e\x0a\x1a\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x53\x54\x41\x54\x45\x5f\x44\x45\x50\x52\x45\x43\x41\x54\x45\x44\x10\x02\x12\x1b\x0a\x17\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x53\x54\x41\x54\x45\x5f\x44\x45\x4c\x45\x54\x45\x44\x10\x03\x2a\x66\x0a\x0d\x41\x72\x63\x68\x69\x76\x61\x6c\x53\x74\x61\x74\x65\x12\x1c\x0a\x1a\x41\x52\x43\x48\x49\x56\x41\x4c\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1b\x0a\x17\x41\x52\x43\x48\x49\x56\x41\x4c\x5f\x53\x54\x41\x54\x45\x5f\x44\x49\x53\x41\x42\x4c\x45\x44\x10\x01\x12\x1a\x0a\x16\x41\x52\x43\x48\x49\x56\x41\x4c\x5f\x53\x54\x41\x54\x45\x5f\x45\x4e\x41\x42\x4c\x45\x44\x10\x02\x2a\x71\x0a\x10\x52\x65\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x53\x74\x61\x74\x65\x12\x1f\x0a\x1d\x52\x45\x50\x4c\x49\x43\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1c\x0a\x18\x52\x45\x50\x4c\x49\x43\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x4e\x4f\x52\x4d\x41\x4c\x10\x01\x12\x1e\x0a\x1a\x52\x45\x50\x4c\x49\x43\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x48\x41\x4e\x44\x4f\x56\x45\x52\x10\x02\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
 data NamespaceState
-  = NAMESPACE_STATE_UNSPECIFIED |
-    NAMESPACE_STATE_REGISTERED |
-    NAMESPACE_STATE_DEPRECATED |
-    NAMESPACE_STATE_DELETED |
-    NamespaceState'Unrecognized !NamespaceState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum NamespaceState where
-  maybeToEnum 0 = Prelude.Just NAMESPACE_STATE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just NAMESPACE_STATE_REGISTERED
-  maybeToEnum 2 = Prelude.Just NAMESPACE_STATE_DEPRECATED
-  maybeToEnum 3 = Prelude.Just NAMESPACE_STATE_DELETED
-  maybeToEnum k
-    = Prelude.Just
-        (NamespaceState'Unrecognized
-           (NamespaceState'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum NAMESPACE_STATE_UNSPECIFIED
-    = "NAMESPACE_STATE_UNSPECIFIED"
-  showEnum NAMESPACE_STATE_REGISTERED = "NAMESPACE_STATE_REGISTERED"
-  showEnum NAMESPACE_STATE_DEPRECATED = "NAMESPACE_STATE_DEPRECATED"
-  showEnum NAMESPACE_STATE_DELETED = "NAMESPACE_STATE_DELETED"
-  showEnum
-    (NamespaceState'Unrecognized (NamespaceState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "NAMESPACE_STATE_UNSPECIFIED"
-    = Prelude.Just NAMESPACE_STATE_UNSPECIFIED
-    | (Prelude.==) k "NAMESPACE_STATE_REGISTERED"
-    = Prelude.Just NAMESPACE_STATE_REGISTERED
-    | (Prelude.==) k "NAMESPACE_STATE_DEPRECATED"
-    = Prelude.Just NAMESPACE_STATE_DEPRECATED
-    | (Prelude.==) k "NAMESPACE_STATE_DELETED"
-    = Prelude.Just NAMESPACE_STATE_DELETED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded NamespaceState where
-  minBound = NAMESPACE_STATE_UNSPECIFIED
-  maxBound = NAMESPACE_STATE_DELETED
-instance Prelude.Enum NamespaceState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum NamespaceState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum NAMESPACE_STATE_UNSPECIFIED = 0
-  fromEnum NAMESPACE_STATE_REGISTERED = 1
-  fromEnum NAMESPACE_STATE_DEPRECATED = 2
-  fromEnum NAMESPACE_STATE_DELETED = 3
-  fromEnum
-    (NamespaceState'Unrecognized (NamespaceState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ NAMESPACE_STATE_DELETED
-    = Prelude.error
-        "NamespaceState.succ: bad argument NAMESPACE_STATE_DELETED. This value would be out of bounds."
-  succ NAMESPACE_STATE_UNSPECIFIED = NAMESPACE_STATE_REGISTERED
-  succ NAMESPACE_STATE_REGISTERED = NAMESPACE_STATE_DEPRECATED
-  succ NAMESPACE_STATE_DEPRECATED = NAMESPACE_STATE_DELETED
-  succ (NamespaceState'Unrecognized _)
-    = Prelude.error
-        "NamespaceState.succ: bad argument: unrecognized value"
-  pred NAMESPACE_STATE_UNSPECIFIED
-    = Prelude.error
-        "NamespaceState.pred: bad argument NAMESPACE_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred NAMESPACE_STATE_REGISTERED = NAMESPACE_STATE_UNSPECIFIED
-  pred NAMESPACE_STATE_DEPRECATED = NAMESPACE_STATE_REGISTERED
-  pred NAMESPACE_STATE_DELETED = NAMESPACE_STATE_DEPRECATED
-  pred (NamespaceState'Unrecognized _)
-    = Prelude.error
-        "NamespaceState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault NamespaceState where
-  fieldDefault = NAMESPACE_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData NamespaceState where
-  rnf x__ = Prelude.seq x__ ()
-newtype ReplicationState'UnrecognizedValue
-  = ReplicationState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+  = NamespaceState'NamespaceStateUnspecified
+  | NamespaceState'NamespaceStateRegistered
+  | NamespaceState'NamespaceStateDeprecated
+  | NamespaceState'NamespaceStateDeleted
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumNamespaceState :: NamespaceState -> Int
+toProtoEnumNamespaceState NamespaceState'NamespaceStateUnspecified = 0
+toProtoEnumNamespaceState NamespaceState'NamespaceStateRegistered = 1
+toProtoEnumNamespaceState NamespaceState'NamespaceStateDeprecated = 2
+toProtoEnumNamespaceState NamespaceState'NamespaceStateDeleted = 3
+
+fromProtoEnumNamespaceState :: Int -> Maybe NamespaceState
+fromProtoEnumNamespaceState 0 = Just NamespaceState'NamespaceStateUnspecified
+fromProtoEnumNamespaceState 1 = Just NamespaceState'NamespaceStateRegistered
+fromProtoEnumNamespaceState 2 = Just NamespaceState'NamespaceStateDeprecated
+fromProtoEnumNamespaceState 3 = Just NamespaceState'NamespaceStateDeleted
+fromProtoEnumNamespaceState _ = Nothing
+
+instance MessageEncode NamespaceState where
+  buildMessage _ = mempty
+instance MessageSize NamespaceState where
+  messageSize _ = 0
+instance MessageDecode NamespaceState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON NamespaceState where
+  toJSON NamespaceState'NamespaceStateUnspecified = Aeson.String "NAMESPACE_STATE_UNSPECIFIED"
+  toJSON NamespaceState'NamespaceStateRegistered = Aeson.String "NAMESPACE_STATE_REGISTERED"
+  toJSON NamespaceState'NamespaceStateDeprecated = Aeson.String "NAMESPACE_STATE_DEPRECATED"
+  toJSON NamespaceState'NamespaceStateDeleted = Aeson.String "NAMESPACE_STATE_DELETED"
+
+instance Aeson.FromJSON NamespaceState where
+  parseJSON = \case
+    Aeson.String "NAMESPACE_STATE_UNSPECIFIED" -> pure NamespaceState'NamespaceStateUnspecified
+    Aeson.String "NAMESPACE_STATE_REGISTERED" -> pure NamespaceState'NamespaceStateRegistered
+    Aeson.String "NAMESPACE_STATE_DEPRECATED" -> pure NamespaceState'NamespaceStateDeprecated
+    Aeson.String "NAMESPACE_STATE_DELETED" -> pure NamespaceState'NamespaceStateDeleted
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for NamespaceState"
+
+instance Hashable NamespaceState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumNamespaceState x)
+
+data ArchivalState
+  = ArchivalState'ArchivalStateUnspecified
+  | ArchivalState'ArchivalStateDisabled
+  | ArchivalState'ArchivalStateEnabled
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumArchivalState :: ArchivalState -> Int
+toProtoEnumArchivalState ArchivalState'ArchivalStateUnspecified = 0
+toProtoEnumArchivalState ArchivalState'ArchivalStateDisabled = 1
+toProtoEnumArchivalState ArchivalState'ArchivalStateEnabled = 2
+
+fromProtoEnumArchivalState :: Int -> Maybe ArchivalState
+fromProtoEnumArchivalState 0 = Just ArchivalState'ArchivalStateUnspecified
+fromProtoEnumArchivalState 1 = Just ArchivalState'ArchivalStateDisabled
+fromProtoEnumArchivalState 2 = Just ArchivalState'ArchivalStateEnabled
+fromProtoEnumArchivalState _ = Nothing
+
+instance MessageEncode ArchivalState where
+  buildMessage _ = mempty
+instance MessageSize ArchivalState where
+  messageSize _ = 0
+instance MessageDecode ArchivalState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON ArchivalState where
+  toJSON ArchivalState'ArchivalStateUnspecified = Aeson.String "ARCHIVAL_STATE_UNSPECIFIED"
+  toJSON ArchivalState'ArchivalStateDisabled = Aeson.String "ARCHIVAL_STATE_DISABLED"
+  toJSON ArchivalState'ArchivalStateEnabled = Aeson.String "ARCHIVAL_STATE_ENABLED"
+
+instance Aeson.FromJSON ArchivalState where
+  parseJSON = \case
+    Aeson.String "ARCHIVAL_STATE_UNSPECIFIED" -> pure ArchivalState'ArchivalStateUnspecified
+    Aeson.String "ARCHIVAL_STATE_DISABLED" -> pure ArchivalState'ArchivalStateDisabled
+    Aeson.String "ARCHIVAL_STATE_ENABLED" -> pure ArchivalState'ArchivalStateEnabled
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for ArchivalState"
+
+instance Hashable ArchivalState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumArchivalState x)
+
 data ReplicationState
-  = REPLICATION_STATE_UNSPECIFIED |
-    REPLICATION_STATE_NORMAL |
-    REPLICATION_STATE_HANDOVER |
-    ReplicationState'Unrecognized !ReplicationState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum ReplicationState where
-  maybeToEnum 0 = Prelude.Just REPLICATION_STATE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just REPLICATION_STATE_NORMAL
-  maybeToEnum 2 = Prelude.Just REPLICATION_STATE_HANDOVER
-  maybeToEnum k
-    = Prelude.Just
-        (ReplicationState'Unrecognized
-           (ReplicationState'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum REPLICATION_STATE_UNSPECIFIED
-    = "REPLICATION_STATE_UNSPECIFIED"
-  showEnum REPLICATION_STATE_NORMAL = "REPLICATION_STATE_NORMAL"
-  showEnum REPLICATION_STATE_HANDOVER = "REPLICATION_STATE_HANDOVER"
-  showEnum
-    (ReplicationState'Unrecognized (ReplicationState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "REPLICATION_STATE_UNSPECIFIED"
-    = Prelude.Just REPLICATION_STATE_UNSPECIFIED
-    | (Prelude.==) k "REPLICATION_STATE_NORMAL"
-    = Prelude.Just REPLICATION_STATE_NORMAL
-    | (Prelude.==) k "REPLICATION_STATE_HANDOVER"
-    = Prelude.Just REPLICATION_STATE_HANDOVER
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded ReplicationState where
-  minBound = REPLICATION_STATE_UNSPECIFIED
-  maxBound = REPLICATION_STATE_HANDOVER
-instance Prelude.Enum ReplicationState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum ReplicationState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum REPLICATION_STATE_UNSPECIFIED = 0
-  fromEnum REPLICATION_STATE_NORMAL = 1
-  fromEnum REPLICATION_STATE_HANDOVER = 2
-  fromEnum
-    (ReplicationState'Unrecognized (ReplicationState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ REPLICATION_STATE_HANDOVER
-    = Prelude.error
-        "ReplicationState.succ: bad argument REPLICATION_STATE_HANDOVER. This value would be out of bounds."
-  succ REPLICATION_STATE_UNSPECIFIED = REPLICATION_STATE_NORMAL
-  succ REPLICATION_STATE_NORMAL = REPLICATION_STATE_HANDOVER
-  succ (ReplicationState'Unrecognized _)
-    = Prelude.error
-        "ReplicationState.succ: bad argument: unrecognized value"
-  pred REPLICATION_STATE_UNSPECIFIED
-    = Prelude.error
-        "ReplicationState.pred: bad argument REPLICATION_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred REPLICATION_STATE_NORMAL = REPLICATION_STATE_UNSPECIFIED
-  pred REPLICATION_STATE_HANDOVER = REPLICATION_STATE_NORMAL
-  pred (ReplicationState'Unrecognized _)
-    = Prelude.error
-        "ReplicationState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault ReplicationState where
-  fieldDefault = REPLICATION_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData ReplicationState where
-  rnf x__ = Prelude.seq x__ ()
+  = ReplicationState'ReplicationStateUnspecified
+  | ReplicationState'ReplicationStateNormal
+  | ReplicationState'ReplicationStateHandover
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumReplicationState :: ReplicationState -> Int
+toProtoEnumReplicationState ReplicationState'ReplicationStateUnspecified = 0
+toProtoEnumReplicationState ReplicationState'ReplicationStateNormal = 1
+toProtoEnumReplicationState ReplicationState'ReplicationStateHandover = 2
+
+fromProtoEnumReplicationState :: Int -> Maybe ReplicationState
+fromProtoEnumReplicationState 0 = Just ReplicationState'ReplicationStateUnspecified
+fromProtoEnumReplicationState 1 = Just ReplicationState'ReplicationStateNormal
+fromProtoEnumReplicationState 2 = Just ReplicationState'ReplicationStateHandover
+fromProtoEnumReplicationState _ = Nothing
+
+instance MessageEncode ReplicationState where
+  buildMessage _ = mempty
+instance MessageSize ReplicationState where
+  messageSize _ = 0
+instance MessageDecode ReplicationState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON ReplicationState where
+  toJSON ReplicationState'ReplicationStateUnspecified = Aeson.String "REPLICATION_STATE_UNSPECIFIED"
+  toJSON ReplicationState'ReplicationStateNormal = Aeson.String "REPLICATION_STATE_NORMAL"
+  toJSON ReplicationState'ReplicationStateHandover = Aeson.String "REPLICATION_STATE_HANDOVER"
+
+instance Aeson.FromJSON ReplicationState where
+  parseJSON = \case
+    Aeson.String "REPLICATION_STATE_UNSPECIFIED" -> pure ReplicationState'ReplicationStateUnspecified
+    Aeson.String "REPLICATION_STATE_NORMAL" -> pure ReplicationState'ReplicationStateNormal
+    Aeson.String "REPLICATION_STATE_HANDOVER" -> pure ReplicationState'ReplicationStateHandover
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for ReplicationState"
+
+instance Hashable ReplicationState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumReplicationState x)

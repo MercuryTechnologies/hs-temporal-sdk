@@ -99,7 +99,7 @@ addCommand command = do
 debugging core.
 -}
 trace_ :: String -> a -> a
-trace_ _ = id
+trace_ _ = Prelude.id
 
 
 -- trace_ = Debug.Trace.trace

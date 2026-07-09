@@ -2,7 +2,7 @@
   writeShellApplication,
   lib,
   temporal-sdk-core-src,
-  proto-lens-protoc,
+  temporal-protogen-wireform,
   protobuf,
   hpack,
   ...
@@ -19,8 +19,9 @@ writeShellApplication {
     repo_root="$( git rev-parse --show-toplevel )"
     package_dir="$repo_root/protos"
     protoc \
-      --plugin=protoc-gen-haskell=${lib.getExe proto-lens-protoc} \
-      --haskell_out="$package_dir/src" \
+      --plugin=protoc-gen-wireform=${lib.getExe temporal-protogen-wireform} \
+      --wireform_out="$package_dir/src" \
+      --wireform_opt=module_prefix=Proto,field_naming=unprefixed \
       --proto_path=${temporal-sdk-core-src}/crates/common/protos/api_upstream \
       --proto_path=${temporal-sdk-core-src}/crates/common/protos/google \
       --proto_path=${temporal-sdk-core-src}/crates/common/protos/grpc \
@@ -31,7 +32,7 @@ writeShellApplication {
       ${temporal-sdk-core-src}/crates/common/protos/grpc/**/*.proto \
       ${temporal-sdk-core-src}/crates/common/protos/local/**/*.proto \
       ${temporal-sdk-core-src}/crates/common/protos/testsrv_upstream/temporal/**/*.proto
-    # Remove codegen for well-known types (`proto-lens` provides these).
+    # Remove codegen for well-known types (`wireform-proto` provides these).
     rm -rf "$package_dir/src/Proto/Google/Protobuf"
     # Re-generate cabal file to include new/updated modules. 
     hpack "$package_dir"

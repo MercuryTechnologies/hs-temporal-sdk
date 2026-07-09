@@ -3,14 +3,20 @@ module Temporal.Workflow.Unsafe.Handle where
 
 import Control.Monad.Reader
 import qualified Data.HashMap.Strict as HashMap
+import Data.Maybe (fromMaybe)
 import Data.Kind
-import Data.ProtoLens
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import Lens.Family2
+import qualified Proto.Temporal.Api.Failure.V1.Message as Failure
 import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow as ChildWorkflow
-import qualified Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow_Fields as ChildWorkflow
-import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
+import qualified Proto.Temporal.Sdk.Core.Common.Common as Common
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
+import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
+  ResolveChildWorkflowExecution (..),
+  ResolveRequestCancelExternalWorkflow (..),
+ )
+import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
 import RequireCallStack
 import Temporal.Common
 import Temporal.Exception
@@ -72,21 +78,27 @@ instance Cancel (ExternalWorkflowHandle a) where
     res <- newTrackedIVar
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalCancels = HashMap.insert s res (externalCancels seqMaps)}
-    addCommand
-      ( defMessage
-          & Command.requestCancelExternalWorkflowExecution
-            .~ ( defMessage
-                  & Command.seq .~ sVal
-                  & Command.workflowExecution
-                    .~ ( defMessage
-                          & Common.workflowId .~ rawWorkflowId h.externalWorkflowWorkflowId
-                          & Common.runId .~ maybe "" rawRunId h.externalWorkflowRunId
-                       )
-               )
-      )
+    addCommand $
+      Command.WorkflowCommand
+        Nothing
+        ( Just $
+            Command.WorkflowCommand'Variant'RequestCancelExternalWorkflowExecution $
+              Command.RequestCancelExternalWorkflowExecution
+                (Just sVal)
+                ( Just $
+                    Common.NamespacedWorkflowExecution
+                      Nothing
+                      (Just $ rawWorkflowId h.externalWorkflowWorkflowId)
+                      (fmap rawRunId h.externalWorkflowRunId)
+                      []
+                )
+                Nothing
+                []
+        )
+        []
     pure $ do
       res' <- getIVar res
-      case res' ^. Activation.maybe'failure of
+      case res'.failure of
         Nothing -> pure ()
         Just f -> throw $ CancelExternalWorkflowFailed f
 
@@ -107,16 +119,17 @@ waitChildWorkflowResult wfHandle@(ChildWorkflowHandle {childWorkflowResultConver
   waitChildWorkflowStart wfHandle >> do
     updateCallStackW
     res <- getIVar wfHandle.resultHandle
-    case res ^. Activation.result . ChildWorkflow.maybe'status of
+    case res.result >>= (.status) of
       Nothing -> ilift $ throwIO $ RuntimeError "Unrecognized child workflow result status"
       Just s -> case s of
-        ChildWorkflow.ChildWorkflowResult'Completed res' -> do
-          eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload $ res' ^. ChildWorkflow.result
+        ChildWorkflow.ChildWorkflowResult'Status'Completed res' -> do
+          payload <- maybe (ilift $ throwIO $ RuntimeError "Child workflow completed without result payload") pure res'.result
+          eVal <- ilift $ liftIO $ UnliftIO.try $ childWorkflowResultConverter $ convertFromProtoPayload payload
           case eVal of
             Left err -> throw (err :: SomeException)
             Right ok -> pure ok
-        ChildWorkflow.ChildWorkflowResult'Failed res' -> throw $ ChildWorkflowFailed $ res' ^. ChildWorkflow.failure
-        ChildWorkflow.ChildWorkflowResult'Cancelled _ -> throw ChildWorkflowCancelled
+        ChildWorkflow.ChildWorkflowResult'Status'Failed res' -> throw $ ChildWorkflowFailed $ fromMaybe (Failure.Failure Nothing Nothing Nothing Nothing Nothing Nothing []) res'.failure
+        ChildWorkflow.ChildWorkflowResult'Status'Cancelled _ -> throw ChildWorkflowCancelled
 
 
 instance Cancel (ChildWorkflowHandle a) where
@@ -133,8 +146,10 @@ cancelChildWorkflowExecution ChildWorkflowHandle {childWorkflowSequence} = ilift
   -- managing the cancellation. Compare with ResolveRequestCancelExternalWorkflow. I think
   -- external workflows need a resolution step because they may not even exist.
   addCommand $
-    defMessage
-      & Command.cancelChildWorkflowExecution
-        .~ ( defMessage
-              & Command.childWorkflowSeq .~ rawSequence childWorkflowSequence
-           )
+    Command.WorkflowCommand
+      Nothing
+      ( Just $
+          Command.WorkflowCommand'Variant'CancelChildWorkflowExecution $
+            Command.CancelChildWorkflowExecution (Just $ rawSequence childWorkflowSequence) Nothing []
+      )
+      []

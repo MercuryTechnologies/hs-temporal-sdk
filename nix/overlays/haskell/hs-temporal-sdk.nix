@@ -2,14 +2,27 @@
   lib,
   haskell,
   temporal-cli,
+  fetchFromGitHub,
   temporal-test-server,
   ...
 }:
 hfinal: _hprev:
 let
   inherit (haskell.lib.compose) addTestToolDepends enableCabalFlag;
+  wireformSrc = fetchFromGitHub {
+    owner = "iand675";
+    repo = "wireform-";
+    rev = "a3bae259ae4e35d1940a98e86ce460b1cefbbf81";
+    hash = "sha256-Qwx2MZ5r3g99piRjDFFGFS+0kqbense11rNtMs11kCE=";
+  };
 in
 {
+  wireform-core = hfinal.callCabal2nix "wireform-core" "${wireformSrc}/wireform-core" { };
+
+  wireform-derive = hfinal.callCabal2nix "wireform-derive" "${wireformSrc}/wireform-derive" { };
+
+  wireform-proto = hfinal.callCabal2nix "wireform-proto" "${wireformSrc}/wireform-proto" { };
+
   temporal-api-protos = hfinal.callCabal2nix "temporal-api-protos" ../../../protos { };
 
   temporal-sdk-core = lib.pipe (hfinal.callCabal2nix "temporal-sdk-core" ../../../core { }) [
@@ -40,6 +53,8 @@ in
   temporal-sdk-optimal-codec =
     hfinal.callCabal2nix "temporal-sdk-optimal-codec" ../../../optimal-codec
       { };
+
+  temporal-protogen-wireform = hfinal.callCabal2nix "temporal-protogen-wireform" ../../../tools/protogen-wireform { };
 
   tix-to-markdown = hfinal.callCabal2nix "tix-to-markdown" ../../../tools/tix-to-markdown { };
 }

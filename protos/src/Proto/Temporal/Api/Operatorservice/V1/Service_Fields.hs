@@ -1,31 +1,85 @@
-{- This file was auto-generated from temporal/api/operatorservice/v1/service.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists -Wno-name-shadowing #-}
+
 module Proto.Temporal.Api.Operatorservice.V1.Service_Fields where
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Api.Annotations
-import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse
+
+import Proto.Compat.HasField ()
+import Proto.Lens qualified as Lens
+
+addorupdateremotecluster = Lens.field @"addorupdateremotecluster"
+maybe'addorupdateremotecluster = Lens.field @"addorupdateremotecluster"
+vec'addorupdateremotecluster = Lens.field @"addorupdateremotecluster"
+addorupdateremoteclusterHandler = Lens.field @"addorupdateremoteclusterHandler"
+maybe'addorupdateremoteclusterHandler = Lens.field @"addorupdateremoteclusterHandler"
+vec'addorupdateremoteclusterHandler = Lens.field @"addorupdateremoteclusterHandler"
+addsearchattributes = Lens.field @"addsearchattributes"
+maybe'addsearchattributes = Lens.field @"addsearchattributes"
+vec'addsearchattributes = Lens.field @"addsearchattributes"
+addsearchattributesHandler = Lens.field @"addsearchattributesHandler"
+maybe'addsearchattributesHandler = Lens.field @"addsearchattributesHandler"
+vec'addsearchattributesHandler = Lens.field @"addsearchattributesHandler"
+createnexusendpoint = Lens.field @"createnexusendpoint"
+maybe'createnexusendpoint = Lens.field @"createnexusendpoint"
+vec'createnexusendpoint = Lens.field @"createnexusendpoint"
+createnexusendpointHandler = Lens.field @"createnexusendpointHandler"
+maybe'createnexusendpointHandler = Lens.field @"createnexusendpointHandler"
+vec'createnexusendpointHandler = Lens.field @"createnexusendpointHandler"
+deletenamespace = Lens.field @"deletenamespace"
+maybe'deletenamespace = Lens.field @"deletenamespace"
+vec'deletenamespace = Lens.field @"deletenamespace"
+deletenamespaceHandler = Lens.field @"deletenamespaceHandler"
+maybe'deletenamespaceHandler = Lens.field @"deletenamespaceHandler"
+vec'deletenamespaceHandler = Lens.field @"deletenamespaceHandler"
+deletenexusendpoint = Lens.field @"deletenexusendpoint"
+maybe'deletenexusendpoint = Lens.field @"deletenexusendpoint"
+vec'deletenexusendpoint = Lens.field @"deletenexusendpoint"
+deletenexusendpointHandler = Lens.field @"deletenexusendpointHandler"
+maybe'deletenexusendpointHandler = Lens.field @"deletenexusendpointHandler"
+vec'deletenexusendpointHandler = Lens.field @"deletenexusendpointHandler"
+getnexusendpoint = Lens.field @"getnexusendpoint"
+maybe'getnexusendpoint = Lens.field @"getnexusendpoint"
+vec'getnexusendpoint = Lens.field @"getnexusendpoint"
+getnexusendpointHandler = Lens.field @"getnexusendpointHandler"
+maybe'getnexusendpointHandler = Lens.field @"getnexusendpointHandler"
+vec'getnexusendpointHandler = Lens.field @"getnexusendpointHandler"
+listclusters = Lens.field @"listclusters"
+maybe'listclusters = Lens.field @"listclusters"
+vec'listclusters = Lens.field @"listclusters"
+listclustersHandler = Lens.field @"listclustersHandler"
+maybe'listclustersHandler = Lens.field @"listclustersHandler"
+vec'listclustersHandler = Lens.field @"listclustersHandler"
+listnexusendpoints = Lens.field @"listnexusendpoints"
+maybe'listnexusendpoints = Lens.field @"listnexusendpoints"
+vec'listnexusendpoints = Lens.field @"listnexusendpoints"
+listnexusendpointsHandler = Lens.field @"listnexusendpointsHandler"
+maybe'listnexusendpointsHandler = Lens.field @"listnexusendpointsHandler"
+vec'listnexusendpointsHandler = Lens.field @"listnexusendpointsHandler"
+listsearchattributes = Lens.field @"listsearchattributes"
+maybe'listsearchattributes = Lens.field @"listsearchattributes"
+vec'listsearchattributes = Lens.field @"listsearchattributes"
+listsearchattributesHandler = Lens.field @"listsearchattributesHandler"
+maybe'listsearchattributesHandler = Lens.field @"listsearchattributesHandler"
+vec'listsearchattributesHandler = Lens.field @"listsearchattributesHandler"
+removeremotecluster = Lens.field @"removeremotecluster"
+maybe'removeremotecluster = Lens.field @"removeremotecluster"
+vec'removeremotecluster = Lens.field @"removeremotecluster"
+removeremoteclusterHandler = Lens.field @"removeremoteclusterHandler"
+maybe'removeremoteclusterHandler = Lens.field @"removeremoteclusterHandler"
+vec'removeremoteclusterHandler = Lens.field @"removeremoteclusterHandler"
+removesearchattributes = Lens.field @"removesearchattributes"
+maybe'removesearchattributes = Lens.field @"removesearchattributes"
+vec'removesearchattributes = Lens.field @"removesearchattributes"
+removesearchattributesHandler = Lens.field @"removesearchattributesHandler"
+maybe'removesearchattributesHandler = Lens.field @"removesearchattributesHandler"
+vec'removesearchattributesHandler = Lens.field @"removesearchattributesHandler"
+updatenexusendpoint = Lens.field @"updatenexusendpoint"
+maybe'updatenexusendpoint = Lens.field @"updatenexusendpoint"
+vec'updatenexusendpoint = Lens.field @"updatenexusendpoint"
+updatenexusendpointHandler = Lens.field @"updatenexusendpointHandler"
+maybe'updatenexusendpointHandler = Lens.field @"updatenexusendpointHandler"
+vec'updatenexusendpointHandler = Lens.field @"updatenexusendpointHandler"

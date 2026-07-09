@@ -21,11 +21,13 @@ import Crypto.Cipher.Types (AuthTag (..), KeySizeSpecifier (KeySizeFixed), ciphe
 import Crypto.Error (CryptoFailable (..))
 import qualified Crypto.Random.Types as CRT
 import Data.ByteArray (ScrubbedBytes, convert)
+import Data.Bifunctor (first)
 import Data.ByteArray.Encoding
 import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.ProtoLens.Encoding (decodeMessage, encodeMessage)
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import Temporal.Payload
 
 
@@ -118,6 +120,6 @@ instance Codec Encrypted Payload where
             CryptoFailed e -> throwE $ displayException e
           authTag <- tryJust "Unable to decrypt Payload without auth tag" $ payload.payloadMetadata Map.!? "auth-tag"
           decrypted <- tryJust "Unable to decrypt Payload" $ AESGCMSIV.decrypt k n (mempty :: ByteString) payload.payloadData (AuthTag $ convert authTag)
-          p <- tryRight $ decodeMessage decrypted
+          p <- tryRight $ first show $ decodeMessage decrypted
           pure $! convertFromProtoPayload p
     _ -> pure $ Right payload

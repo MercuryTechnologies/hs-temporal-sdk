@@ -1,885 +1,515 @@
-{- This file was auto-generated from temporal/api/enums/v1/common.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Enums.V1.Common (
-        ApplicationErrorCategory(..), ApplicationErrorCategory(),
-        ApplicationErrorCategory'UnrecognizedValue, CallbackState(..),
-        CallbackState(), CallbackState'UnrecognizedValue, EncodingType(..),
-        EncodingType(), EncodingType'UnrecognizedValue,
-        IndexedValueType(..), IndexedValueType(),
-        IndexedValueType'UnrecognizedValue,
-        NexusOperationCancellationState(..),
-        NexusOperationCancellationState(),
-        NexusOperationCancellationState'UnrecognizedValue,
-        PendingNexusOperationState(..), PendingNexusOperationState(),
-        PendingNexusOperationState'UnrecognizedValue, Severity(..),
-        Severity(), Severity'UnrecognizedValue, WorkerStatus(..),
-        WorkerStatus(), WorkerStatus'UnrecognizedValue,
-        WorkflowRuleActionScope(..), WorkflowRuleActionScope(),
-        WorkflowRuleActionScope'UnrecognizedValue
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-newtype ApplicationErrorCategory'UnrecognizedValue
-  = ApplicationErrorCategory'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data ApplicationErrorCategory
-  = APPLICATION_ERROR_CATEGORY_UNSPECIFIED |
-    APPLICATION_ERROR_CATEGORY_BENIGN |
-    ApplicationErrorCategory'Unrecognized !ApplicationErrorCategory'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum ApplicationErrorCategory where
-  maybeToEnum 0 = Prelude.Just APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just APPLICATION_ERROR_CATEGORY_BENIGN
-  maybeToEnum k
-    = Prelude.Just
-        (ApplicationErrorCategory'Unrecognized
-           (ApplicationErrorCategory'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-    = "APPLICATION_ERROR_CATEGORY_UNSPECIFIED"
-  showEnum APPLICATION_ERROR_CATEGORY_BENIGN
-    = "APPLICATION_ERROR_CATEGORY_BENIGN"
-  showEnum
-    (ApplicationErrorCategory'Unrecognized (ApplicationErrorCategory'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "APPLICATION_ERROR_CATEGORY_UNSPECIFIED"
-    = Prelude.Just APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-    | (Prelude.==) k "APPLICATION_ERROR_CATEGORY_BENIGN"
-    = Prelude.Just APPLICATION_ERROR_CATEGORY_BENIGN
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded ApplicationErrorCategory where
-  minBound = APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-  maxBound = APPLICATION_ERROR_CATEGORY_BENIGN
-instance Prelude.Enum ApplicationErrorCategory where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum ApplicationErrorCategory: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum APPLICATION_ERROR_CATEGORY_UNSPECIFIED = 0
-  fromEnum APPLICATION_ERROR_CATEGORY_BENIGN = 1
-  fromEnum
-    (ApplicationErrorCategory'Unrecognized (ApplicationErrorCategory'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ APPLICATION_ERROR_CATEGORY_BENIGN
-    = Prelude.error
-        "ApplicationErrorCategory.succ: bad argument APPLICATION_ERROR_CATEGORY_BENIGN. This value would be out of bounds."
-  succ APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-    = APPLICATION_ERROR_CATEGORY_BENIGN
-  succ (ApplicationErrorCategory'Unrecognized _)
-    = Prelude.error
-        "ApplicationErrorCategory.succ: bad argument: unrecognized value"
-  pred APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-    = Prelude.error
-        "ApplicationErrorCategory.pred: bad argument APPLICATION_ERROR_CATEGORY_UNSPECIFIED. This value would be out of bounds."
-  pred APPLICATION_ERROR_CATEGORY_BENIGN
-    = APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-  pred (ApplicationErrorCategory'Unrecognized _)
-    = Prelude.error
-        "ApplicationErrorCategory.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault ApplicationErrorCategory where
-  fieldDefault = APPLICATION_ERROR_CATEGORY_UNSPECIFIED
-instance Control.DeepSeq.NFData ApplicationErrorCategory where
-  rnf x__ = Prelude.seq x__ ()
-newtype CallbackState'UnrecognizedValue
-  = CallbackState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data CallbackState
-  = CALLBACK_STATE_UNSPECIFIED |
-    CALLBACK_STATE_STANDBY |
-    CALLBACK_STATE_SCHEDULED |
-    CALLBACK_STATE_BACKING_OFF |
-    CALLBACK_STATE_FAILED |
-    CALLBACK_STATE_SUCCEEDED |
-    CALLBACK_STATE_BLOCKED |
-    CallbackState'Unrecognized !CallbackState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum CallbackState where
-  maybeToEnum 0 = Prelude.Just CALLBACK_STATE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just CALLBACK_STATE_STANDBY
-  maybeToEnum 2 = Prelude.Just CALLBACK_STATE_SCHEDULED
-  maybeToEnum 3 = Prelude.Just CALLBACK_STATE_BACKING_OFF
-  maybeToEnum 4 = Prelude.Just CALLBACK_STATE_FAILED
-  maybeToEnum 5 = Prelude.Just CALLBACK_STATE_SUCCEEDED
-  maybeToEnum 6 = Prelude.Just CALLBACK_STATE_BLOCKED
-  maybeToEnum k
-    = Prelude.Just
-        (CallbackState'Unrecognized
-           (CallbackState'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum CALLBACK_STATE_UNSPECIFIED = "CALLBACK_STATE_UNSPECIFIED"
-  showEnum CALLBACK_STATE_STANDBY = "CALLBACK_STATE_STANDBY"
-  showEnum CALLBACK_STATE_SCHEDULED = "CALLBACK_STATE_SCHEDULED"
-  showEnum CALLBACK_STATE_BACKING_OFF = "CALLBACK_STATE_BACKING_OFF"
-  showEnum CALLBACK_STATE_FAILED = "CALLBACK_STATE_FAILED"
-  showEnum CALLBACK_STATE_SUCCEEDED = "CALLBACK_STATE_SUCCEEDED"
-  showEnum CALLBACK_STATE_BLOCKED = "CALLBACK_STATE_BLOCKED"
-  showEnum
-    (CallbackState'Unrecognized (CallbackState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "CALLBACK_STATE_UNSPECIFIED"
-    = Prelude.Just CALLBACK_STATE_UNSPECIFIED
-    | (Prelude.==) k "CALLBACK_STATE_STANDBY"
-    = Prelude.Just CALLBACK_STATE_STANDBY
-    | (Prelude.==) k "CALLBACK_STATE_SCHEDULED"
-    = Prelude.Just CALLBACK_STATE_SCHEDULED
-    | (Prelude.==) k "CALLBACK_STATE_BACKING_OFF"
-    = Prelude.Just CALLBACK_STATE_BACKING_OFF
-    | (Prelude.==) k "CALLBACK_STATE_FAILED"
-    = Prelude.Just CALLBACK_STATE_FAILED
-    | (Prelude.==) k "CALLBACK_STATE_SUCCEEDED"
-    = Prelude.Just CALLBACK_STATE_SUCCEEDED
-    | (Prelude.==) k "CALLBACK_STATE_BLOCKED"
-    = Prelude.Just CALLBACK_STATE_BLOCKED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded CallbackState where
-  minBound = CALLBACK_STATE_UNSPECIFIED
-  maxBound = CALLBACK_STATE_BLOCKED
-instance Prelude.Enum CallbackState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum CallbackState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum CALLBACK_STATE_UNSPECIFIED = 0
-  fromEnum CALLBACK_STATE_STANDBY = 1
-  fromEnum CALLBACK_STATE_SCHEDULED = 2
-  fromEnum CALLBACK_STATE_BACKING_OFF = 3
-  fromEnum CALLBACK_STATE_FAILED = 4
-  fromEnum CALLBACK_STATE_SUCCEEDED = 5
-  fromEnum CALLBACK_STATE_BLOCKED = 6
-  fromEnum
-    (CallbackState'Unrecognized (CallbackState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ CALLBACK_STATE_BLOCKED
-    = Prelude.error
-        "CallbackState.succ: bad argument CALLBACK_STATE_BLOCKED. This value would be out of bounds."
-  succ CALLBACK_STATE_UNSPECIFIED = CALLBACK_STATE_STANDBY
-  succ CALLBACK_STATE_STANDBY = CALLBACK_STATE_SCHEDULED
-  succ CALLBACK_STATE_SCHEDULED = CALLBACK_STATE_BACKING_OFF
-  succ CALLBACK_STATE_BACKING_OFF = CALLBACK_STATE_FAILED
-  succ CALLBACK_STATE_FAILED = CALLBACK_STATE_SUCCEEDED
-  succ CALLBACK_STATE_SUCCEEDED = CALLBACK_STATE_BLOCKED
-  succ (CallbackState'Unrecognized _)
-    = Prelude.error
-        "CallbackState.succ: bad argument: unrecognized value"
-  pred CALLBACK_STATE_UNSPECIFIED
-    = Prelude.error
-        "CallbackState.pred: bad argument CALLBACK_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred CALLBACK_STATE_STANDBY = CALLBACK_STATE_UNSPECIFIED
-  pred CALLBACK_STATE_SCHEDULED = CALLBACK_STATE_STANDBY
-  pred CALLBACK_STATE_BACKING_OFF = CALLBACK_STATE_SCHEDULED
-  pred CALLBACK_STATE_FAILED = CALLBACK_STATE_BACKING_OFF
-  pred CALLBACK_STATE_SUCCEEDED = CALLBACK_STATE_FAILED
-  pred CALLBACK_STATE_BLOCKED = CALLBACK_STATE_SUCCEEDED
-  pred (CallbackState'Unrecognized _)
-    = Prelude.error
-        "CallbackState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault CallbackState where
-  fieldDefault = CALLBACK_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData CallbackState where
-  rnf x__ = Prelude.seq x__ ()
-newtype EncodingType'UnrecognizedValue
-  = EncodingType'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.enums.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Enums.V1.Common where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x22\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2a\x5d\x0a\x0c\x45\x6e\x63\x6f\x64\x69\x6e\x67\x54\x79\x70\x65\x12\x1b\x0a\x19\x45\x4e\x43\x4f\x44\x49\x4e\x47\x5f\x54\x59\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x18\x0a\x14\x45\x4e\x43\x4f\x44\x49\x4e\x47\x5f\x54\x59\x50\x45\x5f\x50\x52\x4f\x54\x4f\x33\x10\x01\x12\x16\x0a\x12\x45\x4e\x43\x4f\x44\x49\x4e\x47\x5f\x54\x59\x50\x45\x5f\x4a\x53\x4f\x4e\x10\x02\x2a\x8f\x02\x0a\x10\x49\x6e\x64\x65\x78\x65\x64\x56\x61\x6c\x75\x65\x54\x79\x70\x65\x12\x20\x0a\x1e\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1b\x0a\x17\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x54\x45\x58\x54\x10\x01\x12\x1e\x0a\x1a\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x4b\x45\x59\x57\x4f\x52\x44\x10\x02\x12\x1a\x0a\x16\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x49\x4e\x54\x10\x03\x12\x1d\x0a\x19\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x44\x4f\x55\x42\x4c\x45\x10\x04\x12\x1b\x0a\x17\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x42\x4f\x4f\x4c\x10\x05\x12\x1f\x0a\x1b\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x44\x41\x54\x45\x54\x49\x4d\x45\x10\x06\x12\x23\x0a\x1f\x49\x4e\x44\x45\x58\x45\x44\x5f\x56\x41\x4c\x55\x45\x5f\x54\x59\x50\x45\x5f\x4b\x45\x59\x57\x4f\x52\x44\x5f\x4c\x49\x53\x54\x10\x07\x2a\x5c\x0a\x08\x53\x65\x76\x65\x72\x69\x74\x79\x12\x16\x0a\x14\x53\x45\x56\x45\x52\x49\x54\x59\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x11\x0a\x0d\x53\x45\x56\x45\x52\x49\x54\x59\x5f\x48\x49\x47\x48\x10\x01\x12\x13\x0a\x0f\x53\x45\x56\x45\x52\x49\x54\x59\x5f\x4d\x45\x44\x49\x55\x4d\x10\x02\x12\x10\x0a\x0c\x53\x45\x56\x45\x52\x49\x54\x59\x5f\x4c\x4f\x57\x10\x03\x2a\xdc\x01\x0a\x0d\x43\x61\x6c\x6c\x62\x61\x63\x6b\x53\x74\x61\x74\x65\x12\x1c\x0a\x1a\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1a\x0a\x16\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x53\x54\x41\x4e\x44\x42\x59\x10\x01\x12\x1c\x0a\x18\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x53\x43\x48\x45\x44\x55\x4c\x45\x44\x10\x02\x12\x1e\x0a\x1a\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x42\x41\x43\x4b\x49\x4e\x47\x5f\x4f\x46\x46\x10\x03\x12\x19\x0a\x15\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x46\x41\x49\x4c\x45\x44\x10\x04\x12\x1c\x0a\x18\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x53\x55\x43\x43\x45\x45\x44\x45\x44\x10\x05\x12\x1a\x0a\x16\x43\x41\x4c\x4c\x42\x41\x43\x4b\x5f\x53\x54\x41\x54\x45\x5f\x42\x4c\x4f\x43\x4b\x45\x44\x10\x06\x2a\xfb\x01\x0a\x1a\x50\x65\x6e\x64\x69\x6e\x67\x4e\x65\x78\x75\x73\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x53\x74\x61\x74\x65\x12\x2b\x0a\x29\x50\x45\x4e\x44\x49\x4e\x47\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x2b\x0a\x27\x50\x45\x4e\x44\x49\x4e\x47\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x53\x43\x48\x45\x44\x55\x4c\x45\x44\x10\x01\x12\x2d\x0a\x29\x50\x45\x4e\x44\x49\x4e\x47\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x42\x41\x43\x4b\x49\x4e\x47\x5f\x4f\x46\x46\x10\x02\x12\x29\x0a\x25\x50\x45\x4e\x44\x49\x4e\x47\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x53\x54\x41\x52\x54\x45\x44\x10\x03\x12\x29\x0a\x25\x50\x45\x4e\x44\x49\x4e\x47\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x42\x4c\x4f\x43\x4b\x45\x44\x10\x04\x2a\xfc\x02\x0a\x1f\x4e\x65\x78\x75\x73\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x53\x74\x61\x74\x65\x12\x30\x0a\x2e\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x30\x0a\x2c\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x53\x43\x48\x45\x44\x55\x4c\x45\x44\x10\x01\x12\x32\x0a\x2e\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x42\x41\x43\x4b\x49\x4e\x47\x5f\x4f\x46\x46\x10\x02\x12\x30\x0a\x2c\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x53\x55\x43\x43\x45\x45\x44\x45\x44\x10\x03\x12\x2d\x0a\x29\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x46\x41\x49\x4c\x45\x44\x10\x04\x12\x30\x0a\x2c\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x54\x49\x4d\x45\x44\x5f\x4f\x55\x54\x10\x05\x12\x2e\x0a\x2a\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x43\x41\x4e\x43\x45\x4c\x4c\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x42\x4c\x4f\x43\x4b\x45\x44\x10\x06\x2a\x95\x01\x0a\x17\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x41\x63\x74\x69\x6f\x6e\x53\x63\x6f\x70\x65\x12\x28\x0a\x26\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x52\x55\x4c\x45\x5f\x41\x43\x54\x49\x4f\x4e\x5f\x53\x43\x4f\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x27\x0a\x23\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x52\x55\x4c\x45\x5f\x41\x43\x54\x49\x4f\x4e\x5f\x53\x43\x4f\x50\x45\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x10\x01\x12\x27\x0a\x23\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x52\x55\x4c\x45\x5f\x41\x43\x54\x49\x4f\x4e\x5f\x53\x43\x4f\x50\x45\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x10\x02\x2a\x6b\x0a\x18\x41\x70\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x45\x72\x72\x6f\x72\x43\x61\x74\x65\x67\x6f\x72\x79\x12\x28\x0a\x26\x41\x50\x50\x4c\x49\x43\x41\x54\x49\x4f\x4e\x5f\x45\x52\x52\x4f\x52\x5f\x43\x41\x54\x45\x47\x4f\x52\x59\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x25\x0a\x21\x41\x50\x50\x4c\x49\x43\x41\x54\x49\x4f\x4e\x5f\x45\x52\x52\x4f\x52\x5f\x43\x41\x54\x45\x47\x4f\x52\x59\x5f\x42\x45\x4e\x49\x47\x4e\x10\x01\x2a\x83\x01\x0a\x0c\x57\x6f\x72\x6b\x65\x72\x53\x74\x61\x74\x75\x73\x12\x1b\x0a\x19\x57\x4f\x52\x4b\x45\x52\x5f\x53\x54\x41\x54\x55\x53\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x19\x0a\x15\x57\x4f\x52\x4b\x45\x52\x5f\x53\x54\x41\x54\x55\x53\x5f\x52\x55\x4e\x4e\x49\x4e\x47\x10\x01\x12\x1f\x0a\x1b\x57\x4f\x52\x4b\x45\x52\x5f\x53\x54\x41\x54\x55\x53\x5f\x53\x48\x55\x54\x54\x49\x4e\x47\x5f\x44\x4f\x57\x4e\x10\x02\x12\x1a\x0a\x16\x57\x4f\x52\x4b\x45\x52\x5f\x53\x54\x41\x54\x55\x53\x5f\x53\x48\x55\x54\x44\x4f\x57\x4e\x10\x03\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
 data EncodingType
-  = ENCODING_TYPE_UNSPECIFIED |
-    ENCODING_TYPE_PROTO3 |
-    ENCODING_TYPE_JSON |
-    EncodingType'Unrecognized !EncodingType'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum EncodingType where
-  maybeToEnum 0 = Prelude.Just ENCODING_TYPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just ENCODING_TYPE_PROTO3
-  maybeToEnum 2 = Prelude.Just ENCODING_TYPE_JSON
-  maybeToEnum k
-    = Prelude.Just
-        (EncodingType'Unrecognized
-           (EncodingType'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum ENCODING_TYPE_UNSPECIFIED = "ENCODING_TYPE_UNSPECIFIED"
-  showEnum ENCODING_TYPE_PROTO3 = "ENCODING_TYPE_PROTO3"
-  showEnum ENCODING_TYPE_JSON = "ENCODING_TYPE_JSON"
-  showEnum
-    (EncodingType'Unrecognized (EncodingType'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "ENCODING_TYPE_UNSPECIFIED"
-    = Prelude.Just ENCODING_TYPE_UNSPECIFIED
-    | (Prelude.==) k "ENCODING_TYPE_PROTO3"
-    = Prelude.Just ENCODING_TYPE_PROTO3
-    | (Prelude.==) k "ENCODING_TYPE_JSON"
-    = Prelude.Just ENCODING_TYPE_JSON
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded EncodingType where
-  minBound = ENCODING_TYPE_UNSPECIFIED
-  maxBound = ENCODING_TYPE_JSON
-instance Prelude.Enum EncodingType where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum EncodingType: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum ENCODING_TYPE_UNSPECIFIED = 0
-  fromEnum ENCODING_TYPE_PROTO3 = 1
-  fromEnum ENCODING_TYPE_JSON = 2
-  fromEnum
-    (EncodingType'Unrecognized (EncodingType'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ ENCODING_TYPE_JSON
-    = Prelude.error
-        "EncodingType.succ: bad argument ENCODING_TYPE_JSON. This value would be out of bounds."
-  succ ENCODING_TYPE_UNSPECIFIED = ENCODING_TYPE_PROTO3
-  succ ENCODING_TYPE_PROTO3 = ENCODING_TYPE_JSON
-  succ (EncodingType'Unrecognized _)
-    = Prelude.error
-        "EncodingType.succ: bad argument: unrecognized value"
-  pred ENCODING_TYPE_UNSPECIFIED
-    = Prelude.error
-        "EncodingType.pred: bad argument ENCODING_TYPE_UNSPECIFIED. This value would be out of bounds."
-  pred ENCODING_TYPE_PROTO3 = ENCODING_TYPE_UNSPECIFIED
-  pred ENCODING_TYPE_JSON = ENCODING_TYPE_PROTO3
-  pred (EncodingType'Unrecognized _)
-    = Prelude.error
-        "EncodingType.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault EncodingType where
-  fieldDefault = ENCODING_TYPE_UNSPECIFIED
-instance Control.DeepSeq.NFData EncodingType where
-  rnf x__ = Prelude.seq x__ ()
-newtype IndexedValueType'UnrecognizedValue
-  = IndexedValueType'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+  = EncodingType'EncodingTypeUnspecified
+  | EncodingType'EncodingTypeProto3
+  | EncodingType'EncodingTypeJson
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumEncodingType :: EncodingType -> Int
+toProtoEnumEncodingType EncodingType'EncodingTypeUnspecified = 0
+toProtoEnumEncodingType EncodingType'EncodingTypeProto3 = 1
+toProtoEnumEncodingType EncodingType'EncodingTypeJson = 2
+
+fromProtoEnumEncodingType :: Int -> Maybe EncodingType
+fromProtoEnumEncodingType 0 = Just EncodingType'EncodingTypeUnspecified
+fromProtoEnumEncodingType 1 = Just EncodingType'EncodingTypeProto3
+fromProtoEnumEncodingType 2 = Just EncodingType'EncodingTypeJson
+fromProtoEnumEncodingType _ = Nothing
+
+instance MessageEncode EncodingType where
+  buildMessage _ = mempty
+instance MessageSize EncodingType where
+  messageSize _ = 0
+instance MessageDecode EncodingType where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON EncodingType where
+  toJSON EncodingType'EncodingTypeUnspecified = Aeson.String "ENCODING_TYPE_UNSPECIFIED"
+  toJSON EncodingType'EncodingTypeProto3 = Aeson.String "ENCODING_TYPE_PROTO3"
+  toJSON EncodingType'EncodingTypeJson = Aeson.String "ENCODING_TYPE_JSON"
+
+instance Aeson.FromJSON EncodingType where
+  parseJSON = \case
+    Aeson.String "ENCODING_TYPE_UNSPECIFIED" -> pure EncodingType'EncodingTypeUnspecified
+    Aeson.String "ENCODING_TYPE_PROTO3" -> pure EncodingType'EncodingTypeProto3
+    Aeson.String "ENCODING_TYPE_JSON" -> pure EncodingType'EncodingTypeJson
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for EncodingType"
+
+instance Hashable EncodingType where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumEncodingType x)
+
 data IndexedValueType
-  = INDEXED_VALUE_TYPE_UNSPECIFIED |
-    INDEXED_VALUE_TYPE_TEXT |
-    INDEXED_VALUE_TYPE_KEYWORD |
-    INDEXED_VALUE_TYPE_INT |
-    INDEXED_VALUE_TYPE_DOUBLE |
-    INDEXED_VALUE_TYPE_BOOL |
-    INDEXED_VALUE_TYPE_DATETIME |
-    INDEXED_VALUE_TYPE_KEYWORD_LIST |
-    IndexedValueType'Unrecognized !IndexedValueType'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum IndexedValueType where
-  maybeToEnum 0 = Prelude.Just INDEXED_VALUE_TYPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just INDEXED_VALUE_TYPE_TEXT
-  maybeToEnum 2 = Prelude.Just INDEXED_VALUE_TYPE_KEYWORD
-  maybeToEnum 3 = Prelude.Just INDEXED_VALUE_TYPE_INT
-  maybeToEnum 4 = Prelude.Just INDEXED_VALUE_TYPE_DOUBLE
-  maybeToEnum 5 = Prelude.Just INDEXED_VALUE_TYPE_BOOL
-  maybeToEnum 6 = Prelude.Just INDEXED_VALUE_TYPE_DATETIME
-  maybeToEnum 7 = Prelude.Just INDEXED_VALUE_TYPE_KEYWORD_LIST
-  maybeToEnum k
-    = Prelude.Just
-        (IndexedValueType'Unrecognized
-           (IndexedValueType'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum INDEXED_VALUE_TYPE_UNSPECIFIED
-    = "INDEXED_VALUE_TYPE_UNSPECIFIED"
-  showEnum INDEXED_VALUE_TYPE_TEXT = "INDEXED_VALUE_TYPE_TEXT"
-  showEnum INDEXED_VALUE_TYPE_KEYWORD = "INDEXED_VALUE_TYPE_KEYWORD"
-  showEnum INDEXED_VALUE_TYPE_INT = "INDEXED_VALUE_TYPE_INT"
-  showEnum INDEXED_VALUE_TYPE_DOUBLE = "INDEXED_VALUE_TYPE_DOUBLE"
-  showEnum INDEXED_VALUE_TYPE_BOOL = "INDEXED_VALUE_TYPE_BOOL"
-  showEnum INDEXED_VALUE_TYPE_DATETIME
-    = "INDEXED_VALUE_TYPE_DATETIME"
-  showEnum INDEXED_VALUE_TYPE_KEYWORD_LIST
-    = "INDEXED_VALUE_TYPE_KEYWORD_LIST"
-  showEnum
-    (IndexedValueType'Unrecognized (IndexedValueType'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_UNSPECIFIED"
-    = Prelude.Just INDEXED_VALUE_TYPE_UNSPECIFIED
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_TEXT"
-    = Prelude.Just INDEXED_VALUE_TYPE_TEXT
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_KEYWORD"
-    = Prelude.Just INDEXED_VALUE_TYPE_KEYWORD
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_INT"
-    = Prelude.Just INDEXED_VALUE_TYPE_INT
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_DOUBLE"
-    = Prelude.Just INDEXED_VALUE_TYPE_DOUBLE
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_BOOL"
-    = Prelude.Just INDEXED_VALUE_TYPE_BOOL
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_DATETIME"
-    = Prelude.Just INDEXED_VALUE_TYPE_DATETIME
-    | (Prelude.==) k "INDEXED_VALUE_TYPE_KEYWORD_LIST"
-    = Prelude.Just INDEXED_VALUE_TYPE_KEYWORD_LIST
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded IndexedValueType where
-  minBound = INDEXED_VALUE_TYPE_UNSPECIFIED
-  maxBound = INDEXED_VALUE_TYPE_KEYWORD_LIST
-instance Prelude.Enum IndexedValueType where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum IndexedValueType: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum INDEXED_VALUE_TYPE_UNSPECIFIED = 0
-  fromEnum INDEXED_VALUE_TYPE_TEXT = 1
-  fromEnum INDEXED_VALUE_TYPE_KEYWORD = 2
-  fromEnum INDEXED_VALUE_TYPE_INT = 3
-  fromEnum INDEXED_VALUE_TYPE_DOUBLE = 4
-  fromEnum INDEXED_VALUE_TYPE_BOOL = 5
-  fromEnum INDEXED_VALUE_TYPE_DATETIME = 6
-  fromEnum INDEXED_VALUE_TYPE_KEYWORD_LIST = 7
-  fromEnum
-    (IndexedValueType'Unrecognized (IndexedValueType'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ INDEXED_VALUE_TYPE_KEYWORD_LIST
-    = Prelude.error
-        "IndexedValueType.succ: bad argument INDEXED_VALUE_TYPE_KEYWORD_LIST. This value would be out of bounds."
-  succ INDEXED_VALUE_TYPE_UNSPECIFIED = INDEXED_VALUE_TYPE_TEXT
-  succ INDEXED_VALUE_TYPE_TEXT = INDEXED_VALUE_TYPE_KEYWORD
-  succ INDEXED_VALUE_TYPE_KEYWORD = INDEXED_VALUE_TYPE_INT
-  succ INDEXED_VALUE_TYPE_INT = INDEXED_VALUE_TYPE_DOUBLE
-  succ INDEXED_VALUE_TYPE_DOUBLE = INDEXED_VALUE_TYPE_BOOL
-  succ INDEXED_VALUE_TYPE_BOOL = INDEXED_VALUE_TYPE_DATETIME
-  succ INDEXED_VALUE_TYPE_DATETIME = INDEXED_VALUE_TYPE_KEYWORD_LIST
-  succ (IndexedValueType'Unrecognized _)
-    = Prelude.error
-        "IndexedValueType.succ: bad argument: unrecognized value"
-  pred INDEXED_VALUE_TYPE_UNSPECIFIED
-    = Prelude.error
-        "IndexedValueType.pred: bad argument INDEXED_VALUE_TYPE_UNSPECIFIED. This value would be out of bounds."
-  pred INDEXED_VALUE_TYPE_TEXT = INDEXED_VALUE_TYPE_UNSPECIFIED
-  pred INDEXED_VALUE_TYPE_KEYWORD = INDEXED_VALUE_TYPE_TEXT
-  pred INDEXED_VALUE_TYPE_INT = INDEXED_VALUE_TYPE_KEYWORD
-  pred INDEXED_VALUE_TYPE_DOUBLE = INDEXED_VALUE_TYPE_INT
-  pred INDEXED_VALUE_TYPE_BOOL = INDEXED_VALUE_TYPE_DOUBLE
-  pred INDEXED_VALUE_TYPE_DATETIME = INDEXED_VALUE_TYPE_BOOL
-  pred INDEXED_VALUE_TYPE_KEYWORD_LIST = INDEXED_VALUE_TYPE_DATETIME
-  pred (IndexedValueType'Unrecognized _)
-    = Prelude.error
-        "IndexedValueType.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault IndexedValueType where
-  fieldDefault = INDEXED_VALUE_TYPE_UNSPECIFIED
-instance Control.DeepSeq.NFData IndexedValueType where
-  rnf x__ = Prelude.seq x__ ()
-newtype NexusOperationCancellationState'UnrecognizedValue
-  = NexusOperationCancellationState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data NexusOperationCancellationState
-  = NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED |
-    NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED |
-    NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF |
-    NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED |
-    NEXUS_OPERATION_CANCELLATION_STATE_FAILED |
-    NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT |
-    NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED |
-    NexusOperationCancellationState'Unrecognized !NexusOperationCancellationState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum NexusOperationCancellationState where
-  maybeToEnum 0
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-  maybeToEnum 1
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-  maybeToEnum 2
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-  maybeToEnum 3
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-  maybeToEnum 4
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-  maybeToEnum 5
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-  maybeToEnum 6
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-  maybeToEnum k
-    = Prelude.Just
-        (NexusOperationCancellationState'Unrecognized
-           (NexusOperationCancellationState'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-    = "NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED"
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-    = "NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED"
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-    = "NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF"
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-    = "NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED"
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-    = "NEXUS_OPERATION_CANCELLATION_STATE_FAILED"
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-    = "NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT"
-  showEnum NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-    = "NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED"
-  showEnum
-    (NexusOperationCancellationState'Unrecognized (NexusOperationCancellationState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_FAILED"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-    | (Prelude.==) k "NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED"
-    = Prelude.Just NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded NexusOperationCancellationState where
-  minBound = NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-  maxBound = NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-instance Prelude.Enum NexusOperationCancellationState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum NexusOperationCancellationState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED = 0
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED = 1
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF = 2
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED = 3
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_FAILED = 4
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT = 5
-  fromEnum NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED = 6
-  fromEnum
-    (NexusOperationCancellationState'Unrecognized (NexusOperationCancellationState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-    = Prelude.error
-        "NexusOperationCancellationState.succ: bad argument NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED. This value would be out of bounds."
-  succ NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-    = NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-  succ NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-    = NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-  succ NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-    = NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-  succ NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-    = NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-  succ NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-    = NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-  succ NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-    = NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-  succ (NexusOperationCancellationState'Unrecognized _)
-    = Prelude.error
-        "NexusOperationCancellationState.succ: bad argument: unrecognized value"
-  pred NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-    = Prelude.error
-        "NexusOperationCancellationState.pred: bad argument NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-    = NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-  pred NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-    = NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED
-  pred NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-    = NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF
-  pred NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-    = NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED
-  pred NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-    = NEXUS_OPERATION_CANCELLATION_STATE_FAILED
-  pred NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED
-    = NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT
-  pred (NexusOperationCancellationState'Unrecognized _)
-    = Prelude.error
-        "NexusOperationCancellationState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault NexusOperationCancellationState where
-  fieldDefault = NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData NexusOperationCancellationState where
-  rnf x__ = Prelude.seq x__ ()
-newtype PendingNexusOperationState'UnrecognizedValue
-  = PendingNexusOperationState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data PendingNexusOperationState
-  = PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED |
-    PENDING_NEXUS_OPERATION_STATE_SCHEDULED |
-    PENDING_NEXUS_OPERATION_STATE_BACKING_OFF |
-    PENDING_NEXUS_OPERATION_STATE_STARTED |
-    PENDING_NEXUS_OPERATION_STATE_BLOCKED |
-    PendingNexusOperationState'Unrecognized !PendingNexusOperationState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum PendingNexusOperationState where
-  maybeToEnum 0
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-  maybeToEnum 1
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-  maybeToEnum 2
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-  maybeToEnum 3 = Prelude.Just PENDING_NEXUS_OPERATION_STATE_STARTED
-  maybeToEnum 4 = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BLOCKED
-  maybeToEnum k
-    = Prelude.Just
-        (PendingNexusOperationState'Unrecognized
-           (PendingNexusOperationState'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-    = "PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED"
-  showEnum PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-    = "PENDING_NEXUS_OPERATION_STATE_SCHEDULED"
-  showEnum PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-    = "PENDING_NEXUS_OPERATION_STATE_BACKING_OFF"
-  showEnum PENDING_NEXUS_OPERATION_STATE_STARTED
-    = "PENDING_NEXUS_OPERATION_STATE_STARTED"
-  showEnum PENDING_NEXUS_OPERATION_STATE_BLOCKED
-    = "PENDING_NEXUS_OPERATION_STATE_BLOCKED"
-  showEnum
-    (PendingNexusOperationState'Unrecognized (PendingNexusOperationState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED"
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-    | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_SCHEDULED"
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-    | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_BACKING_OFF"
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-    | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_STARTED"
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_STARTED
-    | (Prelude.==) k "PENDING_NEXUS_OPERATION_STATE_BLOCKED"
-    = Prelude.Just PENDING_NEXUS_OPERATION_STATE_BLOCKED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded PendingNexusOperationState where
-  minBound = PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-  maxBound = PENDING_NEXUS_OPERATION_STATE_BLOCKED
-instance Prelude.Enum PendingNexusOperationState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum PendingNexusOperationState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED = 0
-  fromEnum PENDING_NEXUS_OPERATION_STATE_SCHEDULED = 1
-  fromEnum PENDING_NEXUS_OPERATION_STATE_BACKING_OFF = 2
-  fromEnum PENDING_NEXUS_OPERATION_STATE_STARTED = 3
-  fromEnum PENDING_NEXUS_OPERATION_STATE_BLOCKED = 4
-  fromEnum
-    (PendingNexusOperationState'Unrecognized (PendingNexusOperationState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ PENDING_NEXUS_OPERATION_STATE_BLOCKED
-    = Prelude.error
-        "PendingNexusOperationState.succ: bad argument PENDING_NEXUS_OPERATION_STATE_BLOCKED. This value would be out of bounds."
-  succ PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-    = PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-  succ PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-    = PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-  succ PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-    = PENDING_NEXUS_OPERATION_STATE_STARTED
-  succ PENDING_NEXUS_OPERATION_STATE_STARTED
-    = PENDING_NEXUS_OPERATION_STATE_BLOCKED
-  succ (PendingNexusOperationState'Unrecognized _)
-    = Prelude.error
-        "PendingNexusOperationState.succ: bad argument: unrecognized value"
-  pred PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-    = Prelude.error
-        "PendingNexusOperationState.pred: bad argument PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-    = PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-  pred PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-    = PENDING_NEXUS_OPERATION_STATE_SCHEDULED
-  pred PENDING_NEXUS_OPERATION_STATE_STARTED
-    = PENDING_NEXUS_OPERATION_STATE_BACKING_OFF
-  pred PENDING_NEXUS_OPERATION_STATE_BLOCKED
-    = PENDING_NEXUS_OPERATION_STATE_STARTED
-  pred (PendingNexusOperationState'Unrecognized _)
-    = Prelude.error
-        "PendingNexusOperationState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault PendingNexusOperationState where
-  fieldDefault = PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData PendingNexusOperationState where
-  rnf x__ = Prelude.seq x__ ()
-newtype Severity'UnrecognizedValue
-  = Severity'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+  = IndexedValueType'IndexedValueTypeUnspecified
+  | IndexedValueType'IndexedValueTypeText
+  | IndexedValueType'IndexedValueTypeKeyword
+  | IndexedValueType'IndexedValueTypeInt
+  | IndexedValueType'IndexedValueTypeDouble
+  | IndexedValueType'IndexedValueTypeBool
+  | IndexedValueType'IndexedValueTypeDatetime
+  | IndexedValueType'IndexedValueTypeKeywordList
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumIndexedValueType :: IndexedValueType -> Int
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeUnspecified = 0
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeText = 1
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeKeyword = 2
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeInt = 3
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeDouble = 4
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeBool = 5
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeDatetime = 6
+toProtoEnumIndexedValueType IndexedValueType'IndexedValueTypeKeywordList = 7
+
+fromProtoEnumIndexedValueType :: Int -> Maybe IndexedValueType
+fromProtoEnumIndexedValueType 0 = Just IndexedValueType'IndexedValueTypeUnspecified
+fromProtoEnumIndexedValueType 1 = Just IndexedValueType'IndexedValueTypeText
+fromProtoEnumIndexedValueType 2 = Just IndexedValueType'IndexedValueTypeKeyword
+fromProtoEnumIndexedValueType 3 = Just IndexedValueType'IndexedValueTypeInt
+fromProtoEnumIndexedValueType 4 = Just IndexedValueType'IndexedValueTypeDouble
+fromProtoEnumIndexedValueType 5 = Just IndexedValueType'IndexedValueTypeBool
+fromProtoEnumIndexedValueType 6 = Just IndexedValueType'IndexedValueTypeDatetime
+fromProtoEnumIndexedValueType 7 = Just IndexedValueType'IndexedValueTypeKeywordList
+fromProtoEnumIndexedValueType _ = Nothing
+
+instance MessageEncode IndexedValueType where
+  buildMessage _ = mempty
+instance MessageSize IndexedValueType where
+  messageSize _ = 0
+instance MessageDecode IndexedValueType where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON IndexedValueType where
+  toJSON IndexedValueType'IndexedValueTypeUnspecified = Aeson.String "INDEXED_VALUE_TYPE_UNSPECIFIED"
+  toJSON IndexedValueType'IndexedValueTypeText = Aeson.String "INDEXED_VALUE_TYPE_TEXT"
+  toJSON IndexedValueType'IndexedValueTypeKeyword = Aeson.String "INDEXED_VALUE_TYPE_KEYWORD"
+  toJSON IndexedValueType'IndexedValueTypeInt = Aeson.String "INDEXED_VALUE_TYPE_INT"
+  toJSON IndexedValueType'IndexedValueTypeDouble = Aeson.String "INDEXED_VALUE_TYPE_DOUBLE"
+  toJSON IndexedValueType'IndexedValueTypeBool = Aeson.String "INDEXED_VALUE_TYPE_BOOL"
+  toJSON IndexedValueType'IndexedValueTypeDatetime = Aeson.String "INDEXED_VALUE_TYPE_DATETIME"
+  toJSON IndexedValueType'IndexedValueTypeKeywordList = Aeson.String "INDEXED_VALUE_TYPE_KEYWORD_LIST"
+
+instance Aeson.FromJSON IndexedValueType where
+  parseJSON = \case
+    Aeson.String "INDEXED_VALUE_TYPE_UNSPECIFIED" -> pure IndexedValueType'IndexedValueTypeUnspecified
+    Aeson.String "INDEXED_VALUE_TYPE_TEXT" -> pure IndexedValueType'IndexedValueTypeText
+    Aeson.String "INDEXED_VALUE_TYPE_KEYWORD" -> pure IndexedValueType'IndexedValueTypeKeyword
+    Aeson.String "INDEXED_VALUE_TYPE_INT" -> pure IndexedValueType'IndexedValueTypeInt
+    Aeson.String "INDEXED_VALUE_TYPE_DOUBLE" -> pure IndexedValueType'IndexedValueTypeDouble
+    Aeson.String "INDEXED_VALUE_TYPE_BOOL" -> pure IndexedValueType'IndexedValueTypeBool
+    Aeson.String "INDEXED_VALUE_TYPE_DATETIME" -> pure IndexedValueType'IndexedValueTypeDatetime
+    Aeson.String "INDEXED_VALUE_TYPE_KEYWORD_LIST" -> pure IndexedValueType'IndexedValueTypeKeywordList
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for IndexedValueType"
+
+instance Hashable IndexedValueType where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumIndexedValueType x)
+
 data Severity
-  = SEVERITY_UNSPECIFIED |
-    SEVERITY_HIGH |
-    SEVERITY_MEDIUM |
-    SEVERITY_LOW |
-    Severity'Unrecognized !Severity'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum Severity where
-  maybeToEnum 0 = Prelude.Just SEVERITY_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just SEVERITY_HIGH
-  maybeToEnum 2 = Prelude.Just SEVERITY_MEDIUM
-  maybeToEnum 3 = Prelude.Just SEVERITY_LOW
-  maybeToEnum k
-    = Prelude.Just
-        (Severity'Unrecognized
-           (Severity'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum SEVERITY_UNSPECIFIED = "SEVERITY_UNSPECIFIED"
-  showEnum SEVERITY_HIGH = "SEVERITY_HIGH"
-  showEnum SEVERITY_MEDIUM = "SEVERITY_MEDIUM"
-  showEnum SEVERITY_LOW = "SEVERITY_LOW"
-  showEnum (Severity'Unrecognized (Severity'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "SEVERITY_UNSPECIFIED"
-    = Prelude.Just SEVERITY_UNSPECIFIED
-    | (Prelude.==) k "SEVERITY_HIGH" = Prelude.Just SEVERITY_HIGH
-    | (Prelude.==) k "SEVERITY_MEDIUM" = Prelude.Just SEVERITY_MEDIUM
-    | (Prelude.==) k "SEVERITY_LOW" = Prelude.Just SEVERITY_LOW
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded Severity where
-  minBound = SEVERITY_UNSPECIFIED
-  maxBound = SEVERITY_LOW
-instance Prelude.Enum Severity where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum Severity: " (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum SEVERITY_UNSPECIFIED = 0
-  fromEnum SEVERITY_HIGH = 1
-  fromEnum SEVERITY_MEDIUM = 2
-  fromEnum SEVERITY_LOW = 3
-  fromEnum (Severity'Unrecognized (Severity'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ SEVERITY_LOW
-    = Prelude.error
-        "Severity.succ: bad argument SEVERITY_LOW. This value would be out of bounds."
-  succ SEVERITY_UNSPECIFIED = SEVERITY_HIGH
-  succ SEVERITY_HIGH = SEVERITY_MEDIUM
-  succ SEVERITY_MEDIUM = SEVERITY_LOW
-  succ (Severity'Unrecognized _)
-    = Prelude.error "Severity.succ: bad argument: unrecognized value"
-  pred SEVERITY_UNSPECIFIED
-    = Prelude.error
-        "Severity.pred: bad argument SEVERITY_UNSPECIFIED. This value would be out of bounds."
-  pred SEVERITY_HIGH = SEVERITY_UNSPECIFIED
-  pred SEVERITY_MEDIUM = SEVERITY_HIGH
-  pred SEVERITY_LOW = SEVERITY_MEDIUM
-  pred (Severity'Unrecognized _)
-    = Prelude.error "Severity.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault Severity where
-  fieldDefault = SEVERITY_UNSPECIFIED
-instance Control.DeepSeq.NFData Severity where
-  rnf x__ = Prelude.seq x__ ()
-newtype WorkerStatus'UnrecognizedValue
-  = WorkerStatus'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data WorkerStatus
-  = WORKER_STATUS_UNSPECIFIED |
-    WORKER_STATUS_RUNNING |
-    WORKER_STATUS_SHUTTING_DOWN |
-    WORKER_STATUS_SHUTDOWN |
-    WorkerStatus'Unrecognized !WorkerStatus'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum WorkerStatus where
-  maybeToEnum 0 = Prelude.Just WORKER_STATUS_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just WORKER_STATUS_RUNNING
-  maybeToEnum 2 = Prelude.Just WORKER_STATUS_SHUTTING_DOWN
-  maybeToEnum 3 = Prelude.Just WORKER_STATUS_SHUTDOWN
-  maybeToEnum k
-    = Prelude.Just
-        (WorkerStatus'Unrecognized
-           (WorkerStatus'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum WORKER_STATUS_UNSPECIFIED = "WORKER_STATUS_UNSPECIFIED"
-  showEnum WORKER_STATUS_RUNNING = "WORKER_STATUS_RUNNING"
-  showEnum WORKER_STATUS_SHUTTING_DOWN
-    = "WORKER_STATUS_SHUTTING_DOWN"
-  showEnum WORKER_STATUS_SHUTDOWN = "WORKER_STATUS_SHUTDOWN"
-  showEnum
-    (WorkerStatus'Unrecognized (WorkerStatus'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "WORKER_STATUS_UNSPECIFIED"
-    = Prelude.Just WORKER_STATUS_UNSPECIFIED
-    | (Prelude.==) k "WORKER_STATUS_RUNNING"
-    = Prelude.Just WORKER_STATUS_RUNNING
-    | (Prelude.==) k "WORKER_STATUS_SHUTTING_DOWN"
-    = Prelude.Just WORKER_STATUS_SHUTTING_DOWN
-    | (Prelude.==) k "WORKER_STATUS_SHUTDOWN"
-    = Prelude.Just WORKER_STATUS_SHUTDOWN
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded WorkerStatus where
-  minBound = WORKER_STATUS_UNSPECIFIED
-  maxBound = WORKER_STATUS_SHUTDOWN
-instance Prelude.Enum WorkerStatus where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum WorkerStatus: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum WORKER_STATUS_UNSPECIFIED = 0
-  fromEnum WORKER_STATUS_RUNNING = 1
-  fromEnum WORKER_STATUS_SHUTTING_DOWN = 2
-  fromEnum WORKER_STATUS_SHUTDOWN = 3
-  fromEnum
-    (WorkerStatus'Unrecognized (WorkerStatus'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ WORKER_STATUS_SHUTDOWN
-    = Prelude.error
-        "WorkerStatus.succ: bad argument WORKER_STATUS_SHUTDOWN. This value would be out of bounds."
-  succ WORKER_STATUS_UNSPECIFIED = WORKER_STATUS_RUNNING
-  succ WORKER_STATUS_RUNNING = WORKER_STATUS_SHUTTING_DOWN
-  succ WORKER_STATUS_SHUTTING_DOWN = WORKER_STATUS_SHUTDOWN
-  succ (WorkerStatus'Unrecognized _)
-    = Prelude.error
-        "WorkerStatus.succ: bad argument: unrecognized value"
-  pred WORKER_STATUS_UNSPECIFIED
-    = Prelude.error
-        "WorkerStatus.pred: bad argument WORKER_STATUS_UNSPECIFIED. This value would be out of bounds."
-  pred WORKER_STATUS_RUNNING = WORKER_STATUS_UNSPECIFIED
-  pred WORKER_STATUS_SHUTTING_DOWN = WORKER_STATUS_RUNNING
-  pred WORKER_STATUS_SHUTDOWN = WORKER_STATUS_SHUTTING_DOWN
-  pred (WorkerStatus'Unrecognized _)
-    = Prelude.error
-        "WorkerStatus.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault WorkerStatus where
-  fieldDefault = WORKER_STATUS_UNSPECIFIED
-instance Control.DeepSeq.NFData WorkerStatus where
-  rnf x__ = Prelude.seq x__ ()
-newtype WorkflowRuleActionScope'UnrecognizedValue
-  = WorkflowRuleActionScope'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+  = Severity'SeverityUnspecified
+  | Severity'SeverityHigh
+  | Severity'SeverityMedium
+  | Severity'SeverityLow
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumSeverity :: Severity -> Int
+toProtoEnumSeverity Severity'SeverityUnspecified = 0
+toProtoEnumSeverity Severity'SeverityHigh = 1
+toProtoEnumSeverity Severity'SeverityMedium = 2
+toProtoEnumSeverity Severity'SeverityLow = 3
+
+fromProtoEnumSeverity :: Int -> Maybe Severity
+fromProtoEnumSeverity 0 = Just Severity'SeverityUnspecified
+fromProtoEnumSeverity 1 = Just Severity'SeverityHigh
+fromProtoEnumSeverity 2 = Just Severity'SeverityMedium
+fromProtoEnumSeverity 3 = Just Severity'SeverityLow
+fromProtoEnumSeverity _ = Nothing
+
+instance MessageEncode Severity where
+  buildMessage _ = mempty
+instance MessageSize Severity where
+  messageSize _ = 0
+instance MessageDecode Severity where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON Severity where
+  toJSON Severity'SeverityUnspecified = Aeson.String "SEVERITY_UNSPECIFIED"
+  toJSON Severity'SeverityHigh = Aeson.String "SEVERITY_HIGH"
+  toJSON Severity'SeverityMedium = Aeson.String "SEVERITY_MEDIUM"
+  toJSON Severity'SeverityLow = Aeson.String "SEVERITY_LOW"
+
+instance Aeson.FromJSON Severity where
+  parseJSON = \case
+    Aeson.String "SEVERITY_UNSPECIFIED" -> pure Severity'SeverityUnspecified
+    Aeson.String "SEVERITY_HIGH" -> pure Severity'SeverityHigh
+    Aeson.String "SEVERITY_MEDIUM" -> pure Severity'SeverityMedium
+    Aeson.String "SEVERITY_LOW" -> pure Severity'SeverityLow
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for Severity"
+
+instance Hashable Severity where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumSeverity x)
+
+data CallbackState
+  = CallbackState'CallbackStateUnspecified
+  | CallbackState'CallbackStateStandby
+  | CallbackState'CallbackStateScheduled
+  | CallbackState'CallbackStateBackingOff
+  | CallbackState'CallbackStateFailed
+  | CallbackState'CallbackStateSucceeded
+  | CallbackState'CallbackStateBlocked
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumCallbackState :: CallbackState -> Int
+toProtoEnumCallbackState CallbackState'CallbackStateUnspecified = 0
+toProtoEnumCallbackState CallbackState'CallbackStateStandby = 1
+toProtoEnumCallbackState CallbackState'CallbackStateScheduled = 2
+toProtoEnumCallbackState CallbackState'CallbackStateBackingOff = 3
+toProtoEnumCallbackState CallbackState'CallbackStateFailed = 4
+toProtoEnumCallbackState CallbackState'CallbackStateSucceeded = 5
+toProtoEnumCallbackState CallbackState'CallbackStateBlocked = 6
+
+fromProtoEnumCallbackState :: Int -> Maybe CallbackState
+fromProtoEnumCallbackState 0 = Just CallbackState'CallbackStateUnspecified
+fromProtoEnumCallbackState 1 = Just CallbackState'CallbackStateStandby
+fromProtoEnumCallbackState 2 = Just CallbackState'CallbackStateScheduled
+fromProtoEnumCallbackState 3 = Just CallbackState'CallbackStateBackingOff
+fromProtoEnumCallbackState 4 = Just CallbackState'CallbackStateFailed
+fromProtoEnumCallbackState 5 = Just CallbackState'CallbackStateSucceeded
+fromProtoEnumCallbackState 6 = Just CallbackState'CallbackStateBlocked
+fromProtoEnumCallbackState _ = Nothing
+
+instance MessageEncode CallbackState where
+  buildMessage _ = mempty
+instance MessageSize CallbackState where
+  messageSize _ = 0
+instance MessageDecode CallbackState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON CallbackState where
+  toJSON CallbackState'CallbackStateUnspecified = Aeson.String "CALLBACK_STATE_UNSPECIFIED"
+  toJSON CallbackState'CallbackStateStandby = Aeson.String "CALLBACK_STATE_STANDBY"
+  toJSON CallbackState'CallbackStateScheduled = Aeson.String "CALLBACK_STATE_SCHEDULED"
+  toJSON CallbackState'CallbackStateBackingOff = Aeson.String "CALLBACK_STATE_BACKING_OFF"
+  toJSON CallbackState'CallbackStateFailed = Aeson.String "CALLBACK_STATE_FAILED"
+  toJSON CallbackState'CallbackStateSucceeded = Aeson.String "CALLBACK_STATE_SUCCEEDED"
+  toJSON CallbackState'CallbackStateBlocked = Aeson.String "CALLBACK_STATE_BLOCKED"
+
+instance Aeson.FromJSON CallbackState where
+  parseJSON = \case
+    Aeson.String "CALLBACK_STATE_UNSPECIFIED" -> pure CallbackState'CallbackStateUnspecified
+    Aeson.String "CALLBACK_STATE_STANDBY" -> pure CallbackState'CallbackStateStandby
+    Aeson.String "CALLBACK_STATE_SCHEDULED" -> pure CallbackState'CallbackStateScheduled
+    Aeson.String "CALLBACK_STATE_BACKING_OFF" -> pure CallbackState'CallbackStateBackingOff
+    Aeson.String "CALLBACK_STATE_FAILED" -> pure CallbackState'CallbackStateFailed
+    Aeson.String "CALLBACK_STATE_SUCCEEDED" -> pure CallbackState'CallbackStateSucceeded
+    Aeson.String "CALLBACK_STATE_BLOCKED" -> pure CallbackState'CallbackStateBlocked
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for CallbackState"
+
+instance Hashable CallbackState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumCallbackState x)
+
+data PendingNexusOperationState
+  = PendingNexusOperationState'PendingNexusOperationStateUnspecified
+  | PendingNexusOperationState'PendingNexusOperationStateScheduled
+  | PendingNexusOperationState'PendingNexusOperationStateBackingOff
+  | PendingNexusOperationState'PendingNexusOperationStateStarted
+  | PendingNexusOperationState'PendingNexusOperationStateBlocked
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumPendingNexusOperationState :: PendingNexusOperationState -> Int
+toProtoEnumPendingNexusOperationState PendingNexusOperationState'PendingNexusOperationStateUnspecified = 0
+toProtoEnumPendingNexusOperationState PendingNexusOperationState'PendingNexusOperationStateScheduled = 1
+toProtoEnumPendingNexusOperationState PendingNexusOperationState'PendingNexusOperationStateBackingOff = 2
+toProtoEnumPendingNexusOperationState PendingNexusOperationState'PendingNexusOperationStateStarted = 3
+toProtoEnumPendingNexusOperationState PendingNexusOperationState'PendingNexusOperationStateBlocked = 4
+
+fromProtoEnumPendingNexusOperationState :: Int -> Maybe PendingNexusOperationState
+fromProtoEnumPendingNexusOperationState 0 = Just PendingNexusOperationState'PendingNexusOperationStateUnspecified
+fromProtoEnumPendingNexusOperationState 1 = Just PendingNexusOperationState'PendingNexusOperationStateScheduled
+fromProtoEnumPendingNexusOperationState 2 = Just PendingNexusOperationState'PendingNexusOperationStateBackingOff
+fromProtoEnumPendingNexusOperationState 3 = Just PendingNexusOperationState'PendingNexusOperationStateStarted
+fromProtoEnumPendingNexusOperationState 4 = Just PendingNexusOperationState'PendingNexusOperationStateBlocked
+fromProtoEnumPendingNexusOperationState _ = Nothing
+
+instance MessageEncode PendingNexusOperationState where
+  buildMessage _ = mempty
+instance MessageSize PendingNexusOperationState where
+  messageSize _ = 0
+instance MessageDecode PendingNexusOperationState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON PendingNexusOperationState where
+  toJSON PendingNexusOperationState'PendingNexusOperationStateUnspecified = Aeson.String "PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED"
+  toJSON PendingNexusOperationState'PendingNexusOperationStateScheduled = Aeson.String "PENDING_NEXUS_OPERATION_STATE_SCHEDULED"
+  toJSON PendingNexusOperationState'PendingNexusOperationStateBackingOff = Aeson.String "PENDING_NEXUS_OPERATION_STATE_BACKING_OFF"
+  toJSON PendingNexusOperationState'PendingNexusOperationStateStarted = Aeson.String "PENDING_NEXUS_OPERATION_STATE_STARTED"
+  toJSON PendingNexusOperationState'PendingNexusOperationStateBlocked = Aeson.String "PENDING_NEXUS_OPERATION_STATE_BLOCKED"
+
+instance Aeson.FromJSON PendingNexusOperationState where
+  parseJSON = \case
+    Aeson.String "PENDING_NEXUS_OPERATION_STATE_UNSPECIFIED" -> pure PendingNexusOperationState'PendingNexusOperationStateUnspecified
+    Aeson.String "PENDING_NEXUS_OPERATION_STATE_SCHEDULED" -> pure PendingNexusOperationState'PendingNexusOperationStateScheduled
+    Aeson.String "PENDING_NEXUS_OPERATION_STATE_BACKING_OFF" -> pure PendingNexusOperationState'PendingNexusOperationStateBackingOff
+    Aeson.String "PENDING_NEXUS_OPERATION_STATE_STARTED" -> pure PendingNexusOperationState'PendingNexusOperationStateStarted
+    Aeson.String "PENDING_NEXUS_OPERATION_STATE_BLOCKED" -> pure PendingNexusOperationState'PendingNexusOperationStateBlocked
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for PendingNexusOperationState"
+
+instance Hashable PendingNexusOperationState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumPendingNexusOperationState x)
+
+data NexusOperationCancellationState
+  = NexusOperationCancellationState'NexusOperationCancellationStateUnspecified
+  | NexusOperationCancellationState'NexusOperationCancellationStateScheduled
+  | NexusOperationCancellationState'NexusOperationCancellationStateBackingOff
+  | NexusOperationCancellationState'NexusOperationCancellationStateSucceeded
+  | NexusOperationCancellationState'NexusOperationCancellationStateFailed
+  | NexusOperationCancellationState'NexusOperationCancellationStateTimedOut
+  | NexusOperationCancellationState'NexusOperationCancellationStateBlocked
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumNexusOperationCancellationState :: NexusOperationCancellationState -> Int
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateUnspecified = 0
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateScheduled = 1
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateBackingOff = 2
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateSucceeded = 3
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateFailed = 4
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateTimedOut = 5
+toProtoEnumNexusOperationCancellationState NexusOperationCancellationState'NexusOperationCancellationStateBlocked = 6
+
+fromProtoEnumNexusOperationCancellationState :: Int -> Maybe NexusOperationCancellationState
+fromProtoEnumNexusOperationCancellationState 0 = Just NexusOperationCancellationState'NexusOperationCancellationStateUnspecified
+fromProtoEnumNexusOperationCancellationState 1 = Just NexusOperationCancellationState'NexusOperationCancellationStateScheduled
+fromProtoEnumNexusOperationCancellationState 2 = Just NexusOperationCancellationState'NexusOperationCancellationStateBackingOff
+fromProtoEnumNexusOperationCancellationState 3 = Just NexusOperationCancellationState'NexusOperationCancellationStateSucceeded
+fromProtoEnumNexusOperationCancellationState 4 = Just NexusOperationCancellationState'NexusOperationCancellationStateFailed
+fromProtoEnumNexusOperationCancellationState 5 = Just NexusOperationCancellationState'NexusOperationCancellationStateTimedOut
+fromProtoEnumNexusOperationCancellationState 6 = Just NexusOperationCancellationState'NexusOperationCancellationStateBlocked
+fromProtoEnumNexusOperationCancellationState _ = Nothing
+
+instance MessageEncode NexusOperationCancellationState where
+  buildMessage _ = mempty
+instance MessageSize NexusOperationCancellationState where
+  messageSize _ = 0
+instance MessageDecode NexusOperationCancellationState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON NexusOperationCancellationState where
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateUnspecified = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED"
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateScheduled = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED"
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateBackingOff = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF"
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateSucceeded = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED"
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateFailed = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_FAILED"
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateTimedOut = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT"
+  toJSON NexusOperationCancellationState'NexusOperationCancellationStateBlocked = Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED"
+
+instance Aeson.FromJSON NexusOperationCancellationState where
+  parseJSON = \case
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_UNSPECIFIED" -> pure NexusOperationCancellationState'NexusOperationCancellationStateUnspecified
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_SCHEDULED" -> pure NexusOperationCancellationState'NexusOperationCancellationStateScheduled
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_BACKING_OFF" -> pure NexusOperationCancellationState'NexusOperationCancellationStateBackingOff
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_SUCCEEDED" -> pure NexusOperationCancellationState'NexusOperationCancellationStateSucceeded
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_FAILED" -> pure NexusOperationCancellationState'NexusOperationCancellationStateFailed
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_TIMED_OUT" -> pure NexusOperationCancellationState'NexusOperationCancellationStateTimedOut
+    Aeson.String "NEXUS_OPERATION_CANCELLATION_STATE_BLOCKED" -> pure NexusOperationCancellationState'NexusOperationCancellationStateBlocked
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for NexusOperationCancellationState"
+
+instance Hashable NexusOperationCancellationState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumNexusOperationCancellationState x)
+
 data WorkflowRuleActionScope
-  = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED |
-    WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW |
-    WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY |
-    WorkflowRuleActionScope'Unrecognized !WorkflowRuleActionScope'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum WorkflowRuleActionScope where
-  maybeToEnum 0 = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-  maybeToEnum 2 = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-  maybeToEnum k
-    = Prelude.Just
-        (WorkflowRuleActionScope'Unrecognized
-           (WorkflowRuleActionScope'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-    = "WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED"
-  showEnum WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-    = "WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW"
-  showEnum WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-    = "WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY"
-  showEnum
-    (WorkflowRuleActionScope'Unrecognized (WorkflowRuleActionScope'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED"
-    = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-    | (Prelude.==) k "WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW"
-    = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-    | (Prelude.==) k "WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY"
-    = Prelude.Just WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded WorkflowRuleActionScope where
-  minBound = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-  maxBound = WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-instance Prelude.Enum WorkflowRuleActionScope where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum WorkflowRuleActionScope: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED = 0
-  fromEnum WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW = 1
-  fromEnum WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY = 2
-  fromEnum
-    (WorkflowRuleActionScope'Unrecognized (WorkflowRuleActionScope'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-    = Prelude.error
-        "WorkflowRuleActionScope.succ: bad argument WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY. This value would be out of bounds."
-  succ WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-    = WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-  succ WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-    = WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-  succ (WorkflowRuleActionScope'Unrecognized _)
-    = Prelude.error
-        "WorkflowRuleActionScope.succ: bad argument: unrecognized value"
-  pred WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-    = Prelude.error
-        "WorkflowRuleActionScope.pred: bad argument WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED. This value would be out of bounds."
-  pred WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-    = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-  pred WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY
-    = WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW
-  pred (WorkflowRuleActionScope'Unrecognized _)
-    = Prelude.error
-        "WorkflowRuleActionScope.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault WorkflowRuleActionScope where
-  fieldDefault = WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED
-instance Control.DeepSeq.NFData WorkflowRuleActionScope where
-  rnf x__ = Prelude.seq x__ ()
+  = WorkflowRuleActionScope'WorkflowRuleActionScopeUnspecified
+  | WorkflowRuleActionScope'WorkflowRuleActionScopeWorkflow
+  | WorkflowRuleActionScope'WorkflowRuleActionScopeActivity
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumWorkflowRuleActionScope :: WorkflowRuleActionScope -> Int
+toProtoEnumWorkflowRuleActionScope WorkflowRuleActionScope'WorkflowRuleActionScopeUnspecified = 0
+toProtoEnumWorkflowRuleActionScope WorkflowRuleActionScope'WorkflowRuleActionScopeWorkflow = 1
+toProtoEnumWorkflowRuleActionScope WorkflowRuleActionScope'WorkflowRuleActionScopeActivity = 2
+
+fromProtoEnumWorkflowRuleActionScope :: Int -> Maybe WorkflowRuleActionScope
+fromProtoEnumWorkflowRuleActionScope 0 = Just WorkflowRuleActionScope'WorkflowRuleActionScopeUnspecified
+fromProtoEnumWorkflowRuleActionScope 1 = Just WorkflowRuleActionScope'WorkflowRuleActionScopeWorkflow
+fromProtoEnumWorkflowRuleActionScope 2 = Just WorkflowRuleActionScope'WorkflowRuleActionScopeActivity
+fromProtoEnumWorkflowRuleActionScope _ = Nothing
+
+instance MessageEncode WorkflowRuleActionScope where
+  buildMessage _ = mempty
+instance MessageSize WorkflowRuleActionScope where
+  messageSize _ = 0
+instance MessageDecode WorkflowRuleActionScope where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON WorkflowRuleActionScope where
+  toJSON WorkflowRuleActionScope'WorkflowRuleActionScopeUnspecified = Aeson.String "WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED"
+  toJSON WorkflowRuleActionScope'WorkflowRuleActionScopeWorkflow = Aeson.String "WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW"
+  toJSON WorkflowRuleActionScope'WorkflowRuleActionScopeActivity = Aeson.String "WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY"
+
+instance Aeson.FromJSON WorkflowRuleActionScope where
+  parseJSON = \case
+    Aeson.String "WORKFLOW_RULE_ACTION_SCOPE_UNSPECIFIED" -> pure WorkflowRuleActionScope'WorkflowRuleActionScopeUnspecified
+    Aeson.String "WORKFLOW_RULE_ACTION_SCOPE_WORKFLOW" -> pure WorkflowRuleActionScope'WorkflowRuleActionScopeWorkflow
+    Aeson.String "WORKFLOW_RULE_ACTION_SCOPE_ACTIVITY" -> pure WorkflowRuleActionScope'WorkflowRuleActionScopeActivity
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for WorkflowRuleActionScope"
+
+instance Hashable WorkflowRuleActionScope where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumWorkflowRuleActionScope x)
+
+data ApplicationErrorCategory
+  = ApplicationErrorCategory'ApplicationErrorCategoryUnspecified
+  | ApplicationErrorCategory'ApplicationErrorCategoryBenign
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumApplicationErrorCategory :: ApplicationErrorCategory -> Int
+toProtoEnumApplicationErrorCategory ApplicationErrorCategory'ApplicationErrorCategoryUnspecified = 0
+toProtoEnumApplicationErrorCategory ApplicationErrorCategory'ApplicationErrorCategoryBenign = 1
+
+fromProtoEnumApplicationErrorCategory :: Int -> Maybe ApplicationErrorCategory
+fromProtoEnumApplicationErrorCategory 0 = Just ApplicationErrorCategory'ApplicationErrorCategoryUnspecified
+fromProtoEnumApplicationErrorCategory 1 = Just ApplicationErrorCategory'ApplicationErrorCategoryBenign
+fromProtoEnumApplicationErrorCategory _ = Nothing
+
+instance MessageEncode ApplicationErrorCategory where
+  buildMessage _ = mempty
+instance MessageSize ApplicationErrorCategory where
+  messageSize _ = 0
+instance MessageDecode ApplicationErrorCategory where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON ApplicationErrorCategory where
+  toJSON ApplicationErrorCategory'ApplicationErrorCategoryUnspecified = Aeson.String "APPLICATION_ERROR_CATEGORY_UNSPECIFIED"
+  toJSON ApplicationErrorCategory'ApplicationErrorCategoryBenign = Aeson.String "APPLICATION_ERROR_CATEGORY_BENIGN"
+
+instance Aeson.FromJSON ApplicationErrorCategory where
+  parseJSON = \case
+    Aeson.String "APPLICATION_ERROR_CATEGORY_UNSPECIFIED" -> pure ApplicationErrorCategory'ApplicationErrorCategoryUnspecified
+    Aeson.String "APPLICATION_ERROR_CATEGORY_BENIGN" -> pure ApplicationErrorCategory'ApplicationErrorCategoryBenign
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for ApplicationErrorCategory"
+
+instance Hashable ApplicationErrorCategory where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumApplicationErrorCategory x)
+
+data WorkerStatus
+  = WorkerStatus'WorkerStatusUnspecified
+  | WorkerStatus'WorkerStatusRunning
+  | WorkerStatus'WorkerStatusShuttingDown
+  | WorkerStatus'WorkerStatusShutdown
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumWorkerStatus :: WorkerStatus -> Int
+toProtoEnumWorkerStatus WorkerStatus'WorkerStatusUnspecified = 0
+toProtoEnumWorkerStatus WorkerStatus'WorkerStatusRunning = 1
+toProtoEnumWorkerStatus WorkerStatus'WorkerStatusShuttingDown = 2
+toProtoEnumWorkerStatus WorkerStatus'WorkerStatusShutdown = 3
+
+fromProtoEnumWorkerStatus :: Int -> Maybe WorkerStatus
+fromProtoEnumWorkerStatus 0 = Just WorkerStatus'WorkerStatusUnspecified
+fromProtoEnumWorkerStatus 1 = Just WorkerStatus'WorkerStatusRunning
+fromProtoEnumWorkerStatus 2 = Just WorkerStatus'WorkerStatusShuttingDown
+fromProtoEnumWorkerStatus 3 = Just WorkerStatus'WorkerStatusShutdown
+fromProtoEnumWorkerStatus _ = Nothing
+
+instance MessageEncode WorkerStatus where
+  buildMessage _ = mempty
+instance MessageSize WorkerStatus where
+  messageSize _ = 0
+instance MessageDecode WorkerStatus where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON WorkerStatus where
+  toJSON WorkerStatus'WorkerStatusUnspecified = Aeson.String "WORKER_STATUS_UNSPECIFIED"
+  toJSON WorkerStatus'WorkerStatusRunning = Aeson.String "WORKER_STATUS_RUNNING"
+  toJSON WorkerStatus'WorkerStatusShuttingDown = Aeson.String "WORKER_STATUS_SHUTTING_DOWN"
+  toJSON WorkerStatus'WorkerStatusShutdown = Aeson.String "WORKER_STATUS_SHUTDOWN"
+
+instance Aeson.FromJSON WorkerStatus where
+  parseJSON = \case
+    Aeson.String "WORKER_STATUS_UNSPECIFIED" -> pure WorkerStatus'WorkerStatusUnspecified
+    Aeson.String "WORKER_STATUS_RUNNING" -> pure WorkerStatus'WorkerStatusRunning
+    Aeson.String "WORKER_STATUS_SHUTTING_DOWN" -> pure WorkerStatus'WorkerStatusShuttingDown
+    Aeson.String "WORKER_STATUS_SHUTDOWN" -> pure WorkerStatus'WorkerStatusShutdown
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for WorkerStatus"
+
+instance Hashable WorkerStatus where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumWorkerStatus x)

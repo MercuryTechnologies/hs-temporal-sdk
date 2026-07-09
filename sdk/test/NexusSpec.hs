@@ -7,7 +7,7 @@
 module NexusSpec where
 
 import qualified Data.HashMap.Strict as HashMap
-import Data.ProtoLens (defMessage)
+
 import qualified Data.Text as T
 import Lens.Family2
 import qualified Proto.Temporal.Api.Enums.V1.Nexus as NexusEnum
@@ -35,9 +35,9 @@ mkEchoHandler :: NexusOperationHandler
 mkEchoHandler = NexusOperationHandler
   { handleStartOperation = \req -> do
       let inputPayload = req ^. NexusMsg.maybe'payload
-          syncResp = maybe defMessage (\p -> defMessage & NexusMsg.payload .~ p) inputPayload
-          startOpResp = defMessage & NexusMsg.syncSuccess .~ syncResp
-          response = defMessage & NexusMsg.startOperation .~ startOpResp
+          syncResp = maybe mempty (\p -> mempty & NexusMsg.payload .~ p) inputPayload
+          startOpResp = mempty & NexusMsg.syncSuccess .~ syncResp
+          response = mempty & NexusMsg.startOperation .~ startOpResp
       pure $ Nexus.NexusTaskCompletion'Completed response
   , handleCancelOperation = \_ ->
       pure $ Nexus.NexusTaskCompletion'AckCancel True
@@ -48,10 +48,10 @@ mkErrorHandler :: NexusOperationHandler
 mkErrorHandler = NexusOperationHandler
   { handleStartOperation = \_ ->
       pure $ Nexus.NexusTaskCompletion'Error
-        ( defMessage
+        ( mempty
             & NexusMsg.errorType .~ "BAD_REQUEST"
             & NexusMsg.retryBehavior .~ NexusEnum.NEXUS_HANDLER_ERROR_RETRY_BEHAVIOR_NON_RETRYABLE
-            & NexusMsg.failure .~ (defMessage & NexusMsg.message .~ "intentional test error")
+            & NexusMsg.failure .~ (mempty & NexusMsg.message .~ "intentional test error")
         )
   , handleCancelOperation = \_ ->
       pure $ Nexus.NexusTaskCompletion'AckCancel True

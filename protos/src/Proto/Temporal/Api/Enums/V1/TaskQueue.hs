@@ -1,544 +1,332 @@
-{- This file was auto-generated from temporal/api/enums/v1/task_queue.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Enums.V1.TaskQueue (
-        BuildIdTaskReachability(..), BuildIdTaskReachability(),
-        BuildIdTaskReachability'UnrecognizedValue,
-        DescribeTaskQueueMode(..), DescribeTaskQueueMode(),
-        DescribeTaskQueueMode'UnrecognizedValue, RateLimitSource(..),
-        RateLimitSource(), RateLimitSource'UnrecognizedValue,
-        TaskQueueKind(..), TaskQueueKind(),
-        TaskQueueKind'UnrecognizedValue, TaskQueueType(..),
-        TaskQueueType(), TaskQueueType'UnrecognizedValue,
-        TaskReachability(..), TaskReachability(),
-        TaskReachability'UnrecognizedValue
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-newtype BuildIdTaskReachability'UnrecognizedValue
-  = BuildIdTaskReachability'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data BuildIdTaskReachability
-  = BUILD_ID_TASK_REACHABILITY_UNSPECIFIED |
-    BUILD_ID_TASK_REACHABILITY_REACHABLE |
-    BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY |
-    BUILD_ID_TASK_REACHABILITY_UNREACHABLE |
-    BuildIdTaskReachability'Unrecognized !BuildIdTaskReachability'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum BuildIdTaskReachability where
-  maybeToEnum 0 = Prelude.Just BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just BUILD_ID_TASK_REACHABILITY_REACHABLE
-  maybeToEnum 2
-    = Prelude.Just BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-  maybeToEnum 3 = Prelude.Just BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-  maybeToEnum k
-    = Prelude.Just
-        (BuildIdTaskReachability'Unrecognized
-           (BuildIdTaskReachability'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-    = "BUILD_ID_TASK_REACHABILITY_UNSPECIFIED"
-  showEnum BUILD_ID_TASK_REACHABILITY_REACHABLE
-    = "BUILD_ID_TASK_REACHABILITY_REACHABLE"
-  showEnum BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-    = "BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY"
-  showEnum BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-    = "BUILD_ID_TASK_REACHABILITY_UNREACHABLE"
-  showEnum
-    (BuildIdTaskReachability'Unrecognized (BuildIdTaskReachability'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "BUILD_ID_TASK_REACHABILITY_UNSPECIFIED"
-    = Prelude.Just BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-    | (Prelude.==) k "BUILD_ID_TASK_REACHABILITY_REACHABLE"
-    = Prelude.Just BUILD_ID_TASK_REACHABILITY_REACHABLE
-    | (Prelude.==) k "BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY"
-    = Prelude.Just BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-    | (Prelude.==) k "BUILD_ID_TASK_REACHABILITY_UNREACHABLE"
-    = Prelude.Just BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded BuildIdTaskReachability where
-  minBound = BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-  maxBound = BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-instance Prelude.Enum BuildIdTaskReachability where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum BuildIdTaskReachability: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum BUILD_ID_TASK_REACHABILITY_UNSPECIFIED = 0
-  fromEnum BUILD_ID_TASK_REACHABILITY_REACHABLE = 1
-  fromEnum BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY = 2
-  fromEnum BUILD_ID_TASK_REACHABILITY_UNREACHABLE = 3
-  fromEnum
-    (BuildIdTaskReachability'Unrecognized (BuildIdTaskReachability'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-    = Prelude.error
-        "BuildIdTaskReachability.succ: bad argument BUILD_ID_TASK_REACHABILITY_UNREACHABLE. This value would be out of bounds."
-  succ BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-    = BUILD_ID_TASK_REACHABILITY_REACHABLE
-  succ BUILD_ID_TASK_REACHABILITY_REACHABLE
-    = BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-  succ BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-    = BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-  succ (BuildIdTaskReachability'Unrecognized _)
-    = Prelude.error
-        "BuildIdTaskReachability.succ: bad argument: unrecognized value"
-  pred BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-    = Prelude.error
-        "BuildIdTaskReachability.pred: bad argument BUILD_ID_TASK_REACHABILITY_UNSPECIFIED. This value would be out of bounds."
-  pred BUILD_ID_TASK_REACHABILITY_REACHABLE
-    = BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-  pred BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-    = BUILD_ID_TASK_REACHABILITY_REACHABLE
-  pred BUILD_ID_TASK_REACHABILITY_UNREACHABLE
-    = BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY
-  pred (BuildIdTaskReachability'Unrecognized _)
-    = Prelude.error
-        "BuildIdTaskReachability.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault BuildIdTaskReachability where
-  fieldDefault = BUILD_ID_TASK_REACHABILITY_UNSPECIFIED
-instance Control.DeepSeq.NFData BuildIdTaskReachability where
-  rnf x__ = Prelude.seq x__ ()
-newtype DescribeTaskQueueMode'UnrecognizedValue
-  = DescribeTaskQueueMode'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data DescribeTaskQueueMode
-  = DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED |
-    DESCRIBE_TASK_QUEUE_MODE_ENHANCED |
-    DescribeTaskQueueMode'Unrecognized !DescribeTaskQueueMode'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum DescribeTaskQueueMode where
-  maybeToEnum 0 = Prelude.Just DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-  maybeToEnum k
-    = Prelude.Just
-        (DescribeTaskQueueMode'Unrecognized
-           (DescribeTaskQueueMode'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-    = "DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED"
-  showEnum DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-    = "DESCRIBE_TASK_QUEUE_MODE_ENHANCED"
-  showEnum
-    (DescribeTaskQueueMode'Unrecognized (DescribeTaskQueueMode'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED"
-    = Prelude.Just DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-    | (Prelude.==) k "DESCRIBE_TASK_QUEUE_MODE_ENHANCED"
-    = Prelude.Just DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded DescribeTaskQueueMode where
-  minBound = DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-  maxBound = DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-instance Prelude.Enum DescribeTaskQueueMode where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum DescribeTaskQueueMode: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED = 0
-  fromEnum DESCRIBE_TASK_QUEUE_MODE_ENHANCED = 1
-  fromEnum
-    (DescribeTaskQueueMode'Unrecognized (DescribeTaskQueueMode'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-    = Prelude.error
-        "DescribeTaskQueueMode.succ: bad argument DESCRIBE_TASK_QUEUE_MODE_ENHANCED. This value would be out of bounds."
-  succ DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-    = DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-  succ (DescribeTaskQueueMode'Unrecognized _)
-    = Prelude.error
-        "DescribeTaskQueueMode.succ: bad argument: unrecognized value"
-  pred DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-    = Prelude.error
-        "DescribeTaskQueueMode.pred: bad argument DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED. This value would be out of bounds."
-  pred DESCRIBE_TASK_QUEUE_MODE_ENHANCED
-    = DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-  pred (DescribeTaskQueueMode'Unrecognized _)
-    = Prelude.error
-        "DescribeTaskQueueMode.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault DescribeTaskQueueMode where
-  fieldDefault = DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED
-instance Control.DeepSeq.NFData DescribeTaskQueueMode where
-  rnf x__ = Prelude.seq x__ ()
-newtype RateLimitSource'UnrecognizedValue
-  = RateLimitSource'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data RateLimitSource
-  = RATE_LIMIT_SOURCE_UNSPECIFIED |
-    RATE_LIMIT_SOURCE_API |
-    RATE_LIMIT_SOURCE_WORKER |
-    RATE_LIMIT_SOURCE_SYSTEM |
-    RateLimitSource'Unrecognized !RateLimitSource'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum RateLimitSource where
-  maybeToEnum 0 = Prelude.Just RATE_LIMIT_SOURCE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just RATE_LIMIT_SOURCE_API
-  maybeToEnum 2 = Prelude.Just RATE_LIMIT_SOURCE_WORKER
-  maybeToEnum 3 = Prelude.Just RATE_LIMIT_SOURCE_SYSTEM
-  maybeToEnum k
-    = Prelude.Just
-        (RateLimitSource'Unrecognized
-           (RateLimitSource'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum RATE_LIMIT_SOURCE_UNSPECIFIED
-    = "RATE_LIMIT_SOURCE_UNSPECIFIED"
-  showEnum RATE_LIMIT_SOURCE_API = "RATE_LIMIT_SOURCE_API"
-  showEnum RATE_LIMIT_SOURCE_WORKER = "RATE_LIMIT_SOURCE_WORKER"
-  showEnum RATE_LIMIT_SOURCE_SYSTEM = "RATE_LIMIT_SOURCE_SYSTEM"
-  showEnum
-    (RateLimitSource'Unrecognized (RateLimitSource'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "RATE_LIMIT_SOURCE_UNSPECIFIED"
-    = Prelude.Just RATE_LIMIT_SOURCE_UNSPECIFIED
-    | (Prelude.==) k "RATE_LIMIT_SOURCE_API"
-    = Prelude.Just RATE_LIMIT_SOURCE_API
-    | (Prelude.==) k "RATE_LIMIT_SOURCE_WORKER"
-    = Prelude.Just RATE_LIMIT_SOURCE_WORKER
-    | (Prelude.==) k "RATE_LIMIT_SOURCE_SYSTEM"
-    = Prelude.Just RATE_LIMIT_SOURCE_SYSTEM
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded RateLimitSource where
-  minBound = RATE_LIMIT_SOURCE_UNSPECIFIED
-  maxBound = RATE_LIMIT_SOURCE_SYSTEM
-instance Prelude.Enum RateLimitSource where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum RateLimitSource: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum RATE_LIMIT_SOURCE_UNSPECIFIED = 0
-  fromEnum RATE_LIMIT_SOURCE_API = 1
-  fromEnum RATE_LIMIT_SOURCE_WORKER = 2
-  fromEnum RATE_LIMIT_SOURCE_SYSTEM = 3
-  fromEnum
-    (RateLimitSource'Unrecognized (RateLimitSource'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ RATE_LIMIT_SOURCE_SYSTEM
-    = Prelude.error
-        "RateLimitSource.succ: bad argument RATE_LIMIT_SOURCE_SYSTEM. This value would be out of bounds."
-  succ RATE_LIMIT_SOURCE_UNSPECIFIED = RATE_LIMIT_SOURCE_API
-  succ RATE_LIMIT_SOURCE_API = RATE_LIMIT_SOURCE_WORKER
-  succ RATE_LIMIT_SOURCE_WORKER = RATE_LIMIT_SOURCE_SYSTEM
-  succ (RateLimitSource'Unrecognized _)
-    = Prelude.error
-        "RateLimitSource.succ: bad argument: unrecognized value"
-  pred RATE_LIMIT_SOURCE_UNSPECIFIED
-    = Prelude.error
-        "RateLimitSource.pred: bad argument RATE_LIMIT_SOURCE_UNSPECIFIED. This value would be out of bounds."
-  pred RATE_LIMIT_SOURCE_API = RATE_LIMIT_SOURCE_UNSPECIFIED
-  pred RATE_LIMIT_SOURCE_WORKER = RATE_LIMIT_SOURCE_API
-  pred RATE_LIMIT_SOURCE_SYSTEM = RATE_LIMIT_SOURCE_WORKER
-  pred (RateLimitSource'Unrecognized _)
-    = Prelude.error
-        "RateLimitSource.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault RateLimitSource where
-  fieldDefault = RATE_LIMIT_SOURCE_UNSPECIFIED
-instance Control.DeepSeq.NFData RateLimitSource where
-  rnf x__ = Prelude.seq x__ ()
-newtype TaskQueueKind'UnrecognizedValue
-  = TaskQueueKind'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.enums.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Enums.V1.TaskQueue where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x74\x61\x73\x6b\x5f\x71\x75\x65\x75\x65\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2a\x66\x0a\x0d\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x4b\x69\x6e\x64\x12\x1d\x0a\x1b\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x4b\x49\x4e\x44\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1a\x0a\x16\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x4b\x49\x4e\x44\x5f\x4e\x4f\x52\x4d\x41\x4c\x10\x01\x12\x1a\x0a\x16\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x4b\x49\x4e\x44\x5f\x53\x54\x49\x43\x4b\x59\x10\x02\x2a\x85\x01\x0a\x0d\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x54\x79\x70\x65\x12\x1d\x0a\x1b\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x54\x59\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1c\x0a\x18\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x54\x59\x50\x45\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x10\x01\x12\x1c\x0a\x18\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x54\x59\x50\x45\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x10\x02\x12\x19\x0a\x15\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x54\x59\x50\x45\x5f\x4e\x45\x58\x55\x53\x10\x03\x2a\xd0\x01\x0a\x10\x54\x61\x73\x6b\x52\x65\x61\x63\x68\x61\x62\x69\x6c\x69\x74\x79\x12\x1f\x0a\x1d\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x23\x0a\x1f\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x4e\x45\x57\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x53\x10\x01\x12\x28\x0a\x24\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x45\x58\x49\x53\x54\x49\x4e\x47\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x53\x10\x02\x12\x24\x0a\x20\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x4f\x50\x45\x4e\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x53\x10\x03\x12\x26\x0a\x22\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x43\x4c\x4f\x53\x45\x44\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x53\x10\x04\x2a\xcf\x01\x0a\x17\x42\x75\x69\x6c\x64\x49\x64\x54\x61\x73\x6b\x52\x65\x61\x63\x68\x61\x62\x69\x6c\x69\x74\x79\x12\x28\x0a\x26\x42\x55\x49\x4c\x44\x5f\x49\x44\x5f\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x28\x0a\x24\x42\x55\x49\x4c\x44\x5f\x49\x44\x5f\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x52\x45\x41\x43\x48\x41\x42\x4c\x45\x10\x01\x12\x34\x0a\x30\x42\x55\x49\x4c\x44\x5f\x49\x44\x5f\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x43\x4c\x4f\x53\x45\x44\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x53\x5f\x4f\x4e\x4c\x59\x10\x02\x12\x2a\x0a\x26\x42\x55\x49\x4c\x44\x5f\x49\x44\x5f\x54\x41\x53\x4b\x5f\x52\x45\x41\x43\x48\x41\x42\x49\x4c\x49\x54\x59\x5f\x55\x4e\x52\x45\x41\x43\x48\x41\x42\x4c\x45\x10\x03\x2a\x66\x0a\x15\x44\x65\x73\x63\x72\x69\x62\x65\x54\x61\x73\x6b\x51\x75\x65\x75\x65\x4d\x6f\x64\x65\x12\x26\x0a\x24\x44\x45\x53\x43\x52\x49\x42\x45\x5f\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x4d\x4f\x44\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x25\x0a\x21\x44\x45\x53\x43\x52\x49\x42\x45\x5f\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x5f\x4d\x4f\x44\x45\x5f\x45\x4e\x48\x41\x4e\x43\x45\x44\x10\x01\x2a\x89\x01\x0a\x0f\x52\x61\x74\x65\x4c\x69\x6d\x69\x74\x53\x6f\x75\x72\x63\x65\x12\x1f\x0a\x1d\x52\x41\x54\x45\x5f\x4c\x49\x4d\x49\x54\x5f\x53\x4f\x55\x52\x43\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x19\x0a\x15\x52\x41\x54\x45\x5f\x4c\x49\x4d\x49\x54\x5f\x53\x4f\x55\x52\x43\x45\x5f\x41\x50\x49\x10\x01\x12\x1c\x0a\x18\x52\x41\x54\x45\x5f\x4c\x49\x4d\x49\x54\x5f\x53\x4f\x55\x52\x43\x45\x5f\x57\x4f\x52\x4b\x45\x52\x10\x02\x12\x1c\x0a\x18\x52\x41\x54\x45\x5f\x4c\x49\x4d\x49\x54\x5f\x53\x4f\x55\x52\x43\x45\x5f\x53\x59\x53\x54\x45\x4d\x10\x03\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
 data TaskQueueKind
-  = TASK_QUEUE_KIND_UNSPECIFIED |
-    TASK_QUEUE_KIND_NORMAL |
-    TASK_QUEUE_KIND_STICKY |
-    TaskQueueKind'Unrecognized !TaskQueueKind'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum TaskQueueKind where
-  maybeToEnum 0 = Prelude.Just TASK_QUEUE_KIND_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just TASK_QUEUE_KIND_NORMAL
-  maybeToEnum 2 = Prelude.Just TASK_QUEUE_KIND_STICKY
-  maybeToEnum k
-    = Prelude.Just
-        (TaskQueueKind'Unrecognized
-           (TaskQueueKind'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum TASK_QUEUE_KIND_UNSPECIFIED
-    = "TASK_QUEUE_KIND_UNSPECIFIED"
-  showEnum TASK_QUEUE_KIND_NORMAL = "TASK_QUEUE_KIND_NORMAL"
-  showEnum TASK_QUEUE_KIND_STICKY = "TASK_QUEUE_KIND_STICKY"
-  showEnum
-    (TaskQueueKind'Unrecognized (TaskQueueKind'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "TASK_QUEUE_KIND_UNSPECIFIED"
-    = Prelude.Just TASK_QUEUE_KIND_UNSPECIFIED
-    | (Prelude.==) k "TASK_QUEUE_KIND_NORMAL"
-    = Prelude.Just TASK_QUEUE_KIND_NORMAL
-    | (Prelude.==) k "TASK_QUEUE_KIND_STICKY"
-    = Prelude.Just TASK_QUEUE_KIND_STICKY
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded TaskQueueKind where
-  minBound = TASK_QUEUE_KIND_UNSPECIFIED
-  maxBound = TASK_QUEUE_KIND_STICKY
-instance Prelude.Enum TaskQueueKind where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum TaskQueueKind: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum TASK_QUEUE_KIND_UNSPECIFIED = 0
-  fromEnum TASK_QUEUE_KIND_NORMAL = 1
-  fromEnum TASK_QUEUE_KIND_STICKY = 2
-  fromEnum
-    (TaskQueueKind'Unrecognized (TaskQueueKind'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ TASK_QUEUE_KIND_STICKY
-    = Prelude.error
-        "TaskQueueKind.succ: bad argument TASK_QUEUE_KIND_STICKY. This value would be out of bounds."
-  succ TASK_QUEUE_KIND_UNSPECIFIED = TASK_QUEUE_KIND_NORMAL
-  succ TASK_QUEUE_KIND_NORMAL = TASK_QUEUE_KIND_STICKY
-  succ (TaskQueueKind'Unrecognized _)
-    = Prelude.error
-        "TaskQueueKind.succ: bad argument: unrecognized value"
-  pred TASK_QUEUE_KIND_UNSPECIFIED
-    = Prelude.error
-        "TaskQueueKind.pred: bad argument TASK_QUEUE_KIND_UNSPECIFIED. This value would be out of bounds."
-  pred TASK_QUEUE_KIND_NORMAL = TASK_QUEUE_KIND_UNSPECIFIED
-  pred TASK_QUEUE_KIND_STICKY = TASK_QUEUE_KIND_NORMAL
-  pred (TaskQueueKind'Unrecognized _)
-    = Prelude.error
-        "TaskQueueKind.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault TaskQueueKind where
-  fieldDefault = TASK_QUEUE_KIND_UNSPECIFIED
-instance Control.DeepSeq.NFData TaskQueueKind where
-  rnf x__ = Prelude.seq x__ ()
-newtype TaskQueueType'UnrecognizedValue
-  = TaskQueueType'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+  = TaskQueueKind'TaskQueueKindUnspecified
+  | TaskQueueKind'TaskQueueKindNormal
+  | TaskQueueKind'TaskQueueKindSticky
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumTaskQueueKind :: TaskQueueKind -> Int
+toProtoEnumTaskQueueKind TaskQueueKind'TaskQueueKindUnspecified = 0
+toProtoEnumTaskQueueKind TaskQueueKind'TaskQueueKindNormal = 1
+toProtoEnumTaskQueueKind TaskQueueKind'TaskQueueKindSticky = 2
+
+fromProtoEnumTaskQueueKind :: Int -> Maybe TaskQueueKind
+fromProtoEnumTaskQueueKind 0 = Just TaskQueueKind'TaskQueueKindUnspecified
+fromProtoEnumTaskQueueKind 1 = Just TaskQueueKind'TaskQueueKindNormal
+fromProtoEnumTaskQueueKind 2 = Just TaskQueueKind'TaskQueueKindSticky
+fromProtoEnumTaskQueueKind _ = Nothing
+
+instance MessageEncode TaskQueueKind where
+  buildMessage _ = mempty
+instance MessageSize TaskQueueKind where
+  messageSize _ = 0
+instance MessageDecode TaskQueueKind where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON TaskQueueKind where
+  toJSON TaskQueueKind'TaskQueueKindUnspecified = Aeson.String "TASK_QUEUE_KIND_UNSPECIFIED"
+  toJSON TaskQueueKind'TaskQueueKindNormal = Aeson.String "TASK_QUEUE_KIND_NORMAL"
+  toJSON TaskQueueKind'TaskQueueKindSticky = Aeson.String "TASK_QUEUE_KIND_STICKY"
+
+instance Aeson.FromJSON TaskQueueKind where
+  parseJSON = \case
+    Aeson.String "TASK_QUEUE_KIND_UNSPECIFIED" -> pure TaskQueueKind'TaskQueueKindUnspecified
+    Aeson.String "TASK_QUEUE_KIND_NORMAL" -> pure TaskQueueKind'TaskQueueKindNormal
+    Aeson.String "TASK_QUEUE_KIND_STICKY" -> pure TaskQueueKind'TaskQueueKindSticky
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for TaskQueueKind"
+
+instance Hashable TaskQueueKind where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumTaskQueueKind x)
+
 data TaskQueueType
-  = TASK_QUEUE_TYPE_UNSPECIFIED |
-    TASK_QUEUE_TYPE_WORKFLOW |
-    TASK_QUEUE_TYPE_ACTIVITY |
-    TASK_QUEUE_TYPE_NEXUS |
-    TaskQueueType'Unrecognized !TaskQueueType'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum TaskQueueType where
-  maybeToEnum 0 = Prelude.Just TASK_QUEUE_TYPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just TASK_QUEUE_TYPE_WORKFLOW
-  maybeToEnum 2 = Prelude.Just TASK_QUEUE_TYPE_ACTIVITY
-  maybeToEnum 3 = Prelude.Just TASK_QUEUE_TYPE_NEXUS
-  maybeToEnum k
-    = Prelude.Just
-        (TaskQueueType'Unrecognized
-           (TaskQueueType'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum TASK_QUEUE_TYPE_UNSPECIFIED
-    = "TASK_QUEUE_TYPE_UNSPECIFIED"
-  showEnum TASK_QUEUE_TYPE_WORKFLOW = "TASK_QUEUE_TYPE_WORKFLOW"
-  showEnum TASK_QUEUE_TYPE_ACTIVITY = "TASK_QUEUE_TYPE_ACTIVITY"
-  showEnum TASK_QUEUE_TYPE_NEXUS = "TASK_QUEUE_TYPE_NEXUS"
-  showEnum
-    (TaskQueueType'Unrecognized (TaskQueueType'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "TASK_QUEUE_TYPE_UNSPECIFIED"
-    = Prelude.Just TASK_QUEUE_TYPE_UNSPECIFIED
-    | (Prelude.==) k "TASK_QUEUE_TYPE_WORKFLOW"
-    = Prelude.Just TASK_QUEUE_TYPE_WORKFLOW
-    | (Prelude.==) k "TASK_QUEUE_TYPE_ACTIVITY"
-    = Prelude.Just TASK_QUEUE_TYPE_ACTIVITY
-    | (Prelude.==) k "TASK_QUEUE_TYPE_NEXUS"
-    = Prelude.Just TASK_QUEUE_TYPE_NEXUS
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded TaskQueueType where
-  minBound = TASK_QUEUE_TYPE_UNSPECIFIED
-  maxBound = TASK_QUEUE_TYPE_NEXUS
-instance Prelude.Enum TaskQueueType where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum TaskQueueType: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum TASK_QUEUE_TYPE_UNSPECIFIED = 0
-  fromEnum TASK_QUEUE_TYPE_WORKFLOW = 1
-  fromEnum TASK_QUEUE_TYPE_ACTIVITY = 2
-  fromEnum TASK_QUEUE_TYPE_NEXUS = 3
-  fromEnum
-    (TaskQueueType'Unrecognized (TaskQueueType'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ TASK_QUEUE_TYPE_NEXUS
-    = Prelude.error
-        "TaskQueueType.succ: bad argument TASK_QUEUE_TYPE_NEXUS. This value would be out of bounds."
-  succ TASK_QUEUE_TYPE_UNSPECIFIED = TASK_QUEUE_TYPE_WORKFLOW
-  succ TASK_QUEUE_TYPE_WORKFLOW = TASK_QUEUE_TYPE_ACTIVITY
-  succ TASK_QUEUE_TYPE_ACTIVITY = TASK_QUEUE_TYPE_NEXUS
-  succ (TaskQueueType'Unrecognized _)
-    = Prelude.error
-        "TaskQueueType.succ: bad argument: unrecognized value"
-  pred TASK_QUEUE_TYPE_UNSPECIFIED
-    = Prelude.error
-        "TaskQueueType.pred: bad argument TASK_QUEUE_TYPE_UNSPECIFIED. This value would be out of bounds."
-  pred TASK_QUEUE_TYPE_WORKFLOW = TASK_QUEUE_TYPE_UNSPECIFIED
-  pred TASK_QUEUE_TYPE_ACTIVITY = TASK_QUEUE_TYPE_WORKFLOW
-  pred TASK_QUEUE_TYPE_NEXUS = TASK_QUEUE_TYPE_ACTIVITY
-  pred (TaskQueueType'Unrecognized _)
-    = Prelude.error
-        "TaskQueueType.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault TaskQueueType where
-  fieldDefault = TASK_QUEUE_TYPE_UNSPECIFIED
-instance Control.DeepSeq.NFData TaskQueueType where
-  rnf x__ = Prelude.seq x__ ()
-newtype TaskReachability'UnrecognizedValue
-  = TaskReachability'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+  = TaskQueueType'TaskQueueTypeUnspecified
+  | TaskQueueType'TaskQueueTypeWorkflow
+  | TaskQueueType'TaskQueueTypeActivity
+  | TaskQueueType'TaskQueueTypeNexus
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumTaskQueueType :: TaskQueueType -> Int
+toProtoEnumTaskQueueType TaskQueueType'TaskQueueTypeUnspecified = 0
+toProtoEnumTaskQueueType TaskQueueType'TaskQueueTypeWorkflow = 1
+toProtoEnumTaskQueueType TaskQueueType'TaskQueueTypeActivity = 2
+toProtoEnumTaskQueueType TaskQueueType'TaskQueueTypeNexus = 3
+
+fromProtoEnumTaskQueueType :: Int -> Maybe TaskQueueType
+fromProtoEnumTaskQueueType 0 = Just TaskQueueType'TaskQueueTypeUnspecified
+fromProtoEnumTaskQueueType 1 = Just TaskQueueType'TaskQueueTypeWorkflow
+fromProtoEnumTaskQueueType 2 = Just TaskQueueType'TaskQueueTypeActivity
+fromProtoEnumTaskQueueType 3 = Just TaskQueueType'TaskQueueTypeNexus
+fromProtoEnumTaskQueueType _ = Nothing
+
+instance MessageEncode TaskQueueType where
+  buildMessage _ = mempty
+instance MessageSize TaskQueueType where
+  messageSize _ = 0
+instance MessageDecode TaskQueueType where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON TaskQueueType where
+  toJSON TaskQueueType'TaskQueueTypeUnspecified = Aeson.String "TASK_QUEUE_TYPE_UNSPECIFIED"
+  toJSON TaskQueueType'TaskQueueTypeWorkflow = Aeson.String "TASK_QUEUE_TYPE_WORKFLOW"
+  toJSON TaskQueueType'TaskQueueTypeActivity = Aeson.String "TASK_QUEUE_TYPE_ACTIVITY"
+  toJSON TaskQueueType'TaskQueueTypeNexus = Aeson.String "TASK_QUEUE_TYPE_NEXUS"
+
+instance Aeson.FromJSON TaskQueueType where
+  parseJSON = \case
+    Aeson.String "TASK_QUEUE_TYPE_UNSPECIFIED" -> pure TaskQueueType'TaskQueueTypeUnspecified
+    Aeson.String "TASK_QUEUE_TYPE_WORKFLOW" -> pure TaskQueueType'TaskQueueTypeWorkflow
+    Aeson.String "TASK_QUEUE_TYPE_ACTIVITY" -> pure TaskQueueType'TaskQueueTypeActivity
+    Aeson.String "TASK_QUEUE_TYPE_NEXUS" -> pure TaskQueueType'TaskQueueTypeNexus
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for TaskQueueType"
+
+instance Hashable TaskQueueType where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumTaskQueueType x)
+
 data TaskReachability
-  = TASK_REACHABILITY_UNSPECIFIED |
-    TASK_REACHABILITY_NEW_WORKFLOWS |
-    TASK_REACHABILITY_EXISTING_WORKFLOWS |
-    TASK_REACHABILITY_OPEN_WORKFLOWS |
-    TASK_REACHABILITY_CLOSED_WORKFLOWS |
-    TaskReachability'Unrecognized !TaskReachability'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum TaskReachability where
-  maybeToEnum 0 = Prelude.Just TASK_REACHABILITY_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just TASK_REACHABILITY_NEW_WORKFLOWS
-  maybeToEnum 2 = Prelude.Just TASK_REACHABILITY_EXISTING_WORKFLOWS
-  maybeToEnum 3 = Prelude.Just TASK_REACHABILITY_OPEN_WORKFLOWS
-  maybeToEnum 4 = Prelude.Just TASK_REACHABILITY_CLOSED_WORKFLOWS
-  maybeToEnum k
-    = Prelude.Just
-        (TaskReachability'Unrecognized
-           (TaskReachability'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum TASK_REACHABILITY_UNSPECIFIED
-    = "TASK_REACHABILITY_UNSPECIFIED"
-  showEnum TASK_REACHABILITY_NEW_WORKFLOWS
-    = "TASK_REACHABILITY_NEW_WORKFLOWS"
-  showEnum TASK_REACHABILITY_EXISTING_WORKFLOWS
-    = "TASK_REACHABILITY_EXISTING_WORKFLOWS"
-  showEnum TASK_REACHABILITY_OPEN_WORKFLOWS
-    = "TASK_REACHABILITY_OPEN_WORKFLOWS"
-  showEnum TASK_REACHABILITY_CLOSED_WORKFLOWS
-    = "TASK_REACHABILITY_CLOSED_WORKFLOWS"
-  showEnum
-    (TaskReachability'Unrecognized (TaskReachability'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "TASK_REACHABILITY_UNSPECIFIED"
-    = Prelude.Just TASK_REACHABILITY_UNSPECIFIED
-    | (Prelude.==) k "TASK_REACHABILITY_NEW_WORKFLOWS"
-    = Prelude.Just TASK_REACHABILITY_NEW_WORKFLOWS
-    | (Prelude.==) k "TASK_REACHABILITY_EXISTING_WORKFLOWS"
-    = Prelude.Just TASK_REACHABILITY_EXISTING_WORKFLOWS
-    | (Prelude.==) k "TASK_REACHABILITY_OPEN_WORKFLOWS"
-    = Prelude.Just TASK_REACHABILITY_OPEN_WORKFLOWS
-    | (Prelude.==) k "TASK_REACHABILITY_CLOSED_WORKFLOWS"
-    = Prelude.Just TASK_REACHABILITY_CLOSED_WORKFLOWS
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded TaskReachability where
-  minBound = TASK_REACHABILITY_UNSPECIFIED
-  maxBound = TASK_REACHABILITY_CLOSED_WORKFLOWS
-instance Prelude.Enum TaskReachability where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum TaskReachability: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum TASK_REACHABILITY_UNSPECIFIED = 0
-  fromEnum TASK_REACHABILITY_NEW_WORKFLOWS = 1
-  fromEnum TASK_REACHABILITY_EXISTING_WORKFLOWS = 2
-  fromEnum TASK_REACHABILITY_OPEN_WORKFLOWS = 3
-  fromEnum TASK_REACHABILITY_CLOSED_WORKFLOWS = 4
-  fromEnum
-    (TaskReachability'Unrecognized (TaskReachability'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ TASK_REACHABILITY_CLOSED_WORKFLOWS
-    = Prelude.error
-        "TaskReachability.succ: bad argument TASK_REACHABILITY_CLOSED_WORKFLOWS. This value would be out of bounds."
-  succ TASK_REACHABILITY_UNSPECIFIED
-    = TASK_REACHABILITY_NEW_WORKFLOWS
-  succ TASK_REACHABILITY_NEW_WORKFLOWS
-    = TASK_REACHABILITY_EXISTING_WORKFLOWS
-  succ TASK_REACHABILITY_EXISTING_WORKFLOWS
-    = TASK_REACHABILITY_OPEN_WORKFLOWS
-  succ TASK_REACHABILITY_OPEN_WORKFLOWS
-    = TASK_REACHABILITY_CLOSED_WORKFLOWS
-  succ (TaskReachability'Unrecognized _)
-    = Prelude.error
-        "TaskReachability.succ: bad argument: unrecognized value"
-  pred TASK_REACHABILITY_UNSPECIFIED
-    = Prelude.error
-        "TaskReachability.pred: bad argument TASK_REACHABILITY_UNSPECIFIED. This value would be out of bounds."
-  pred TASK_REACHABILITY_NEW_WORKFLOWS
-    = TASK_REACHABILITY_UNSPECIFIED
-  pred TASK_REACHABILITY_EXISTING_WORKFLOWS
-    = TASK_REACHABILITY_NEW_WORKFLOWS
-  pred TASK_REACHABILITY_OPEN_WORKFLOWS
-    = TASK_REACHABILITY_EXISTING_WORKFLOWS
-  pred TASK_REACHABILITY_CLOSED_WORKFLOWS
-    = TASK_REACHABILITY_OPEN_WORKFLOWS
-  pred (TaskReachability'Unrecognized _)
-    = Prelude.error
-        "TaskReachability.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault TaskReachability where
-  fieldDefault = TASK_REACHABILITY_UNSPECIFIED
-instance Control.DeepSeq.NFData TaskReachability where
-  rnf x__ = Prelude.seq x__ ()
+  = TaskReachability'TaskReachabilityUnspecified
+  | TaskReachability'TaskReachabilityNewWorkflows
+  | TaskReachability'TaskReachabilityExistingWorkflows
+  | TaskReachability'TaskReachabilityOpenWorkflows
+  | TaskReachability'TaskReachabilityClosedWorkflows
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumTaskReachability :: TaskReachability -> Int
+toProtoEnumTaskReachability TaskReachability'TaskReachabilityUnspecified = 0
+toProtoEnumTaskReachability TaskReachability'TaskReachabilityNewWorkflows = 1
+toProtoEnumTaskReachability TaskReachability'TaskReachabilityExistingWorkflows = 2
+toProtoEnumTaskReachability TaskReachability'TaskReachabilityOpenWorkflows = 3
+toProtoEnumTaskReachability TaskReachability'TaskReachabilityClosedWorkflows = 4
+
+fromProtoEnumTaskReachability :: Int -> Maybe TaskReachability
+fromProtoEnumTaskReachability 0 = Just TaskReachability'TaskReachabilityUnspecified
+fromProtoEnumTaskReachability 1 = Just TaskReachability'TaskReachabilityNewWorkflows
+fromProtoEnumTaskReachability 2 = Just TaskReachability'TaskReachabilityExistingWorkflows
+fromProtoEnumTaskReachability 3 = Just TaskReachability'TaskReachabilityOpenWorkflows
+fromProtoEnumTaskReachability 4 = Just TaskReachability'TaskReachabilityClosedWorkflows
+fromProtoEnumTaskReachability _ = Nothing
+
+instance MessageEncode TaskReachability where
+  buildMessage _ = mempty
+instance MessageSize TaskReachability where
+  messageSize _ = 0
+instance MessageDecode TaskReachability where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON TaskReachability where
+  toJSON TaskReachability'TaskReachabilityUnspecified = Aeson.String "TASK_REACHABILITY_UNSPECIFIED"
+  toJSON TaskReachability'TaskReachabilityNewWorkflows = Aeson.String "TASK_REACHABILITY_NEW_WORKFLOWS"
+  toJSON TaskReachability'TaskReachabilityExistingWorkflows = Aeson.String "TASK_REACHABILITY_EXISTING_WORKFLOWS"
+  toJSON TaskReachability'TaskReachabilityOpenWorkflows = Aeson.String "TASK_REACHABILITY_OPEN_WORKFLOWS"
+  toJSON TaskReachability'TaskReachabilityClosedWorkflows = Aeson.String "TASK_REACHABILITY_CLOSED_WORKFLOWS"
+
+instance Aeson.FromJSON TaskReachability where
+  parseJSON = \case
+    Aeson.String "TASK_REACHABILITY_UNSPECIFIED" -> pure TaskReachability'TaskReachabilityUnspecified
+    Aeson.String "TASK_REACHABILITY_NEW_WORKFLOWS" -> pure TaskReachability'TaskReachabilityNewWorkflows
+    Aeson.String "TASK_REACHABILITY_EXISTING_WORKFLOWS" -> pure TaskReachability'TaskReachabilityExistingWorkflows
+    Aeson.String "TASK_REACHABILITY_OPEN_WORKFLOWS" -> pure TaskReachability'TaskReachabilityOpenWorkflows
+    Aeson.String "TASK_REACHABILITY_CLOSED_WORKFLOWS" -> pure TaskReachability'TaskReachabilityClosedWorkflows
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for TaskReachability"
+
+instance Hashable TaskReachability where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumTaskReachability x)
+
+data BuildIdTaskReachability
+  = BuildIdTaskReachability'BuildIdTaskReachabilityUnspecified
+  | BuildIdTaskReachability'BuildIdTaskReachabilityReachable
+  | BuildIdTaskReachability'BuildIdTaskReachabilityClosedWorkflowsOnly
+  | BuildIdTaskReachability'BuildIdTaskReachabilityUnreachable
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumBuildIdTaskReachability :: BuildIdTaskReachability -> Int
+toProtoEnumBuildIdTaskReachability BuildIdTaskReachability'BuildIdTaskReachabilityUnspecified = 0
+toProtoEnumBuildIdTaskReachability BuildIdTaskReachability'BuildIdTaskReachabilityReachable = 1
+toProtoEnumBuildIdTaskReachability BuildIdTaskReachability'BuildIdTaskReachabilityClosedWorkflowsOnly = 2
+toProtoEnumBuildIdTaskReachability BuildIdTaskReachability'BuildIdTaskReachabilityUnreachable = 3
+
+fromProtoEnumBuildIdTaskReachability :: Int -> Maybe BuildIdTaskReachability
+fromProtoEnumBuildIdTaskReachability 0 = Just BuildIdTaskReachability'BuildIdTaskReachabilityUnspecified
+fromProtoEnumBuildIdTaskReachability 1 = Just BuildIdTaskReachability'BuildIdTaskReachabilityReachable
+fromProtoEnumBuildIdTaskReachability 2 = Just BuildIdTaskReachability'BuildIdTaskReachabilityClosedWorkflowsOnly
+fromProtoEnumBuildIdTaskReachability 3 = Just BuildIdTaskReachability'BuildIdTaskReachabilityUnreachable
+fromProtoEnumBuildIdTaskReachability _ = Nothing
+
+instance MessageEncode BuildIdTaskReachability where
+  buildMessage _ = mempty
+instance MessageSize BuildIdTaskReachability where
+  messageSize _ = 0
+instance MessageDecode BuildIdTaskReachability where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON BuildIdTaskReachability where
+  toJSON BuildIdTaskReachability'BuildIdTaskReachabilityUnspecified = Aeson.String "BUILD_ID_TASK_REACHABILITY_UNSPECIFIED"
+  toJSON BuildIdTaskReachability'BuildIdTaskReachabilityReachable = Aeson.String "BUILD_ID_TASK_REACHABILITY_REACHABLE"
+  toJSON BuildIdTaskReachability'BuildIdTaskReachabilityClosedWorkflowsOnly = Aeson.String "BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY"
+  toJSON BuildIdTaskReachability'BuildIdTaskReachabilityUnreachable = Aeson.String "BUILD_ID_TASK_REACHABILITY_UNREACHABLE"
+
+instance Aeson.FromJSON BuildIdTaskReachability where
+  parseJSON = \case
+    Aeson.String "BUILD_ID_TASK_REACHABILITY_UNSPECIFIED" -> pure BuildIdTaskReachability'BuildIdTaskReachabilityUnspecified
+    Aeson.String "BUILD_ID_TASK_REACHABILITY_REACHABLE" -> pure BuildIdTaskReachability'BuildIdTaskReachabilityReachable
+    Aeson.String "BUILD_ID_TASK_REACHABILITY_CLOSED_WORKFLOWS_ONLY" -> pure BuildIdTaskReachability'BuildIdTaskReachabilityClosedWorkflowsOnly
+    Aeson.String "BUILD_ID_TASK_REACHABILITY_UNREACHABLE" -> pure BuildIdTaskReachability'BuildIdTaskReachabilityUnreachable
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for BuildIdTaskReachability"
+
+instance Hashable BuildIdTaskReachability where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumBuildIdTaskReachability x)
+
+data DescribeTaskQueueMode
+  = DescribeTaskQueueMode'DescribeTaskQueueModeUnspecified
+  | DescribeTaskQueueMode'DescribeTaskQueueModeEnhanced
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumDescribeTaskQueueMode :: DescribeTaskQueueMode -> Int
+toProtoEnumDescribeTaskQueueMode DescribeTaskQueueMode'DescribeTaskQueueModeUnspecified = 0
+toProtoEnumDescribeTaskQueueMode DescribeTaskQueueMode'DescribeTaskQueueModeEnhanced = 1
+
+fromProtoEnumDescribeTaskQueueMode :: Int -> Maybe DescribeTaskQueueMode
+fromProtoEnumDescribeTaskQueueMode 0 = Just DescribeTaskQueueMode'DescribeTaskQueueModeUnspecified
+fromProtoEnumDescribeTaskQueueMode 1 = Just DescribeTaskQueueMode'DescribeTaskQueueModeEnhanced
+fromProtoEnumDescribeTaskQueueMode _ = Nothing
+
+instance MessageEncode DescribeTaskQueueMode where
+  buildMessage _ = mempty
+instance MessageSize DescribeTaskQueueMode where
+  messageSize _ = 0
+instance MessageDecode DescribeTaskQueueMode where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON DescribeTaskQueueMode where
+  toJSON DescribeTaskQueueMode'DescribeTaskQueueModeUnspecified = Aeson.String "DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED"
+  toJSON DescribeTaskQueueMode'DescribeTaskQueueModeEnhanced = Aeson.String "DESCRIBE_TASK_QUEUE_MODE_ENHANCED"
+
+instance Aeson.FromJSON DescribeTaskQueueMode where
+  parseJSON = \case
+    Aeson.String "DESCRIBE_TASK_QUEUE_MODE_UNSPECIFIED" -> pure DescribeTaskQueueMode'DescribeTaskQueueModeUnspecified
+    Aeson.String "DESCRIBE_TASK_QUEUE_MODE_ENHANCED" -> pure DescribeTaskQueueMode'DescribeTaskQueueModeEnhanced
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for DescribeTaskQueueMode"
+
+instance Hashable DescribeTaskQueueMode where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumDescribeTaskQueueMode x)
+
+data RateLimitSource
+  = RateLimitSource'RateLimitSourceUnspecified
+  | RateLimitSource'RateLimitSourceApi
+  | RateLimitSource'RateLimitSourceWorker
+  | RateLimitSource'RateLimitSourceSystem
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumRateLimitSource :: RateLimitSource -> Int
+toProtoEnumRateLimitSource RateLimitSource'RateLimitSourceUnspecified = 0
+toProtoEnumRateLimitSource RateLimitSource'RateLimitSourceApi = 1
+toProtoEnumRateLimitSource RateLimitSource'RateLimitSourceWorker = 2
+toProtoEnumRateLimitSource RateLimitSource'RateLimitSourceSystem = 3
+
+fromProtoEnumRateLimitSource :: Int -> Maybe RateLimitSource
+fromProtoEnumRateLimitSource 0 = Just RateLimitSource'RateLimitSourceUnspecified
+fromProtoEnumRateLimitSource 1 = Just RateLimitSource'RateLimitSourceApi
+fromProtoEnumRateLimitSource 2 = Just RateLimitSource'RateLimitSourceWorker
+fromProtoEnumRateLimitSource 3 = Just RateLimitSource'RateLimitSourceSystem
+fromProtoEnumRateLimitSource _ = Nothing
+
+instance MessageEncode RateLimitSource where
+  buildMessage _ = mempty
+instance MessageSize RateLimitSource where
+  messageSize _ = 0
+instance MessageDecode RateLimitSource where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON RateLimitSource where
+  toJSON RateLimitSource'RateLimitSourceUnspecified = Aeson.String "RATE_LIMIT_SOURCE_UNSPECIFIED"
+  toJSON RateLimitSource'RateLimitSourceApi = Aeson.String "RATE_LIMIT_SOURCE_API"
+  toJSON RateLimitSource'RateLimitSourceWorker = Aeson.String "RATE_LIMIT_SOURCE_WORKER"
+  toJSON RateLimitSource'RateLimitSourceSystem = Aeson.String "RATE_LIMIT_SOURCE_SYSTEM"
+
+instance Aeson.FromJSON RateLimitSource where
+  parseJSON = \case
+    Aeson.String "RATE_LIMIT_SOURCE_UNSPECIFIED" -> pure RateLimitSource'RateLimitSourceUnspecified
+    Aeson.String "RATE_LIMIT_SOURCE_API" -> pure RateLimitSource'RateLimitSourceApi
+    Aeson.String "RATE_LIMIT_SOURCE_WORKER" -> pure RateLimitSource'RateLimitSourceWorker
+    Aeson.String "RATE_LIMIT_SOURCE_SYSTEM" -> pure RateLimitSource'RateLimitSourceSystem
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for RateLimitSource"
+
+instance Hashable RateLimitSource where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumRateLimitSource x)

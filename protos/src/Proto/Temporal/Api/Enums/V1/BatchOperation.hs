@@ -1,274 +1,188 @@
-{- This file was auto-generated from temporal/api/enums/v1/batch_operation.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Enums.V1.BatchOperation (
-        BatchOperationState(..), BatchOperationState(),
-        BatchOperationState'UnrecognizedValue, BatchOperationType(..),
-        BatchOperationType(), BatchOperationType'UnrecognizedValue
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-newtype BatchOperationState'UnrecognizedValue
-  = BatchOperationState'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data BatchOperationState
-  = BATCH_OPERATION_STATE_UNSPECIFIED |
-    BATCH_OPERATION_STATE_RUNNING |
-    BATCH_OPERATION_STATE_COMPLETED |
-    BATCH_OPERATION_STATE_FAILED |
-    BatchOperationState'Unrecognized !BatchOperationState'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum BatchOperationState where
-  maybeToEnum 0 = Prelude.Just BATCH_OPERATION_STATE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just BATCH_OPERATION_STATE_RUNNING
-  maybeToEnum 2 = Prelude.Just BATCH_OPERATION_STATE_COMPLETED
-  maybeToEnum 3 = Prelude.Just BATCH_OPERATION_STATE_FAILED
-  maybeToEnum k
-    = Prelude.Just
-        (BatchOperationState'Unrecognized
-           (BatchOperationState'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum BATCH_OPERATION_STATE_UNSPECIFIED
-    = "BATCH_OPERATION_STATE_UNSPECIFIED"
-  showEnum BATCH_OPERATION_STATE_RUNNING
-    = "BATCH_OPERATION_STATE_RUNNING"
-  showEnum BATCH_OPERATION_STATE_COMPLETED
-    = "BATCH_OPERATION_STATE_COMPLETED"
-  showEnum BATCH_OPERATION_STATE_FAILED
-    = "BATCH_OPERATION_STATE_FAILED"
-  showEnum
-    (BatchOperationState'Unrecognized (BatchOperationState'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "BATCH_OPERATION_STATE_UNSPECIFIED"
-    = Prelude.Just BATCH_OPERATION_STATE_UNSPECIFIED
-    | (Prelude.==) k "BATCH_OPERATION_STATE_RUNNING"
-    = Prelude.Just BATCH_OPERATION_STATE_RUNNING
-    | (Prelude.==) k "BATCH_OPERATION_STATE_COMPLETED"
-    = Prelude.Just BATCH_OPERATION_STATE_COMPLETED
-    | (Prelude.==) k "BATCH_OPERATION_STATE_FAILED"
-    = Prelude.Just BATCH_OPERATION_STATE_FAILED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded BatchOperationState where
-  minBound = BATCH_OPERATION_STATE_UNSPECIFIED
-  maxBound = BATCH_OPERATION_STATE_FAILED
-instance Prelude.Enum BatchOperationState where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum BatchOperationState: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum BATCH_OPERATION_STATE_UNSPECIFIED = 0
-  fromEnum BATCH_OPERATION_STATE_RUNNING = 1
-  fromEnum BATCH_OPERATION_STATE_COMPLETED = 2
-  fromEnum BATCH_OPERATION_STATE_FAILED = 3
-  fromEnum
-    (BatchOperationState'Unrecognized (BatchOperationState'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ BATCH_OPERATION_STATE_FAILED
-    = Prelude.error
-        "BatchOperationState.succ: bad argument BATCH_OPERATION_STATE_FAILED. This value would be out of bounds."
-  succ BATCH_OPERATION_STATE_UNSPECIFIED
-    = BATCH_OPERATION_STATE_RUNNING
-  succ BATCH_OPERATION_STATE_RUNNING
-    = BATCH_OPERATION_STATE_COMPLETED
-  succ BATCH_OPERATION_STATE_COMPLETED = BATCH_OPERATION_STATE_FAILED
-  succ (BatchOperationState'Unrecognized _)
-    = Prelude.error
-        "BatchOperationState.succ: bad argument: unrecognized value"
-  pred BATCH_OPERATION_STATE_UNSPECIFIED
-    = Prelude.error
-        "BatchOperationState.pred: bad argument BATCH_OPERATION_STATE_UNSPECIFIED. This value would be out of bounds."
-  pred BATCH_OPERATION_STATE_RUNNING
-    = BATCH_OPERATION_STATE_UNSPECIFIED
-  pred BATCH_OPERATION_STATE_COMPLETED
-    = BATCH_OPERATION_STATE_RUNNING
-  pred BATCH_OPERATION_STATE_FAILED = BATCH_OPERATION_STATE_COMPLETED
-  pred (BatchOperationState'Unrecognized _)
-    = Prelude.error
-        "BatchOperationState.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault BatchOperationState where
-  fieldDefault = BATCH_OPERATION_STATE_UNSPECIFIED
-instance Control.DeepSeq.NFData BatchOperationState where
-  rnf x__ = Prelude.seq x__ ()
-newtype BatchOperationType'UnrecognizedValue
-  = BatchOperationType'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.enums.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Enums.V1.BatchOperation where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x2b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x62\x61\x74\x63\x68\x5f\x6f\x70\x65\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2a\x98\x03\x0a\x12\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x54\x79\x70\x65\x12\x22\x0a\x20\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x22\x0a\x1e\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x54\x45\x52\x4d\x49\x4e\x41\x54\x45\x10\x01\x12\x1f\x0a\x1b\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x43\x41\x4e\x43\x45\x4c\x10\x02\x12\x1f\x0a\x1b\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x53\x49\x47\x4e\x41\x4c\x10\x03\x12\x1f\x0a\x1b\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x44\x45\x4c\x45\x54\x45\x10\x04\x12\x1e\x0a\x1a\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x52\x45\x53\x45\x54\x10\x05\x12\x31\x0a\x2d\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x55\x50\x44\x41\x54\x45\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x4f\x50\x54\x49\x4f\x4e\x53\x10\x06\x12\x29\x0a\x25\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x55\x4e\x50\x41\x55\x53\x45\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x10\x07\x12\x30\x0a\x2c\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x55\x50\x44\x41\x54\x45\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x5f\x4f\x50\x54\x49\x4f\x4e\x53\x10\x08\x12\x27\x0a\x23\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x54\x59\x50\x45\x5f\x52\x45\x53\x45\x54\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x10\x09\x2a\xa4\x01\x0a\x13\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x53\x74\x61\x74\x65\x12\x23\x0a\x21\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x21\x0a\x1d\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x52\x55\x4e\x4e\x49\x4e\x47\x10\x01\x12\x23\x0a\x1f\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x43\x4f\x4d\x50\x4c\x45\x54\x45\x44\x10\x02\x12\x20\x0a\x1c\x42\x41\x54\x43\x48\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x53\x54\x41\x54\x45\x5f\x46\x41\x49\x4c\x45\x44\x10\x03\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
 data BatchOperationType
-  = BATCH_OPERATION_TYPE_UNSPECIFIED |
-    BATCH_OPERATION_TYPE_TERMINATE |
-    BATCH_OPERATION_TYPE_CANCEL |
-    BATCH_OPERATION_TYPE_SIGNAL |
-    BATCH_OPERATION_TYPE_DELETE |
-    BATCH_OPERATION_TYPE_RESET |
-    BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS |
-    BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY |
-    BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS |
-    BATCH_OPERATION_TYPE_RESET_ACTIVITY |
-    BatchOperationType'Unrecognized !BatchOperationType'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum BatchOperationType where
-  maybeToEnum 0 = Prelude.Just BATCH_OPERATION_TYPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just BATCH_OPERATION_TYPE_TERMINATE
-  maybeToEnum 2 = Prelude.Just BATCH_OPERATION_TYPE_CANCEL
-  maybeToEnum 3 = Prelude.Just BATCH_OPERATION_TYPE_SIGNAL
-  maybeToEnum 4 = Prelude.Just BATCH_OPERATION_TYPE_DELETE
-  maybeToEnum 5 = Prelude.Just BATCH_OPERATION_TYPE_RESET
-  maybeToEnum 6
-    = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-  maybeToEnum 7 = Prelude.Just BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-  maybeToEnum 8
-    = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-  maybeToEnum 9 = Prelude.Just BATCH_OPERATION_TYPE_RESET_ACTIVITY
-  maybeToEnum k
-    = Prelude.Just
-        (BatchOperationType'Unrecognized
-           (BatchOperationType'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum BATCH_OPERATION_TYPE_UNSPECIFIED
-    = "BATCH_OPERATION_TYPE_UNSPECIFIED"
-  showEnum BATCH_OPERATION_TYPE_TERMINATE
-    = "BATCH_OPERATION_TYPE_TERMINATE"
-  showEnum BATCH_OPERATION_TYPE_CANCEL
-    = "BATCH_OPERATION_TYPE_CANCEL"
-  showEnum BATCH_OPERATION_TYPE_SIGNAL
-    = "BATCH_OPERATION_TYPE_SIGNAL"
-  showEnum BATCH_OPERATION_TYPE_DELETE
-    = "BATCH_OPERATION_TYPE_DELETE"
-  showEnum BATCH_OPERATION_TYPE_RESET = "BATCH_OPERATION_TYPE_RESET"
-  showEnum BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-    = "BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS"
-  showEnum BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-    = "BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY"
-  showEnum BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-    = "BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS"
-  showEnum BATCH_OPERATION_TYPE_RESET_ACTIVITY
-    = "BATCH_OPERATION_TYPE_RESET_ACTIVITY"
-  showEnum
-    (BatchOperationType'Unrecognized (BatchOperationType'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_UNSPECIFIED"
-    = Prelude.Just BATCH_OPERATION_TYPE_UNSPECIFIED
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_TERMINATE"
-    = Prelude.Just BATCH_OPERATION_TYPE_TERMINATE
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_CANCEL"
-    = Prelude.Just BATCH_OPERATION_TYPE_CANCEL
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_SIGNAL"
-    = Prelude.Just BATCH_OPERATION_TYPE_SIGNAL
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_DELETE"
-    = Prelude.Just BATCH_OPERATION_TYPE_DELETE
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_RESET"
-    = Prelude.Just BATCH_OPERATION_TYPE_RESET
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS"
-    = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY"
-    = Prelude.Just BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS"
-    = Prelude.Just BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-    | (Prelude.==) k "BATCH_OPERATION_TYPE_RESET_ACTIVITY"
-    = Prelude.Just BATCH_OPERATION_TYPE_RESET_ACTIVITY
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded BatchOperationType where
-  minBound = BATCH_OPERATION_TYPE_UNSPECIFIED
-  maxBound = BATCH_OPERATION_TYPE_RESET_ACTIVITY
-instance Prelude.Enum BatchOperationType where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum BatchOperationType: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum BATCH_OPERATION_TYPE_UNSPECIFIED = 0
-  fromEnum BATCH_OPERATION_TYPE_TERMINATE = 1
-  fromEnum BATCH_OPERATION_TYPE_CANCEL = 2
-  fromEnum BATCH_OPERATION_TYPE_SIGNAL = 3
-  fromEnum BATCH_OPERATION_TYPE_DELETE = 4
-  fromEnum BATCH_OPERATION_TYPE_RESET = 5
-  fromEnum BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS = 6
-  fromEnum BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY = 7
-  fromEnum BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS = 8
-  fromEnum BATCH_OPERATION_TYPE_RESET_ACTIVITY = 9
-  fromEnum
-    (BatchOperationType'Unrecognized (BatchOperationType'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ BATCH_OPERATION_TYPE_RESET_ACTIVITY
-    = Prelude.error
-        "BatchOperationType.succ: bad argument BATCH_OPERATION_TYPE_RESET_ACTIVITY. This value would be out of bounds."
-  succ BATCH_OPERATION_TYPE_UNSPECIFIED
-    = BATCH_OPERATION_TYPE_TERMINATE
-  succ BATCH_OPERATION_TYPE_TERMINATE = BATCH_OPERATION_TYPE_CANCEL
-  succ BATCH_OPERATION_TYPE_CANCEL = BATCH_OPERATION_TYPE_SIGNAL
-  succ BATCH_OPERATION_TYPE_SIGNAL = BATCH_OPERATION_TYPE_DELETE
-  succ BATCH_OPERATION_TYPE_DELETE = BATCH_OPERATION_TYPE_RESET
-  succ BATCH_OPERATION_TYPE_RESET
-    = BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-  succ BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-    = BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-  succ BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-    = BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-  succ BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-    = BATCH_OPERATION_TYPE_RESET_ACTIVITY
-  succ (BatchOperationType'Unrecognized _)
-    = Prelude.error
-        "BatchOperationType.succ: bad argument: unrecognized value"
-  pred BATCH_OPERATION_TYPE_UNSPECIFIED
-    = Prelude.error
-        "BatchOperationType.pred: bad argument BATCH_OPERATION_TYPE_UNSPECIFIED. This value would be out of bounds."
-  pred BATCH_OPERATION_TYPE_TERMINATE
-    = BATCH_OPERATION_TYPE_UNSPECIFIED
-  pred BATCH_OPERATION_TYPE_CANCEL = BATCH_OPERATION_TYPE_TERMINATE
-  pred BATCH_OPERATION_TYPE_SIGNAL = BATCH_OPERATION_TYPE_CANCEL
-  pred BATCH_OPERATION_TYPE_DELETE = BATCH_OPERATION_TYPE_SIGNAL
-  pred BATCH_OPERATION_TYPE_RESET = BATCH_OPERATION_TYPE_DELETE
-  pred BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-    = BATCH_OPERATION_TYPE_RESET
-  pred BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-    = BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS
-  pred BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-    = BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY
-  pred BATCH_OPERATION_TYPE_RESET_ACTIVITY
-    = BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS
-  pred (BatchOperationType'Unrecognized _)
-    = Prelude.error
-        "BatchOperationType.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault BatchOperationType where
-  fieldDefault = BATCH_OPERATION_TYPE_UNSPECIFIED
-instance Control.DeepSeq.NFData BatchOperationType where
-  rnf x__ = Prelude.seq x__ ()
+  = BatchOperationType'BatchOperationTypeUnspecified
+  | BatchOperationType'BatchOperationTypeTerminate
+  | BatchOperationType'BatchOperationTypeCancel
+  | BatchOperationType'BatchOperationTypeSignal
+  | BatchOperationType'BatchOperationTypeDelete
+  | BatchOperationType'BatchOperationTypeReset
+  | BatchOperationType'BatchOperationTypeUpdateExecutionOptions
+  | BatchOperationType'BatchOperationTypeUnpauseActivity
+  | BatchOperationType'BatchOperationTypeUpdateActivityOptions
+  | BatchOperationType'BatchOperationTypeResetActivity
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumBatchOperationType :: BatchOperationType -> Int
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeUnspecified = 0
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeTerminate = 1
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeCancel = 2
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeSignal = 3
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeDelete = 4
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeReset = 5
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeUpdateExecutionOptions = 6
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeUnpauseActivity = 7
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeUpdateActivityOptions = 8
+toProtoEnumBatchOperationType BatchOperationType'BatchOperationTypeResetActivity = 9
+
+fromProtoEnumBatchOperationType :: Int -> Maybe BatchOperationType
+fromProtoEnumBatchOperationType 0 = Just BatchOperationType'BatchOperationTypeUnspecified
+fromProtoEnumBatchOperationType 1 = Just BatchOperationType'BatchOperationTypeTerminate
+fromProtoEnumBatchOperationType 2 = Just BatchOperationType'BatchOperationTypeCancel
+fromProtoEnumBatchOperationType 3 = Just BatchOperationType'BatchOperationTypeSignal
+fromProtoEnumBatchOperationType 4 = Just BatchOperationType'BatchOperationTypeDelete
+fromProtoEnumBatchOperationType 5 = Just BatchOperationType'BatchOperationTypeReset
+fromProtoEnumBatchOperationType 6 = Just BatchOperationType'BatchOperationTypeUpdateExecutionOptions
+fromProtoEnumBatchOperationType 7 = Just BatchOperationType'BatchOperationTypeUnpauseActivity
+fromProtoEnumBatchOperationType 8 = Just BatchOperationType'BatchOperationTypeUpdateActivityOptions
+fromProtoEnumBatchOperationType 9 = Just BatchOperationType'BatchOperationTypeResetActivity
+fromProtoEnumBatchOperationType _ = Nothing
+
+instance MessageEncode BatchOperationType where
+  buildMessage _ = mempty
+instance MessageSize BatchOperationType where
+  messageSize _ = 0
+instance MessageDecode BatchOperationType where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON BatchOperationType where
+  toJSON BatchOperationType'BatchOperationTypeUnspecified = Aeson.String "BATCH_OPERATION_TYPE_UNSPECIFIED"
+  toJSON BatchOperationType'BatchOperationTypeTerminate = Aeson.String "BATCH_OPERATION_TYPE_TERMINATE"
+  toJSON BatchOperationType'BatchOperationTypeCancel = Aeson.String "BATCH_OPERATION_TYPE_CANCEL"
+  toJSON BatchOperationType'BatchOperationTypeSignal = Aeson.String "BATCH_OPERATION_TYPE_SIGNAL"
+  toJSON BatchOperationType'BatchOperationTypeDelete = Aeson.String "BATCH_OPERATION_TYPE_DELETE"
+  toJSON BatchOperationType'BatchOperationTypeReset = Aeson.String "BATCH_OPERATION_TYPE_RESET"
+  toJSON BatchOperationType'BatchOperationTypeUpdateExecutionOptions = Aeson.String "BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS"
+  toJSON BatchOperationType'BatchOperationTypeUnpauseActivity = Aeson.String "BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY"
+  toJSON BatchOperationType'BatchOperationTypeUpdateActivityOptions = Aeson.String "BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS"
+  toJSON BatchOperationType'BatchOperationTypeResetActivity = Aeson.String "BATCH_OPERATION_TYPE_RESET_ACTIVITY"
+
+instance Aeson.FromJSON BatchOperationType where
+  parseJSON = \case
+    Aeson.String "BATCH_OPERATION_TYPE_UNSPECIFIED" -> pure BatchOperationType'BatchOperationTypeUnspecified
+    Aeson.String "BATCH_OPERATION_TYPE_TERMINATE" -> pure BatchOperationType'BatchOperationTypeTerminate
+    Aeson.String "BATCH_OPERATION_TYPE_CANCEL" -> pure BatchOperationType'BatchOperationTypeCancel
+    Aeson.String "BATCH_OPERATION_TYPE_SIGNAL" -> pure BatchOperationType'BatchOperationTypeSignal
+    Aeson.String "BATCH_OPERATION_TYPE_DELETE" -> pure BatchOperationType'BatchOperationTypeDelete
+    Aeson.String "BATCH_OPERATION_TYPE_RESET" -> pure BatchOperationType'BatchOperationTypeReset
+    Aeson.String "BATCH_OPERATION_TYPE_UPDATE_EXECUTION_OPTIONS" -> pure BatchOperationType'BatchOperationTypeUpdateExecutionOptions
+    Aeson.String "BATCH_OPERATION_TYPE_UNPAUSE_ACTIVITY" -> pure BatchOperationType'BatchOperationTypeUnpauseActivity
+    Aeson.String "BATCH_OPERATION_TYPE_UPDATE_ACTIVITY_OPTIONS" -> pure BatchOperationType'BatchOperationTypeUpdateActivityOptions
+    Aeson.String "BATCH_OPERATION_TYPE_RESET_ACTIVITY" -> pure BatchOperationType'BatchOperationTypeResetActivity
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for BatchOperationType"
+
+instance Hashable BatchOperationType where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumBatchOperationType x)
+
+data BatchOperationState
+  = BatchOperationState'BatchOperationStateUnspecified
+  | BatchOperationState'BatchOperationStateRunning
+  | BatchOperationState'BatchOperationStateCompleted
+  | BatchOperationState'BatchOperationStateFailed
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumBatchOperationState :: BatchOperationState -> Int
+toProtoEnumBatchOperationState BatchOperationState'BatchOperationStateUnspecified = 0
+toProtoEnumBatchOperationState BatchOperationState'BatchOperationStateRunning = 1
+toProtoEnumBatchOperationState BatchOperationState'BatchOperationStateCompleted = 2
+toProtoEnumBatchOperationState BatchOperationState'BatchOperationStateFailed = 3
+
+fromProtoEnumBatchOperationState :: Int -> Maybe BatchOperationState
+fromProtoEnumBatchOperationState 0 = Just BatchOperationState'BatchOperationStateUnspecified
+fromProtoEnumBatchOperationState 1 = Just BatchOperationState'BatchOperationStateRunning
+fromProtoEnumBatchOperationState 2 = Just BatchOperationState'BatchOperationStateCompleted
+fromProtoEnumBatchOperationState 3 = Just BatchOperationState'BatchOperationStateFailed
+fromProtoEnumBatchOperationState _ = Nothing
+
+instance MessageEncode BatchOperationState where
+  buildMessage _ = mempty
+instance MessageSize BatchOperationState where
+  messageSize _ = 0
+instance MessageDecode BatchOperationState where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON BatchOperationState where
+  toJSON BatchOperationState'BatchOperationStateUnspecified = Aeson.String "BATCH_OPERATION_STATE_UNSPECIFIED"
+  toJSON BatchOperationState'BatchOperationStateRunning = Aeson.String "BATCH_OPERATION_STATE_RUNNING"
+  toJSON BatchOperationState'BatchOperationStateCompleted = Aeson.String "BATCH_OPERATION_STATE_COMPLETED"
+  toJSON BatchOperationState'BatchOperationStateFailed = Aeson.String "BATCH_OPERATION_STATE_FAILED"
+
+instance Aeson.FromJSON BatchOperationState where
+  parseJSON = \case
+    Aeson.String "BATCH_OPERATION_STATE_UNSPECIFIED" -> pure BatchOperationState'BatchOperationStateUnspecified
+    Aeson.String "BATCH_OPERATION_STATE_RUNNING" -> pure BatchOperationState'BatchOperationStateRunning
+    Aeson.String "BATCH_OPERATION_STATE_COMPLETED" -> pure BatchOperationState'BatchOperationStateCompleted
+    Aeson.String "BATCH_OPERATION_STATE_FAILED" -> pure BatchOperationState'BatchOperationStateFailed
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for BatchOperationState"
+
+instance Hashable BatchOperationState where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumBatchOperationState x)

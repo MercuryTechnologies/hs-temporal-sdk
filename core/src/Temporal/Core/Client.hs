@@ -60,8 +60,8 @@ import qualified Data.ByteString as BL
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Internal as BS
 import Data.HashMap.Strict (HashMap)
-import Data.ProtoLens.Encoding
-import Data.ProtoLens.Service.Types
+import Proto.Decode (MessageDecode, decodeMessage)
+import Proto.Encode (MessageEncode, encodeMessage)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Vector.Storable as V
@@ -358,7 +358,7 @@ type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray
 --
 -- This function is async-exception-safe: all Rust allocations are properly
 -- freed even if an async exception occurs during processing.
-call :: forall svc t. (HasMethodImpl svc t) => PrimRpcCall -> Client -> MethodInput svc t -> IO (Either RpcError (MethodOutput svc t))
+call :: forall req res. (MessageEncode req, MessageDecode res) => PrimRpcCall -> Client -> req -> IO (Either RpcError res)
 call f c req_ = withClient c $ \cPtr -> do
   let msgBytes = encodeMessage req_
   BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do
@@ -381,7 +381,14 @@ call f c req_ = withClient c $ \cPtr -> do
           (\resultPtr -> do
             arr <- peek resultPtr
             bs <- cArrayToByteString arr
-            return (decodeMessageOrDie bs))
+            return (decodeMessageOrThrow bs))
+
+
+decodeMessageOrThrow :: MessageDecode msg => ByteString -> msg
+decodeMessageOrThrow bs =
+  case decodeMessage bs of
+    Left err -> error (show err)
+    Right msg -> msg
 
 
 -- | Bracket-style wrapper for Client that ensures proper cleanup.

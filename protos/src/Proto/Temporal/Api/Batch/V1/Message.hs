@@ -1,3912 +1,1600 @@
-{- This file was auto-generated from temporal/api/batch/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Batch.V1.Message (
-        BatchOperationCancellation(), BatchOperationDeletion(),
-        BatchOperationInfo(), BatchOperationReset(),
-        BatchOperationResetActivities(),
-        BatchOperationResetActivities'Activity(..),
-        _BatchOperationResetActivities'Type,
-        _BatchOperationResetActivities'MatchAll, BatchOperationSignal(),
-        BatchOperationTermination(), BatchOperationTriggerWorkflowRule(),
-        BatchOperationTriggerWorkflowRule'Rule(..),
-        _BatchOperationTriggerWorkflowRule'Id,
-        _BatchOperationTriggerWorkflowRule'Spec,
-        BatchOperationUnpauseActivities(),
-        BatchOperationUnpauseActivities'Activity(..),
-        _BatchOperationUnpauseActivities'Type,
-        _BatchOperationUnpauseActivities'MatchAll,
-        BatchOperationUpdateActivityOptions(),
-        BatchOperationUpdateActivityOptions'Activity(..),
-        _BatchOperationUpdateActivityOptions'Type,
-        _BatchOperationUpdateActivityOptions'MatchAll,
-        BatchOperationUpdateWorkflowExecutionOptions()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.FieldMask
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Activity.V1.Message
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Api.Enums.V1.BatchOperation
-import qualified Proto.Temporal.Api.Enums.V1.Reset
-import qualified Proto.Temporal.Api.Rules.V1.Message
-import qualified Proto.Temporal.Api.Workflow.V1.Message
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationCancellation Data.Text.Text@ -}
-data BatchOperationCancellation
-  = BatchOperationCancellation'_constructor {_BatchOperationCancellation'identity :: !Data.Text.Text,
-                                             _BatchOperationCancellation'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationCancellation where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationCancellation "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationCancellation'identity
-           (\ x__ y__ -> x__ {_BatchOperationCancellation'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationCancellation where
-  messageName _
-    = Data.Text.pack "temporal.api.batch.v1.BatchOperationCancellation"
-  packedMessageDescriptor _
-    = "\n\
-      \\SUBBatchOperationCancellation\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationCancellation
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationCancellation'_unknownFields
-        (\ x__ y__
-           -> x__ {_BatchOperationCancellation'_unknownFields = y__})
-  defMessage
-    = BatchOperationCancellation'_constructor
-        {_BatchOperationCancellation'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationCancellation'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationCancellation
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationCancellation
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationCancellation"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData BatchOperationCancellation where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationCancellation'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationCancellation'identity x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationDeletion Data.Text.Text@ -}
-data BatchOperationDeletion
-  = BatchOperationDeletion'_constructor {_BatchOperationDeletion'identity :: !Data.Text.Text,
-                                         _BatchOperationDeletion'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationDeletion where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationDeletion "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationDeletion'identity
-           (\ x__ y__ -> x__ {_BatchOperationDeletion'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationDeletion where
-  messageName _
-    = Data.Text.pack "temporal.api.batch.v1.BatchOperationDeletion"
-  packedMessageDescriptor _
-    = "\n\
-      \\SYNBatchOperationDeletion\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationDeletion
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationDeletion'_unknownFields
-        (\ x__ y__ -> x__ {_BatchOperationDeletion'_unknownFields = y__})
-  defMessage
-    = BatchOperationDeletion'_constructor
-        {_BatchOperationDeletion'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationDeletion'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationDeletion
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationDeletion
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationDeletion"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData BatchOperationDeletion where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationDeletion'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_BatchOperationDeletion'identity x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.jobId' @:: Lens' BatchOperationInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.state' @:: Lens' BatchOperationInfo Proto.Temporal.Api.Enums.V1.BatchOperation.BatchOperationState@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.startTime' @:: Lens' BatchOperationInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'startTime' @:: Lens' BatchOperationInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.closeTime' @:: Lens' BatchOperationInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'closeTime' @:: Lens' BatchOperationInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data BatchOperationInfo
-  = BatchOperationInfo'_constructor {_BatchOperationInfo'jobId :: !Data.Text.Text,
-                                     _BatchOperationInfo'state :: !Proto.Temporal.Api.Enums.V1.BatchOperation.BatchOperationState,
-                                     _BatchOperationInfo'startTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                     _BatchOperationInfo'closeTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                     _BatchOperationInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationInfo "jobId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationInfo'jobId
-           (\ x__ y__ -> x__ {_BatchOperationInfo'jobId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationInfo "state" Proto.Temporal.Api.Enums.V1.BatchOperation.BatchOperationState where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationInfo'state
-           (\ x__ y__ -> x__ {_BatchOperationInfo'state = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationInfo "startTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationInfo'startTime
-           (\ x__ y__ -> x__ {_BatchOperationInfo'startTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationInfo "maybe'startTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationInfo'startTime
-           (\ x__ y__ -> x__ {_BatchOperationInfo'startTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationInfo "closeTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationInfo'closeTime
-           (\ x__ y__ -> x__ {_BatchOperationInfo'closeTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationInfo "maybe'closeTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationInfo'closeTime
-           (\ x__ y__ -> x__ {_BatchOperationInfo'closeTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.batch.v1.BatchOperationInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2BatchOperationInfo\DC2\NAK\n\
-      \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobId\DC2@\n\
-      \\ENQstate\CAN\STX \SOH(\SO2*.temporal.api.enums.v1.BatchOperationStateR\ENQstate\DC29\n\
-      \\n\
-      \start_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC29\n\
-      \\n\
-      \close_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tcloseTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        jobId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "job_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"jobId")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationInfo
-        state__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "state"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.BatchOperation.BatchOperationState)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"state")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationInfo
-        startTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "start_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'startTime")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationInfo
-        closeTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "close_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'closeTime")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, jobId__field_descriptor),
-           (Data.ProtoLens.Tag 2, state__field_descriptor),
-           (Data.ProtoLens.Tag 3, startTime__field_descriptor),
-           (Data.ProtoLens.Tag 4, closeTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationInfo'_unknownFields
-        (\ x__ y__ -> x__ {_BatchOperationInfo'_unknownFields = y__})
-  defMessage
-    = BatchOperationInfo'_constructor
-        {_BatchOperationInfo'jobId = Data.ProtoLens.fieldDefault,
-         _BatchOperationInfo'state = Data.ProtoLens.fieldDefault,
-         _BatchOperationInfo'startTime = Prelude.Nothing,
-         _BatchOperationInfo'closeTime = Prelude.Nothing,
-         _BatchOperationInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "job_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"jobId") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "state"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"state") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "start_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startTime") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "close_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"closeTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"jobId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"state") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'startTime") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'closeTime") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData BatchOperationInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationInfo'jobId x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationInfo'state x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationInfo'startTime x__)
-                      (Control.DeepSeq.deepseq (_BatchOperationInfo'closeTime x__) ()))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationReset Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.options' @:: Lens' BatchOperationReset Proto.Temporal.Api.Common.V1.Message.ResetOptions@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'options' @:: Lens' BatchOperationReset (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.ResetOptions)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetType' @:: Lens' BatchOperationReset Proto.Temporal.Api.Enums.V1.Reset.ResetType@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetReapplyType' @:: Lens' BatchOperationReset Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.postResetOperations' @:: Lens' BatchOperationReset [Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation]@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.vec'postResetOperations' @:: Lens' BatchOperationReset (Data.Vector.Vector Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation)@ -}
-data BatchOperationReset
-  = BatchOperationReset'_constructor {_BatchOperationReset'identity :: !Data.Text.Text,
-                                      _BatchOperationReset'options :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.ResetOptions),
-                                      _BatchOperationReset'resetType :: !Proto.Temporal.Api.Enums.V1.Reset.ResetType,
-                                      _BatchOperationReset'resetReapplyType :: !Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType,
-                                      _BatchOperationReset'postResetOperations :: !(Data.Vector.Vector Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation),
-                                      _BatchOperationReset'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationReset where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationReset "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'identity
-           (\ x__ y__ -> x__ {_BatchOperationReset'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationReset "options" Proto.Temporal.Api.Common.V1.Message.ResetOptions where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'options
-           (\ x__ y__ -> x__ {_BatchOperationReset'options = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationReset "maybe'options" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.ResetOptions) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'options
-           (\ x__ y__ -> x__ {_BatchOperationReset'options = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationReset "resetType" Proto.Temporal.Api.Enums.V1.Reset.ResetType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'resetType
-           (\ x__ y__ -> x__ {_BatchOperationReset'resetType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationReset "resetReapplyType" Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'resetReapplyType
-           (\ x__ y__ -> x__ {_BatchOperationReset'resetReapplyType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationReset "postResetOperations" [Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'postResetOperations
-           (\ x__ y__
-              -> x__ {_BatchOperationReset'postResetOperations = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField BatchOperationReset "vec'postResetOperations" (Data.Vector.Vector Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationReset'postResetOperations
-           (\ x__ y__
-              -> x__ {_BatchOperationReset'postResetOperations = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationReset where
-  messageName _
-    = Data.Text.pack "temporal.api.batch.v1.BatchOperationReset"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC3BatchOperationReset\DC2\SUB\n\
-      \\bidentity\CAN\ETX \SOH(\tR\bidentity\DC2>\n\
-      \\aoptions\CAN\EOT \SOH(\v2$.temporal.api.common.v1.ResetOptionsR\aoptions\DC2C\n\
-      \\n\
-      \reset_type\CAN\SOH \SOH(\SO2 .temporal.api.enums.v1.ResetTypeR\tresetTypeB\STX\CAN\SOH\DC2Y\n\
-      \\DC2reset_reapply_type\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyTypeB\STX\CAN\SOH\DC2`\n\
-      \\NAKpost_reset_operations\CAN\ENQ \ETX(\v2,.temporal.api.workflow.v1.PostResetOperationR\DC3postResetOperations"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationReset
-        options__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "options"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.ResetOptions)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'options")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationReset
-        resetType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Reset.ResetType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetType")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationReset
-        resetReapplyType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_reapply_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetReapplyType")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationReset
-        postResetOperations__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "post_reset_operations"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"postResetOperations")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationReset
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 3, identity__field_descriptor),
-           (Data.ProtoLens.Tag 4, options__field_descriptor),
-           (Data.ProtoLens.Tag 1, resetType__field_descriptor),
-           (Data.ProtoLens.Tag 2, resetReapplyType__field_descriptor),
-           (Data.ProtoLens.Tag 5, postResetOperations__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationReset'_unknownFields
-        (\ x__ y__ -> x__ {_BatchOperationReset'_unknownFields = y__})
-  defMessage
-    = BatchOperationReset'_constructor
-        {_BatchOperationReset'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationReset'options = Prelude.Nothing,
-         _BatchOperationReset'resetType = Data.ProtoLens.fieldDefault,
-         _BatchOperationReset'resetReapplyType = Data.ProtoLens.fieldDefault,
-         _BatchOperationReset'postResetOperations = Data.Vector.Generic.empty,
-         _BatchOperationReset'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationReset
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Workflow.V1.Message.PostResetOperation
-             -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationReset
-        loop x mutable'postResetOperations
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'postResetOperations <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                      (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                         mutable'postResetOperations)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'postResetOperations")
-                              frozen'postResetOperations x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                                  mutable'postResetOperations
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "options"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"options") y x)
-                                  mutable'postResetOperations
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "reset_type"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"resetType") y x)
-                                  mutable'postResetOperations
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "reset_reapply_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"resetReapplyType") y x)
-                                  mutable'postResetOperations
-                        42
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "post_reset_operations"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'postResetOperations y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'postResetOperations
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'postResetOperations <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                               Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'postResetOperations)
-          "BatchOperationReset"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'options") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"resetType") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                            ((Prelude..)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                               Prelude.fromEnum _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"resetReapplyType") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                               ((Prelude..)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                                  Prelude.fromEnum _v))
-                      ((Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                            (\ _v
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                    ((Prelude..)
-                                       (\ bs
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                  (Prelude.fromIntegral
-                                                     (Data.ByteString.length bs)))
-                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                       Data.ProtoLens.encodeMessage _v))
-                            (Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"vec'postResetOperations") _x))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData BatchOperationReset where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationReset'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationReset'identity x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationReset'options x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationReset'resetType x__)
-                      (Control.DeepSeq.deepseq
-                         (_BatchOperationReset'resetReapplyType x__)
-                         (Control.DeepSeq.deepseq
-                            (_BatchOperationReset'postResetOperations x__) ())))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationResetActivities Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetAttempts' @:: Lens' BatchOperationResetActivities Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetHeartbeat' @:: Lens' BatchOperationResetActivities Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.keepPaused' @:: Lens' BatchOperationResetActivities Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.jitter' @:: Lens' BatchOperationResetActivities Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'jitter' @:: Lens' BatchOperationResetActivities (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.restoreOriginalOptions' @:: Lens' BatchOperationResetActivities Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'activity' @:: Lens' BatchOperationResetActivities (Prelude.Maybe BatchOperationResetActivities'Activity)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'type'' @:: Lens' BatchOperationResetActivities (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.type'' @:: Lens' BatchOperationResetActivities Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'matchAll' @:: Lens' BatchOperationResetActivities (Prelude.Maybe Prelude.Bool)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.matchAll' @:: Lens' BatchOperationResetActivities Prelude.Bool@ -}
-data BatchOperationResetActivities
-  = BatchOperationResetActivities'_constructor {_BatchOperationResetActivities'identity :: !Data.Text.Text,
-                                                _BatchOperationResetActivities'resetAttempts :: !Prelude.Bool,
-                                                _BatchOperationResetActivities'resetHeartbeat :: !Prelude.Bool,
-                                                _BatchOperationResetActivities'keepPaused :: !Prelude.Bool,
-                                                _BatchOperationResetActivities'jitter :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                                _BatchOperationResetActivities'restoreOriginalOptions :: !Prelude.Bool,
-                                                _BatchOperationResetActivities'activity :: !(Prelude.Maybe BatchOperationResetActivities'Activity),
-                                                _BatchOperationResetActivities'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationResetActivities where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-data BatchOperationResetActivities'Activity
-  = BatchOperationResetActivities'Type !Data.Text.Text |
-    BatchOperationResetActivities'MatchAll !Prelude.Bool
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'identity
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "resetAttempts" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'resetAttempts
-           (\ x__ y__
-              -> x__ {_BatchOperationResetActivities'resetAttempts = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "resetHeartbeat" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'resetHeartbeat
-           (\ x__ y__
-              -> x__ {_BatchOperationResetActivities'resetHeartbeat = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "keepPaused" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'keepPaused
-           (\ x__ y__
-              -> x__ {_BatchOperationResetActivities'keepPaused = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "jitter" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'jitter
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'jitter = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "maybe'jitter" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'jitter
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'jitter = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "restoreOriginalOptions" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'restoreOriginalOptions
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationResetActivities'restoreOriginalOptions = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "maybe'activity" (Prelude.Maybe BatchOperationResetActivities'Activity) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'activity
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'activity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "maybe'type'" (Prelude.Maybe Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'activity
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'activity = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationResetActivities'Type x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap BatchOperationResetActivities'Type y__))
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "type'" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'activity
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'activity = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationResetActivities'Type x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap BatchOperationResetActivities'Type y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "maybe'matchAll" (Prelude.Maybe Prelude.Bool) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'activity
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'activity = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationResetActivities'MatchAll x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__
-              -> Prelude.fmap BatchOperationResetActivities'MatchAll y__))
-instance Data.ProtoLens.Field.HasField BatchOperationResetActivities "matchAll" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationResetActivities'activity
-           (\ x__ y__ -> x__ {_BatchOperationResetActivities'activity = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationResetActivities'MatchAll x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__
-                 -> Prelude.fmap BatchOperationResetActivities'MatchAll y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Message BatchOperationResetActivities where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.batch.v1.BatchOperationResetActivities"
-  packedMessageDescriptor _
-    = "\n\
-      \\GSBatchOperationResetActivities\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DC4\n\
-      \\EOTtype\CAN\STX \SOH(\tH\NULR\EOTtype\DC2\GS\n\
-      \\tmatch_all\CAN\ETX \SOH(\bH\NULR\bmatchAll\DC2%\n\
-      \\SOreset_attempts\CAN\EOT \SOH(\bR\rresetAttempts\DC2'\n\
-      \\SIreset_heartbeat\CAN\ENQ \SOH(\bR\SOresetHeartbeat\DC2\US\n\
-      \\vkeep_paused\CAN\ACK \SOH(\bR\n\
-      \keepPaused\DC21\n\
-      \\ACKjitter\CAN\a \SOH(\v2\EM.google.protobuf.DurationR\ACKjitter\DC28\n\
-      \\CANrestore_original_options\CAN\b \SOH(\bR\SYNrestoreOriginalOptionsB\n\
-      \\n\
-      \\bactivity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        resetAttempts__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_attempts"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetAttempts")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        resetHeartbeat__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_heartbeat"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetHeartbeat")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        keepPaused__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "keep_paused"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"keepPaused")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        jitter__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "jitter"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'jitter")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        restoreOriginalOptions__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "restore_original_options"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"restoreOriginalOptions")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        type'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'type'")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-        matchAll__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "match_all"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'matchAll")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationResetActivities
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor),
-           (Data.ProtoLens.Tag 4, resetAttempts__field_descriptor),
-           (Data.ProtoLens.Tag 5, resetHeartbeat__field_descriptor),
-           (Data.ProtoLens.Tag 6, keepPaused__field_descriptor),
-           (Data.ProtoLens.Tag 7, jitter__field_descriptor),
-           (Data.ProtoLens.Tag 8, restoreOriginalOptions__field_descriptor),
-           (Data.ProtoLens.Tag 2, type'__field_descriptor),
-           (Data.ProtoLens.Tag 3, matchAll__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationResetActivities'_unknownFields
-        (\ x__ y__
-           -> x__ {_BatchOperationResetActivities'_unknownFields = y__})
-  defMessage
-    = BatchOperationResetActivities'_constructor
-        {_BatchOperationResetActivities'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationResetActivities'resetAttempts = Data.ProtoLens.fieldDefault,
-         _BatchOperationResetActivities'resetHeartbeat = Data.ProtoLens.fieldDefault,
-         _BatchOperationResetActivities'keepPaused = Data.ProtoLens.fieldDefault,
-         _BatchOperationResetActivities'jitter = Prelude.Nothing,
-         _BatchOperationResetActivities'restoreOriginalOptions = Data.ProtoLens.fieldDefault,
-         _BatchOperationResetActivities'activity = Prelude.Nothing,
-         _BatchOperationResetActivities'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationResetActivities
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationResetActivities
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "reset_attempts"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"resetAttempts") y x)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "reset_heartbeat"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"resetHeartbeat") y x)
-                        48
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "keep_paused"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"keepPaused") y x)
-                        58
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "jitter"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"jitter") y x)
-                        64
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "restore_original_options"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"restoreOriginalOptions") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "type"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"type'") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "match_all"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"matchAll") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationResetActivities"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"resetAttempts") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"resetHeartbeat") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                               _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"keepPaused") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (\ b -> if b then 1 else 0) _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'jitter") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just _v)
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage _v))
-                         ((Data.Monoid.<>)
-                            (let
-                               _v
-                                 = Lens.Family2.view
-                                     (Data.ProtoLens.Field.field @"restoreOriginalOptions") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 64)
-                                     ((Prelude..)
-                                        Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (\ b -> if b then 1 else 0) _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'activity") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just (BatchOperationResetActivities'Type v))
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.Text.Encoding.encodeUtf8 v)
-                                  (Prelude.Just (BatchOperationResetActivities'MatchAll v))
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                                         ((Prelude..)
-                                            Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (\ b -> if b then 1 else 0) v))
-                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
-instance Control.DeepSeq.NFData BatchOperationResetActivities where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationResetActivities'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationResetActivities'identity x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationResetActivities'resetAttempts x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationResetActivities'resetHeartbeat x__)
-                      (Control.DeepSeq.deepseq
-                         (_BatchOperationResetActivities'keepPaused x__)
-                         (Control.DeepSeq.deepseq
-                            (_BatchOperationResetActivities'jitter x__)
-                            (Control.DeepSeq.deepseq
-                               (_BatchOperationResetActivities'restoreOriginalOptions x__)
-                               (Control.DeepSeq.deepseq
-                                  (_BatchOperationResetActivities'activity x__) ())))))))
-instance Control.DeepSeq.NFData BatchOperationResetActivities'Activity where
-  rnf (BatchOperationResetActivities'Type x__)
-    = Control.DeepSeq.rnf x__
-  rnf (BatchOperationResetActivities'MatchAll x__)
-    = Control.DeepSeq.rnf x__
-_BatchOperationResetActivities'Type ::
-  Data.ProtoLens.Prism.Prism' BatchOperationResetActivities'Activity Data.Text.Text
-_BatchOperationResetActivities'Type
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationResetActivities'Type
-      (\ p__
-         -> case p__ of
-              (BatchOperationResetActivities'Type p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_BatchOperationResetActivities'MatchAll ::
-  Data.ProtoLens.Prism.Prism' BatchOperationResetActivities'Activity Prelude.Bool
-_BatchOperationResetActivities'MatchAll
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationResetActivities'MatchAll
-      (\ p__
-         -> case p__ of
-              (BatchOperationResetActivities'MatchAll p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.signal' @:: Lens' BatchOperationSignal Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.input' @:: Lens' BatchOperationSignal Proto.Temporal.Api.Common.V1.Message.Payloads@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'input' @:: Lens' BatchOperationSignal (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.header' @:: Lens' BatchOperationSignal Proto.Temporal.Api.Common.V1.Message.Header@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'header' @:: Lens' BatchOperationSignal (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationSignal Data.Text.Text@ -}
-data BatchOperationSignal
-  = BatchOperationSignal'_constructor {_BatchOperationSignal'signal :: !Data.Text.Text,
-                                       _BatchOperationSignal'input :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
-                                       _BatchOperationSignal'header :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header),
-                                       _BatchOperationSignal'identity :: !Data.Text.Text,
-                                       _BatchOperationSignal'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationSignal where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationSignal "signal" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationSignal'signal
-           (\ x__ y__ -> x__ {_BatchOperationSignal'signal = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationSignal "input" Proto.Temporal.Api.Common.V1.Message.Payloads where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationSignal'input
-           (\ x__ y__ -> x__ {_BatchOperationSignal'input = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationSignal "maybe'input" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationSignal'input
-           (\ x__ y__ -> x__ {_BatchOperationSignal'input = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationSignal "header" Proto.Temporal.Api.Common.V1.Message.Header where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationSignal'header
-           (\ x__ y__ -> x__ {_BatchOperationSignal'header = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationSignal "maybe'header" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationSignal'header
-           (\ x__ y__ -> x__ {_BatchOperationSignal'header = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationSignal "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationSignal'identity
-           (\ x__ y__ -> x__ {_BatchOperationSignal'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationSignal where
-  messageName _
-    = Data.Text.pack "temporal.api.batch.v1.BatchOperationSignal"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC4BatchOperationSignal\DC2\SYN\n\
-      \\ACKsignal\CAN\SOH \SOH(\tR\ACKsignal\DC26\n\
-      \\ENQinput\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC26\n\
-      \\ACKheader\CAN\ETX \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC2\SUB\n\
-      \\bidentity\CAN\EOT \SOH(\tR\bidentity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        signal__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "signal"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"signal")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationSignal
-        input__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "input"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'input")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationSignal
-        header__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "header"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Header)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'header")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationSignal
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationSignal
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, signal__field_descriptor),
-           (Data.ProtoLens.Tag 2, input__field_descriptor),
-           (Data.ProtoLens.Tag 3, header__field_descriptor),
-           (Data.ProtoLens.Tag 4, identity__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationSignal'_unknownFields
-        (\ x__ y__ -> x__ {_BatchOperationSignal'_unknownFields = y__})
-  defMessage
-    = BatchOperationSignal'_constructor
-        {_BatchOperationSignal'signal = Data.ProtoLens.fieldDefault,
-         _BatchOperationSignal'input = Prelude.Nothing,
-         _BatchOperationSignal'header = Prelude.Nothing,
-         _BatchOperationSignal'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationSignal'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationSignal
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationSignal
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "signal"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"signal") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "input"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"input") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "header"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"header") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationSignal"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"signal") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'input") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'header") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData BatchOperationSignal where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationSignal'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationSignal'signal x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationSignal'input x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationSignal'header x__)
-                      (Control.DeepSeq.deepseq
-                         (_BatchOperationSignal'identity x__) ()))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.details' @:: Lens' BatchOperationTermination Proto.Temporal.Api.Common.V1.Message.Payloads@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'details' @:: Lens' BatchOperationTermination (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationTermination Data.Text.Text@ -}
-data BatchOperationTermination
-  = BatchOperationTermination'_constructor {_BatchOperationTermination'details :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
-                                            _BatchOperationTermination'identity :: !Data.Text.Text,
-                                            _BatchOperationTermination'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationTermination where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationTermination "details" Proto.Temporal.Api.Common.V1.Message.Payloads where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTermination'details
-           (\ x__ y__ -> x__ {_BatchOperationTermination'details = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationTermination "maybe'details" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTermination'details
-           (\ x__ y__ -> x__ {_BatchOperationTermination'details = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationTermination "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTermination'identity
-           (\ x__ y__ -> x__ {_BatchOperationTermination'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationTermination where
-  messageName _
-    = Data.Text.pack "temporal.api.batch.v1.BatchOperationTermination"
-  packedMessageDescriptor _
-    = "\n\
-      \\EMBatchOperationTermination\DC2:\n\
-      \\adetails\CAN\SOH \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\DC2\SUB\n\
-      \\bidentity\CAN\STX \SOH(\tR\bidentity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        details__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "details"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'details")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationTermination
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationTermination
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, details__field_descriptor),
-           (Data.ProtoLens.Tag 2, identity__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationTermination'_unknownFields
-        (\ x__ y__
-           -> x__ {_BatchOperationTermination'_unknownFields = y__})
-  defMessage
-    = BatchOperationTermination'_constructor
-        {_BatchOperationTermination'details = Prelude.Nothing,
-         _BatchOperationTermination'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationTermination'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationTermination
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationTermination
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "details"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"details") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchOperationTermination"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'details") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData BatchOperationTermination where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationTermination'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationTermination'details x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationTermination'identity x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationTriggerWorkflowRule Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'rule' @:: Lens' BatchOperationTriggerWorkflowRule (Prelude.Maybe BatchOperationTriggerWorkflowRule'Rule)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'id' @:: Lens' BatchOperationTriggerWorkflowRule (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.id' @:: Lens' BatchOperationTriggerWorkflowRule Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'spec' @:: Lens' BatchOperationTriggerWorkflowRule (Prelude.Maybe Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.spec' @:: Lens' BatchOperationTriggerWorkflowRule Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec@ -}
-data BatchOperationTriggerWorkflowRule
-  = BatchOperationTriggerWorkflowRule'_constructor {_BatchOperationTriggerWorkflowRule'identity :: !Data.Text.Text,
-                                                    _BatchOperationTriggerWorkflowRule'rule :: !(Prelude.Maybe BatchOperationTriggerWorkflowRule'Rule),
-                                                    _BatchOperationTriggerWorkflowRule'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationTriggerWorkflowRule where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-data BatchOperationTriggerWorkflowRule'Rule
-  = BatchOperationTriggerWorkflowRule'Id !Data.Text.Text |
-    BatchOperationTriggerWorkflowRule'Spec !Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField BatchOperationTriggerWorkflowRule "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTriggerWorkflowRule'identity
-           (\ x__ y__
-              -> x__ {_BatchOperationTriggerWorkflowRule'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationTriggerWorkflowRule "maybe'rule" (Prelude.Maybe BatchOperationTriggerWorkflowRule'Rule) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTriggerWorkflowRule'rule
-           (\ x__ y__ -> x__ {_BatchOperationTriggerWorkflowRule'rule = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationTriggerWorkflowRule "maybe'id" (Prelude.Maybe Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTriggerWorkflowRule'rule
-           (\ x__ y__ -> x__ {_BatchOperationTriggerWorkflowRule'rule = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationTriggerWorkflowRule'Id x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap BatchOperationTriggerWorkflowRule'Id y__))
-instance Data.ProtoLens.Field.HasField BatchOperationTriggerWorkflowRule "id" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTriggerWorkflowRule'rule
-           (\ x__ y__ -> x__ {_BatchOperationTriggerWorkflowRule'rule = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationTriggerWorkflowRule'Id x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap BatchOperationTriggerWorkflowRule'Id y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Field.HasField BatchOperationTriggerWorkflowRule "maybe'spec" (Prelude.Maybe Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTriggerWorkflowRule'rule
-           (\ x__ y__ -> x__ {_BatchOperationTriggerWorkflowRule'rule = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationTriggerWorkflowRule'Spec x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__
-              -> Prelude.fmap BatchOperationTriggerWorkflowRule'Spec y__))
-instance Data.ProtoLens.Field.HasField BatchOperationTriggerWorkflowRule "spec" Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationTriggerWorkflowRule'rule
-           (\ x__ y__ -> x__ {_BatchOperationTriggerWorkflowRule'rule = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationTriggerWorkflowRule'Spec x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__
-                 -> Prelude.fmap BatchOperationTriggerWorkflowRule'Spec y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message BatchOperationTriggerWorkflowRule where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.batch.v1.BatchOperationTriggerWorkflowRule"
-  packedMessageDescriptor _
-    = "\n\
-      \!BatchOperationTriggerWorkflowRule\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DLE\n\
-      \\STXid\CAN\STX \SOH(\tH\NULR\STXid\DC2=\n\
-      \\EOTspec\CAN\ETX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecH\NULR\EOTspecB\ACK\n\
-      \\EOTrule"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationTriggerWorkflowRule
-        id__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'id")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationTriggerWorkflowRule
-        spec__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "spec"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'spec")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationTriggerWorkflowRule
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor),
-           (Data.ProtoLens.Tag 2, id__field_descriptor),
-           (Data.ProtoLens.Tag 3, spec__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationTriggerWorkflowRule'_unknownFields
-        (\ x__ y__
-           -> x__ {_BatchOperationTriggerWorkflowRule'_unknownFields = y__})
-  defMessage
-    = BatchOperationTriggerWorkflowRule'_constructor
-        {_BatchOperationTriggerWorkflowRule'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationTriggerWorkflowRule'rule = Prelude.Nothing,
-         _BatchOperationTriggerWorkflowRule'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationTriggerWorkflowRule
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationTriggerWorkflowRule
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "spec"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage)
-          "BatchOperationTriggerWorkflowRule"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'rule") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just (BatchOperationTriggerWorkflowRule'Id v))
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.Text.Encoding.encodeUtf8 v)
-                   (Prelude.Just (BatchOperationTriggerWorkflowRule'Spec v))
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData BatchOperationTriggerWorkflowRule where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationTriggerWorkflowRule'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationTriggerWorkflowRule'identity x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationTriggerWorkflowRule'rule x__) ()))
-instance Control.DeepSeq.NFData BatchOperationTriggerWorkflowRule'Rule where
-  rnf (BatchOperationTriggerWorkflowRule'Id x__)
-    = Control.DeepSeq.rnf x__
-  rnf (BatchOperationTriggerWorkflowRule'Spec x__)
-    = Control.DeepSeq.rnf x__
-_BatchOperationTriggerWorkflowRule'Id ::
-  Data.ProtoLens.Prism.Prism' BatchOperationTriggerWorkflowRule'Rule Data.Text.Text
-_BatchOperationTriggerWorkflowRule'Id
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationTriggerWorkflowRule'Id
-      (\ p__
-         -> case p__ of
-              (BatchOperationTriggerWorkflowRule'Id p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_BatchOperationTriggerWorkflowRule'Spec ::
-  Data.ProtoLens.Prism.Prism' BatchOperationTriggerWorkflowRule'Rule Proto.Temporal.Api.Rules.V1.Message.WorkflowRuleSpec
-_BatchOperationTriggerWorkflowRule'Spec
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationTriggerWorkflowRule'Spec
-      (\ p__
-         -> case p__ of
-              (BatchOperationTriggerWorkflowRule'Spec p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationUnpauseActivities Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetAttempts' @:: Lens' BatchOperationUnpauseActivities Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.resetHeartbeat' @:: Lens' BatchOperationUnpauseActivities Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.jitter' @:: Lens' BatchOperationUnpauseActivities Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'jitter' @:: Lens' BatchOperationUnpauseActivities (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'activity' @:: Lens' BatchOperationUnpauseActivities (Prelude.Maybe BatchOperationUnpauseActivities'Activity)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'type'' @:: Lens' BatchOperationUnpauseActivities (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.type'' @:: Lens' BatchOperationUnpauseActivities Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'matchAll' @:: Lens' BatchOperationUnpauseActivities (Prelude.Maybe Prelude.Bool)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.matchAll' @:: Lens' BatchOperationUnpauseActivities Prelude.Bool@ -}
-data BatchOperationUnpauseActivities
-  = BatchOperationUnpauseActivities'_constructor {_BatchOperationUnpauseActivities'identity :: !Data.Text.Text,
-                                                  _BatchOperationUnpauseActivities'resetAttempts :: !Prelude.Bool,
-                                                  _BatchOperationUnpauseActivities'resetHeartbeat :: !Prelude.Bool,
-                                                  _BatchOperationUnpauseActivities'jitter :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                                  _BatchOperationUnpauseActivities'activity :: !(Prelude.Maybe BatchOperationUnpauseActivities'Activity),
-                                                  _BatchOperationUnpauseActivities'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationUnpauseActivities where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.batch.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Batch.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.FieldMask as PB_FieldMask
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+import qualified Proto.Temporal.Api.Activity.V1.Message as TE_Activity_V1_Message
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+import qualified Proto.Temporal.Api.Enums.V1.BatchOperation as TE_Enums_V1_BatchOperation
+import qualified Proto.Temporal.Api.Enums.V1.Reset as TE_Enums_V1_Reset
+import qualified Proto.Temporal.Api.Rules.V1.Message as TE_Rules_V1_Message
+import qualified Proto.Temporal.Api.Workflow.V1.Message as TE_Workflow_V1_Message
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x62\x61\x74\x63\x68\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x62\x61\x74\x63\x68\x2e\x76\x31\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x20\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x66\x69\x65\x6c\x64\x5f\x6d\x61\x73\x6b\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x2b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x62\x61\x74\x63\x68\x5f\x6f\x70\x65\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x21\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x72\x65\x73\x65\x74\x2e\x70\x72\x6f\x74\x6f\x1a\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x72\x75\x6c\x65\x73\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x22\xbc\x01\x0a\x12\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x49\x6e\x66\x6f\x12\x0e\x0a\x06\x6a\x6f\x62\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x12\x38\x0a\x05\x73\x74\x61\x74\x65\x18\x02\x20\x01\x28\x0b\x32\x29\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x53\x74\x61\x74\x65\x12\x2d\x0a\x0a\x73\x74\x61\x72\x74\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x2d\x0a\x0a\x63\x6c\x6f\x73\x65\x5f\x74\x69\x6d\x65\x18\x04\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\x5f\x0a\x19\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x54\x65\x72\x6d\x69\x6e\x61\x74\x69\x6f\x6e\x12\x30\x0a\x07\x64\x65\x74\x61\x69\x6c\x73\x18\x01\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x73\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x02\x20\x01\x28\x09\x22\x97\x01\x0a\x14\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x53\x69\x67\x6e\x61\x6c\x12\x0e\x0a\x06\x73\x69\x67\x6e\x61\x6c\x18\x01\x20\x01\x28\x09\x12\x2e\x0a\x05\x69\x6e\x70\x75\x74\x18\x02\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x73\x12\x2d\x0a\x06\x68\x65\x61\x64\x65\x72\x18\x03\x20\x01\x28\x0b\x32\x1d\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x48\x65\x61\x64\x65\x72\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x04\x20\x01\x28\x09\x22\x2e\x0a\x1a\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x22\x2a\x0a\x16\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x44\x65\x6c\x65\x74\x69\x6f\x6e\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x22\xa2\x02\x0a\x13\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x52\x65\x73\x65\x74\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x03\x20\x01\x28\x09\x12\x34\x0a\x07\x6f\x70\x74\x69\x6f\x6e\x73\x18\x04\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x52\x65\x73\x65\x74\x4f\x70\x74\x69\x6f\x6e\x73\x12\x33\x0a\x0a\x72\x65\x73\x65\x74\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x52\x65\x73\x65\x74\x54\x79\x70\x65\x12\x42\x0a\x12\x72\x65\x73\x65\x74\x5f\x72\x65\x61\x70\x70\x6c\x79\x5f\x74\x79\x70\x65\x18\x02\x20\x01\x28\x0b\x32\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x52\x65\x73\x65\x74\x52\x65\x61\x70\x70\x6c\x79\x54\x79\x70\x65\x12\x4a\x0a\x15\x70\x6f\x73\x74\x5f\x72\x65\x73\x65\x74\x5f\x6f\x70\x65\x72\x61\x74\x69\x6f\x6e\x73\x18\x05\x20\x03\x28\x0b\x32\x2b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x2e\x76\x31\x2e\x50\x6f\x73\x74\x52\x65\x73\x65\x74\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x22\xc7\x01\x0a\x2c\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x55\x70\x64\x61\x74\x65\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x4f\x70\x74\x69\x6f\x6e\x73\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x12\x55\x0a\x1a\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x65\x78\x65\x63\x75\x74\x69\x6f\x6e\x5f\x6f\x70\x74\x69\x6f\x6e\x73\x18\x02\x20\x01\x28\x0b\x32\x31\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x4f\x70\x74\x69\x6f\x6e\x73\x12\x2e\x0a\x0b\x75\x70\x64\x61\x74\x65\x5f\x6d\x61\x73\x6b\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x46\x69\x65\x6c\x64\x4d\x61\x73\x6b\x22\xbb\x01\x0a\x1f\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x55\x6e\x70\x61\x75\x73\x65\x41\x63\x74\x69\x76\x69\x74\x69\x65\x73\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x12\x16\x0a\x0e\x72\x65\x73\x65\x74\x5f\x61\x74\x74\x65\x6d\x70\x74\x73\x18\x04\x20\x01\x28\x08\x12\x17\x0a\x0f\x72\x65\x73\x65\x74\x5f\x68\x65\x61\x72\x74\x62\x65\x61\x74\x18\x05\x20\x01\x28\x08\x12\x28\x0a\x06\x6a\x69\x74\x74\x65\x72\x18\x06\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x0c\x0a\x04\x74\x79\x70\x65\x18\x02\x20\x01\x28\x09\x12\x11\x0a\x09\x6d\x61\x74\x63\x68\x5f\x61\x6c\x6c\x18\x03\x20\x01\x28\x08\x42\x0a\x0a\x08\x61\x63\x74\x69\x76\x69\x74\x79\x22\x7f\x0a\x21\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x54\x72\x69\x67\x67\x65\x72\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x12\x0a\x0a\x02\x69\x64\x18\x02\x20\x01\x28\x09\x12\x34\x0a\x04\x73\x70\x65\x63\x18\x03\x20\x01\x28\x0b\x32\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x72\x75\x6c\x65\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x53\x70\x65\x63\x42\x06\x0a\x04\x72\x75\x6c\x65\x22\xf0\x01\x0a\x1d\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x52\x65\x73\x65\x74\x41\x63\x74\x69\x76\x69\x74\x69\x65\x73\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x12\x16\x0a\x0e\x72\x65\x73\x65\x74\x5f\x61\x74\x74\x65\x6d\x70\x74\x73\x18\x04\x20\x01\x28\x08\x12\x17\x0a\x0f\x72\x65\x73\x65\x74\x5f\x68\x65\x61\x72\x74\x62\x65\x61\x74\x18\x05\x20\x01\x28\x08\x12\x13\x0a\x0b\x6b\x65\x65\x70\x5f\x70\x61\x75\x73\x65\x64\x18\x06\x20\x01\x28\x08\x12\x28\x0a\x06\x6a\x69\x74\x74\x65\x72\x18\x07\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x20\x0a\x18\x72\x65\x73\x74\x6f\x72\x65\x5f\x6f\x72\x69\x67\x69\x6e\x61\x6c\x5f\x6f\x70\x74\x69\x6f\x6e\x73\x18\x08\x20\x01\x28\x08\x12\x0c\x0a\x04\x74\x79\x70\x65\x18\x02\x20\x01\x28\x09\x12\x11\x0a\x09\x6d\x61\x74\x63\x68\x5f\x61\x6c\x6c\x18\x03\x20\x01\x28\x08\x42\x0a\x0a\x08\x61\x63\x74\x69\x76\x69\x74\x79\x22\xf2\x01\x0a\x23\x42\x61\x74\x63\x68\x4f\x70\x65\x72\x61\x74\x69\x6f\x6e\x55\x70\x64\x61\x74\x65\x41\x63\x74\x69\x76\x69\x74\x79\x4f\x70\x74\x69\x6f\x6e\x73\x12\x10\x0a\x08\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x01\x20\x01\x28\x09\x12\x42\x0a\x10\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x6f\x70\x74\x69\x6f\x6e\x73\x18\x04\x20\x01\x28\x0b\x32\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x2e\x76\x31\x2e\x41\x63\x74\x69\x76\x69\x74\x79\x4f\x70\x74\x69\x6f\x6e\x73\x12\x2e\x0a\x0b\x75\x70\x64\x61\x74\x65\x5f\x6d\x61\x73\x6b\x18\x05\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x46\x69\x65\x6c\x64\x4d\x61\x73\x6b\x12\x18\x0a\x10\x72\x65\x73\x74\x6f\x72\x65\x5f\x6f\x72\x69\x67\x69\x6e\x61\x6c\x18\x06\x20\x01\x28\x08\x12\x0c\x0a\x04\x74\x79\x70\x65\x18\x02\x20\x01\x28\x09\x12\x11\x0a\x09\x6d\x61\x74\x63\x68\x5f\x61\x6c\x6c\x18\x03\x20\x01\x28\x08\x42\x0a\x0a\x08\x61\x63\x74\x69\x76\x69\x74\x79\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data BatchOperationInfo = BatchOperationInfo
+  { jobId :: !(Maybe Text)
+  , state :: !(Maybe TE_Enums_V1_BatchOperation.BatchOperationState)
+  , startTime :: !(Maybe PB_Timestamp.Timestamp)
+  , closeTime :: !(Maybe PB_Timestamp.Timestamp)
+  , batchOperationInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationInfo :: BatchOperationInfo
+defaultBatchOperationInfo = BatchOperationInfo
+  { jobId = Nothing
+  , state = Nothing
+  , startTime = Nothing
+  , closeTime = Nothing
+  , batchOperationInfoUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.jobId)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.state)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.startTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.closeTime)
+    <> encodeUnknownFields msg.batchOperationInfoUnknownFields
+
+instance MessageSize BatchOperationInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.jobId)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.state)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.startTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.closeTime)
+    + unknownFieldsSize msg.batchOperationInfoUnknownFields
+
+instance MessageDecode BatchOperationInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (BatchOperationInfo {jobId = acc_0, state = acc_1, startTime = acc_2, closeTime = acc_3, batchOperationInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationInfo where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationInfo"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "job_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationInfo) -> m.jobId
+        , fdSet = \v (m :: BatchOperationInfo) -> (m { jobId = v } :: BatchOperationInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "state"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.BatchOperationState"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationInfo) -> m.state
+        , fdSet = \v (m :: BatchOperationInfo) -> (m { state = v } :: BatchOperationInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "start_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationInfo) -> m.startTime
+        , fdSet = \v (m :: BatchOperationInfo) -> (m { startTime = v } :: BatchOperationInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "close_time"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationInfo) -> m.closeTime
+        , fdSet = \v (m :: BatchOperationInfo) -> (m { closeTime = v } :: BatchOperationInfo)
+        })
+    ]
+
+instance IsMessage BatchOperationInfo
+
+instance Aeson.ToJSON BatchOperationInfo where
+  toJSON msg = jsonObject
+      [ "jobId" .=: msg.jobId
+      , "state" .=: msg.state
+      , "startTime" .=: msg.startTime
+      , "closeTime" .=: msg.closeTime
+      ]
+
+instance Aeson.FromJSON BatchOperationInfo where
+  parseJSON = Aeson.withObject "BatchOperationInfo" $ \obj -> do
+    fld_jobId <- parseFieldMaybe obj "jobId"
+    fld_state <- parseFieldMaybe obj "state"
+    fld_startTime <- parseFieldMaybe obj "startTime"
+    fld_closeTime <- parseFieldMaybe obj "closeTime"
+    pure (defaultBatchOperationInfo
+      { jobId = maybe (defaultBatchOperationInfo.jobId) Prelude.id fld_jobId
+      , state = maybe (defaultBatchOperationInfo.state) Prelude.id fld_state
+      , startTime = maybe (defaultBatchOperationInfo.startTime) Prelude.id fld_startTime
+      , closeTime = maybe (defaultBatchOperationInfo.closeTime) Prelude.id fld_closeTime
+      , batchOperationInfoUnknownFields = []
+      } :: BatchOperationInfo)
+
+instance Hashable BatchOperationInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.jobId) msg.state) msg.startTime) msg.closeTime
+
+instance Proto.Extension.HasExtensions BatchOperationInfo where
+  messageUnknownFields msg = msg.batchOperationInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationInfoUnknownFields = ufs }
+
+instance Semigroup BatchOperationInfo where
+  a <> b = BatchOperationInfo
+    { jobId = case b.jobId of { Nothing -> a.jobId; x -> x }
+    , state = case b.state of { Nothing -> a.state; x -> x }
+    , startTime = case b.startTime of { Nothing -> a.startTime; x -> x }
+    , closeTime = case b.closeTime of { Nothing -> a.closeTime; x -> x }
+    , batchOperationInfoUnknownFields = a.batchOperationInfoUnknownFields <> b.batchOperationInfoUnknownFields
+    }
+
+instance Monoid BatchOperationInfo where
+  mempty = defaultBatchOperationInfo
+
+data BatchOperationTermination = BatchOperationTermination
+  { details :: !(Maybe TE_Common_V1_Message.Payloads)
+  , identity :: !(Maybe Text)
+  , batchOperationTerminationUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationTermination :: BatchOperationTermination
+defaultBatchOperationTermination = BatchOperationTermination
+  { details = Nothing
+  , identity = Nothing
+  , batchOperationTerminationUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationTermination where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.details)
+    <> (maybe mempty (\v -> archString 18 v) msg.identity)
+    <> encodeUnknownFields msg.batchOperationTerminationUnknownFields
+
+instance MessageSize BatchOperationTermination where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.details)
+    + (maybe 0 (\v -> archStringSize v) msg.identity)
+    + unknownFieldsSize msg.batchOperationTerminationUnknownFields
+
+instance MessageDecode BatchOperationTermination where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (BatchOperationTermination {details = acc_0, identity = acc_1, batchOperationTerminationUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationTermination where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationTermination"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationTermination
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "details"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payloads"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationTermination) -> m.details
+        , fdSet = \v (m :: BatchOperationTermination) -> (m { details = v } :: BatchOperationTermination)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationTermination) -> m.identity
+        , fdSet = \v (m :: BatchOperationTermination) -> (m { identity = v } :: BatchOperationTermination)
+        })
+    ]
+
+instance IsMessage BatchOperationTermination
+
+instance Aeson.ToJSON BatchOperationTermination where
+  toJSON msg = jsonObject
+      [ "details" .=: msg.details
+      , "identity" .=: msg.identity
+      ]
+
+instance Aeson.FromJSON BatchOperationTermination where
+  parseJSON = Aeson.withObject "BatchOperationTermination" $ \obj -> do
+    fld_details <- parseFieldMaybe obj "details"
+    fld_identity <- parseFieldMaybe obj "identity"
+    pure (defaultBatchOperationTermination
+      { details = maybe (defaultBatchOperationTermination.details) Prelude.id fld_details
+      , identity = maybe (defaultBatchOperationTermination.identity) Prelude.id fld_identity
+      , batchOperationTerminationUnknownFields = []
+      } :: BatchOperationTermination)
+
+instance Hashable BatchOperationTermination where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.details) msg.identity
+
+instance Proto.Extension.HasExtensions BatchOperationTermination where
+  messageUnknownFields msg = msg.batchOperationTerminationUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationTerminationUnknownFields = ufs }
+
+instance Semigroup BatchOperationTermination where
+  a <> b = BatchOperationTermination
+    { details = case b.details of { Nothing -> a.details; x -> x }
+    , identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , batchOperationTerminationUnknownFields = a.batchOperationTerminationUnknownFields <> b.batchOperationTerminationUnknownFields
+    }
+
+instance Monoid BatchOperationTermination where
+  mempty = defaultBatchOperationTermination
+
+data BatchOperationSignal = BatchOperationSignal
+  { signal :: !(Maybe Text)
+  , input :: !(Maybe TE_Common_V1_Message.Payloads)
+  , header :: !(Maybe TE_Common_V1_Message.Header)
+  , identity :: !(Maybe Text)
+  , batchOperationSignalUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationSignal :: BatchOperationSignal
+defaultBatchOperationSignal = BatchOperationSignal
+  { signal = Nothing
+  , input = Nothing
+  , header = Nothing
+  , identity = Nothing
+  , batchOperationSignalUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationSignal where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.signal)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.input)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.header)
+    <> (maybe mempty (\v -> archString 34 v) msg.identity)
+    <> encodeUnknownFields msg.batchOperationSignalUnknownFields
+
+instance MessageSize BatchOperationSignal where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.signal)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.input)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.header)
+    + (maybe 0 (\v -> archStringSize v) msg.identity)
+    + unknownFieldsSize msg.batchOperationSignalUnknownFields
+
+instance MessageDecode BatchOperationSignal where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (BatchOperationSignal {signal = acc_0, input = acc_1, header = acc_2, identity = acc_3, batchOperationSignalUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationSignal where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationSignal"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationSignal
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "signal"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationSignal) -> m.signal
+        , fdSet = \v (m :: BatchOperationSignal) -> (m { signal = v } :: BatchOperationSignal)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "input"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payloads"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationSignal) -> m.input
+        , fdSet = \v (m :: BatchOperationSignal) -> (m { input = v } :: BatchOperationSignal)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "header"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Header"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationSignal) -> m.header
+        , fdSet = \v (m :: BatchOperationSignal) -> (m { header = v } :: BatchOperationSignal)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationSignal) -> m.identity
+        , fdSet = \v (m :: BatchOperationSignal) -> (m { identity = v } :: BatchOperationSignal)
+        })
+    ]
+
+instance IsMessage BatchOperationSignal
+
+instance Aeson.ToJSON BatchOperationSignal where
+  toJSON msg = jsonObject
+      [ "signal" .=: msg.signal
+      , "input" .=: msg.input
+      , "header" .=: msg.header
+      , "identity" .=: msg.identity
+      ]
+
+instance Aeson.FromJSON BatchOperationSignal where
+  parseJSON = Aeson.withObject "BatchOperationSignal" $ \obj -> do
+    fld_signal <- parseFieldMaybe obj "signal"
+    fld_input <- parseFieldMaybe obj "input"
+    fld_header <- parseFieldMaybe obj "header"
+    fld_identity <- parseFieldMaybe obj "identity"
+    pure (defaultBatchOperationSignal
+      { signal = maybe (defaultBatchOperationSignal.signal) Prelude.id fld_signal
+      , input = maybe (defaultBatchOperationSignal.input) Prelude.id fld_input
+      , header = maybe (defaultBatchOperationSignal.header) Prelude.id fld_header
+      , identity = maybe (defaultBatchOperationSignal.identity) Prelude.id fld_identity
+      , batchOperationSignalUnknownFields = []
+      } :: BatchOperationSignal)
+
+instance Hashable BatchOperationSignal where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.signal) msg.input) msg.header) msg.identity
+
+instance Proto.Extension.HasExtensions BatchOperationSignal where
+  messageUnknownFields msg = msg.batchOperationSignalUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationSignalUnknownFields = ufs }
+
+instance Semigroup BatchOperationSignal where
+  a <> b = BatchOperationSignal
+    { signal = case b.signal of { Nothing -> a.signal; x -> x }
+    , input = case b.input of { Nothing -> a.input; x -> x }
+    , header = case b.header of { Nothing -> a.header; x -> x }
+    , identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , batchOperationSignalUnknownFields = a.batchOperationSignalUnknownFields <> b.batchOperationSignalUnknownFields
+    }
+
+instance Monoid BatchOperationSignal where
+  mempty = defaultBatchOperationSignal
+
+data BatchOperationCancellation = BatchOperationCancellation
+  { identity :: !(Maybe Text)
+  , batchOperationCancellationUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationCancellation :: BatchOperationCancellation
+defaultBatchOperationCancellation = BatchOperationCancellation
+  { identity = Nothing
+  , batchOperationCancellationUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationCancellation where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> encodeUnknownFields msg.batchOperationCancellationUnknownFields
+
+instance MessageSize BatchOperationCancellation where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + unknownFieldsSize msg.batchOperationCancellationUnknownFields
+
+instance MessageDecode BatchOperationCancellation where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (BatchOperationCancellation {identity = acc_0, batchOperationCancellationUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationCancellation where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationCancellation"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationCancellation
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationCancellation) -> m.identity
+        , fdSet = \v (m :: BatchOperationCancellation) -> (m { identity = v } :: BatchOperationCancellation)
+        })
+    ]
+
+instance IsMessage BatchOperationCancellation
+
+instance Aeson.ToJSON BatchOperationCancellation where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+
+      ]
+
+instance Aeson.FromJSON BatchOperationCancellation where
+  parseJSON = Aeson.withObject "BatchOperationCancellation" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    pure (defaultBatchOperationCancellation
+      { identity = maybe (defaultBatchOperationCancellation.identity) Prelude.id fld_identity
+      , batchOperationCancellationUnknownFields = []
+      } :: BatchOperationCancellation)
+
+instance Hashable BatchOperationCancellation where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.identity
+
+instance Proto.Extension.HasExtensions BatchOperationCancellation where
+  messageUnknownFields msg = msg.batchOperationCancellationUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationCancellationUnknownFields = ufs }
+
+instance Semigroup BatchOperationCancellation where
+  a <> b = BatchOperationCancellation
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , batchOperationCancellationUnknownFields = a.batchOperationCancellationUnknownFields <> b.batchOperationCancellationUnknownFields
+    }
+
+instance Monoid BatchOperationCancellation where
+  mempty = defaultBatchOperationCancellation
+
+data BatchOperationDeletion = BatchOperationDeletion
+  { identity :: !(Maybe Text)
+  , batchOperationDeletionUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationDeletion :: BatchOperationDeletion
+defaultBatchOperationDeletion = BatchOperationDeletion
+  { identity = Nothing
+  , batchOperationDeletionUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationDeletion where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> encodeUnknownFields msg.batchOperationDeletionUnknownFields
+
+instance MessageSize BatchOperationDeletion where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + unknownFieldsSize msg.batchOperationDeletionUnknownFields
+
+instance MessageDecode BatchOperationDeletion where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (BatchOperationDeletion {identity = acc_0, batchOperationDeletionUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationDeletion where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationDeletion"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationDeletion
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationDeletion) -> m.identity
+        , fdSet = \v (m :: BatchOperationDeletion) -> (m { identity = v } :: BatchOperationDeletion)
+        })
+    ]
+
+instance IsMessage BatchOperationDeletion
+
+instance Aeson.ToJSON BatchOperationDeletion where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+
+      ]
+
+instance Aeson.FromJSON BatchOperationDeletion where
+  parseJSON = Aeson.withObject "BatchOperationDeletion" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    pure (defaultBatchOperationDeletion
+      { identity = maybe (defaultBatchOperationDeletion.identity) Prelude.id fld_identity
+      , batchOperationDeletionUnknownFields = []
+      } :: BatchOperationDeletion)
+
+instance Hashable BatchOperationDeletion where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.identity
+
+instance Proto.Extension.HasExtensions BatchOperationDeletion where
+  messageUnknownFields msg = msg.batchOperationDeletionUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationDeletionUnknownFields = ufs }
+
+instance Semigroup BatchOperationDeletion where
+  a <> b = BatchOperationDeletion
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , batchOperationDeletionUnknownFields = a.batchOperationDeletionUnknownFields <> b.batchOperationDeletionUnknownFields
+    }
+
+instance Monoid BatchOperationDeletion where
+  mempty = defaultBatchOperationDeletion
+
+data BatchOperationReset = BatchOperationReset
+  { identity :: !(Maybe Text)
+  , options :: !(Maybe TE_Common_V1_Message.ResetOptions)
+  , resetType :: !(Maybe TE_Enums_V1_Reset.ResetType)
+  , resetReapplyType :: !(Maybe TE_Enums_V1_Reset.ResetReapplyType)
+  , postResetOperations :: !(V.Vector TE_Workflow_V1_Message.PostResetOperation)
+  , batchOperationResetUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationReset :: BatchOperationReset
+defaultBatchOperationReset = BatchOperationReset
+  { identity = Nothing
+  , options = Nothing
+  , resetType = Nothing
+  , resetReapplyType = Nothing
+  , postResetOperations = V.empty
+  , batchOperationResetUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationReset where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 26 v) msg.identity)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.options)
+    <> (maybe mempty (\v -> archVarint 8 (fromIntegral (fromEnum v))) msg.resetType)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.resetReapplyType)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 42 sz (buildMessage v)) mempty msg.postResetOperations
+    <> encodeUnknownFields msg.batchOperationResetUnknownFields
+
+instance MessageSize BatchOperationReset where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.options)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.resetType)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.resetReapplyType)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.postResetOperations)
+    + unknownFieldsSize msg.batchOperationResetUnknownFields
+
+instance MessageDecode BatchOperationReset where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing V.empty []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (BatchOperationReset {identity = acc_0, options = acc_1, resetType = acc_2, resetReapplyType = acc_3, postResetOperations = acc_4, batchOperationResetUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          3 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          1 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (acc_4 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationReset where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationReset"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationReset
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (3, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationReset) -> m.identity
+        , fdSet = \v (m :: BatchOperationReset) -> (m { identity = v } :: BatchOperationReset)
+        }), (4, SomeField FieldDescriptor
+        { fdName = "options"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.common.v1.ResetOptions"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationReset) -> m.options
+        , fdSet = \v (m :: BatchOperationReset) -> (m { options = v } :: BatchOperationReset)
+        })
+    , (1, SomeField FieldDescriptor
+        { fdName = "reset_type"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.ResetType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationReset) -> m.resetType
+        , fdSet = \v (m :: BatchOperationReset) -> (m { resetType = v } :: BatchOperationReset)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "reset_reapply_type"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.ResetReapplyType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationReset) -> m.resetReapplyType
+        , fdSet = \v (m :: BatchOperationReset) -> (m { resetReapplyType = v } :: BatchOperationReset)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "post_reset_operations"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "temporal.api.workflow.v1.PostResetOperation"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: BatchOperationReset) -> m.postResetOperations
+        , fdSet = \v (m :: BatchOperationReset) -> (m { postResetOperations = v } :: BatchOperationReset)
+        })
+    ]
+
+instance IsMessage BatchOperationReset
+
+instance Aeson.ToJSON BatchOperationReset where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+      , "options" .=: msg.options
+      , "resetType" .=: msg.resetType
+      , "resetReapplyType" .=: msg.resetReapplyType
+      , "postResetOperations" .=: msg.postResetOperations
+      ]
+
+instance Aeson.FromJSON BatchOperationReset where
+  parseJSON = Aeson.withObject "BatchOperationReset" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    fld_options <- parseFieldMaybe obj "options"
+    fld_resetType <- parseFieldMaybe obj "resetType"
+    fld_resetReapplyType <- parseFieldMaybe obj "resetReapplyType"
+    fld_postResetOperations <- parseFieldMaybe obj "postResetOperations"
+    pure (defaultBatchOperationReset
+      { identity = maybe (defaultBatchOperationReset.identity) Prelude.id fld_identity
+      , options = maybe (defaultBatchOperationReset.options) Prelude.id fld_options
+      , resetType = maybe (defaultBatchOperationReset.resetType) Prelude.id fld_resetType
+      , resetReapplyType = maybe (defaultBatchOperationReset.resetReapplyType) Prelude.id fld_resetReapplyType
+      , postResetOperations = maybe (defaultBatchOperationReset.postResetOperations) Prelude.id fld_postResetOperations
+      , batchOperationResetUnknownFields = []
+      } :: BatchOperationReset)
+
+instance Hashable BatchOperationReset where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.identity) msg.options) msg.resetType) msg.resetReapplyType) msg.postResetOperations
+
+instance Proto.Extension.HasExtensions BatchOperationReset where
+  messageUnknownFields msg = msg.batchOperationResetUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationResetUnknownFields = ufs }
+
+instance Semigroup BatchOperationReset where
+  a <> b = BatchOperationReset
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , options = case b.options of { Nothing -> a.options; x -> x }
+    , resetType = case b.resetType of { Nothing -> a.resetType; x -> x }
+    , resetReapplyType = case b.resetReapplyType of { Nothing -> a.resetReapplyType; x -> x }
+    , postResetOperations = a.postResetOperations <> b.postResetOperations
+    , batchOperationResetUnknownFields = a.batchOperationResetUnknownFields <> b.batchOperationResetUnknownFields
+    }
+
+instance Monoid BatchOperationReset where
+  mempty = defaultBatchOperationReset
+
+data BatchOperationUpdateWorkflowExecutionOptions = BatchOperationUpdateWorkflowExecutionOptions
+  { identity :: !(Maybe Text)
+  , workflowExecutionOptions :: !(Maybe TE_Workflow_V1_Message.WorkflowExecutionOptions)
+  , updateMask :: !(Maybe PB_FieldMask.FieldMask)
+  , batchOperationUpdateWorkflowExecutionOptionsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBatchOperationUpdateWorkflowExecutionOptions :: BatchOperationUpdateWorkflowExecutionOptions
+defaultBatchOperationUpdateWorkflowExecutionOptions = BatchOperationUpdateWorkflowExecutionOptions
+  { identity = Nothing
+  , workflowExecutionOptions = Nothing
+  , updateMask = Nothing
+  , batchOperationUpdateWorkflowExecutionOptionsUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationUpdateWorkflowExecutionOptions where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.workflowExecutionOptions)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.updateMask)
+    <> encodeUnknownFields msg.batchOperationUpdateWorkflowExecutionOptionsUnknownFields
+
+instance MessageSize BatchOperationUpdateWorkflowExecutionOptions where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.workflowExecutionOptions)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.updateMask)
+    + unknownFieldsSize msg.batchOperationUpdateWorkflowExecutionOptionsUnknownFields
+
+instance MessageDecode BatchOperationUpdateWorkflowExecutionOptions where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (BatchOperationUpdateWorkflowExecutionOptions {identity = acc_0, workflowExecutionOptions = acc_1, updateMask = acc_2, batchOperationUpdateWorkflowExecutionOptionsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationUpdateWorkflowExecutionOptions where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationUpdateWorkflowExecutionOptions"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationUpdateWorkflowExecutionOptions
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateWorkflowExecutionOptions) -> m.identity
+        , fdSet = \v (m :: BatchOperationUpdateWorkflowExecutionOptions) -> (m { identity = v } :: BatchOperationUpdateWorkflowExecutionOptions)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "workflow_execution_options"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.workflow.v1.WorkflowExecutionOptions"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateWorkflowExecutionOptions) -> m.workflowExecutionOptions
+        , fdSet = \v (m :: BatchOperationUpdateWorkflowExecutionOptions) -> (m { workflowExecutionOptions = v } :: BatchOperationUpdateWorkflowExecutionOptions)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "update_mask"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.FieldMask"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateWorkflowExecutionOptions) -> m.updateMask
+        , fdSet = \v (m :: BatchOperationUpdateWorkflowExecutionOptions) -> (m { updateMask = v } :: BatchOperationUpdateWorkflowExecutionOptions)
+        })
+    ]
+
+instance IsMessage BatchOperationUpdateWorkflowExecutionOptions
+
+instance Aeson.ToJSON BatchOperationUpdateWorkflowExecutionOptions where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+      , "workflowExecutionOptions" .=: msg.workflowExecutionOptions
+      , "updateMask" .=: msg.updateMask
+      ]
+
+instance Aeson.FromJSON BatchOperationUpdateWorkflowExecutionOptions where
+  parseJSON = Aeson.withObject "BatchOperationUpdateWorkflowExecutionOptions" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    fld_workflowExecutionOptions <- parseFieldMaybe obj "workflowExecutionOptions"
+    fld_updateMask <- parseFieldMaybe obj "updateMask"
+    pure (defaultBatchOperationUpdateWorkflowExecutionOptions
+      { identity = maybe (defaultBatchOperationUpdateWorkflowExecutionOptions.identity) Prelude.id fld_identity
+      , workflowExecutionOptions = maybe (defaultBatchOperationUpdateWorkflowExecutionOptions.workflowExecutionOptions) Prelude.id fld_workflowExecutionOptions
+      , updateMask = maybe (defaultBatchOperationUpdateWorkflowExecutionOptions.updateMask) Prelude.id fld_updateMask
+      , batchOperationUpdateWorkflowExecutionOptionsUnknownFields = []
+      } :: BatchOperationUpdateWorkflowExecutionOptions)
+
+instance Hashable BatchOperationUpdateWorkflowExecutionOptions where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.identity) msg.workflowExecutionOptions) msg.updateMask
+
+instance Proto.Extension.HasExtensions BatchOperationUpdateWorkflowExecutionOptions where
+  messageUnknownFields msg = msg.batchOperationUpdateWorkflowExecutionOptionsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationUpdateWorkflowExecutionOptionsUnknownFields = ufs }
+
+instance Semigroup BatchOperationUpdateWorkflowExecutionOptions where
+  a <> b = BatchOperationUpdateWorkflowExecutionOptions
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , workflowExecutionOptions = case b.workflowExecutionOptions of { Nothing -> a.workflowExecutionOptions; x -> x }
+    , updateMask = case b.updateMask of { Nothing -> a.updateMask; x -> x }
+    , batchOperationUpdateWorkflowExecutionOptionsUnknownFields = a.batchOperationUpdateWorkflowExecutionOptionsUnknownFields <> b.batchOperationUpdateWorkflowExecutionOptionsUnknownFields
+    }
+
+instance Monoid BatchOperationUpdateWorkflowExecutionOptions where
+  mempty = defaultBatchOperationUpdateWorkflowExecutionOptions
+
+data BatchOperationUnpauseActivities = BatchOperationUnpauseActivities
+  { identity :: !(Maybe Text)
+  , resetAttempts :: !(Maybe Bool)
+  , resetHeartbeat :: !(Maybe Bool)
+  , jitter :: !(Maybe PB_Duration.Duration)
+  , activity :: !(Maybe BatchOperationUnpauseActivities'Activity)
+  , batchOperationUnpauseActivitiesUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data BatchOperationUnpauseActivities'Activity
-  = BatchOperationUnpauseActivities'Type !Data.Text.Text |
-    BatchOperationUnpauseActivities'MatchAll !Prelude.Bool
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'identity
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "resetAttempts" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'resetAttempts
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'resetAttempts = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "resetHeartbeat" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'resetHeartbeat
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'resetHeartbeat = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "jitter" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'jitter
-           (\ x__ y__ -> x__ {_BatchOperationUnpauseActivities'jitter = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "maybe'jitter" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'jitter
-           (\ x__ y__ -> x__ {_BatchOperationUnpauseActivities'jitter = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "maybe'activity" (Prelude.Maybe BatchOperationUnpauseActivities'Activity) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'activity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "maybe'type'" (Prelude.Maybe Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'activity = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationUnpauseActivities'Type x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap BatchOperationUnpauseActivities'Type y__))
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "type'" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'activity = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationUnpauseActivities'Type x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap BatchOperationUnpauseActivities'Type y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "maybe'matchAll" (Prelude.Maybe Prelude.Bool) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'activity = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationUnpauseActivities'MatchAll x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__
-              -> Prelude.fmap BatchOperationUnpauseActivities'MatchAll y__))
-instance Data.ProtoLens.Field.HasField BatchOperationUnpauseActivities "matchAll" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUnpauseActivities'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUnpauseActivities'activity = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationUnpauseActivities'MatchAll x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__
-                 -> Prelude.fmap BatchOperationUnpauseActivities'MatchAll y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Message BatchOperationUnpauseActivities where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.batch.v1.BatchOperationUnpauseActivities"
-  packedMessageDescriptor _
-    = "\n\
-      \\USBatchOperationUnpauseActivities\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DC4\n\
-      \\EOTtype\CAN\STX \SOH(\tH\NULR\EOTtype\DC2\GS\n\
-      \\tmatch_all\CAN\ETX \SOH(\bH\NULR\bmatchAll\DC2%\n\
-      \\SOreset_attempts\CAN\EOT \SOH(\bR\rresetAttempts\DC2'\n\
-      \\SIreset_heartbeat\CAN\ENQ \SOH(\bR\SOresetHeartbeat\DC21\n\
-      \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitterB\n\
-      \\n\
-      \\bactivity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUnpauseActivities
-        resetAttempts__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_attempts"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetAttempts")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUnpauseActivities
-        resetHeartbeat__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_heartbeat"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetHeartbeat")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUnpauseActivities
-        jitter__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "jitter"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'jitter")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUnpauseActivities
-        type'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'type'")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUnpauseActivities
-        matchAll__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "match_all"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'matchAll")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUnpauseActivities
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor),
-           (Data.ProtoLens.Tag 4, resetAttempts__field_descriptor),
-           (Data.ProtoLens.Tag 5, resetHeartbeat__field_descriptor),
-           (Data.ProtoLens.Tag 6, jitter__field_descriptor),
-           (Data.ProtoLens.Tag 2, type'__field_descriptor),
-           (Data.ProtoLens.Tag 3, matchAll__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationUnpauseActivities'_unknownFields
-        (\ x__ y__
-           -> x__ {_BatchOperationUnpauseActivities'_unknownFields = y__})
-  defMessage
-    = BatchOperationUnpauseActivities'_constructor
-        {_BatchOperationUnpauseActivities'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationUnpauseActivities'resetAttempts = Data.ProtoLens.fieldDefault,
-         _BatchOperationUnpauseActivities'resetHeartbeat = Data.ProtoLens.fieldDefault,
-         _BatchOperationUnpauseActivities'jitter = Prelude.Nothing,
-         _BatchOperationUnpauseActivities'activity = Prelude.Nothing,
-         _BatchOperationUnpauseActivities'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationUnpauseActivities
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationUnpauseActivities
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "reset_attempts"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"resetAttempts") y x)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "reset_heartbeat"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"resetHeartbeat") y x)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "jitter"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"jitter") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "type"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"type'") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "match_all"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"matchAll") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage)
-          "BatchOperationUnpauseActivities"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"resetAttempts") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"resetHeartbeat") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                               _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'jitter") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'activity") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just (BatchOperationUnpauseActivities'Type v))
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.Text.Encoding.encodeUtf8 v)
-                            (Prelude.Just (BatchOperationUnpauseActivities'MatchAll v))
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                                   ((Prelude..)
-                                      Data.ProtoLens.Encoding.Bytes.putVarInt
-                                      (\ b -> if b then 1 else 0) v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData BatchOperationUnpauseActivities where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationUnpauseActivities'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationUnpauseActivities'identity x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationUnpauseActivities'resetAttempts x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationUnpauseActivities'resetHeartbeat x__)
-                      (Control.DeepSeq.deepseq
-                         (_BatchOperationUnpauseActivities'jitter x__)
-                         (Control.DeepSeq.deepseq
-                            (_BatchOperationUnpauseActivities'activity x__) ())))))
-instance Control.DeepSeq.NFData BatchOperationUnpauseActivities'Activity where
-  rnf (BatchOperationUnpauseActivities'Type x__)
-    = Control.DeepSeq.rnf x__
-  rnf (BatchOperationUnpauseActivities'MatchAll x__)
-    = Control.DeepSeq.rnf x__
-_BatchOperationUnpauseActivities'Type ::
-  Data.ProtoLens.Prism.Prism' BatchOperationUnpauseActivities'Activity Data.Text.Text
-_BatchOperationUnpauseActivities'Type
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationUnpauseActivities'Type
-      (\ p__
-         -> case p__ of
-              (BatchOperationUnpauseActivities'Type p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_BatchOperationUnpauseActivities'MatchAll ::
-  Data.ProtoLens.Prism.Prism' BatchOperationUnpauseActivities'Activity Prelude.Bool
-_BatchOperationUnpauseActivities'MatchAll
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationUnpauseActivities'MatchAll
-      (\ p__
-         -> case p__ of
-              (BatchOperationUnpauseActivities'MatchAll p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationUpdateActivityOptions Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.activityOptions' @:: Lens' BatchOperationUpdateActivityOptions Proto.Temporal.Api.Activity.V1.Message.ActivityOptions@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'activityOptions' @:: Lens' BatchOperationUpdateActivityOptions (Prelude.Maybe Proto.Temporal.Api.Activity.V1.Message.ActivityOptions)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.updateMask' @:: Lens' BatchOperationUpdateActivityOptions Proto.Google.Protobuf.FieldMask.FieldMask@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'updateMask' @:: Lens' BatchOperationUpdateActivityOptions (Prelude.Maybe Proto.Google.Protobuf.FieldMask.FieldMask)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.restoreOriginal' @:: Lens' BatchOperationUpdateActivityOptions Prelude.Bool@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'activity' @:: Lens' BatchOperationUpdateActivityOptions (Prelude.Maybe BatchOperationUpdateActivityOptions'Activity)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'type'' @:: Lens' BatchOperationUpdateActivityOptions (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.type'' @:: Lens' BatchOperationUpdateActivityOptions Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'matchAll' @:: Lens' BatchOperationUpdateActivityOptions (Prelude.Maybe Prelude.Bool)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.matchAll' @:: Lens' BatchOperationUpdateActivityOptions Prelude.Bool@ -}
-data BatchOperationUpdateActivityOptions
-  = BatchOperationUpdateActivityOptions'_constructor {_BatchOperationUpdateActivityOptions'identity :: !Data.Text.Text,
-                                                      _BatchOperationUpdateActivityOptions'activityOptions :: !(Prelude.Maybe Proto.Temporal.Api.Activity.V1.Message.ActivityOptions),
-                                                      _BatchOperationUpdateActivityOptions'updateMask :: !(Prelude.Maybe Proto.Google.Protobuf.FieldMask.FieldMask),
-                                                      _BatchOperationUpdateActivityOptions'restoreOriginal :: !Prelude.Bool,
-                                                      _BatchOperationUpdateActivityOptions'activity :: !(Prelude.Maybe BatchOperationUpdateActivityOptions'Activity),
-                                                      _BatchOperationUpdateActivityOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationUpdateActivityOptions where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+  = BatchOperationUnpauseActivities'Activity'Type !Text
+  | BatchOperationUnpauseActivities'Activity'MatchAll {-# UNPACK #-} !Bool
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON BatchOperationUnpauseActivities'Activity where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON BatchOperationUnpauseActivities'Activity where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable BatchOperationUnpauseActivities'Activity where
+  hashWithSalt salt (BatchOperationUnpauseActivities'Activity'Type v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (BatchOperationUnpauseActivities'Activity'MatchAll v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultBatchOperationUnpauseActivities :: BatchOperationUnpauseActivities
+defaultBatchOperationUnpauseActivities = BatchOperationUnpauseActivities
+  { identity = Nothing
+  , resetAttempts = Nothing
+  , resetHeartbeat = Nothing
+  , jitter = Nothing
+  , activity = Nothing
+  , batchOperationUnpauseActivitiesUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationUnpauseActivities where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> (maybe mempty (\v -> archBool 32 v) msg.resetAttempts)
+    <> (maybe mempty (\v -> archBool 40 v) msg.resetHeartbeat)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 50 sz (buildMessage v)) msg.jitter)
+    <> (case msg.activity of
+      Nothing -> mempty
+      Just (BatchOperationUnpauseActivities'Activity'Type v) -> archString 18 v
+      Just (BatchOperationUnpauseActivities'Activity'MatchAll v) -> archBool 24 v)
+    <> encodeUnknownFields msg.batchOperationUnpauseActivitiesUnknownFields
+
+instance MessageSize BatchOperationUnpauseActivities where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + (maybe 0 (\v -> archBoolSize) msg.resetAttempts)
+    + (maybe 0 (\v -> archBoolSize) msg.resetHeartbeat)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.jitter)
+    + (case msg.activity of { Nothing -> 0; Just (BatchOperationUnpauseActivities'Activity'Type v) -> archStringSize v
+    ; Just (BatchOperationUnpauseActivities'Activity'MatchAll v) -> archBoolSize })
+    + unknownFieldsSize msg.batchOperationUnpauseActivitiesUnknownFields
+
+instance MessageDecode BatchOperationUnpauseActivities where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (BatchOperationUnpauseActivities {identity = acc_0, resetAttempts = acc_1, resetHeartbeat = acc_2, jitter = acc_3, activity = acc_4, batchOperationUnpauseActivitiesUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 (Just (BatchOperationUnpauseActivities'Activity'Type v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 (Just (BatchOperationUnpauseActivities'Activity'MatchAll v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationUnpauseActivities where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationUnpauseActivities"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationUnpauseActivities
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUnpauseActivities) -> m.identity
+        , fdSet = \v (m :: BatchOperationUnpauseActivities) -> (m { identity = v } :: BatchOperationUnpauseActivities)
+        }), (4, SomeField FieldDescriptor
+        { fdName = "reset_attempts"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUnpauseActivities) -> m.resetAttempts
+        , fdSet = \v (m :: BatchOperationUnpauseActivities) -> (m { resetAttempts = v } :: BatchOperationUnpauseActivities)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "reset_heartbeat"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUnpauseActivities) -> m.resetHeartbeat
+        , fdSet = \v (m :: BatchOperationUnpauseActivities) -> (m { resetHeartbeat = v } :: BatchOperationUnpauseActivities)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "jitter"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUnpauseActivities) -> m.jitter
+        , fdSet = \v (m :: BatchOperationUnpauseActivities) -> (m { jitter = v } :: BatchOperationUnpauseActivities)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "activity"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "activity"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUnpauseActivities) -> m.activity
+        , fdSet = \v (m :: BatchOperationUnpauseActivities) -> (m { activity = v } :: BatchOperationUnpauseActivities)
+        })
+    ]
+
+instance IsMessage BatchOperationUnpauseActivities
+
+instance Aeson.ToJSON BatchOperationUnpauseActivities where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+      , "resetAttempts" .=: msg.resetAttempts
+      , "resetHeartbeat" .=: msg.resetHeartbeat
+      , "jitter" .=: msg.jitter
+      , "activity" .=: msg.activity
+      ]
+
+instance Aeson.FromJSON BatchOperationUnpauseActivities where
+  parseJSON = Aeson.withObject "BatchOperationUnpauseActivities" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    fld_resetAttempts <- parseFieldMaybe obj "resetAttempts"
+    fld_resetHeartbeat <- parseFieldMaybe obj "resetHeartbeat"
+    fld_jitter <- parseFieldMaybe obj "jitter"
+    fld_activity <- parseFieldMaybe obj "activity"
+    pure (defaultBatchOperationUnpauseActivities
+      { identity = maybe (defaultBatchOperationUnpauseActivities.identity) Prelude.id fld_identity
+      , resetAttempts = maybe (defaultBatchOperationUnpauseActivities.resetAttempts) Prelude.id fld_resetAttempts
+      , resetHeartbeat = maybe (defaultBatchOperationUnpauseActivities.resetHeartbeat) Prelude.id fld_resetHeartbeat
+      , jitter = maybe (defaultBatchOperationUnpauseActivities.jitter) Prelude.id fld_jitter
+      , activity = maybe (defaultBatchOperationUnpauseActivities.activity) Prelude.id fld_activity
+      , batchOperationUnpauseActivitiesUnknownFields = []
+      } :: BatchOperationUnpauseActivities)
+
+instance Hashable BatchOperationUnpauseActivities where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.identity) msg.resetAttempts) msg.resetHeartbeat) msg.jitter) msg.activity
+
+instance Proto.Extension.HasExtensions BatchOperationUnpauseActivities where
+  messageUnknownFields msg = msg.batchOperationUnpauseActivitiesUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationUnpauseActivitiesUnknownFields = ufs }
+
+instance Semigroup BatchOperationUnpauseActivities where
+  a <> b = BatchOperationUnpauseActivities
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , resetAttempts = case b.resetAttempts of { Nothing -> a.resetAttempts; x -> x }
+    , resetHeartbeat = case b.resetHeartbeat of { Nothing -> a.resetHeartbeat; x -> x }
+    , jitter = case b.jitter of { Nothing -> a.jitter; x -> x }
+    , activity = case b.activity of { Nothing -> a.activity; x -> x }
+    , batchOperationUnpauseActivitiesUnknownFields = a.batchOperationUnpauseActivitiesUnknownFields <> b.batchOperationUnpauseActivitiesUnknownFields
+    }
+
+instance Monoid BatchOperationUnpauseActivities where
+  mempty = defaultBatchOperationUnpauseActivities
+
+data BatchOperationTriggerWorkflowRule = BatchOperationTriggerWorkflowRule
+  { identity :: !(Maybe Text)
+  , rule :: !(Maybe BatchOperationTriggerWorkflowRule'Rule)
+  , batchOperationTriggerWorkflowRuleUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+data BatchOperationTriggerWorkflowRule'Rule
+  = BatchOperationTriggerWorkflowRule'Rule'Id !Text
+  | BatchOperationTriggerWorkflowRule'Rule'Spec !TE_Rules_V1_Message.WorkflowRuleSpec
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON BatchOperationTriggerWorkflowRule'Rule where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON BatchOperationTriggerWorkflowRule'Rule where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable BatchOperationTriggerWorkflowRule'Rule where
+  hashWithSalt salt (BatchOperationTriggerWorkflowRule'Rule'Id v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (BatchOperationTriggerWorkflowRule'Rule'Spec v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultBatchOperationTriggerWorkflowRule :: BatchOperationTriggerWorkflowRule
+defaultBatchOperationTriggerWorkflowRule = BatchOperationTriggerWorkflowRule
+  { identity = Nothing
+  , rule = Nothing
+  , batchOperationTriggerWorkflowRuleUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationTriggerWorkflowRule where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> (case msg.rule of
+      Nothing -> mempty
+      Just (BatchOperationTriggerWorkflowRule'Rule'Id v) -> archString 18 v
+      Just (BatchOperationTriggerWorkflowRule'Rule'Spec v) -> (let sz = messageSize v in archSubmessage 26 sz (buildMessage v)))
+    <> encodeUnknownFields msg.batchOperationTriggerWorkflowRuleUnknownFields
+
+instance MessageSize BatchOperationTriggerWorkflowRule where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + (case msg.rule of { Nothing -> 0; Just (BatchOperationTriggerWorkflowRule'Rule'Id v) -> archStringSize v
+    ; Just (BatchOperationTriggerWorkflowRule'Rule'Spec v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.batchOperationTriggerWorkflowRuleUnknownFields
+
+instance MessageDecode BatchOperationTriggerWorkflowRule where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (BatchOperationTriggerWorkflowRule {identity = acc_0, rule = acc_1, batchOperationTriggerWorkflowRuleUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just (BatchOperationTriggerWorkflowRule'Rule'Id v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just (BatchOperationTriggerWorkflowRule'Rule'Spec v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationTriggerWorkflowRule where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationTriggerWorkflowRule"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationTriggerWorkflowRule
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationTriggerWorkflowRule) -> m.identity
+        , fdSet = \v (m :: BatchOperationTriggerWorkflowRule) -> (m { identity = v } :: BatchOperationTriggerWorkflowRule)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "rule"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "rule"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationTriggerWorkflowRule) -> m.rule
+        , fdSet = \v (m :: BatchOperationTriggerWorkflowRule) -> (m { rule = v } :: BatchOperationTriggerWorkflowRule)
+        })
+    ]
+
+instance IsMessage BatchOperationTriggerWorkflowRule
+
+instance Aeson.ToJSON BatchOperationTriggerWorkflowRule where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+      , "rule" .=: msg.rule
+      ]
+
+instance Aeson.FromJSON BatchOperationTriggerWorkflowRule where
+  parseJSON = Aeson.withObject "BatchOperationTriggerWorkflowRule" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    fld_rule <- parseFieldMaybe obj "rule"
+    pure (defaultBatchOperationTriggerWorkflowRule
+      { identity = maybe (defaultBatchOperationTriggerWorkflowRule.identity) Prelude.id fld_identity
+      , rule = maybe (defaultBatchOperationTriggerWorkflowRule.rule) Prelude.id fld_rule
+      , batchOperationTriggerWorkflowRuleUnknownFields = []
+      } :: BatchOperationTriggerWorkflowRule)
+
+instance Hashable BatchOperationTriggerWorkflowRule where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.identity) msg.rule
+
+instance Proto.Extension.HasExtensions BatchOperationTriggerWorkflowRule where
+  messageUnknownFields msg = msg.batchOperationTriggerWorkflowRuleUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationTriggerWorkflowRuleUnknownFields = ufs }
+
+instance Semigroup BatchOperationTriggerWorkflowRule where
+  a <> b = BatchOperationTriggerWorkflowRule
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , rule = case b.rule of { Nothing -> a.rule; x -> x }
+    , batchOperationTriggerWorkflowRuleUnknownFields = a.batchOperationTriggerWorkflowRuleUnknownFields <> b.batchOperationTriggerWorkflowRuleUnknownFields
+    }
+
+instance Monoid BatchOperationTriggerWorkflowRule where
+  mempty = defaultBatchOperationTriggerWorkflowRule
+
+data BatchOperationResetActivities = BatchOperationResetActivities
+  { identity :: !(Maybe Text)
+  , resetAttempts :: !(Maybe Bool)
+  , resetHeartbeat :: !(Maybe Bool)
+  , keepPaused :: !(Maybe Bool)
+  , jitter :: !(Maybe PB_Duration.Duration)
+  , restoreOriginalOptions :: !(Maybe Bool)
+  , activity :: !(Maybe BatchOperationResetActivities'Activity)
+  , batchOperationResetActivitiesUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+data BatchOperationResetActivities'Activity
+  = BatchOperationResetActivities'Activity'Type !Text
+  | BatchOperationResetActivities'Activity'MatchAll {-# UNPACK #-} !Bool
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON BatchOperationResetActivities'Activity where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON BatchOperationResetActivities'Activity where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable BatchOperationResetActivities'Activity where
+  hashWithSalt salt (BatchOperationResetActivities'Activity'Type v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (BatchOperationResetActivities'Activity'MatchAll v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultBatchOperationResetActivities :: BatchOperationResetActivities
+defaultBatchOperationResetActivities = BatchOperationResetActivities
+  { identity = Nothing
+  , resetAttempts = Nothing
+  , resetHeartbeat = Nothing
+  , keepPaused = Nothing
+  , jitter = Nothing
+  , restoreOriginalOptions = Nothing
+  , activity = Nothing
+  , batchOperationResetActivitiesUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationResetActivities where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> (maybe mempty (\v -> archBool 32 v) msg.resetAttempts)
+    <> (maybe mempty (\v -> archBool 40 v) msg.resetHeartbeat)
+    <> (maybe mempty (\v -> archBool 48 v) msg.keepPaused)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 58 sz (buildMessage v)) msg.jitter)
+    <> (maybe mempty (\v -> archBool 64 v) msg.restoreOriginalOptions)
+    <> (case msg.activity of
+      Nothing -> mempty
+      Just (BatchOperationResetActivities'Activity'Type v) -> archString 18 v
+      Just (BatchOperationResetActivities'Activity'MatchAll v) -> archBool 24 v)
+    <> encodeUnknownFields msg.batchOperationResetActivitiesUnknownFields
+
+instance MessageSize BatchOperationResetActivities where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + (maybe 0 (\v -> archBoolSize) msg.resetAttempts)
+    + (maybe 0 (\v -> archBoolSize) msg.resetHeartbeat)
+    + (maybe 0 (\v -> archBoolSize) msg.keepPaused)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.jitter)
+    + (maybe 0 (\v -> archBoolSize) msg.restoreOriginalOptions)
+    + (case msg.activity of { Nothing -> 0; Just (BatchOperationResetActivities'Activity'Type v) -> archStringSize v
+    ; Just (BatchOperationResetActivities'Activity'MatchAll v) -> archBoolSize })
+    + unknownFieldsSize msg.batchOperationResetActivitiesUnknownFields
+
+instance MessageDecode BatchOperationResetActivities where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_ = withTagM
+        (pure (BatchOperationResetActivities {identity = acc_0, resetAttempts = acc_1, resetHeartbeat = acc_2, keepPaused = acc_3, jitter = acc_4, restoreOriginalOptions = acc_5, activity = acc_6, batchOperationResetActivitiesUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          4 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          5 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          6 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_unknown_
+          7 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_unknown_
+          8 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just (BatchOperationResetActivities'Activity'Type v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just (BatchOperationResetActivities'Activity'MatchAll v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationResetActivities where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationResetActivities"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationResetActivities
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.identity
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { identity = v } :: BatchOperationResetActivities)
+        }), (4, SomeField FieldDescriptor
+        { fdName = "reset_attempts"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.resetAttempts
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { resetAttempts = v } :: BatchOperationResetActivities)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "reset_heartbeat"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.resetHeartbeat
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { resetHeartbeat = v } :: BatchOperationResetActivities)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "keep_paused"
+        , fdNumber = 6
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.keepPaused
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { keepPaused = v } :: BatchOperationResetActivities)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "jitter"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.jitter
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { jitter = v } :: BatchOperationResetActivities)
+        })
+    , (8, SomeField FieldDescriptor
+        { fdName = "restore_original_options"
+        , fdNumber = 8
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.restoreOriginalOptions
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { restoreOriginalOptions = v } :: BatchOperationResetActivities)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "activity"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "activity"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationResetActivities) -> m.activity
+        , fdSet = \v (m :: BatchOperationResetActivities) -> (m { activity = v } :: BatchOperationResetActivities)
+        })
+    ]
+
+instance IsMessage BatchOperationResetActivities
+
+instance Aeson.ToJSON BatchOperationResetActivities where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+      , "resetAttempts" .=: msg.resetAttempts
+      , "resetHeartbeat" .=: msg.resetHeartbeat
+      , "keepPaused" .=: msg.keepPaused
+      , "jitter" .=: msg.jitter
+      , "restoreOriginalOptions" .=: msg.restoreOriginalOptions
+      , "activity" .=: msg.activity
+      ]
+
+instance Aeson.FromJSON BatchOperationResetActivities where
+  parseJSON = Aeson.withObject "BatchOperationResetActivities" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    fld_resetAttempts <- parseFieldMaybe obj "resetAttempts"
+    fld_resetHeartbeat <- parseFieldMaybe obj "resetHeartbeat"
+    fld_keepPaused <- parseFieldMaybe obj "keepPaused"
+    fld_jitter <- parseFieldMaybe obj "jitter"
+    fld_restoreOriginalOptions <- parseFieldMaybe obj "restoreOriginalOptions"
+    fld_activity <- parseFieldMaybe obj "activity"
+    pure (defaultBatchOperationResetActivities
+      { identity = maybe (defaultBatchOperationResetActivities.identity) Prelude.id fld_identity
+      , resetAttempts = maybe (defaultBatchOperationResetActivities.resetAttempts) Prelude.id fld_resetAttempts
+      , resetHeartbeat = maybe (defaultBatchOperationResetActivities.resetHeartbeat) Prelude.id fld_resetHeartbeat
+      , keepPaused = maybe (defaultBatchOperationResetActivities.keepPaused) Prelude.id fld_keepPaused
+      , jitter = maybe (defaultBatchOperationResetActivities.jitter) Prelude.id fld_jitter
+      , restoreOriginalOptions = maybe (defaultBatchOperationResetActivities.restoreOriginalOptions) Prelude.id fld_restoreOriginalOptions
+      , activity = maybe (defaultBatchOperationResetActivities.activity) Prelude.id fld_activity
+      , batchOperationResetActivitiesUnknownFields = []
+      } :: BatchOperationResetActivities)
+
+instance Hashable BatchOperationResetActivities where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.identity) msg.resetAttempts) msg.resetHeartbeat) msg.keepPaused) msg.jitter) msg.restoreOriginalOptions) msg.activity
+
+instance Proto.Extension.HasExtensions BatchOperationResetActivities where
+  messageUnknownFields msg = msg.batchOperationResetActivitiesUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationResetActivitiesUnknownFields = ufs }
+
+instance Semigroup BatchOperationResetActivities where
+  a <> b = BatchOperationResetActivities
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , resetAttempts = case b.resetAttempts of { Nothing -> a.resetAttempts; x -> x }
+    , resetHeartbeat = case b.resetHeartbeat of { Nothing -> a.resetHeartbeat; x -> x }
+    , keepPaused = case b.keepPaused of { Nothing -> a.keepPaused; x -> x }
+    , jitter = case b.jitter of { Nothing -> a.jitter; x -> x }
+    , restoreOriginalOptions = case b.restoreOriginalOptions of { Nothing -> a.restoreOriginalOptions; x -> x }
+    , activity = case b.activity of { Nothing -> a.activity; x -> x }
+    , batchOperationResetActivitiesUnknownFields = a.batchOperationResetActivitiesUnknownFields <> b.batchOperationResetActivitiesUnknownFields
+    }
+
+instance Monoid BatchOperationResetActivities where
+  mempty = defaultBatchOperationResetActivities
+
+data BatchOperationUpdateActivityOptions = BatchOperationUpdateActivityOptions
+  { identity :: !(Maybe Text)
+  , activityOptions :: !(Maybe TE_Activity_V1_Message.ActivityOptions)
+  , updateMask :: !(Maybe PB_FieldMask.FieldMask)
+  , restoreOriginal :: !(Maybe Bool)
+  , activity :: !(Maybe BatchOperationUpdateActivityOptions'Activity)
+  , batchOperationUpdateActivityOptionsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data BatchOperationUpdateActivityOptions'Activity
-  = BatchOperationUpdateActivityOptions'Type !Data.Text.Text |
-    BatchOperationUpdateActivityOptions'MatchAll !Prelude.Bool
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'identity
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "activityOptions" Proto.Temporal.Api.Activity.V1.Message.ActivityOptions where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activityOptions
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateActivityOptions'activityOptions = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "maybe'activityOptions" (Prelude.Maybe Proto.Temporal.Api.Activity.V1.Message.ActivityOptions) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activityOptions
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateActivityOptions'activityOptions = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "updateMask" Proto.Google.Protobuf.FieldMask.FieldMask where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'updateMask
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'updateMask = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "maybe'updateMask" (Prelude.Maybe Proto.Google.Protobuf.FieldMask.FieldMask) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'updateMask
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'updateMask = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "restoreOriginal" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'restoreOriginal
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateActivityOptions'restoreOriginal = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "maybe'activity" (Prelude.Maybe BatchOperationUpdateActivityOptions'Activity) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'activity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "maybe'type'" (Prelude.Maybe Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'activity = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationUpdateActivityOptions'Type x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__
-              -> Prelude.fmap BatchOperationUpdateActivityOptions'Type y__))
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "type'" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'activity = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationUpdateActivityOptions'Type x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__
-                 -> Prelude.fmap BatchOperationUpdateActivityOptions'Type y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "maybe'matchAll" (Prelude.Maybe Prelude.Bool) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'activity = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (BatchOperationUpdateActivityOptions'MatchAll x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__
-              -> Prelude.fmap BatchOperationUpdateActivityOptions'MatchAll y__))
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateActivityOptions "matchAll" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateActivityOptions'activity
-           (\ x__ y__
-              -> x__ {_BatchOperationUpdateActivityOptions'activity = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (BatchOperationUpdateActivityOptions'MatchAll x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__
-                 -> Prelude.fmap BatchOperationUpdateActivityOptions'MatchAll y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Message BatchOperationUpdateActivityOptions where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.batch.v1.BatchOperationUpdateActivityOptions"
-  packedMessageDescriptor _
-    = "\n\
-      \#BatchOperationUpdateActivityOptions\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DC4\n\
-      \\EOTtype\CAN\STX \SOH(\tH\NULR\EOTtype\DC2\GS\n\
-      \\tmatch_all\CAN\ETX \SOH(\bH\NULR\bmatchAll\DC2T\n\
-      \\DLEactivity_options\CAN\EOT \SOH(\v2).temporal.api.activity.v1.ActivityOptionsR\SIactivityOptions\DC2;\n\
-      \\vupdate_mask\CAN\ENQ \SOH(\v2\SUB.google.protobuf.FieldMaskR\n\
-      \updateMask\DC2)\n\
-      \\DLErestore_original\CAN\ACK \SOH(\bR\SIrestoreOriginalB\n\
-      \\n\
-      \\bactivity"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateActivityOptions
-        activityOptions__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_options"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Activity.V1.Message.ActivityOptions)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'activityOptions")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateActivityOptions
-        updateMask__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "update_mask"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.FieldMask.FieldMask)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'updateMask")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateActivityOptions
-        restoreOriginal__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "restore_original"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"restoreOriginal")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateActivityOptions
-        type'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'type'")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateActivityOptions
-        matchAll__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "match_all"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'matchAll")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateActivityOptions
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor),
-           (Data.ProtoLens.Tag 4, activityOptions__field_descriptor),
-           (Data.ProtoLens.Tag 5, updateMask__field_descriptor),
-           (Data.ProtoLens.Tag 6, restoreOriginal__field_descriptor),
-           (Data.ProtoLens.Tag 2, type'__field_descriptor),
-           (Data.ProtoLens.Tag 3, matchAll__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationUpdateActivityOptions'_unknownFields
-        (\ x__ y__
-           -> x__ {_BatchOperationUpdateActivityOptions'_unknownFields = y__})
-  defMessage
-    = BatchOperationUpdateActivityOptions'_constructor
-        {_BatchOperationUpdateActivityOptions'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationUpdateActivityOptions'activityOptions = Prelude.Nothing,
-         _BatchOperationUpdateActivityOptions'updateMask = Prelude.Nothing,
-         _BatchOperationUpdateActivityOptions'restoreOriginal = Data.ProtoLens.fieldDefault,
-         _BatchOperationUpdateActivityOptions'activity = Prelude.Nothing,
-         _BatchOperationUpdateActivityOptions'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationUpdateActivityOptions
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationUpdateActivityOptions
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "activity_options"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityOptions") y x)
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "update_mask"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"updateMask") y x)
-                        48
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "restore_original"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"restoreOriginal") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "type"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"type'") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "match_all"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"matchAll") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage)
-          "BatchOperationUpdateActivityOptions"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'activityOptions") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'updateMask") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"restoreOriginal") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (\ b -> if b then 1 else 0) _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'activity") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just (BatchOperationUpdateActivityOptions'Type v))
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.Text.Encoding.encodeUtf8 v)
-                            (Prelude.Just (BatchOperationUpdateActivityOptions'MatchAll v))
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                                   ((Prelude..)
-                                      Data.ProtoLens.Encoding.Bytes.putVarInt
-                                      (\ b -> if b then 1 else 0) v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData BatchOperationUpdateActivityOptions where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationUpdateActivityOptions'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationUpdateActivityOptions'identity x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationUpdateActivityOptions'activityOptions x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationUpdateActivityOptions'updateMask x__)
-                      (Control.DeepSeq.deepseq
-                         (_BatchOperationUpdateActivityOptions'restoreOriginal x__)
-                         (Control.DeepSeq.deepseq
-                            (_BatchOperationUpdateActivityOptions'activity x__) ())))))
-instance Control.DeepSeq.NFData BatchOperationUpdateActivityOptions'Activity where
-  rnf (BatchOperationUpdateActivityOptions'Type x__)
-    = Control.DeepSeq.rnf x__
-  rnf (BatchOperationUpdateActivityOptions'MatchAll x__)
-    = Control.DeepSeq.rnf x__
-_BatchOperationUpdateActivityOptions'Type ::
-  Data.ProtoLens.Prism.Prism' BatchOperationUpdateActivityOptions'Activity Data.Text.Text
-_BatchOperationUpdateActivityOptions'Type
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationUpdateActivityOptions'Type
-      (\ p__
-         -> case p__ of
-              (BatchOperationUpdateActivityOptions'Type p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_BatchOperationUpdateActivityOptions'MatchAll ::
-  Data.ProtoLens.Prism.Prism' BatchOperationUpdateActivityOptions'Activity Prelude.Bool
-_BatchOperationUpdateActivityOptions'MatchAll
-  = Data.ProtoLens.Prism.prism'
-      BatchOperationUpdateActivityOptions'MatchAll
-      (\ p__
-         -> case p__ of
-              (BatchOperationUpdateActivityOptions'MatchAll p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.identity' @:: Lens' BatchOperationUpdateWorkflowExecutionOptions Data.Text.Text@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.workflowExecutionOptions' @:: Lens' BatchOperationUpdateWorkflowExecutionOptions Proto.Temporal.Api.Workflow.V1.Message.WorkflowExecutionOptions@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'workflowExecutionOptions' @:: Lens' BatchOperationUpdateWorkflowExecutionOptions (Prelude.Maybe Proto.Temporal.Api.Workflow.V1.Message.WorkflowExecutionOptions)@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.updateMask' @:: Lens' BatchOperationUpdateWorkflowExecutionOptions Proto.Google.Protobuf.FieldMask.FieldMask@
-         * 'Proto.Temporal.Api.Batch.V1.Message_Fields.maybe'updateMask' @:: Lens' BatchOperationUpdateWorkflowExecutionOptions (Prelude.Maybe Proto.Google.Protobuf.FieldMask.FieldMask)@ -}
-data BatchOperationUpdateWorkflowExecutionOptions
-  = BatchOperationUpdateWorkflowExecutionOptions'_constructor {_BatchOperationUpdateWorkflowExecutionOptions'identity :: !Data.Text.Text,
-                                                               _BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions :: !(Prelude.Maybe Proto.Temporal.Api.Workflow.V1.Message.WorkflowExecutionOptions),
-                                                               _BatchOperationUpdateWorkflowExecutionOptions'updateMask :: !(Prelude.Maybe Proto.Google.Protobuf.FieldMask.FieldMask),
-                                                               _BatchOperationUpdateWorkflowExecutionOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BatchOperationUpdateWorkflowExecutionOptions where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateWorkflowExecutionOptions "identity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateWorkflowExecutionOptions'identity
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateWorkflowExecutionOptions'identity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateWorkflowExecutionOptions "workflowExecutionOptions" Proto.Temporal.Api.Workflow.V1.Message.WorkflowExecutionOptions where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateWorkflowExecutionOptions "maybe'workflowExecutionOptions" (Prelude.Maybe Proto.Temporal.Api.Workflow.V1.Message.WorkflowExecutionOptions) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateWorkflowExecutionOptions "updateMask" Proto.Google.Protobuf.FieldMask.FieldMask where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateWorkflowExecutionOptions'updateMask
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateWorkflowExecutionOptions'updateMask = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BatchOperationUpdateWorkflowExecutionOptions "maybe'updateMask" (Prelude.Maybe Proto.Google.Protobuf.FieldMask.FieldMask) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BatchOperationUpdateWorkflowExecutionOptions'updateMask
-           (\ x__ y__
-              -> x__
-                   {_BatchOperationUpdateWorkflowExecutionOptions'updateMask = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BatchOperationUpdateWorkflowExecutionOptions where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.batch.v1.BatchOperationUpdateWorkflowExecutionOptions"
-  packedMessageDescriptor _
-    = "\n\
-      \,BatchOperationUpdateWorkflowExecutionOptions\DC2\SUB\n\
-      \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2p\n\
-      \\SUBworkflow_execution_options\CAN\STX \SOH(\v22.temporal.api.workflow.v1.WorkflowExecutionOptionsR\CANworkflowExecutionOptions\DC2;\n\
-      \\vupdate_mask\CAN\ETX \SOH(\v2\SUB.google.protobuf.FieldMaskR\n\
-      \updateMask"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        identity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"identity")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateWorkflowExecutionOptions
-        workflowExecutionOptions__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_execution_options"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Workflow.V1.Message.WorkflowExecutionOptions)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowExecutionOptions")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateWorkflowExecutionOptions
-        updateMask__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "update_mask"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.FieldMask.FieldMask)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'updateMask")) ::
-              Data.ProtoLens.FieldDescriptor BatchOperationUpdateWorkflowExecutionOptions
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, identity__field_descriptor),
-           (Data.ProtoLens.Tag 2, workflowExecutionOptions__field_descriptor),
-           (Data.ProtoLens.Tag 3, updateMask__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BatchOperationUpdateWorkflowExecutionOptions'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_BatchOperationUpdateWorkflowExecutionOptions'_unknownFields = y__})
-  defMessage
-    = BatchOperationUpdateWorkflowExecutionOptions'_constructor
-        {_BatchOperationUpdateWorkflowExecutionOptions'identity = Data.ProtoLens.fieldDefault,
-         _BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions = Prelude.Nothing,
-         _BatchOperationUpdateWorkflowExecutionOptions'updateMask = Prelude.Nothing,
-         _BatchOperationUpdateWorkflowExecutionOptions'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BatchOperationUpdateWorkflowExecutionOptions
-          -> Data.ProtoLens.Encoding.Bytes.Parser BatchOperationUpdateWorkflowExecutionOptions
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "identity"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"identity") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_execution_options"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowExecutionOptions") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "update_mask"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"updateMask") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage)
-          "BatchOperationUpdateWorkflowExecutionOptions"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"identity") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'workflowExecutionOptions") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'updateMask") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData BatchOperationUpdateWorkflowExecutionOptions where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BatchOperationUpdateWorkflowExecutionOptions'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BatchOperationUpdateWorkflowExecutionOptions'identity x__)
-                (Control.DeepSeq.deepseq
-                   (_BatchOperationUpdateWorkflowExecutionOptions'workflowExecutionOptions
-                      x__)
-                   (Control.DeepSeq.deepseq
-                      (_BatchOperationUpdateWorkflowExecutionOptions'updateMask x__)
-                      ())))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \#temporal/api/batch/v1/message.proto\DC2\NAKtemporal.api.batch.v1\SUB\RSgoogle/protobuf/duration.proto\SUB google/protobuf/field_mask.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB&temporal/api/activity/v1/message.proto\SUB$temporal/api/common/v1/message.proto\SUB+temporal/api/enums/v1/batch_operation.proto\SUB!temporal/api/enums/v1/reset.proto\SUB#temporal/api/rules/v1/message.proto\SUB&temporal/api/workflow/v1/message.proto\"\227\SOH\n\
-    \\DC2BatchOperationInfo\DC2\NAK\n\
-    \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobId\DC2@\n\
-    \\ENQstate\CAN\STX \SOH(\SO2*.temporal.api.enums.v1.BatchOperationStateR\ENQstate\DC29\n\
-    \\n\
-    \start_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\tstartTime\DC29\n\
-    \\n\
-    \close_time\CAN\EOT \SOH(\v2\SUB.google.protobuf.TimestampR\tcloseTime\"s\n\
-    \\EMBatchOperationTermination\DC2:\n\
-    \\adetails\CAN\SOH \SOH(\v2 .temporal.api.common.v1.PayloadsR\adetails\DC2\SUB\n\
-    \\bidentity\CAN\STX \SOH(\tR\bidentity\"\186\SOH\n\
-    \\DC4BatchOperationSignal\DC2\SYN\n\
-    \\ACKsignal\CAN\SOH \SOH(\tR\ACKsignal\DC26\n\
-    \\ENQinput\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\ENQinput\DC26\n\
-    \\ACKheader\CAN\ETX \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\DC2\SUB\n\
-    \\bidentity\CAN\EOT \SOH(\tR\bidentity\"8\n\
-    \\SUBBatchOperationCancellation\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\"4\n\
-    \\SYNBatchOperationDeletion\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\"\243\STX\n\
-    \\DC3BatchOperationReset\DC2\SUB\n\
-    \\bidentity\CAN\ETX \SOH(\tR\bidentity\DC2>\n\
-    \\aoptions\CAN\EOT \SOH(\v2$.temporal.api.common.v1.ResetOptionsR\aoptions\DC2C\n\
-    \\n\
-    \reset_type\CAN\SOH \SOH(\SO2 .temporal.api.enums.v1.ResetTypeR\tresetTypeB\STX\CAN\SOH\DC2Y\n\
-    \\DC2reset_reapply_type\CAN\STX \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyTypeB\STX\CAN\SOH\DC2`\n\
-    \\NAKpost_reset_operations\CAN\ENQ \ETX(\v2,.temporal.api.workflow.v1.PostResetOperationR\DC3postResetOperations\"\249\SOH\n\
-    \,BatchOperationUpdateWorkflowExecutionOptions\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2p\n\
-    \\SUBworkflow_execution_options\CAN\STX \SOH(\v22.temporal.api.workflow.v1.WorkflowExecutionOptionsR\CANworkflowExecutionOptions\DC2;\n\
-    \\vupdate_mask\CAN\ETX \SOH(\v2\SUB.google.protobuf.FieldMaskR\n\
-    \updateMask\"\129\STX\n\
-    \\USBatchOperationUnpauseActivities\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DC4\n\
-    \\EOTtype\CAN\STX \SOH(\tH\NULR\EOTtype\DC2\GS\n\
-    \\tmatch_all\CAN\ETX \SOH(\bH\NULR\bmatchAll\DC2%\n\
-    \\SOreset_attempts\CAN\EOT \SOH(\bR\rresetAttempts\DC2'\n\
-    \\SIreset_heartbeat\CAN\ENQ \SOH(\bR\SOresetHeartbeat\DC21\n\
-    \\ACKjitter\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\ACKjitterB\n\
-    \\n\
-    \\bactivity\"\152\SOH\n\
-    \!BatchOperationTriggerWorkflowRule\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DLE\n\
-    \\STXid\CAN\STX \SOH(\tH\NULR\STXid\DC2=\n\
-    \\EOTspec\CAN\ETX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecH\NULR\EOTspecB\ACK\n\
-    \\EOTrule\"\218\STX\n\
-    \\GSBatchOperationResetActivities\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DC4\n\
-    \\EOTtype\CAN\STX \SOH(\tH\NULR\EOTtype\DC2\GS\n\
-    \\tmatch_all\CAN\ETX \SOH(\bH\NULR\bmatchAll\DC2%\n\
-    \\SOreset_attempts\CAN\EOT \SOH(\bR\rresetAttempts\DC2'\n\
-    \\SIreset_heartbeat\CAN\ENQ \SOH(\bR\SOresetHeartbeat\DC2\US\n\
-    \\vkeep_paused\CAN\ACK \SOH(\bR\n\
-    \keepPaused\DC21\n\
-    \\ACKjitter\CAN\a \SOH(\v2\EM.google.protobuf.DurationR\ACKjitter\DC28\n\
-    \\CANrestore_original_options\CAN\b \SOH(\bR\SYNrestoreOriginalOptionsB\n\
-    \\n\
-    \\bactivity\"\192\STX\n\
-    \#BatchOperationUpdateActivityOptions\DC2\SUB\n\
-    \\bidentity\CAN\SOH \SOH(\tR\bidentity\DC2\DC4\n\
-    \\EOTtype\CAN\STX \SOH(\tH\NULR\EOTtype\DC2\GS\n\
-    \\tmatch_all\CAN\ETX \SOH(\bH\NULR\bmatchAll\DC2T\n\
-    \\DLEactivity_options\CAN\EOT \SOH(\v2).temporal.api.activity.v1.ActivityOptionsR\SIactivityOptions\DC2;\n\
-    \\vupdate_mask\CAN\ENQ \SOH(\v2\SUB.google.protobuf.FieldMaskR\n\
-    \updateMask\DC2)\n\
-    \\DLErestore_original\CAN\ACK \SOH(\bR\SIrestoreOriginalB\n\
-    \\n\
-    \\bactivityB\132\SOH\n\
-    \\CANio.temporal.api.batch.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/batch/v1;batch\170\STX\ETBTemporalio.Api.Batch.V1\234\STX\SUBTemporalio::Api::Batch::V1J\214>\n\
-    \\a\DC2\ENQ\NUL\NUL\194\SOH\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL8\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL3\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL3\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL4\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL4\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\f\NUL*\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\r\NUL)\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\SO\NUL0\n\
-    \\t\n\
-    \\STX\ETX\EOT\DC2\ETX\SI\NUL.\n\
-    \\t\n\
-    \\STX\ETX\ENQ\DC2\ETX\DLE\NUL5\n\
-    \\t\n\
-    \\STX\ETX\ACK\DC2\ETX\DC1\NUL+\n\
-    \\t\n\
-    \\STX\ETX\a\DC2\ETX\DC2\NUL-\n\
-    \\t\n\
-    \\STX\ETX\b\DC2\ETX\DC3\NUL0\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT\NAK\NUL\RS\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\NAK\b\SUB\n\
-    \\ESC\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\ETB\STX\DC4\SUB\SO Batch job ID\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\ETB\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\ETB\t\SI\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\ETB\DC2\DC3\n\
-    \$\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\EM\STX6\SUB\ETB Batch operation state\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\EM\STX+\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\EM,1\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\EM45\n\
-    \)\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\ESC\STX+\SUB\FS Batch operation start time\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\ESC\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\ESC\FS&\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\ESC)*\n\
-    \)\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\GS\STX+\SUB\FS Batch operation close time\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\GS\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\GS\FS&\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\GS)*\n\
-    \\140\STX\n\
-    \\STX\EOT\SOH\DC2\EOT#\NUL(\SOH\SUB\255\SOH BatchOperationTermination sends terminate requests to batch workflows.\n\
-    \ Keep the parameter in sync with temporal.api.workflowservice.v1.TerminateWorkflowExecutionRequest.\n\
-    \ Ignore first_execution_run_id because this is used for single workflow operation.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX#\b!\n\
-    \F\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX%\STX.\SUB9 Serialized value(s) to provide to the termination event\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX%\STX!\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX%\")\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX%,-\n\
-    \0\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX'\STX\SYN\SUB# The identity of the worker/client\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX'\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX'\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX'\DC4\NAK\n\
-    \\166\SOH\n\
-    \\STX\EOT\STX\DC2\EOT,\NUL6\SOH\SUB\153\SOH BatchOperationSignal sends signals to batch workflows.\n\
-    \ Keep the parameter in sync with temporal.api.workflowservice.v1.SignalWorkflowExecutionRequest.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX,\b\FS\n\
-    \U\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX.\STX\DC4\SUBH The workflow author-defined name of the signal to send to the workflow\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX.\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX.\t\SI\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX.\DC2\DC3\n\
-    \=\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX0\STX,\SUB0 Serialized value(s) to provide with the signal\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX0\STX!\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX0\"'\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX0*+\n\
-    \\137\SOH\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX3\STX+\SUB| Headers that are passed with the signal to the processing workflow.\n\
-    \ These can include things like auth or tracing tokens.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ACK\DC2\ETX3\STX\US\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX3 &\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX3)*\n\
-    \0\n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETX5\STX\SYN\SUB# The identity of the worker/client\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETX5\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETX5\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETX5\DC4\NAK\n\
-    \\142\STX\n\
-    \\STX\EOT\ETX\DC2\EOT;\NUL>\SOH\SUB\129\STX BatchOperationCancellation sends cancel requests to batch workflows.\n\
-    \ Keep the parameter in sync with temporal.api.workflowservice.v1.RequestCancelWorkflowExecutionRequest.\n\
-    \ Ignore first_execution_run_id because this is used for single workflow operation.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX;\b\"\n\
-    \0\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX=\STX\SYN\SUB# The identity of the worker/client\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX=\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX=\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX=\DC4\NAK\n\
-    \\178\SOH\n\
-    \\STX\EOT\EOT\DC2\EOTB\NULE\SOH\SUB\165\SOH BatchOperationDeletion sends deletion requests to batch workflows.\n\
-    \ Keep the parameter in sync with temporal.api.workflowservice.v1.DeleteWorkflowExecutionRequest.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXB\b\RS\n\
-    \0\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXD\STX\SYN\SUB# The identity of the worker/client\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXD\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXD\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXD\DC4\NAK\n\
-    \\171\SOH\n\
-    \\STX\EOT\ENQ\DC2\EOTI\NULX\SOH\SUB\158\SOH BatchOperationReset sends reset requests to batch workflows.\n\
-    \ Keep the parameter in sync with temporal.api.workflowservice.v1.ResetWorkflowExecutionRequest.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXI\b\ESC\n\
-    \1\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXK\STX\SYN\SUB$ The identity of the worker/client.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXK\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXK\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXK\DC4\NAK\n\
-    \m\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETXN\STX2\SUB` Describes what to reset to and how. If set, `reset_type` and `reset_reapply_type` are ignored.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETXN\STX%\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETXN&-\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETXN01\n\
-    \)\n\
-    \\EOT\EOT\ENQ\STX\STX\DC2\ETXQ\STXE\SUB\FS Deprecated. Use `options`.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ACK\DC2\ETXQ\STX!\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\SOH\DC2\ETXQ\",\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\ETX\DC2\ETXQ/0\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\STX\b\DC2\ETXQ1D\n\
-    \\r\n\
-    \\ACK\EOT\ENQ\STX\STX\b\ETX\DC2\ETXQ2C\n\
-    \)\n\
-    \\EOT\EOT\ENQ\STX\ETX\DC2\ETXS\STXT\SUB\FS Deprecated. Use `options`.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ACK\DC2\ETXS\STX(\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\SOH\DC2\ETXS);\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\ETX\DC2\ETXS>?\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\ETX\b\DC2\ETXS@S\n\
-    \\r\n\
-    \\ACK\EOT\ENQ\STX\ETX\b\ETX\DC2\ETXSAR\n\
-    \\145\STX\n\
-    \\EOT\EOT\ENQ\STX\EOT\DC2\ETXW\STXQ\SUB\131\STX Operations to perform after the workflow has been reset. These operations will be applied\n\
-    \ to the *new* run of the workflow execution in the order they are provided.\n\
-    \ All operations are applied to the workflow before the first new workflow task is generated\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\EOT\DC2\ETXW\STX\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\ACK\DC2\ETXW\v6\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\SOH\DC2\ETXW7L\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\EOT\ETX\DC2\ETXWOP\n\
-    \\230\SOH\n\
-    \\STX\EOT\ACK\DC2\EOT\\\NULf\SOH\SUB\217\SOH BatchOperationUpdateWorkflowExecutionOptions sends UpdateWorkflowExecutionOptions requests to batch workflows.\n\
-    \ Keep the parameters in sync with temporal.api.workflowservice.v1.UpdateWorkflowExecutionOptionsRequest.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX\\\b4\n\
-    \1\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETX^\STX\SYN\SUB$ The identity of the worker/client.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX^\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX^\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX^\DC4\NAK\n\
-    \\158\SOH\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXa\STXS\SUB\144\SOH Update Workflow options that were originally specified via StartWorkflowExecution. Partial updates are accepted and controlled by update_mask.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXa\STX3\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXa4N\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXaQR\n\
-    \\185\SOH\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXe\STX,\SUB\171\SOH Controls which fields from `workflow_execution_options` will be applied.\n\
-    \ To unset a field, set it to null and use the update mask to indicate that it should be mutated.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXe\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXe\FS'\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXe*+\n\
-    \X\n\
-    \\STX\EOT\a\DC2\EOTi\NUL|\SOH\SUBL BatchOperationUnpauseActivities sends unpause requests to batch workflows.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\a\SOH\DC2\ETXi\b'\n\
-    \1\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETXk\STX\SYN\SUB$ The identity of the worker/client.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETXk\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETXk\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETXk\DC4\NAK\n\
-    \f\n\
-    \\EOT\EOT\a\b\NUL\DC2\EOTn\STXq\ETX\SUBX The activity to unpause. If match_all is set to true, all activities will be unpaused.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\b\NUL\SOH\DC2\ETXn\b\DLE\n\
-    \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETXo\EOT\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ENQ\DC2\ETXo\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETXo\v\SI\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETXo\DC2\DC3\n\
-    \\v\n\
-    \\EOT\EOT\a\STX\STX\DC2\ETXp\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\STX\ENQ\DC2\ETXp\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\STX\SOH\DC2\ETXp\t\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\STX\ETX\DC2\ETXp\NAK\SYN\n\
-    \H\n\
-    \\EOT\EOT\a\STX\ETX\DC2\ETXt\STX\SUB\SUB; Setting this flag will also reset the number of attempts.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\ETX\ENQ\DC2\ETXt\STX\ACK\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\ETX\SOH\DC2\ETXt\a\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\ETX\ETX\DC2\ETXt\CAN\EM\n\
-    \G\n\
-    \\EOT\EOT\a\STX\EOT\DC2\ETXw\STX\ESC\SUB: Setting this flag will also reset the heartbeat details.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\EOT\ENQ\DC2\ETXw\STX\ACK\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\EOT\SOH\DC2\ETXw\a\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\EOT\ETX\DC2\ETXw\EM\SUB\n\
-    \\146\SOH\n\
-    \\EOT\EOT\a\STX\ENQ\DC2\ETX{\STX&\SUB\132\SOH If set, the activity will start at a random time within the specified jitter\n\
-    \ duration, introducing variability to the start time.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\ACK\DC2\ETX{\STX\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\SOH\DC2\ETX{\ESC!\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\ENQ\ETX\DC2\ETX{$%\n\
-    \g\n\
-    \\STX\EOT\b\DC2\ENQ\DEL\NUL\137\SOH\SOH\SUBZ BatchOperationTriggerWorkflowRule sends TriggerWorkflowRule requests to batch workflows.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\b\SOH\DC2\ETX\DEL\b)\n\
-    \2\n\
-    \\EOT\EOT\b\STX\NUL\DC2\EOT\129\SOH\STX\SYN\SUB$ The identity of the worker/client.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\EOT\129\SOH\STX\b\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\EOT\129\SOH\t\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\EOT\129\SOH\DC4\NAK\n\
-    \\SO\n\
-    \\EOT\EOT\b\b\NUL\DC2\ACK\131\SOH\STX\136\SOH\ETX\n\
-    \\r\n\
-    \\ENQ\EOT\b\b\NUL\SOH\DC2\EOT\131\SOH\b\f\n\
-    \$\n\
-    \\EOT\EOT\b\STX\SOH\DC2\EOT\133\SOH\EOT\DC2\SUB\SYN ID of existing rule.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ENQ\DC2\EOT\133\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\SOH\DC2\EOT\133\SOH\v\r\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\SOH\ETX\DC2\EOT\133\SOH\DLE\DC1\n\
-    \]\n\
-    \\EOT\EOT\b\STX\STX\DC2\EOT\135\SOH\EOT4\SUBO Rule specification to be applied to the workflow without creating a new rule.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\STX\ACK\DC2\EOT\135\SOH\EOT*\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\STX\SOH\DC2\EOT\135\SOH+/\n\
-    \\r\n\
-    \\ENQ\EOT\b\STX\STX\ETX\DC2\EOT\135\SOH23\n\
-    \\166\SOH\n\
-    \\STX\EOT\t\DC2\ACK\141\SOH\NUL\168\SOH\SOH\SUB\151\SOH BatchOperationResetActivities sends activity reset requests in a batch.\n\
-    \ NOTE: keep in sync with temporal.api.workflowservice.v1.ResetActivityRequest\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\t\SOH\DC2\EOT\141\SOH\b%\n\
-    \2\n\
-    \\EOT\EOT\t\STX\NUL\DC2\EOT\143\SOH\STX\SYN\SUB$ The identity of the worker/client.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\EOT\143\SOH\STX\b\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\EOT\143\SOH\t\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\EOT\143\SOH\DC4\NAK\n\
-    \e\n\
-    \\EOT\EOT\t\b\NUL\DC2\ACK\146\SOH\STX\149\SOH\ETX\SUBU The activities to reset. If match_all is set to true, all activities will be reset.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\b\NUL\SOH\DC2\EOT\146\SOH\b\DLE\n\
-    \\f\n\
-    \\EOT\EOT\t\STX\SOH\DC2\EOT\147\SOH\EOT\DC4\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\EOT\147\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\EOT\147\SOH\v\SI\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\EOT\147\SOH\DC2\DC3\n\
-    \\f\n\
-    \\EOT\EOT\t\STX\STX\DC2\EOT\148\SOH\EOT\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\STX\ENQ\DC2\EOT\148\SOH\EOT\b\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\STX\SOH\DC2\EOT\148\SOH\t\DC2\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\STX\ETX\DC2\EOT\148\SOH\NAK\SYN\n\
-    \I\n\
-    \\EOT\EOT\t\STX\ETX\DC2\EOT\152\SOH\STX\SUB\SUB; Setting this flag will also reset the number of attempts.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ETX\ENQ\DC2\EOT\152\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ETX\SOH\DC2\EOT\152\SOH\a\NAK\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ETX\ETX\DC2\EOT\152\SOH\CAN\EM\n\
-    \H\n\
-    \\EOT\EOT\t\STX\EOT\DC2\EOT\155\SOH\STX\ESC\SUB: Setting this flag will also reset the heartbeat details.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\EOT\ENQ\DC2\EOT\155\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\EOT\SOH\DC2\EOT\155\SOH\a\SYN\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\EOT\ETX\DC2\EOT\155\SOH\EM\SUB\n\
-    \H\n\
-    \\EOT\EOT\t\STX\ENQ\DC2\EOT\158\SOH\STX\ETB\SUB: If activity is paused, it will remain paused after reset\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ENQ\ENQ\DC2\EOT\158\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ENQ\SOH\DC2\EOT\158\SOH\a\DC2\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ENQ\ETX\DC2\EOT\158\SOH\NAK\SYN\n\
-    \\147\SOH\n\
-    \\EOT\EOT\t\STX\ACK\DC2\EOT\162\SOH\STX&\SUB\132\SOH If set, the activity will start at a random time within the specified jitter\n\
-    \ duration, introducing variability to the start time.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ACK\ACK\DC2\EOT\162\SOH\STX\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ACK\SOH\DC2\EOT\162\SOH\ESC!\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\ACK\ETX\DC2\EOT\162\SOH$%\n\
-    \\197\SOH\n\
-    \\EOT\EOT\t\STX\a\DC2\EOT\167\SOH\STX$\SUB\182\SOH If set, the activity options will be restored to the defaults.\n\
-    \ Default options are then options activity was created with.\n\
-    \ They are part of the first ActivityTaskScheduled event.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\a\ENQ\DC2\EOT\167\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\a\SOH\DC2\EOT\167\SOH\a\US\n\
-    \\r\n\
-    \\ENQ\EOT\t\STX\a\ETX\DC2\EOT\167\SOH\"#\n\
-    \\185\SOH\n\
-    \\STX\EOT\n\
-    \\DC2\ACK\172\SOH\NUL\194\SOH\SOH\SUB\170\SOH BatchOperationUpdateActivityOptions sends an update-activity-options requests in a batch.\n\
-    \ NOTE: keep in sync with temporal.api.workflowservice.v1.UpdateActivityRequest\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\n\
-    \\SOH\DC2\EOT\172\SOH\b+\n\
-    \2\n\
-    \\EOT\EOT\n\
-    \\STX\NUL\DC2\EOT\174\SOH\STX\SYN\SUB$ The identity of the worker/client.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\EOT\174\SOH\STX\b\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\EOT\174\SOH\t\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\EOT\174\SOH\DC4\NAK\n\
-    \f\n\
-    \\EOT\EOT\n\
-    \\b\NUL\DC2\ACK\177\SOH\STX\180\SOH\ETX\SUBV The activity to update. If match_all is set to true, all activities will be updated.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\b\NUL\SOH\DC2\EOT\177\SOH\b\DLE\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\SOH\DC2\EOT\178\SOH\EOT\DC4\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\ENQ\DC2\EOT\178\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\SOH\DC2\EOT\178\SOH\v\SI\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\SOH\ETX\DC2\EOT\178\SOH\DC2\DC3\n\
-    \\f\n\
-    \\EOT\EOT\n\
-    \\STX\STX\DC2\EOT\179\SOH\EOT\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\ENQ\DC2\EOT\179\SOH\EOT\b\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\SOH\DC2\EOT\179\SOH\t\DC2\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\STX\ETX\DC2\EOT\179\SOH\NAK\SYN\n\
-    \d\n\
-    \\EOT\EOT\n\
-    \\STX\ETX\DC2\EOT\183\SOH\STX@\SUBV Update Activity options. Partial updates are accepted and controlled by update_mask.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ACK\DC2\EOT\183\SOH\STX*\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\SOH\DC2\EOT\183\SOH+;\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ETX\ETX\DC2\EOT\183\SOH>?\n\
-    \M\n\
-    \\EOT\EOT\n\
-    \\STX\EOT\DC2\EOT\186\SOH\STX,\SUB? Controls which fields from `activity_options` will be applied\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ACK\DC2\EOT\186\SOH\STX\ESC\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\SOH\DC2\EOT\186\SOH\FS'\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\EOT\ETX\DC2\EOT\186\SOH*+\n\
-    \\212\STX\n\
-    \\EOT\EOT\n\
-    \\STX\ENQ\DC2\EOT\193\SOH\STX\FS\SUB\197\STX If set, the activity options will be restored to the default.\n\
-    \ Default options are then options activity was created with.\n\
-    \ They are part of the first ActivityTaskScheduled event.\n\
-    \ This flag cannot be combined with any other option; if you supply\n\
-    \ restore_original together with other options, the request will be rejected.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ENQ\DC2\EOT\193\SOH\STX\ACK\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\SOH\DC2\EOT\193\SOH\a\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\n\
-    \\STX\ENQ\ETX\DC2\EOT\193\SOH\SUB\ESCb\ACKproto3"
+  = BatchOperationUpdateActivityOptions'Activity'Type !Text
+  | BatchOperationUpdateActivityOptions'Activity'MatchAll {-# UNPACK #-} !Bool
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON BatchOperationUpdateActivityOptions'Activity where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON BatchOperationUpdateActivityOptions'Activity where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable BatchOperationUpdateActivityOptions'Activity where
+  hashWithSalt salt (BatchOperationUpdateActivityOptions'Activity'Type v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (BatchOperationUpdateActivityOptions'Activity'MatchAll v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultBatchOperationUpdateActivityOptions :: BatchOperationUpdateActivityOptions
+defaultBatchOperationUpdateActivityOptions = BatchOperationUpdateActivityOptions
+  { identity = Nothing
+  , activityOptions = Nothing
+  , updateMask = Nothing
+  , restoreOriginal = Nothing
+  , activity = Nothing
+  , batchOperationUpdateActivityOptionsUnknownFields = []
+  }
+
+instance MessageEncode BatchOperationUpdateActivityOptions where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.identity)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.activityOptions)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.updateMask)
+    <> (maybe mempty (\v -> archBool 48 v) msg.restoreOriginal)
+    <> (case msg.activity of
+      Nothing -> mempty
+      Just (BatchOperationUpdateActivityOptions'Activity'Type v) -> archString 18 v
+      Just (BatchOperationUpdateActivityOptions'Activity'MatchAll v) -> archBool 24 v)
+    <> encodeUnknownFields msg.batchOperationUpdateActivityOptionsUnknownFields
+
+instance MessageSize BatchOperationUpdateActivityOptions where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.identity)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.activityOptions)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.updateMask)
+    + (maybe 0 (\v -> archBoolSize) msg.restoreOriginal)
+    + (case msg.activity of { Nothing -> 0; Just (BatchOperationUpdateActivityOptions'Activity'Type v) -> archStringSize v
+    ; Just (BatchOperationUpdateActivityOptions'Activity'MatchAll v) -> archBoolSize })
+    + unknownFieldsSize msg.batchOperationUpdateActivityOptionsUnknownFields
+
+instance MessageDecode BatchOperationUpdateActivityOptions where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (BatchOperationUpdateActivityOptions {identity = acc_0, activityOptions = acc_1, updateMask = acc_2, restoreOriginal = acc_3, activity = acc_4, batchOperationUpdateActivityOptionsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          6 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 (Just (BatchOperationUpdateActivityOptions'Activity'Type v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 (Just (BatchOperationUpdateActivityOptions'Activity'MatchAll v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage BatchOperationUpdateActivityOptions where
+  protoMessageName _ = "temporal.api.batch.v1.BatchOperationUpdateActivityOptions"
+  protoPackageName _ = "temporal.api.batch.v1"
+  protoDefaultValue = defaultBatchOperationUpdateActivityOptions
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "identity"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateActivityOptions) -> m.identity
+        , fdSet = \v (m :: BatchOperationUpdateActivityOptions) -> (m { identity = v } :: BatchOperationUpdateActivityOptions)
+        }), (4, SomeField FieldDescriptor
+        { fdName = "activity_options"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.activity.v1.ActivityOptions"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateActivityOptions) -> m.activityOptions
+        , fdSet = \v (m :: BatchOperationUpdateActivityOptions) -> (m { activityOptions = v } :: BatchOperationUpdateActivityOptions)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "update_mask"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.FieldMask"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateActivityOptions) -> m.updateMask
+        , fdSet = \v (m :: BatchOperationUpdateActivityOptions) -> (m { updateMask = v } :: BatchOperationUpdateActivityOptions)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "restore_original"
+        , fdNumber = 6
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateActivityOptions) -> m.restoreOriginal
+        , fdSet = \v (m :: BatchOperationUpdateActivityOptions) -> (m { restoreOriginal = v } :: BatchOperationUpdateActivityOptions)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "activity"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "activity"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BatchOperationUpdateActivityOptions) -> m.activity
+        , fdSet = \v (m :: BatchOperationUpdateActivityOptions) -> (m { activity = v } :: BatchOperationUpdateActivityOptions)
+        })
+    ]
+
+instance IsMessage BatchOperationUpdateActivityOptions
+
+instance Aeson.ToJSON BatchOperationUpdateActivityOptions where
+  toJSON msg = jsonObject
+      [ "identity" .=: msg.identity
+      , "activityOptions" .=: msg.activityOptions
+      , "updateMask" .=: msg.updateMask
+      , "restoreOriginal" .=: msg.restoreOriginal
+      , "activity" .=: msg.activity
+      ]
+
+instance Aeson.FromJSON BatchOperationUpdateActivityOptions where
+  parseJSON = Aeson.withObject "BatchOperationUpdateActivityOptions" $ \obj -> do
+    fld_identity <- parseFieldMaybe obj "identity"
+    fld_activityOptions <- parseFieldMaybe obj "activityOptions"
+    fld_updateMask <- parseFieldMaybe obj "updateMask"
+    fld_restoreOriginal <- parseFieldMaybe obj "restoreOriginal"
+    fld_activity <- parseFieldMaybe obj "activity"
+    pure (defaultBatchOperationUpdateActivityOptions
+      { identity = maybe (defaultBatchOperationUpdateActivityOptions.identity) Prelude.id fld_identity
+      , activityOptions = maybe (defaultBatchOperationUpdateActivityOptions.activityOptions) Prelude.id fld_activityOptions
+      , updateMask = maybe (defaultBatchOperationUpdateActivityOptions.updateMask) Prelude.id fld_updateMask
+      , restoreOriginal = maybe (defaultBatchOperationUpdateActivityOptions.restoreOriginal) Prelude.id fld_restoreOriginal
+      , activity = maybe (defaultBatchOperationUpdateActivityOptions.activity) Prelude.id fld_activity
+      , batchOperationUpdateActivityOptionsUnknownFields = []
+      } :: BatchOperationUpdateActivityOptions)
+
+instance Hashable BatchOperationUpdateActivityOptions where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.identity) msg.activityOptions) msg.updateMask) msg.restoreOriginal) msg.activity
+
+instance Proto.Extension.HasExtensions BatchOperationUpdateActivityOptions where
+  messageUnknownFields msg = msg.batchOperationUpdateActivityOptionsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { batchOperationUpdateActivityOptionsUnknownFields = ufs }
+
+instance Semigroup BatchOperationUpdateActivityOptions where
+  a <> b = BatchOperationUpdateActivityOptions
+    { identity = case b.identity of { Nothing -> a.identity; x -> x }
+    , activityOptions = case b.activityOptions of { Nothing -> a.activityOptions; x -> x }
+    , updateMask = case b.updateMask of { Nothing -> a.updateMask; x -> x }
+    , restoreOriginal = case b.restoreOriginal of { Nothing -> a.restoreOriginal; x -> x }
+    , activity = case b.activity of { Nothing -> a.activity; x -> x }
+    , batchOperationUpdateActivityOptionsUnknownFields = a.batchOperationUpdateActivityOptionsUnknownFields <> b.batchOperationUpdateActivityOptionsUnknownFields
+    }
+
+instance Monoid BatchOperationUpdateActivityOptions where
+  mempty = defaultBatchOperationUpdateActivityOptions

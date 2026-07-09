@@ -49,14 +49,12 @@ import Data.Aeson.Types (Parser)
 import Data.Data
 import Data.Fixed
 import Data.Int (Int32, Int64)
-import Data.ProtoLens (defMessage)
+
 import qualified Data.Text as T
 import Data.Time.Clock
 import Data.Time.Clock.System (SystemTime (..))
 import Language.Haskell.TH.Syntax (Lift)
-import Lens.Family2 ((&), (.~), (^.))
 import qualified Proto.Google.Protobuf.Duration as Duration
-import qualified Proto.Google.Protobuf.Duration_Fields as Duration
 import Text.Printf
 import Text.Read (readMaybe)
 
@@ -266,15 +264,17 @@ infinity = Duration ((2 :: Int64) ^ (32 :: Int64)) 0
 -- and nanoseconds are in @[-999_999_999, 999_999_999]@.
 durationFromProto :: Duration.Duration -> Duration
 durationFromProto d =
-  mkDuration (d ^. Duration.seconds) (d ^. Duration.nanos)
+  mkDuration d.durationSeconds d.durationNanos
 
 
 -- | Convert a 'Duration' to a protocol buffer duration.
 durationToProto :: Duration -> Duration.Duration
 durationToProto ts =
-  defMessage
-    & Duration.seconds .~ durationSeconds ts
-    & Duration.nanos .~ durationNanoseconds ts
+  Duration.Duration
+    { Duration.durationSeconds = durationSeconds ts
+    , Duration.durationNanos = durationNanoseconds ts
+    , Duration.durationUnknownFields = []
+    }
 
 
 {- | Convert a 'Duration' to a milliseconds represented as a 'Double'. This is mostly useful for

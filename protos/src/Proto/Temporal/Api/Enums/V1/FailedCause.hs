@@ -1,1302 +1,522 @@
-{- This file was auto-generated from temporal/api/enums/v1/failed_cause.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Enums.V1.FailedCause (
-        CancelExternalWorkflowExecutionFailedCause(..),
-        CancelExternalWorkflowExecutionFailedCause(),
-        CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue,
-        ResourceExhaustedCause(..), ResourceExhaustedCause(),
-        ResourceExhaustedCause'UnrecognizedValue,
-        ResourceExhaustedScope(..), ResourceExhaustedScope(),
-        ResourceExhaustedScope'UnrecognizedValue,
-        SignalExternalWorkflowExecutionFailedCause(..),
-        SignalExternalWorkflowExecutionFailedCause(),
-        SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue,
-        StartChildWorkflowExecutionFailedCause(..),
-        StartChildWorkflowExecutionFailedCause(),
-        StartChildWorkflowExecutionFailedCause'UnrecognizedValue,
-        WorkflowTaskFailedCause(..), WorkflowTaskFailedCause(),
-        WorkflowTaskFailedCause'UnrecognizedValue
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-newtype CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue
-  = CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data CancelExternalWorkflowExecutionFailedCause
-  = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED |
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND |
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND |
-    CancelExternalWorkflowExecutionFailedCause'Unrecognized !CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum CancelExternalWorkflowExecutionFailedCause where
-  maybeToEnum 0
-    = Prelude.Just
-        CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  maybeToEnum 1
-    = Prelude.Just
-        CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-  maybeToEnum 2
-    = Prelude.Just
-        CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  maybeToEnum k
-    = Prelude.Just
-        (CancelExternalWorkflowExecutionFailedCause'Unrecognized
-           (CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
-  showEnum
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND"
-  showEnum
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
-  showEnum
-    (CancelExternalWorkflowExecutionFailedCause'Unrecognized (CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==)
-        k "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
-    = Prelude.Just
-        CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    | (Prelude.==)
-        k
-        "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND"
-    = Prelude.Just
-        CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    | (Prelude.==)
-        k
-        "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
-    = Prelude.Just
-        CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded CancelExternalWorkflowExecutionFailedCause where
-  minBound
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  maxBound
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-instance Prelude.Enum CancelExternalWorkflowExecutionFailedCause where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum CancelExternalWorkflowExecutionFailedCause: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = 0
-  fromEnum
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = 1
-  fromEnum
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = 2
-  fromEnum
-    (CancelExternalWorkflowExecutionFailedCause'Unrecognized (CancelExternalWorkflowExecutionFailedCause'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = Prelude.error
-        "CancelExternalWorkflowExecutionFailedCause.succ: bad argument CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND. This value would be out of bounds."
-  succ CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-  succ
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  succ (CancelExternalWorkflowExecutionFailedCause'Unrecognized _)
-    = Prelude.error
-        "CancelExternalWorkflowExecutionFailedCause.succ: bad argument: unrecognized value"
-  pred CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = Prelude.error
-        "CancelExternalWorkflowExecutionFailedCause.pred: bad argument CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED. This value would be out of bounds."
-  pred
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  pred
-    CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-  pred (CancelExternalWorkflowExecutionFailedCause'Unrecognized _)
-    = Prelude.error
-        "CancelExternalWorkflowExecutionFailedCause.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault CancelExternalWorkflowExecutionFailedCause where
-  fieldDefault
-    = CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-instance Control.DeepSeq.NFData CancelExternalWorkflowExecutionFailedCause where
-  rnf x__ = Prelude.seq x__ ()
-newtype ResourceExhaustedCause'UnrecognizedValue
-  = ResourceExhaustedCause'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data ResourceExhaustedCause
-  = RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED |
-    RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT |
-    RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT |
-    RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED |
-    RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT |
-    RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW |
-    RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT |
-    RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT |
-    RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN |
-    RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT |
-    ResourceExhaustedCause'Unrecognized !ResourceExhaustedCause'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum ResourceExhaustedCause where
-  maybeToEnum 0 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-  maybeToEnum 2
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-  maybeToEnum 3
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-  maybeToEnum 4
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-  maybeToEnum 5 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-  maybeToEnum 6 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-  maybeToEnum 7
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-  maybeToEnum 8
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-  maybeToEnum 9 = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-  maybeToEnum k
-    = Prelude.Just
-        (ResourceExhaustedCause'Unrecognized
-           (ResourceExhaustedCause'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-    = "RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-    = "RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-    = "RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-    = "RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-    = "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-    = "RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-    = "RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-    = "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-    = "RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN"
-  showEnum RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-    = "RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT"
-  showEnum
-    (ResourceExhaustedCause'Unrecognized (ResourceExhaustedCause'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-    | (Prelude.==)
-        k "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT"
-    = Prelude.Just RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded ResourceExhaustedCause where
-  minBound = RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-  maxBound = RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-instance Prelude.Enum ResourceExhaustedCause where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum ResourceExhaustedCause: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED = 0
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT = 1
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT = 2
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED = 3
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT = 4
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW = 5
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT = 6
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT = 7
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN = 8
-  fromEnum RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT = 9
-  fromEnum
-    (ResourceExhaustedCause'Unrecognized (ResourceExhaustedCause'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-    = Prelude.error
-        "ResourceExhaustedCause.succ: bad argument RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT. This value would be out of bounds."
-  succ RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-    = RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-  succ RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-  succ RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-  succ RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-    = RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-  succ RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-  succ RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-    = RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-  succ RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-  succ RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-  succ RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-    = RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-  succ (ResourceExhaustedCause'Unrecognized _)
-    = Prelude.error
-        "ResourceExhaustedCause.succ: bad argument: unrecognized value"
-  pred RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-    = Prelude.error
-        "ResourceExhaustedCause.pred: bad argument RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED. This value would be out of bounds."
-  pred RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-  pred RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT
-  pred RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-    = RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT
-  pred RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED
-  pred RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-    = RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT
-  pred RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW
-  pred RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT
-  pred RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-    = RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT
-  pred RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT
-    = RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN
-  pred (ResourceExhaustedCause'Unrecognized _)
-    = Prelude.error
-        "ResourceExhaustedCause.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault ResourceExhaustedCause where
-  fieldDefault = RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED
-instance Control.DeepSeq.NFData ResourceExhaustedCause where
-  rnf x__ = Prelude.seq x__ ()
-newtype ResourceExhaustedScope'UnrecognizedValue
-  = ResourceExhaustedScope'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data ResourceExhaustedScope
-  = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED |
-    RESOURCE_EXHAUSTED_SCOPE_NAMESPACE |
-    RESOURCE_EXHAUSTED_SCOPE_SYSTEM |
-    ResourceExhaustedScope'Unrecognized !ResourceExhaustedScope'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum ResourceExhaustedScope where
-  maybeToEnum 0 = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-  maybeToEnum 2 = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-  maybeToEnum k
-    = Prelude.Just
-        (ResourceExhaustedScope'Unrecognized
-           (ResourceExhaustedScope'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-    = "RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED"
-  showEnum RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-    = "RESOURCE_EXHAUSTED_SCOPE_NAMESPACE"
-  showEnum RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-    = "RESOURCE_EXHAUSTED_SCOPE_SYSTEM"
-  showEnum
-    (ResourceExhaustedScope'Unrecognized (ResourceExhaustedScope'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED"
-    = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_SCOPE_NAMESPACE"
-    = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-    | (Prelude.==) k "RESOURCE_EXHAUSTED_SCOPE_SYSTEM"
-    = Prelude.Just RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded ResourceExhaustedScope where
-  minBound = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-  maxBound = RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-instance Prelude.Enum ResourceExhaustedScope where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum ResourceExhaustedScope: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED = 0
-  fromEnum RESOURCE_EXHAUSTED_SCOPE_NAMESPACE = 1
-  fromEnum RESOURCE_EXHAUSTED_SCOPE_SYSTEM = 2
-  fromEnum
-    (ResourceExhaustedScope'Unrecognized (ResourceExhaustedScope'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-    = Prelude.error
-        "ResourceExhaustedScope.succ: bad argument RESOURCE_EXHAUSTED_SCOPE_SYSTEM. This value would be out of bounds."
-  succ RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-    = RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-  succ RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-    = RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-  succ (ResourceExhaustedScope'Unrecognized _)
-    = Prelude.error
-        "ResourceExhaustedScope.succ: bad argument: unrecognized value"
-  pred RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-    = Prelude.error
-        "ResourceExhaustedScope.pred: bad argument RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED. This value would be out of bounds."
-  pred RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-    = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-  pred RESOURCE_EXHAUSTED_SCOPE_SYSTEM
-    = RESOURCE_EXHAUSTED_SCOPE_NAMESPACE
-  pred (ResourceExhaustedScope'Unrecognized _)
-    = Prelude.error
-        "ResourceExhaustedScope.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault ResourceExhaustedScope where
-  fieldDefault = RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED
-instance Control.DeepSeq.NFData ResourceExhaustedScope where
-  rnf x__ = Prelude.seq x__ ()
-newtype SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue
-  = SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data SignalExternalWorkflowExecutionFailedCause
-  = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED |
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND |
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND |
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED |
-    SignalExternalWorkflowExecutionFailedCause'Unrecognized !SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum SignalExternalWorkflowExecutionFailedCause where
-  maybeToEnum 0
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  maybeToEnum 1
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-  maybeToEnum 2
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  maybeToEnum 3
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-  maybeToEnum k
-    = Prelude.Just
-        (SignalExternalWorkflowExecutionFailedCause'Unrecognized
-           (SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
-  showEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND"
-  showEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
-  showEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-    = "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED"
-  showEnum
-    (SignalExternalWorkflowExecutionFailedCause'Unrecognized (SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==)
-        k "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    | (Prelude.==)
-        k
-        "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND"
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    | (Prelude.==)
-        k
-        "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    | (Prelude.==)
-        k
-        "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED"
-    = Prelude.Just
-        SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded SignalExternalWorkflowExecutionFailedCause where
-  minBound
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  maxBound
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-instance Prelude.Enum SignalExternalWorkflowExecutionFailedCause where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum SignalExternalWorkflowExecutionFailedCause: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = 0
-  fromEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = 1
-  fromEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = 2
-  fromEnum
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-    = 3
-  fromEnum
-    (SignalExternalWorkflowExecutionFailedCause'Unrecognized (SignalExternalWorkflowExecutionFailedCause'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-    = Prelude.error
-        "SignalExternalWorkflowExecutionFailedCause.succ: bad argument SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED. This value would be out of bounds."
-  succ SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-  succ
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  succ
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-  succ (SignalExternalWorkflowExecutionFailedCause'Unrecognized _)
-    = Prelude.error
-        "SignalExternalWorkflowExecutionFailedCause.succ: bad argument: unrecognized value"
-  pred SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = Prelude.error
-        "SignalExternalWorkflowExecutionFailedCause.pred: bad argument SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED. This value would be out of bounds."
-  pred
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  pred
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND
-  pred
-    SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  pred (SignalExternalWorkflowExecutionFailedCause'Unrecognized _)
-    = Prelude.error
-        "SignalExternalWorkflowExecutionFailedCause.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault SignalExternalWorkflowExecutionFailedCause where
-  fieldDefault
-    = SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-instance Control.DeepSeq.NFData SignalExternalWorkflowExecutionFailedCause where
-  rnf x__ = Prelude.seq x__ ()
-newtype StartChildWorkflowExecutionFailedCause'UnrecognizedValue
-  = StartChildWorkflowExecutionFailedCause'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data StartChildWorkflowExecutionFailedCause
-  = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED |
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS |
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND |
-    StartChildWorkflowExecutionFailedCause'Unrecognized !StartChildWorkflowExecutionFailedCause'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum StartChildWorkflowExecutionFailedCause where
-  maybeToEnum 0
-    = Prelude.Just
-        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  maybeToEnum 1
-    = Prelude.Just
-        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-  maybeToEnum 2
-    = Prelude.Just
-        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  maybeToEnum k
-    = Prelude.Just
-        (StartChildWorkflowExecutionFailedCause'Unrecognized
-           (StartChildWorkflowExecutionFailedCause'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
-  showEnum
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-    = "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS"
-  showEnum
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
-  showEnum
-    (StartChildWorkflowExecutionFailedCause'Unrecognized (StartChildWorkflowExecutionFailedCause'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==)
-        k "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
-    = Prelude.Just
-        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    | (Prelude.==)
-        k
-        "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS"
-    = Prelude.Just
-        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-    | (Prelude.==)
-        k "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
-    = Prelude.Just
-        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded StartChildWorkflowExecutionFailedCause where
-  minBound = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  maxBound
-    = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-instance Prelude.Enum StartChildWorkflowExecutionFailedCause where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum StartChildWorkflowExecutionFailedCause: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = 0
-  fromEnum
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-    = 1
-  fromEnum
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = 2
-  fromEnum
-    (StartChildWorkflowExecutionFailedCause'Unrecognized (StartChildWorkflowExecutionFailedCause'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = Prelude.error
-        "StartChildWorkflowExecutionFailedCause.succ: bad argument START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND. This value would be out of bounds."
-  succ START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-  succ
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-    = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-  succ (StartChildWorkflowExecutionFailedCause'Unrecognized _)
-    = Prelude.error
-        "StartChildWorkflowExecutionFailedCause.succ: bad argument: unrecognized value"
-  pred START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-    = Prelude.error
-        "StartChildWorkflowExecutionFailedCause.pred: bad argument START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED. This value would be out of bounds."
-  pred
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-    = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-  pred
-    START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND
-    = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS
-  pred (StartChildWorkflowExecutionFailedCause'Unrecognized _)
-    = Prelude.error
-        "StartChildWorkflowExecutionFailedCause.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault StartChildWorkflowExecutionFailedCause where
-  fieldDefault
-    = START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED
-instance Control.DeepSeq.NFData StartChildWorkflowExecutionFailedCause where
-  rnf x__ = Prelude.seq x__ ()
-newtype WorkflowTaskFailedCause'UnrecognizedValue
-  = WorkflowTaskFailedCause'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.enums.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Enums.V1.FailedCause where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x66\x61\x69\x6c\x65\x64\x5f\x63\x61\x75\x73\x65\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2a\xa3\x12\x0a\x17\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x54\x61\x73\x6b\x46\x61\x69\x6c\x65\x64\x43\x61\x75\x73\x65\x12\x28\x0a\x26\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x30\x0a\x2c\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x48\x41\x4e\x44\x4c\x45\x44\x5f\x43\x4f\x4d\x4d\x41\x4e\x44\x10\x01\x12\x3f\x0a\x3b\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x43\x48\x45\x44\x55\x4c\x45\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x02\x12\x45\x0a\x41\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x52\x45\x51\x55\x45\x53\x54\x5f\x43\x41\x4e\x43\x45\x4c\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x03\x12\x39\x0a\x35\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x54\x41\x52\x54\x5f\x54\x49\x4d\x45\x52\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x04\x12\x3a\x0a\x36\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x43\x41\x4e\x43\x45\x4c\x5f\x54\x49\x4d\x45\x52\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x05\x12\x3b\x0a\x37\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x52\x45\x43\x4f\x52\x44\x5f\x4d\x41\x52\x4b\x45\x52\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x06\x12\x49\x0a\x45\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x43\x4f\x4d\x50\x4c\x45\x54\x45\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x07\x12\x45\x0a\x41\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x46\x41\x49\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x08\x12\x47\x0a\x43\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x43\x41\x4e\x43\x45\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x09\x12\x58\x0a\x54\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x52\x45\x51\x55\x45\x53\x54\x5f\x43\x41\x4e\x43\x45\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x0a\x12\x3d\x0a\x39\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x43\x4f\x4e\x54\x49\x4e\x55\x45\x5f\x41\x53\x5f\x4e\x45\x57\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x0b\x12\x37\x0a\x33\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x53\x54\x41\x52\x54\x5f\x54\x49\x4d\x45\x52\x5f\x44\x55\x50\x4c\x49\x43\x41\x54\x45\x5f\x49\x44\x10\x0c\x12\x36\x0a\x32\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x52\x45\x53\x45\x54\x5f\x53\x54\x49\x43\x4b\x59\x5f\x54\x41\x53\x4b\x5f\x51\x55\x45\x55\x45\x10\x0d\x12\x40\x0a\x3c\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x57\x4f\x52\x4b\x45\x52\x5f\x55\x4e\x48\x41\x4e\x44\x4c\x45\x44\x5f\x46\x41\x49\x4c\x55\x52\x45\x10\x0e\x12\x47\x0a\x43\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x49\x47\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x0f\x12\x43\x0a\x3f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x54\x41\x52\x54\x5f\x43\x48\x49\x4c\x44\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x10\x12\x32\x0a\x2e\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x46\x4f\x52\x43\x45\x5f\x43\x4c\x4f\x53\x45\x5f\x43\x4f\x4d\x4d\x41\x4e\x44\x10\x11\x12\x35\x0a\x31\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x46\x41\x49\x4c\x4f\x56\x45\x52\x5f\x43\x4c\x4f\x53\x45\x5f\x43\x4f\x4d\x4d\x41\x4e\x44\x10\x12\x12\x34\x0a\x30\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x49\x47\x4e\x41\x4c\x5f\x49\x4e\x50\x55\x54\x5f\x53\x49\x5a\x45\x10\x13\x12\x2d\x0a\x29\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x52\x45\x53\x45\x54\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x10\x14\x12\x29\x0a\x25\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x42\x49\x4e\x41\x52\x59\x10\x15\x12\x3d\x0a\x39\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x53\x43\x48\x45\x44\x55\x4c\x45\x5f\x41\x43\x54\x49\x56\x49\x54\x59\x5f\x44\x55\x50\x4c\x49\x43\x41\x54\x45\x5f\x49\x44\x10\x16\x12\x34\x0a\x30\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x45\x41\x52\x43\x48\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x17\x12\x36\x0a\x32\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x4e\x4f\x4e\x5f\x44\x45\x54\x45\x52\x4d\x49\x4e\x49\x53\x54\x49\x43\x5f\x45\x52\x52\x4f\x52\x10\x18\x12\x48\x0a\x44\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x4d\x4f\x44\x49\x46\x59\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x50\x52\x4f\x50\x45\x52\x54\x49\x45\x53\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x19\x12\x45\x0a\x41\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x4e\x44\x49\x4e\x47\x5f\x43\x48\x49\x4c\x44\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x53\x5f\x4c\x49\x4d\x49\x54\x5f\x45\x58\x43\x45\x45\x44\x45\x44\x10\x1a\x12\x40\x0a\x3c\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x4e\x44\x49\x4e\x47\x5f\x41\x43\x54\x49\x56\x49\x54\x49\x45\x53\x5f\x4c\x49\x4d\x49\x54\x5f\x45\x58\x43\x45\x45\x44\x45\x44\x10\x1b\x12\x3d\x0a\x39\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x4e\x44\x49\x4e\x47\x5f\x53\x49\x47\x4e\x41\x4c\x53\x5f\x4c\x49\x4d\x49\x54\x5f\x45\x58\x43\x45\x45\x44\x45\x44\x10\x1c\x12\x44\x0a\x40\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x4e\x44\x49\x4e\x47\x5f\x52\x45\x51\x55\x45\x53\x54\x5f\x43\x41\x4e\x43\x45\x4c\x5f\x4c\x49\x4d\x49\x54\x5f\x45\x58\x43\x45\x45\x44\x45\x44\x10\x1d\x12\x44\x0a\x40\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x55\x50\x44\x41\x54\x45\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x4d\x45\x53\x53\x41\x47\x45\x10\x1e\x12\x2f\x0a\x2b\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x48\x41\x4e\x44\x4c\x45\x44\x5f\x55\x50\x44\x41\x54\x45\x10\x1f\x12\x46\x0a\x42\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x53\x43\x48\x45\x44\x55\x4c\x45\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x20\x12\x46\x0a\x42\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x4e\x44\x49\x4e\x47\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x53\x5f\x4c\x49\x4d\x49\x54\x5f\x45\x58\x43\x45\x45\x44\x45\x44\x10\x21\x12\x4c\x0a\x48\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x41\x44\x5f\x52\x45\x51\x55\x45\x53\x54\x5f\x43\x41\x4e\x43\x45\x4c\x5f\x4e\x45\x58\x55\x53\x5f\x4f\x50\x45\x52\x41\x54\x49\x4f\x4e\x5f\x41\x54\x54\x52\x49\x42\x55\x54\x45\x53\x10\x22\x12\x2f\x0a\x2b\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x46\x45\x41\x54\x55\x52\x45\x5f\x44\x49\x53\x41\x42\x4c\x45\x44\x10\x23\x12\x35\x0a\x31\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x54\x41\x53\x4b\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x47\x52\x50\x43\x5f\x4d\x45\x53\x53\x41\x47\x45\x5f\x54\x4f\x4f\x5f\x4c\x41\x52\x47\x45\x10\x24\x2a\xf1\x01\x0a\x26\x53\x74\x61\x72\x74\x43\x68\x69\x6c\x64\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x46\x61\x69\x6c\x65\x64\x43\x61\x75\x73\x65\x12\x39\x0a\x37\x53\x54\x41\x52\x54\x5f\x43\x48\x49\x4c\x44\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x47\x0a\x43\x53\x54\x41\x52\x54\x5f\x43\x48\x49\x4c\x44\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x41\x4c\x52\x45\x41\x44\x59\x5f\x45\x58\x49\x53\x54\x53\x10\x01\x12\x43\x0a\x3f\x53\x54\x41\x52\x54\x5f\x43\x48\x49\x4c\x44\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x4e\x4f\x54\x5f\x46\x4f\x55\x4e\x44\x10\x02\x2a\x8f\x02\x0a\x2a\x43\x61\x6e\x63\x65\x6c\x45\x78\x74\x65\x72\x6e\x61\x6c\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x46\x61\x69\x6c\x65\x64\x43\x61\x75\x73\x65\x12\x3d\x0a\x3b\x43\x41\x4e\x43\x45\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x59\x0a\x55\x43\x41\x4e\x43\x45\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x4e\x4f\x54\x5f\x46\x4f\x55\x4e\x44\x10\x01\x12\x47\x0a\x43\x43\x41\x4e\x43\x45\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x4e\x4f\x54\x5f\x46\x4f\x55\x4e\x44\x10\x02\x2a\xe0\x02\x0a\x2a\x53\x69\x67\x6e\x61\x6c\x45\x78\x74\x65\x72\x6e\x61\x6c\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x46\x61\x69\x6c\x65\x64\x43\x61\x75\x73\x65\x12\x3d\x0a\x3b\x53\x49\x47\x4e\x41\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x59\x0a\x55\x53\x49\x47\x4e\x41\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x4e\x4f\x54\x5f\x46\x4f\x55\x4e\x44\x10\x01\x12\x47\x0a\x43\x53\x49\x47\x4e\x41\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x5f\x4e\x4f\x54\x5f\x46\x4f\x55\x4e\x44\x10\x02\x12\x4f\x0a\x4b\x53\x49\x47\x4e\x41\x4c\x5f\x45\x58\x54\x45\x52\x4e\x41\x4c\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x5f\x45\x58\x45\x43\x55\x54\x49\x4f\x4e\x5f\x46\x41\x49\x4c\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x53\x49\x47\x4e\x41\x4c\x5f\x43\x4f\x55\x4e\x54\x5f\x4c\x49\x4d\x49\x54\x5f\x45\x58\x43\x45\x45\x44\x45\x44\x10\x03\x2a\xde\x03\x0a\x16\x52\x65\x73\x6f\x75\x72\x63\x65\x45\x78\x68\x61\x75\x73\x74\x65\x64\x43\x61\x75\x73\x65\x12\x26\x0a\x24\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x26\x0a\x22\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x52\x50\x53\x5f\x4c\x49\x4d\x49\x54\x10\x01\x12\x2d\x0a\x29\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x43\x4f\x4e\x43\x55\x52\x52\x45\x4e\x54\x5f\x4c\x49\x4d\x49\x54\x10\x02\x12\x2e\x0a\x2a\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x53\x59\x53\x54\x45\x4d\x5f\x4f\x56\x45\x52\x4c\x4f\x41\x44\x45\x44\x10\x03\x12\x2e\x0a\x2a\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x52\x53\x49\x53\x54\x45\x4e\x43\x45\x5f\x4c\x49\x4d\x49\x54\x10\x04\x12\x2a\x0a\x26\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x42\x55\x53\x59\x5f\x57\x4f\x52\x4b\x46\x4c\x4f\x57\x10\x05\x12\x26\x0a\x22\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x41\x50\x53\x5f\x4c\x49\x4d\x49\x54\x10\x06\x12\x36\x0a\x32\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x50\x45\x52\x53\x49\x53\x54\x45\x4e\x43\x45\x5f\x53\x54\x4f\x52\x41\x47\x45\x5f\x4c\x49\x4d\x49\x54\x10\x07\x12\x31\x0a\x2d\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x43\x49\x52\x43\x55\x49\x54\x5f\x42\x52\x45\x41\x4b\x45\x52\x5f\x4f\x50\x45\x4e\x10\x08\x12\x26\x0a\x22\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x43\x41\x55\x53\x45\x5f\x4f\x50\x53\x5f\x4c\x49\x4d\x49\x54\x10\x09\x2a\x8d\x01\x0a\x16\x52\x65\x73\x6f\x75\x72\x63\x65\x45\x78\x68\x61\x75\x73\x74\x65\x64\x53\x63\x6f\x70\x65\x12\x26\x0a\x24\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x53\x43\x4f\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x26\x0a\x22\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x53\x43\x4f\x50\x45\x5f\x4e\x41\x4d\x45\x53\x50\x41\x43\x45\x10\x01\x12\x23\x0a\x1f\x52\x45\x53\x4f\x55\x52\x43\x45\x5f\x45\x58\x48\x41\x55\x53\x54\x45\x44\x5f\x53\x43\x4f\x50\x45\x5f\x53\x59\x53\x54\x45\x4d\x10\x02\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
 data WorkflowTaskFailedCause
-  = WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED |
-    WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID |
-    WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE |
-    WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND |
-    WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE |
-    WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY |
-    WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED |
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED |
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED |
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE |
-    WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED |
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES |
-    WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED |
-    WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE |
-    WorkflowTaskFailedCause'Unrecognized !WorkflowTaskFailedCause'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum WorkflowTaskFailedCause where
-  maybeToEnum 0 = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-  maybeToEnum 1
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-  maybeToEnum 2
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-  maybeToEnum 3
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-  maybeToEnum 4
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-  maybeToEnum 5
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-  maybeToEnum 6
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-  maybeToEnum 7
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-  maybeToEnum 8
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-  maybeToEnum 9
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-  maybeToEnum 10
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-  maybeToEnum 11
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-  maybeToEnum 12
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-  maybeToEnum 13
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-  maybeToEnum 14
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-  maybeToEnum 15
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-  maybeToEnum 16
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-  maybeToEnum 17
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-  maybeToEnum 18
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-  maybeToEnum 19
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-  maybeToEnum 20
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-  maybeToEnum 21 = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-  maybeToEnum 22
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-  maybeToEnum 23
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-  maybeToEnum 24
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-  maybeToEnum 25
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-  maybeToEnum 26
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-  maybeToEnum 27
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-  maybeToEnum 28
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-  maybeToEnum 29
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-  maybeToEnum 30
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-  maybeToEnum 31
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-  maybeToEnum 32
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-  maybeToEnum 33
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-  maybeToEnum 34
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-  maybeToEnum 35
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-  maybeToEnum 36
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-  maybeToEnum k
-    = Prelude.Just
-        (WorkflowTaskFailedCause'Unrecognized
-           (WorkflowTaskFailedCause'UnrecognizedValue
-              (Prelude.fromIntegral k)))
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-    = "WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-    = "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-    = "WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-    = "WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-    = "WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-    = "WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-    = "WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-    = "WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-    = "WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-    = "WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-    = "WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-    = "WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-    = "WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-    = "WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-    = "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-    = "WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED"
-  showEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-    = "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-    = "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
-  showEnum WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-    = "WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE"
-  showEnum
-    (WorkflowTaskFailedCause'Unrecognized (WorkflowTaskFailedCause'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-    | (Prelude.==)
-        k
-        "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES"
-    = Prelude.Just
-        WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-    | (Prelude.==) k "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-    | (Prelude.==)
-        k "WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE"
-    = Prelude.Just WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded WorkflowTaskFailedCause where
-  minBound = WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-  maxBound = WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-instance Prelude.Enum WorkflowTaskFailedCause where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum WorkflowTaskFailedCause: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED = 0
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND = 1
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-    = 2
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-    = 3
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES = 4
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES = 5
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-    = 6
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-    = 7
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = 8
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = 9
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = 10
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-    = 11
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID = 12
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE = 13
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-    = 14
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = 15
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-    = 16
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND = 17
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND = 18
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE = 19
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW = 20
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY = 21
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-    = 22
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES = 23
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR = 24
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-    = 25
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-    = 26
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-    = 27
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-    = 28
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-    = 29
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-    = 30
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE = 31
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-    = 32
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-    = 33
-  fromEnum
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-    = 34
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED = 35
-  fromEnum WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE = 36
-  fromEnum
-    (WorkflowTaskFailedCause'Unrecognized (WorkflowTaskFailedCause'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-    = Prelude.error
-        "WorkflowTaskFailedCause.succ: bad argument WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE. This value would be out of bounds."
-  succ WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-    = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-  succ WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-  succ WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-    = WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-  succ WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-    = WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-  succ WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-  succ WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-    = WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-  succ WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-    = WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-  succ WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-    = WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-  succ WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-  succ WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-  succ WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-  succ WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-  succ WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-    = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-  succ WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-  succ
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-  succ WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-    = WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-  succ (WorkflowTaskFailedCause'Unrecognized _)
-    = Prelude.error
-        "WorkflowTaskFailedCause.succ: bad argument: unrecognized value"
-  pred WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-    = Prelude.error
-        "WorkflowTaskFailedCause.pred: bad argument WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED. This value would be out of bounds."
-  pred WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-    = WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-    = WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID
-  pred WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-    = WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-    = WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-    = WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND
-  pred WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-    = WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW
-  pred WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY
-  pred WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID
-  pred WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED
-  pred WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED
-  pred WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES
-  pred
-    WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-    = WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED
-  pred WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-    = WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES
-  pred WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE
-    = WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED
-  pred (WorkflowTaskFailedCause'Unrecognized _)
-    = Prelude.error
-        "WorkflowTaskFailedCause.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault WorkflowTaskFailedCause where
-  fieldDefault = WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED
-instance Control.DeepSeq.NFData WorkflowTaskFailedCause where
-  rnf x__ = Prelude.seq x__ ()
+  = WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnspecified
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledCommand
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleActivityAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelActivityAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartTimerAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelTimerAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRecordMarkerAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCompleteWorkflowExecutionAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadFailWorkflowExecutionAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelWorkflowExecutionAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelExternalWorkflowExecutionAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadContinueAsNewAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseStartTimerDuplicateId
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetStickyTaskQueue
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseWorkflowWorkerUnhandledFailure
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalWorkflowExecutionAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartChildExecutionAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseForceCloseCommand
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseFailoverCloseCommand
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalInputSize
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetWorkflow
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadBinary
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseScheduleActivityDuplicateId
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSearchAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseNonDeterministicError
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadModifyWorkflowPropertiesAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingChildWorkflowsLimitExceeded
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingActivitiesLimitExceeded
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingSignalsLimitExceeded
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingRequestCancelLimitExceeded
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadUpdateWorkflowExecutionMessage
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledUpdate
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleNexusOperationAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingNexusOperationsLimitExceeded
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelNexusOperationAttributes
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseFeatureDisabled
+  | WorkflowTaskFailedCause'WorkflowTaskFailedCauseGrpcMessageTooLarge
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumWorkflowTaskFailedCause :: WorkflowTaskFailedCause -> Int
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnspecified = 0
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledCommand = 1
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleActivityAttributes = 2
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelActivityAttributes = 3
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartTimerAttributes = 4
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelTimerAttributes = 5
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRecordMarkerAttributes = 6
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCompleteWorkflowExecutionAttributes = 7
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadFailWorkflowExecutionAttributes = 8
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelWorkflowExecutionAttributes = 9
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelExternalWorkflowExecutionAttributes = 10
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadContinueAsNewAttributes = 11
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseStartTimerDuplicateId = 12
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetStickyTaskQueue = 13
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseWorkflowWorkerUnhandledFailure = 14
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalWorkflowExecutionAttributes = 15
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartChildExecutionAttributes = 16
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseForceCloseCommand = 17
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseFailoverCloseCommand = 18
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalInputSize = 19
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetWorkflow = 20
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadBinary = 21
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseScheduleActivityDuplicateId = 22
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSearchAttributes = 23
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseNonDeterministicError = 24
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadModifyWorkflowPropertiesAttributes = 25
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingChildWorkflowsLimitExceeded = 26
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingActivitiesLimitExceeded = 27
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingSignalsLimitExceeded = 28
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingRequestCancelLimitExceeded = 29
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadUpdateWorkflowExecutionMessage = 30
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledUpdate = 31
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleNexusOperationAttributes = 32
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingNexusOperationsLimitExceeded = 33
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelNexusOperationAttributes = 34
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseFeatureDisabled = 35
+toProtoEnumWorkflowTaskFailedCause WorkflowTaskFailedCause'WorkflowTaskFailedCauseGrpcMessageTooLarge = 36
+
+fromProtoEnumWorkflowTaskFailedCause :: Int -> Maybe WorkflowTaskFailedCause
+fromProtoEnumWorkflowTaskFailedCause 0 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnspecified
+fromProtoEnumWorkflowTaskFailedCause 1 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledCommand
+fromProtoEnumWorkflowTaskFailedCause 2 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleActivityAttributes
+fromProtoEnumWorkflowTaskFailedCause 3 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelActivityAttributes
+fromProtoEnumWorkflowTaskFailedCause 4 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartTimerAttributes
+fromProtoEnumWorkflowTaskFailedCause 5 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelTimerAttributes
+fromProtoEnumWorkflowTaskFailedCause 6 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRecordMarkerAttributes
+fromProtoEnumWorkflowTaskFailedCause 7 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCompleteWorkflowExecutionAttributes
+fromProtoEnumWorkflowTaskFailedCause 8 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadFailWorkflowExecutionAttributes
+fromProtoEnumWorkflowTaskFailedCause 9 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelWorkflowExecutionAttributes
+fromProtoEnumWorkflowTaskFailedCause 10 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelExternalWorkflowExecutionAttributes
+fromProtoEnumWorkflowTaskFailedCause 11 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadContinueAsNewAttributes
+fromProtoEnumWorkflowTaskFailedCause 12 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseStartTimerDuplicateId
+fromProtoEnumWorkflowTaskFailedCause 13 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetStickyTaskQueue
+fromProtoEnumWorkflowTaskFailedCause 14 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseWorkflowWorkerUnhandledFailure
+fromProtoEnumWorkflowTaskFailedCause 15 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalWorkflowExecutionAttributes
+fromProtoEnumWorkflowTaskFailedCause 16 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartChildExecutionAttributes
+fromProtoEnumWorkflowTaskFailedCause 17 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseForceCloseCommand
+fromProtoEnumWorkflowTaskFailedCause 18 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseFailoverCloseCommand
+fromProtoEnumWorkflowTaskFailedCause 19 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalInputSize
+fromProtoEnumWorkflowTaskFailedCause 20 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetWorkflow
+fromProtoEnumWorkflowTaskFailedCause 21 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadBinary
+fromProtoEnumWorkflowTaskFailedCause 22 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseScheduleActivityDuplicateId
+fromProtoEnumWorkflowTaskFailedCause 23 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSearchAttributes
+fromProtoEnumWorkflowTaskFailedCause 24 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseNonDeterministicError
+fromProtoEnumWorkflowTaskFailedCause 25 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadModifyWorkflowPropertiesAttributes
+fromProtoEnumWorkflowTaskFailedCause 26 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingChildWorkflowsLimitExceeded
+fromProtoEnumWorkflowTaskFailedCause 27 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingActivitiesLimitExceeded
+fromProtoEnumWorkflowTaskFailedCause 28 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingSignalsLimitExceeded
+fromProtoEnumWorkflowTaskFailedCause 29 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingRequestCancelLimitExceeded
+fromProtoEnumWorkflowTaskFailedCause 30 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadUpdateWorkflowExecutionMessage
+fromProtoEnumWorkflowTaskFailedCause 31 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledUpdate
+fromProtoEnumWorkflowTaskFailedCause 32 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleNexusOperationAttributes
+fromProtoEnumWorkflowTaskFailedCause 33 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingNexusOperationsLimitExceeded
+fromProtoEnumWorkflowTaskFailedCause 34 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelNexusOperationAttributes
+fromProtoEnumWorkflowTaskFailedCause 35 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseFeatureDisabled
+fromProtoEnumWorkflowTaskFailedCause 36 = Just WorkflowTaskFailedCause'WorkflowTaskFailedCauseGrpcMessageTooLarge
+fromProtoEnumWorkflowTaskFailedCause _ = Nothing
+
+instance MessageEncode WorkflowTaskFailedCause where
+  buildMessage _ = mempty
+instance MessageSize WorkflowTaskFailedCause where
+  messageSize _ = 0
+instance MessageDecode WorkflowTaskFailedCause where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON WorkflowTaskFailedCause where
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnspecified = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledCommand = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleActivityAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelActivityAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartTimerAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelTimerAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRecordMarkerAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCompleteWorkflowExecutionAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadFailWorkflowExecutionAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelWorkflowExecutionAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelExternalWorkflowExecutionAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadContinueAsNewAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseStartTimerDuplicateId = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetStickyTaskQueue = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseWorkflowWorkerUnhandledFailure = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalWorkflowExecutionAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartChildExecutionAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseForceCloseCommand = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseFailoverCloseCommand = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalInputSize = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetWorkflow = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadBinary = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseScheduleActivityDuplicateId = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSearchAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseNonDeterministicError = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadModifyWorkflowPropertiesAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingChildWorkflowsLimitExceeded = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingActivitiesLimitExceeded = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingSignalsLimitExceeded = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingRequestCancelLimitExceeded = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadUpdateWorkflowExecutionMessage = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledUpdate = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleNexusOperationAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingNexusOperationsLimitExceeded = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelNexusOperationAttributes = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseFeatureDisabled = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED"
+  toJSON WorkflowTaskFailedCause'WorkflowTaskFailedCauseGrpcMessageTooLarge = Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE"
+
+instance Aeson.FromJSON WorkflowTaskFailedCause where
+  parseJSON = \case
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_UNSPECIFIED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnspecified
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_COMMAND" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledCommand
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_ACTIVITY_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleActivityAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_ACTIVITY_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelActivityAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_TIMER_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartTimerAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_TIMER_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelTimerAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_RECORD_MARKER_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRecordMarkerAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_COMPLETE_WORKFLOW_EXECUTION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCompleteWorkflowExecutionAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_FAIL_WORKFLOW_EXECUTION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadFailWorkflowExecutionAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_CANCEL_WORKFLOW_EXECUTION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadCancelWorkflowExecutionAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_EXTERNAL_WORKFLOW_EXECUTION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelExternalWorkflowExecutionAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_CONTINUE_AS_NEW_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadContinueAsNewAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_START_TIMER_DUPLICATE_ID" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseStartTimerDuplicateId
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_RESET_STICKY_TASK_QUEUE" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetStickyTaskQueue
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_WORKFLOW_WORKER_UNHANDLED_FAILURE" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseWorkflowWorkerUnhandledFailure
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_WORKFLOW_EXECUTION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalWorkflowExecutionAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_START_CHILD_EXECUTION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadStartChildExecutionAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_FORCE_CLOSE_COMMAND" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseForceCloseCommand
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_FAILOVER_CLOSE_COMMAND" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseFailoverCloseCommand
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SIGNAL_INPUT_SIZE" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSignalInputSize
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_RESET_WORKFLOW" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseResetWorkflow
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_BINARY" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadBinary
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_SCHEDULE_ACTIVITY_DUPLICATE_ID" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseScheduleActivityDuplicateId
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SEARCH_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadSearchAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseNonDeterministicError
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_MODIFY_WORKFLOW_PROPERTIES_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadModifyWorkflowPropertiesAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_CHILD_WORKFLOWS_LIMIT_EXCEEDED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingChildWorkflowsLimitExceeded
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_ACTIVITIES_LIMIT_EXCEEDED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingActivitiesLimitExceeded
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_SIGNALS_LIMIT_EXCEEDED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingSignalsLimitExceeded
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_REQUEST_CANCEL_LIMIT_EXCEEDED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingRequestCancelLimitExceeded
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_UPDATE_WORKFLOW_EXECUTION_MESSAGE" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadUpdateWorkflowExecutionMessage
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_UNHANDLED_UPDATE" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseUnhandledUpdate
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_SCHEDULE_NEXUS_OPERATION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadScheduleNexusOperationAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_PENDING_NEXUS_OPERATIONS_LIMIT_EXCEEDED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCausePendingNexusOperationsLimitExceeded
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_BAD_REQUEST_CANCEL_NEXUS_OPERATION_ATTRIBUTES" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseBadRequestCancelNexusOperationAttributes
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_FEATURE_DISABLED" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseFeatureDisabled
+    Aeson.String "WORKFLOW_TASK_FAILED_CAUSE_GRPC_MESSAGE_TOO_LARGE" -> pure WorkflowTaskFailedCause'WorkflowTaskFailedCauseGrpcMessageTooLarge
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for WorkflowTaskFailedCause"
+
+instance Hashable WorkflowTaskFailedCause where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumWorkflowTaskFailedCause x)
+
+data StartChildWorkflowExecutionFailedCause
+  = StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified
+  | StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseWorkflowAlreadyExists
+  | StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseNamespaceNotFound
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumStartChildWorkflowExecutionFailedCause :: StartChildWorkflowExecutionFailedCause -> Int
+toProtoEnumStartChildWorkflowExecutionFailedCause StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified = 0
+toProtoEnumStartChildWorkflowExecutionFailedCause StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseWorkflowAlreadyExists = 1
+toProtoEnumStartChildWorkflowExecutionFailedCause StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseNamespaceNotFound = 2
+
+fromProtoEnumStartChildWorkflowExecutionFailedCause :: Int -> Maybe StartChildWorkflowExecutionFailedCause
+fromProtoEnumStartChildWorkflowExecutionFailedCause 0 = Just StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified
+fromProtoEnumStartChildWorkflowExecutionFailedCause 1 = Just StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseWorkflowAlreadyExists
+fromProtoEnumStartChildWorkflowExecutionFailedCause 2 = Just StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseNamespaceNotFound
+fromProtoEnumStartChildWorkflowExecutionFailedCause _ = Nothing
+
+instance MessageEncode StartChildWorkflowExecutionFailedCause where
+  buildMessage _ = mempty
+instance MessageSize StartChildWorkflowExecutionFailedCause where
+  messageSize _ = 0
+instance MessageDecode StartChildWorkflowExecutionFailedCause where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON StartChildWorkflowExecutionFailedCause where
+  toJSON StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified = Aeson.String "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
+  toJSON StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseWorkflowAlreadyExists = Aeson.String "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS"
+  toJSON StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseNamespaceNotFound = Aeson.String "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
+
+instance Aeson.FromJSON StartChildWorkflowExecutionFailedCause where
+  parseJSON = \case
+    Aeson.String "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED" -> pure StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified
+    Aeson.String "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS" -> pure StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseWorkflowAlreadyExists
+    Aeson.String "START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND" -> pure StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseNamespaceNotFound
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for StartChildWorkflowExecutionFailedCause"
+
+instance Hashable StartChildWorkflowExecutionFailedCause where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumStartChildWorkflowExecutionFailedCause x)
+
+data CancelExternalWorkflowExecutionFailedCause
+  = CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseUnspecified
+  | CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound
+  | CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseNamespaceNotFound
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumCancelExternalWorkflowExecutionFailedCause :: CancelExternalWorkflowExecutionFailedCause -> Int
+toProtoEnumCancelExternalWorkflowExecutionFailedCause CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseUnspecified = 0
+toProtoEnumCancelExternalWorkflowExecutionFailedCause CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound = 1
+toProtoEnumCancelExternalWorkflowExecutionFailedCause CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseNamespaceNotFound = 2
+
+fromProtoEnumCancelExternalWorkflowExecutionFailedCause :: Int -> Maybe CancelExternalWorkflowExecutionFailedCause
+fromProtoEnumCancelExternalWorkflowExecutionFailedCause 0 = Just CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseUnspecified
+fromProtoEnumCancelExternalWorkflowExecutionFailedCause 1 = Just CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound
+fromProtoEnumCancelExternalWorkflowExecutionFailedCause 2 = Just CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseNamespaceNotFound
+fromProtoEnumCancelExternalWorkflowExecutionFailedCause _ = Nothing
+
+instance MessageEncode CancelExternalWorkflowExecutionFailedCause where
+  buildMessage _ = mempty
+instance MessageSize CancelExternalWorkflowExecutionFailedCause where
+  messageSize _ = 0
+instance MessageDecode CancelExternalWorkflowExecutionFailedCause where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON CancelExternalWorkflowExecutionFailedCause where
+  toJSON CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseUnspecified = Aeson.String "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
+  toJSON CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound = Aeson.String "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND"
+  toJSON CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseNamespaceNotFound = Aeson.String "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
+
+instance Aeson.FromJSON CancelExternalWorkflowExecutionFailedCause where
+  parseJSON = \case
+    Aeson.String "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED" -> pure CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseUnspecified
+    Aeson.String "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND" -> pure CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound
+    Aeson.String "CANCEL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND" -> pure CancelExternalWorkflowExecutionFailedCause'CancelExternalWorkflowExecutionFailedCauseNamespaceNotFound
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for CancelExternalWorkflowExecutionFailedCause"
+
+instance Hashable CancelExternalWorkflowExecutionFailedCause where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumCancelExternalWorkflowExecutionFailedCause x)
+
+data SignalExternalWorkflowExecutionFailedCause
+  = SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseUnspecified
+  | SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound
+  | SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseNamespaceNotFound
+  | SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseSignalCountLimitExceeded
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumSignalExternalWorkflowExecutionFailedCause :: SignalExternalWorkflowExecutionFailedCause -> Int
+toProtoEnumSignalExternalWorkflowExecutionFailedCause SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseUnspecified = 0
+toProtoEnumSignalExternalWorkflowExecutionFailedCause SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound = 1
+toProtoEnumSignalExternalWorkflowExecutionFailedCause SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseNamespaceNotFound = 2
+toProtoEnumSignalExternalWorkflowExecutionFailedCause SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseSignalCountLimitExceeded = 3
+
+fromProtoEnumSignalExternalWorkflowExecutionFailedCause :: Int -> Maybe SignalExternalWorkflowExecutionFailedCause
+fromProtoEnumSignalExternalWorkflowExecutionFailedCause 0 = Just SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseUnspecified
+fromProtoEnumSignalExternalWorkflowExecutionFailedCause 1 = Just SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound
+fromProtoEnumSignalExternalWorkflowExecutionFailedCause 2 = Just SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseNamespaceNotFound
+fromProtoEnumSignalExternalWorkflowExecutionFailedCause 3 = Just SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseSignalCountLimitExceeded
+fromProtoEnumSignalExternalWorkflowExecutionFailedCause _ = Nothing
+
+instance MessageEncode SignalExternalWorkflowExecutionFailedCause where
+  buildMessage _ = mempty
+instance MessageSize SignalExternalWorkflowExecutionFailedCause where
+  messageSize _ = 0
+instance MessageDecode SignalExternalWorkflowExecutionFailedCause where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON SignalExternalWorkflowExecutionFailedCause where
+  toJSON SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseUnspecified = Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED"
+  toJSON SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound = Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND"
+  toJSON SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseNamespaceNotFound = Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND"
+  toJSON SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseSignalCountLimitExceeded = Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED"
+
+instance Aeson.FromJSON SignalExternalWorkflowExecutionFailedCause where
+  parseJSON = \case
+    Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_UNSPECIFIED" -> pure SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseUnspecified
+    Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_EXTERNAL_WORKFLOW_EXECUTION_NOT_FOUND" -> pure SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseExternalWorkflowExecutionNotFound
+    Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_NAMESPACE_NOT_FOUND" -> pure SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseNamespaceNotFound
+    Aeson.String "SIGNAL_EXTERNAL_WORKFLOW_EXECUTION_FAILED_CAUSE_SIGNAL_COUNT_LIMIT_EXCEEDED" -> pure SignalExternalWorkflowExecutionFailedCause'SignalExternalWorkflowExecutionFailedCauseSignalCountLimitExceeded
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for SignalExternalWorkflowExecutionFailedCause"
+
+instance Hashable SignalExternalWorkflowExecutionFailedCause where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumSignalExternalWorkflowExecutionFailedCause x)
+
+data ResourceExhaustedCause
+  = ResourceExhaustedCause'ResourceExhaustedCauseUnspecified
+  | ResourceExhaustedCause'ResourceExhaustedCauseRpsLimit
+  | ResourceExhaustedCause'ResourceExhaustedCauseConcurrentLimit
+  | ResourceExhaustedCause'ResourceExhaustedCauseSystemOverloaded
+  | ResourceExhaustedCause'ResourceExhaustedCausePersistenceLimit
+  | ResourceExhaustedCause'ResourceExhaustedCauseBusyWorkflow
+  | ResourceExhaustedCause'ResourceExhaustedCauseApsLimit
+  | ResourceExhaustedCause'ResourceExhaustedCausePersistenceStorageLimit
+  | ResourceExhaustedCause'ResourceExhaustedCauseCircuitBreakerOpen
+  | ResourceExhaustedCause'ResourceExhaustedCauseOpsLimit
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumResourceExhaustedCause :: ResourceExhaustedCause -> Int
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseUnspecified = 0
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseRpsLimit = 1
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseConcurrentLimit = 2
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseSystemOverloaded = 3
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCausePersistenceLimit = 4
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseBusyWorkflow = 5
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseApsLimit = 6
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCausePersistenceStorageLimit = 7
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseCircuitBreakerOpen = 8
+toProtoEnumResourceExhaustedCause ResourceExhaustedCause'ResourceExhaustedCauseOpsLimit = 9
+
+fromProtoEnumResourceExhaustedCause :: Int -> Maybe ResourceExhaustedCause
+fromProtoEnumResourceExhaustedCause 0 = Just ResourceExhaustedCause'ResourceExhaustedCauseUnspecified
+fromProtoEnumResourceExhaustedCause 1 = Just ResourceExhaustedCause'ResourceExhaustedCauseRpsLimit
+fromProtoEnumResourceExhaustedCause 2 = Just ResourceExhaustedCause'ResourceExhaustedCauseConcurrentLimit
+fromProtoEnumResourceExhaustedCause 3 = Just ResourceExhaustedCause'ResourceExhaustedCauseSystemOverloaded
+fromProtoEnumResourceExhaustedCause 4 = Just ResourceExhaustedCause'ResourceExhaustedCausePersistenceLimit
+fromProtoEnumResourceExhaustedCause 5 = Just ResourceExhaustedCause'ResourceExhaustedCauseBusyWorkflow
+fromProtoEnumResourceExhaustedCause 6 = Just ResourceExhaustedCause'ResourceExhaustedCauseApsLimit
+fromProtoEnumResourceExhaustedCause 7 = Just ResourceExhaustedCause'ResourceExhaustedCausePersistenceStorageLimit
+fromProtoEnumResourceExhaustedCause 8 = Just ResourceExhaustedCause'ResourceExhaustedCauseCircuitBreakerOpen
+fromProtoEnumResourceExhaustedCause 9 = Just ResourceExhaustedCause'ResourceExhaustedCauseOpsLimit
+fromProtoEnumResourceExhaustedCause _ = Nothing
+
+instance MessageEncode ResourceExhaustedCause where
+  buildMessage _ = mempty
+instance MessageSize ResourceExhaustedCause where
+  messageSize _ = 0
+instance MessageDecode ResourceExhaustedCause where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON ResourceExhaustedCause where
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseUnspecified = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseRpsLimit = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseConcurrentLimit = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseSystemOverloaded = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCausePersistenceLimit = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseBusyWorkflow = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseApsLimit = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCausePersistenceStorageLimit = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseCircuitBreakerOpen = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN"
+  toJSON ResourceExhaustedCause'ResourceExhaustedCauseOpsLimit = Aeson.String "RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT"
+
+instance Aeson.FromJSON ResourceExhaustedCause where
+  parseJSON = \case
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_UNSPECIFIED" -> pure ResourceExhaustedCause'ResourceExhaustedCauseUnspecified
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_RPS_LIMIT" -> pure ResourceExhaustedCause'ResourceExhaustedCauseRpsLimit
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_CONCURRENT_LIMIT" -> pure ResourceExhaustedCause'ResourceExhaustedCauseConcurrentLimit
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_SYSTEM_OVERLOADED" -> pure ResourceExhaustedCause'ResourceExhaustedCauseSystemOverloaded
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_LIMIT" -> pure ResourceExhaustedCause'ResourceExhaustedCausePersistenceLimit
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_BUSY_WORKFLOW" -> pure ResourceExhaustedCause'ResourceExhaustedCauseBusyWorkflow
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_APS_LIMIT" -> pure ResourceExhaustedCause'ResourceExhaustedCauseApsLimit
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_PERSISTENCE_STORAGE_LIMIT" -> pure ResourceExhaustedCause'ResourceExhaustedCausePersistenceStorageLimit
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_CIRCUIT_BREAKER_OPEN" -> pure ResourceExhaustedCause'ResourceExhaustedCauseCircuitBreakerOpen
+    Aeson.String "RESOURCE_EXHAUSTED_CAUSE_OPS_LIMIT" -> pure ResourceExhaustedCause'ResourceExhaustedCauseOpsLimit
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for ResourceExhaustedCause"
+
+instance Hashable ResourceExhaustedCause where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumResourceExhaustedCause x)
+
+data ResourceExhaustedScope
+  = ResourceExhaustedScope'ResourceExhaustedScopeUnspecified
+  | ResourceExhaustedScope'ResourceExhaustedScopeNamespace
+  | ResourceExhaustedScope'ResourceExhaustedScopeSystem
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumResourceExhaustedScope :: ResourceExhaustedScope -> Int
+toProtoEnumResourceExhaustedScope ResourceExhaustedScope'ResourceExhaustedScopeUnspecified = 0
+toProtoEnumResourceExhaustedScope ResourceExhaustedScope'ResourceExhaustedScopeNamespace = 1
+toProtoEnumResourceExhaustedScope ResourceExhaustedScope'ResourceExhaustedScopeSystem = 2
+
+fromProtoEnumResourceExhaustedScope :: Int -> Maybe ResourceExhaustedScope
+fromProtoEnumResourceExhaustedScope 0 = Just ResourceExhaustedScope'ResourceExhaustedScopeUnspecified
+fromProtoEnumResourceExhaustedScope 1 = Just ResourceExhaustedScope'ResourceExhaustedScopeNamespace
+fromProtoEnumResourceExhaustedScope 2 = Just ResourceExhaustedScope'ResourceExhaustedScopeSystem
+fromProtoEnumResourceExhaustedScope _ = Nothing
+
+instance MessageEncode ResourceExhaustedScope where
+  buildMessage _ = mempty
+instance MessageSize ResourceExhaustedScope where
+  messageSize _ = 0
+instance MessageDecode ResourceExhaustedScope where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON ResourceExhaustedScope where
+  toJSON ResourceExhaustedScope'ResourceExhaustedScopeUnspecified = Aeson.String "RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED"
+  toJSON ResourceExhaustedScope'ResourceExhaustedScopeNamespace = Aeson.String "RESOURCE_EXHAUSTED_SCOPE_NAMESPACE"
+  toJSON ResourceExhaustedScope'ResourceExhaustedScopeSystem = Aeson.String "RESOURCE_EXHAUSTED_SCOPE_SYSTEM"
+
+instance Aeson.FromJSON ResourceExhaustedScope where
+  parseJSON = \case
+    Aeson.String "RESOURCE_EXHAUSTED_SCOPE_UNSPECIFIED" -> pure ResourceExhaustedScope'ResourceExhaustedScopeUnspecified
+    Aeson.String "RESOURCE_EXHAUSTED_SCOPE_NAMESPACE" -> pure ResourceExhaustedScope'ResourceExhaustedScopeNamespace
+    Aeson.String "RESOURCE_EXHAUSTED_SCOPE_SYSTEM" -> pure ResourceExhaustedScope'ResourceExhaustedScopeSystem
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for ResourceExhaustedScope"
+
+instance Hashable ResourceExhaustedScope where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumResourceExhaustedScope x)

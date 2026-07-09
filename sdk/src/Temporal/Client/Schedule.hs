@@ -8,6 +8,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -186,8 +187,8 @@ import Data.ByteString (ByteString)
 import Data.Conduit
 import Data.Int (Int32, Int64)
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
-import Data.ProtoLens
 import Data.Text (Text)
 -- import Temporal.Client (StartWorkflowOptions(..), TimeoutOptions(..))
 
@@ -196,17 +197,14 @@ import Data.Vector (Vector)
 import qualified Data.Vector as V
 import GHC.Generics
 import GHC.Records
-import Lens.Family2
+import Proto.Encode (encodeMessage)
 import qualified Proto.Temporal.Api.Common.V1.Message as C
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as C
 import qualified Proto.Temporal.Api.Enums.V1.Schedule as S
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
 import qualified Proto.Temporal.Api.Schedule.V1.Message as S
-import qualified Proto.Temporal.Api.Schedule.V1.Message_Fields as S
-import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message as TQ
 import qualified Proto.Temporal.Api.Workflow.V1.Message as W
-import qualified Proto.Temporal.Api.Workflow.V1.Message_Fields as W
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
+import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as WF
 import Temporal.Client
 import Temporal.Common
 import Temporal.Core.Client as Core
@@ -218,6 +216,36 @@ import Temporal.SearchAttributes
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow hiding (yield)
 import UnliftIO
+
+
+searchAttributesMessageFromMap :: Map Text C.Payload -> C.SearchAttributes
+searchAttributesMessageFromMap attrs =
+  mempty
+    { C.indexedFields =
+        V.fromList
+          (fmap (\(key, value) -> C.SearchAttributes'IndexedFieldsEntry (Just key) (Just value) []) (Map.toList attrs))
+    }
+
+
+searchAttributesMapFromMessage :: C.SearchAttributes -> Map Text C.Payload
+searchAttributesMapFromMessage attrs =
+  V.foldr
+    ( \(C.SearchAttributes'IndexedFieldsEntry mKey mValue _) acc ->
+        case (mKey, mValue) of
+          (Just key, Just value) -> Map.insert key value acc
+          _ -> acc
+    )
+    Map.empty
+    (getField @"indexedFields" attrs)
+
+
+headerMessageFromMap :: Map Text C.Payload -> C.Header
+headerMessageFromMap headers =
+  mempty
+    { C.fields =
+        V.fromList
+          (fmap (\(key, value) -> C.Header'FieldsEntry (Just key) (Just value) []) (Map.toList headers))
+    }
 
 
 ---------------------------------------------------------------------------------
@@ -270,20 +298,21 @@ createSchedule s opts = liftIO $ do
     eResp <-
       Core.createSchedule
         (scheduleClient s)
-        ( defMessage
-            & WF.namespace .~ rawNamespace s.scheduleClientNamespace
-            & WF.scheduleId .~ rawScheduleId opts.scheduleId
-            & WF.schedule .~ scheduleToProto opts.schedule
-            & WF.identity .~ s.identity
-            & WF.maybe'initialPatch .~ fmap schedulePatchToProto opts.initialPatch
-            & WF.memo .~ convertToProtoMemo opts.memo
-            & WF.requestId .~ opts.requestId
-            & WF.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttributes)
+        ( mempty
+            { WF.namespace = Just (rawNamespace s.scheduleClientNamespace)
+            , WF.scheduleId = Just (rawScheduleId opts.scheduleId)
+            , WF.schedule = Just (scheduleToProto opts.schedule)
+            , WF.identity = Just s.identity
+            , WF.initialPatch = schedulePatchToProto <$> opts.initialPatch
+            , WF.memo = Just (convertToProtoMemo opts.memo)
+            , WF.requestId = Just opts.requestId
+            , WF.searchAttributes = Just (searchAttributesMessageFromMap searchAttributes)
+            }
         )
     case eResp of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
       Right resp -> pure resp
-  pure $ resp ^. WF.conflictToken
+  pure $ fromMaybe "" (getField @"conflictToken" resp)
 
 
 -- | Deletes a schedule, removing it from the system.
@@ -297,10 +326,11 @@ deleteSchedule c sId = do
     liftIO $
       Core.deleteSchedule
         c.scheduleClient
-        ( defMessage
-            & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-            & WF.identity .~ c.identity
-            & WF.scheduleId .~ rawScheduleId sId
+        ( mempty
+            { WF.namespace = Just (rawNamespace c.scheduleClientNamespace)
+            , WF.identity = Just c.identity
+            , WF.scheduleId = Just (rawScheduleId sId)
+            }
         )
   case eResp of
     Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
@@ -323,8 +353,8 @@ data WorkflowExecution = WorkflowExecution
 workflowExecutionFromProto :: C.WorkflowExecution -> WorkflowExecution
 workflowExecutionFromProto p =
   WorkflowExecution
-    { workflowId = WorkflowId (p ^. C.workflowId)
-    , runId = RunId (p ^. C.runId)
+    { workflowId = WorkflowId (fromMaybe "" (getField @"workflowId" p))
+    , runId = RunId (fromMaybe "" (getField @"runId" p))
     }
 
 
@@ -351,19 +381,19 @@ data ScheduleListEntry = ScheduleListEntry
 scheduleListInfoFromProto :: S.ScheduleListInfo -> ScheduleListInfo
 scheduleListInfoFromProto p =
   ScheduleListInfo
-    { spec = fmap scheduleSpecFromProto (p ^. S.maybe'spec)
-    , workflowType = WorkflowType (p ^. S.workflowType . C.name)
-    , notes = p ^. S.notes
-    , paused = p ^. S.paused
-    , recentActions = fmap scheduleActionResultFromProto (p ^. S.recentActions)
-    , futureActionTimes = fmap timespecFromTimestamp (p ^. S.futureActionTimes)
+    { spec = scheduleSpecFromProto <$> getField @"spec" p
+    , workflowType = WorkflowType (fromMaybe "" (getField @"name" (fromMaybe mempty (getField @"workflowType" p))))
+    , notes = fromMaybe "" (getField @"notes" p)
+    , paused = fromMaybe False (getField @"paused" p)
+    , recentActions = V.toList (scheduleActionResultFromProto <$> getField @"recentActions" p)
+    , futureActionTimes = V.toList (timespecFromTimestamp <$> getField @"futureActionTimes" p)
     }
 
 
 scheduleListEntryFromProto :: S.ScheduleListEntry -> IO ScheduleListEntry
 scheduleListEntryFromProto p = do
   let searchAttrs :: Map Text C.Payload
-      searchAttrs = p ^. S.searchAttributes . C.indexedFields
+      searchAttrs = searchAttributesMapFromMessage (fromMaybe mempty (getField @"searchAttributes" p))
   searchAttributes <- do
     res <- searchAttributesFromProto searchAttrs
     case res of
@@ -372,9 +402,9 @@ scheduleListEntryFromProto p = do
 
   pure $
     ScheduleListEntry
-      { info = fmap scheduleListInfoFromProto (p ^. S.maybe'info)
-      , scheduleId = ScheduleId (p ^. S.scheduleId)
-      , memo = convertFromProtoMemo (p ^. S.memo)
+      { info = scheduleListInfoFromProto <$> getField @"info" p
+      , scheduleId = ScheduleId (fromMaybe "" (getField @"scheduleId" p))
+      , memo = convertFromProtoMemo (fromMaybe mempty (getField @"memo" p))
       , ..
       }
 
@@ -392,19 +422,20 @@ listSchedules c opts = go ""
         eResp <-
           Core.listSchedules
             c.scheduleClient
-            ( defMessage
-                & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-                & WF.maximumPageSize .~ opts.maximumPageSize
-                & WF.nextPageToken .~ tok
+            ( mempty
+                { WF.namespace = Just (rawNamespace c.scheduleClientNamespace)
+                , WF.maximumPageSize = Just opts.maximumPageSize
+                , WF.nextPageToken = Just tok
+                }
             )
         case eResp of
           Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
           Right resp -> pure resp
-      unless (V.null (resp ^. WF.vec'schedules)) $ do
-        liftIO (traverse scheduleListEntryFromProto (resp ^. WF.vec'schedules)) >>= yield
-      if resp ^. WF.nextPageToken == "" || V.null (resp ^. WF.vec'schedules)
+      unless (V.null (getField @"schedules" resp)) $ do
+        liftIO (traverse scheduleListEntryFromProto (getField @"schedules" resp)) >>= yield
+      if fromMaybe "" (getField @"nextPageToken" resp) == "" || V.null (getField @"schedules" resp)
         then pure ()
-        else go (resp ^. WF.nextPageToken)
+        else go (fromMaybe "" (getField @"nextPageToken" resp))
 
 
 data ListScheduleMatchingTimesOptions = ListScheduleMatchingTimesOptions
@@ -427,16 +458,17 @@ listScheduleMatchingTimes c opts = do
       eResp <-
         Core.listScheduleMatchingTimes
           c.scheduleClient
-          ( defMessage
-              & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-              & WF.scheduleId .~ rawScheduleId opts.scheduleId
-              & WF.startTime .~ timespecToTimestamp opts.startTime
-              & WF.endTime .~ timespecToTimestamp opts.endTime
+          ( mempty
+              { WF.namespace = Just (rawNamespace c.scheduleClientNamespace)
+              , WF.scheduleId = Just (rawScheduleId opts.scheduleId)
+              , WF.startTime = Just (timespecToTimestamp opts.startTime)
+              , WF.endTime = Just (timespecToTimestamp opts.endTime)
+              }
           )
       case eResp of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
         Right resp -> pure resp
-  pure $ fmap timespecFromTimestamp (resp ^. WF.vec'startTime)
+  pure $ timespecFromTimestamp <$> getField @"startTime" resp
 
 
 data ScheduleActionResult = ScheduleActionResult
@@ -450,9 +482,9 @@ data ScheduleActionResult = ScheduleActionResult
 scheduleActionResultFromProto :: S.ScheduleActionResult -> ScheduleActionResult
 scheduleActionResultFromProto p =
   ScheduleActionResult
-    { scheduleTime = timespecFromTimestamp (p ^. S.scheduleTime)
-    , actualTime = timespecFromTimestamp (p ^. S.actualTime)
-    , startWorkflowResult = workflowExecutionFromProto (p ^. S.startWorkflowResult)
+    { scheduleTime = timespecFromTimestamp (fromMaybe mempty (getField @"scheduleTime" p))
+    , actualTime = timespecFromTimestamp (fromMaybe mempty (getField @"actualTime" p))
+    , startWorkflowResult = workflowExecutionFromProto (fromMaybe mempty (getField @"startWorkflowResult" p))
     }
 
 
@@ -486,15 +518,15 @@ data ScheduleInfo = ScheduleInfo
 scheduleInfoFromProto :: S.ScheduleInfo -> ScheduleInfo
 scheduleInfoFromProto p =
   ScheduleInfo
-    { actionCount = p ^. S.actionCount
-    , missedCatchupWindow = p ^. S.missedCatchupWindow
-    , overlapSkipped = p ^. S.overlapSkipped
-    , runningWorkflows = fmap workflowExecutionFromProto (p ^. S.runningWorkflows)
-    , recentActions = fmap scheduleActionResultFromProto (p ^. S.recentActions)
-    , futureActionTimes = fmap timespecFromTimestamp (p ^. S.futureActionTimes)
-    , createTime = fmap timespecFromTimestamp (p ^. S.maybe'createTime)
-    , updateTime = fmap timespecFromTimestamp (p ^. S.maybe'updateTime)
-    , invalidScheduleError = p ^. S.invalidScheduleError
+    { actionCount = fromMaybe 0 (getField @"actionCount" p)
+    , missedCatchupWindow = fromMaybe 0 (getField @"missedCatchupWindow" p)
+    , overlapSkipped = fromMaybe 0 (getField @"overlapSkipped" p)
+    , runningWorkflows = V.toList (workflowExecutionFromProto <$> getField @"runningWorkflows" p)
+    , recentActions = V.toList (scheduleActionResultFromProto <$> getField @"recentActions" p)
+    , futureActionTimes = V.toList (timespecFromTimestamp <$> getField @"futureActionTimes" p)
+    , createTime = timespecFromTimestamp <$> getField @"createTime" p
+    , updateTime = timespecFromTimestamp <$> getField @"updateTime" p
+    , invalidScheduleError = fromMaybe "" (getField @"invalidScheduleError" p)
     }
 
 
@@ -509,16 +541,18 @@ data Schedule = Schedule
 
 scheduleToProto :: Schedule -> S.Schedule
 scheduleToProto p =
-  defMessage
-    & S.spec .~ scheduleSpecToProto p.spec
-    & S.action .~ scheduleActionToProto p.action
-    & S.policies .~ schedulePoliciesToProto p.policies
-    & S.state .~ scheduleStateToProto p.state
+  mempty
+    { S.spec = Just (scheduleSpecToProto p.spec)
+    , S.action = Just (scheduleActionToProto p.action)
+    , S.policies = Just (schedulePoliciesToProto p.policies)
+    , S.state = Just (scheduleStateToProto p.state)
+    }
 
 
--- | The set of policies that can be used to customize scheduling behavior.
---
--- https://docs.temporal.io/schedule#policies
+{- | The set of policies that can be used to customize scheduling behavior.
+
+https://docs.temporal.io/schedule#policies
+-}
 data SchedulePolicies = SchedulePolicies
   { overlapPolicy :: !OverlapPolicy
   -- ^ Policy for overlaps.
@@ -550,18 +584,19 @@ data SchedulePolicies = SchedulePolicies
 
 schedulePoliciesToProto :: SchedulePolicies -> S.SchedulePolicies
 schedulePoliciesToProto p =
-  defMessage
-    & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
-    & S.maybe'catchupWindow .~ fmap durationToProto p.catchupWindow
-    & S.pauseOnFailure .~ p.pauseOnFailure
+  mempty
+    { S.overlapPolicy = Just (overlapPolicyToProto p.overlapPolicy)
+    , S.catchupWindow = durationToProto <$> p.catchupWindow
+    , S.pauseOnFailure = Just p.pauseOnFailure
+    }
 
 
 schedulePoliciesFromProto :: S.SchedulePolicies -> SchedulePolicies
 schedulePoliciesFromProto p =
   SchedulePolicies
-    { overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
-    , catchupWindow = fmap durationFromProto (p ^. S.maybe'catchupWindow)
-    , pauseOnFailure = p ^. S.pauseOnFailure
+    { overlapPolicy = overlapPolicyFromProto (fromMaybe S.ScheduleOverlapPolicy'ScheduleOverlapPolicyUnspecified (getField @"overlapPolicy" p))
+    , catchupWindow = durationFromProto <$> getField @"catchupWindow" p
+    , pauseOnFailure = fromMaybe False (getField @"pauseOnFailure" p)
     }
 
 
@@ -594,25 +629,25 @@ data OverlapPolicy
 
 overlapPolicyToProto :: OverlapPolicy -> S.ScheduleOverlapPolicy
 overlapPolicyToProto p = case p of
-  Unspecified -> S.SCHEDULE_OVERLAP_POLICY_UNSPECIFIED
-  Skip -> S.SCHEDULE_OVERLAP_POLICY_SKIP
-  BufferOne -> S.SCHEDULE_OVERLAP_POLICY_BUFFER_ONE
-  BufferAll -> S.SCHEDULE_OVERLAP_POLICY_BUFFER_ALL
-  CancelOther -> S.SCHEDULE_OVERLAP_POLICY_CANCEL_OTHER
-  TerminateOther -> S.SCHEDULE_OVERLAP_POLICY_TERMINATE_OTHER
-  AllowAll -> S.SCHEDULE_OVERLAP_POLICY_ALLOW_ALL
-  OverlapPolicyUnrecognized -> S.SCHEDULE_OVERLAP_POLICY_UNSPECIFIED
+  Unspecified -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyUnspecified
+  Skip -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicySkip
+  BufferOne -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyBufferOne
+  BufferAll -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyBufferAll
+  CancelOther -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyCancelOther
+  TerminateOther -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyTerminateOther
+  AllowAll -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyAllowAll
+  OverlapPolicyUnrecognized -> S.ScheduleOverlapPolicy'ScheduleOverlapPolicyUnspecified
 
 
 overlapPolicyFromProto :: S.ScheduleOverlapPolicy -> OverlapPolicy
 overlapPolicyFromProto p = case p of
-  S.SCHEDULE_OVERLAP_POLICY_UNSPECIFIED -> Unspecified
-  S.SCHEDULE_OVERLAP_POLICY_SKIP -> Skip
-  S.SCHEDULE_OVERLAP_POLICY_BUFFER_ONE -> BufferOne
-  S.SCHEDULE_OVERLAP_POLICY_BUFFER_ALL -> BufferAll
-  S.SCHEDULE_OVERLAP_POLICY_CANCEL_OTHER -> CancelOther
-  S.SCHEDULE_OVERLAP_POLICY_TERMINATE_OTHER -> TerminateOther
-  S.SCHEDULE_OVERLAP_POLICY_ALLOW_ALL -> AllowAll
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicyUnspecified -> Unspecified
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicySkip -> Skip
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicyBufferOne -> BufferOne
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicyBufferAll -> BufferAll
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicyCancelOther -> CancelOther
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicyTerminateOther -> TerminateOther
+  S.ScheduleOverlapPolicy'ScheduleOverlapPolicyAllowAll -> AllowAll
   _ -> OverlapPolicyUnrecognized
 
 
@@ -636,27 +671,36 @@ data ScheduleState = ScheduleState
 
 scheduleStateToProto :: ScheduleState -> S.ScheduleState
 scheduleStateToProto p =
-  defMessage
-    & S.notes .~ p.notes
-    & S.paused .~ p.paused
-    & S.limitedActions .~ p.limitedActions
-    & S.remainingActions .~ p.remainingActions
+  mempty
+    { S.notes = Just p.notes
+    , S.paused = Just p.paused
+    , S.limitedActions = Just p.limitedActions
+    , S.remainingActions = Just p.remainingActions
+    }
 
 
 scheduleStateFromProto :: S.ScheduleState -> ScheduleState
 scheduleStateFromProto p =
   ScheduleState
-    { notes = p ^. S.notes
-    , paused = p ^. S.paused
-    , limitedActions = p ^. S.limitedActions
-    , remainingActions = p ^. S.remainingActions
+    { notes = fromMaybe "" (getField @"notes" p)
+    , paused = fromMaybe False (getField @"paused" p)
+    , limitedActions = fromMaybe False (getField @"limitedActions" p)
+    , remainingActions = fromMaybe 0 (getField @"remainingActions" p)
     }
 
 
 data ScheduleAction
   = StartWorkflow W.NewWorkflowExecutionInfo
   | ScheduleActionUnrecognized
-  deriving stock (Eq, Ord, Show)
+  deriving stock (Eq, Show)
+
+
+instance Ord ScheduleAction where
+  compare (StartWorkflow left) (StartWorkflow right) =
+    compare (encodeMessage left) (encodeMessage right)
+  compare StartWorkflow {} ScheduleActionUnrecognized = LT
+  compare ScheduleActionUnrecognized StartWorkflow {} = GT
+  compare ScheduleActionUnrecognized ScheduleActionUnrecognized = EQ
 
 
 mkScheduleAction
@@ -676,45 +720,48 @@ mkScheduleAction (workflowRef -> KnownWorkflow codec wfName) (WorkflowId wfId) o
   inputs' <- sequence inputs
   let tq = rawTaskQueue opts.taskQueue
       executionInfo =
-        defMessage
-          & W.workflowId .~ wfId
-          & W.workflowType .~ (defMessage & C.name .~ wfName)
-          & W.taskQueue
-            .~ ( defMessage
-                  & C.name .~ tq
-                  & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-               )
-          & W.input .~ (defMessage & C.vec'payloads .~ fmap convertToProtoPayload inputs')
-          & W.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts.timeouts.executionTimeout)
-          & W.maybe'workflowRunTimeout .~ (durationToProto <$> opts.timeouts.runTimeout)
-          & W.maybe'workflowTaskTimeout .~ (durationToProto <$> opts.timeouts.taskTimeout)
-          & W.maybe'retryPolicy .~ (retryPolicyToProto <$> opts.retryPolicy)
-          & W.memo .~ convertToProtoMemo opts.memo
-          & W.searchAttributes .~ (defMessage & C.indexedFields .~ searchAttrs)
-          & W.header .~ (defMessage & C.fields .~ fmap convertToProtoPayload opts.headers)
+        mempty
+          { W.workflowId = Just wfId
+          , W.workflowType = Just ((mempty :: C.WorkflowType) {C.name = Just wfName})
+          , W.taskQueue =
+              Just
+                ( mempty
+                    { TQ.name = Just tq
+                    , TQ.kind = Just TaskQueueKind'TaskQueueKindUnspecified
+                    }
+                )
+          , W.input = Just (mempty {C.payloads = convertToProtoPayload <$> inputs'})
+          , W.workflowExecutionTimeout = durationToProto <$> opts.timeouts.executionTimeout
+          , W.workflowRunTimeout = durationToProto <$> opts.timeouts.runTimeout
+          , W.workflowTaskTimeout = durationToProto <$> opts.timeouts.taskTimeout
+          , W.retryPolicy = retryPolicyToProto <$> opts.retryPolicy
+          , W.memo = Just (convertToProtoMemo opts.memo)
+          , W.searchAttributes = Just (searchAttributesMessageFromMap searchAttrs)
+          , W.header = Just (headerMessageFromMap (convertToProtoPayload <$> opts.headers))
+          }
   pure $ StartWorkflow executionInfo
 
 
 scheduleActionToProto :: ScheduleAction -> S.ScheduleAction
 scheduleActionToProto a = case a of
-  StartWorkflow wf -> defMessage & S.maybe'action .~ Just (S.ScheduleAction'StartWorkflow wf)
-  ScheduleActionUnrecognized -> defMessage
+  StartWorkflow wf -> mempty {S.action = Just (S.ScheduleAction'Action'StartWorkflow wf)}
+  ScheduleActionUnrecognized -> mempty
 
 
 scheduleActionFromProto :: S.ScheduleAction -> ScheduleAction
-scheduleActionFromProto a = case a ^. S.maybe'action of
+scheduleActionFromProto a = case getField @"action" a of
   Nothing -> ScheduleActionUnrecognized
   Just a' -> case a' of
-    S.ScheduleAction'StartWorkflow wf -> StartWorkflow wf
+    S.ScheduleAction'Action'StartWorkflow wf -> StartWorkflow wf
 
 
 scheduleFromProto :: S.Schedule -> Schedule
 scheduleFromProto p =
   Schedule
-    { spec = scheduleSpecFromProto (p ^. S.spec)
-    , action = scheduleActionFromProto (p ^. S.action)
-    , policies = schedulePoliciesFromProto (p ^. S.policies)
-    , state = scheduleStateFromProto (p ^. S.state)
+    { spec = scheduleSpecFromProto (fromMaybe mempty (getField @"spec" p))
+    , action = scheduleActionFromProto (fromMaybe mempty (getField @"action" p))
+    , policies = schedulePoliciesFromProto (fromMaybe mempty (getField @"policies" p))
+    , state = scheduleStateFromProto (fromMaybe mempty (getField @"state" p))
     }
 
 
@@ -751,24 +798,25 @@ describeSchedule c (ScheduleId s) = liftIO $ do
   eResp <-
     Core.describeSchedule
       c.scheduleClient
-      ( defMessage
-          & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-          & WF.scheduleId .~ s
+      ( mempty
+          { WF.namespace = Just (rawNamespace c.scheduleClientNamespace)
+          , WF.scheduleId = Just s
+          }
       )
   case eResp of
     Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
     Right res -> do
-      resp <- searchAttributesFromProto (res ^. S.searchAttributes . C.indexedFields)
+      resp <- searchAttributesFromProto (searchAttributesMapFromMessage (fromMaybe mempty (getField @"searchAttributes" res)))
       case resp of
         Left err -> throwIO $ ValueError err
         Right searchAttributes ->
           pure $
             DescribeScheduleResponse
-              { schedule = scheduleFromProto (res ^. WF.schedule)
-              , info = scheduleInfoFromProto (res ^. S.info)
-              , memo = convertFromProtoMemo (res ^. WF.memo)
+              { schedule = scheduleFromProto (fromMaybe mempty (getField @"schedule" res))
+              , info = scheduleInfoFromProto (fromMaybe mempty (getField @"info" res))
+              , memo = convertFromProtoMemo (fromMaybe mempty (getField @"memo" res))
               , searchAttributes = searchAttributes
-              , conflictToken = res ^. WF.conflictToken
+              , conflictToken = fromMaybe "" (getField @"conflictToken" res)
               }
 
 
@@ -780,14 +828,10 @@ data TriggerImmediatelyRequest = TriggerImmediatelyRequest
 
 triggerImmediatelyRequestToProto :: TriggerImmediatelyRequest -> S.TriggerImmediatelyRequest
 triggerImmediatelyRequestToProto p =
-  defMessage
-    & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
+  mempty
+    { S.overlapPolicy = Just (overlapPolicyToProto p.overlapPolicy)
+    }
 
-
--- triggerImmediatelyRequestFromProto :: S.TriggerImmediatelyRequest -> TriggerImmediatelyRequest
--- triggerImmediatelyRequestFromProto p = TriggerImmediatelyRequest
---   { overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
---   }
 
 data BackfillRequest = BackfillRequest
   { startTime :: !SystemTime
@@ -802,18 +846,12 @@ data BackfillRequest = BackfillRequest
 
 backfillRequestToProto :: BackfillRequest -> S.BackfillRequest
 backfillRequestToProto p =
-  defMessage
-    & S.startTime .~ timespecToTimestamp p.startTime
-    & S.endTime .~ timespecToTimestamp p.endTime
-    & S.overlapPolicy .~ overlapPolicyToProto p.overlapPolicy
+  mempty
+    { S.startTime = Just (timespecToTimestamp p.startTime)
+    , S.endTime = Just (timespecToTimestamp p.endTime)
+    , S.overlapPolicy = Just (overlapPolicyToProto p.overlapPolicy)
+    }
 
-
--- backfillRequestFromProto :: S.BackfillRequest -> BackfillRequest
--- backfillRequestFromProto p = BackfillRequest
---   { startTime = timespecFromTimestamp (p ^. S.startTime)
---   , endTime = timespecFromTimestamp (p ^. S.endTime)
---   , overlapPolicy = overlapPolicyFromProto (p ^. S.overlapPolicy)
---   }
 
 data PauseState = Unpause !Text | Pause !Text
   deriving stock (Show, Eq, Ord, Generic)
@@ -836,13 +874,16 @@ data SchedulePatch = SchedulePatch
 
 schedulePatchToProto :: SchedulePatch -> S.SchedulePatch
 schedulePatchToProto p =
-  defMessage
-    & S.maybe'triggerImmediately .~ fmap triggerImmediatelyRequestToProto p.triggerImmediately
-    & S.backfillRequest .~ fmap backfillRequestToProto p.backfillRequest
-    & case p.pauseState of
-      Nothing -> id
-      Just (Unpause s) -> S.unpause .~ s
-      Just (Pause s) -> S.pause .~ s
+  mempty
+    { S.triggerImmediately = triggerImmediatelyRequestToProto <$> p.triggerImmediately
+    , S.backfillRequest = V.fromList (backfillRequestToProto <$> p.backfillRequest)
+    , S.pause = case p.pauseState of
+        Just (Pause notes) -> Just notes
+        _ -> Nothing
+    , S.unpause = case p.pauseState of
+        Just (Unpause notes) -> Just notes
+        _ -> Nothing
+    }
 
 
 -- | Makes a specific change to a schedule or triggers an immediate action.
@@ -856,13 +897,13 @@ patchSchedule c (ScheduleId s) p = liftIO $ do
   eResp <-
     Core.patchSchedule
       c.scheduleClient
-      ( defMessage
-          & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-          & WF.scheduleId .~ s
-          & WF.patch .~ schedulePatchToProto p
-          & WF.identity .~ c.identity
-          -- TODO
-          & WF.requestId .~ p.requestId
+      ( mempty
+          { WF.namespace = Just (rawNamespace c.scheduleClientNamespace)
+          , WF.scheduleId = Just s
+          , WF.patch = Just (schedulePatchToProto p)
+          , WF.identity = Just c.identity
+          , WF.requestId = Just p.requestId
+          }
       )
   case eResp of
     Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
@@ -895,13 +936,14 @@ updateSchedule c (ScheduleId s) u = liftIO $ do
     eResp <-
       Core.updateSchedule
         c.scheduleClient
-        ( defMessage
-            & WF.namespace .~ rawNamespace c.scheduleClientNamespace
-            & WF.scheduleId .~ s
-            & WF.schedule .~ scheduleToProto u.schedule
-            & WF.conflictToken .~ fromMaybe "" u.conflictToken
-            & WF.identity .~ c.identity
-            & WF.requestId .~ u.requestId
+        ( mempty
+            { WF.namespace = Just (rawNamespace c.scheduleClientNamespace)
+            , WF.scheduleId = Just s
+            , WF.schedule = Just (scheduleToProto u.schedule)
+            , WF.conflictToken = Just (fromMaybe "" u.conflictToken)
+            , WF.identity = Just c.identity
+            , WF.requestId = Just u.requestId
+            }
         )
     case eResp of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
@@ -1022,37 +1064,35 @@ data ScheduleSpec = ScheduleSpec
 
 scheduleSpecToProto :: ScheduleSpec -> S.ScheduleSpec
 scheduleSpecToProto p =
-  defMessage
-    & S.structuredCalendar .~ fmap structuredCalendarSpecToProto p.structuredCalendar
-    & S.cronString .~ p.cronString
-    & S.calendar .~ fmap calendarSpecToProto p.calendar
-    & S.interval .~ fmap intervalSpecToProto p.interval
-    & S.excludeCalendar .~ fmap calendarSpecToProto p.excludeCalendar
-    & S.excludeStructuredCalendar .~ fmap structuredCalendarSpecToProto p.excludeStructuredCalendar
-    & S.maybe'startTime .~ fmap timespecToTimestamp p.startTime
-    & S.maybe'endTime .~ fmap timespecToTimestamp p.endTime
-    & S.maybe'jitter .~ fmap durationToProto p.jitter
-    & S.timezoneName .~ p.timezoneName
-    & S.timezoneData .~ fromMaybe "" p.timezoneData
+  mempty
+    { S.structuredCalendar = V.fromList (structuredCalendarSpecToProto <$> p.structuredCalendar)
+    , S.cronString = V.fromList p.cronString
+    , S.calendar = V.fromList (calendarSpecToProto <$> p.calendar)
+    , S.interval = V.fromList (intervalSpecToProto <$> p.interval)
+    , S.excludeCalendar = V.fromList (calendarSpecToProto <$> p.excludeCalendar)
+    , S.excludeStructuredCalendar = V.fromList (structuredCalendarSpecToProto <$> p.excludeStructuredCalendar)
+    , S.startTime = timespecToTimestamp <$> p.startTime
+    , S.endTime = timespecToTimestamp <$> p.endTime
+    , S.jitter = durationToProto <$> p.jitter
+    , S.timezoneName = Just p.timezoneName
+    , S.timezoneData = Just (fromMaybe "" p.timezoneData)
+    }
 
 
 scheduleSpecFromProto :: S.ScheduleSpec -> ScheduleSpec
 scheduleSpecFromProto p =
   ScheduleSpec
-    { structuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.structuredCalendar)
-    , cronString = p ^. S.cronString
-    , calendar = fmap calendarSpecFromProto (p ^. S.calendar)
-    , interval = fmap intervalSpecFromProto (p ^. S.interval)
-    , excludeCalendar = fmap calendarSpecFromProto (p ^. S.excludeCalendar)
-    , excludeStructuredCalendar = fmap structuredCalendarSpecFromProto (p ^. S.excludeStructuredCalendar)
-    , startTime = fmap timespecFromTimestamp (p ^. S.maybe'startTime)
-    , endTime = fmap timespecFromTimestamp (p ^. S.maybe'endTime)
-    , jitter = fmap durationFromProto (p ^. S.maybe'jitter)
-    , timezoneName = p ^. S.timezoneName
-    , timezoneData =
-        if p ^. S.timezoneData == ""
-          then Nothing
-          else Just (p ^. S.timezoneData)
+    { structuredCalendar = V.toList (structuredCalendarSpecFromProto <$> getField @"structuredCalendar" p)
+    , cronString = V.toList (getField @"cronString" p)
+    , calendar = V.toList (calendarSpecFromProto <$> getField @"calendar" p)
+    , interval = V.toList (intervalSpecFromProto <$> getField @"interval" p)
+    , excludeCalendar = V.toList (calendarSpecFromProto <$> getField @"excludeCalendar" p)
+    , excludeStructuredCalendar = V.toList (structuredCalendarSpecFromProto <$> getField @"excludeStructuredCalendar" p)
+    , startTime = timespecFromTimestamp <$> getField @"startTime" p
+    , endTime = timespecFromTimestamp <$> getField @"endTime" p
+    , jitter = durationFromProto <$> getField @"jitter" p
+    , timezoneName = fromMaybe "" (getField @"timezoneName" p)
+    , timezoneData = getField @"timezoneData" p
     }
 
 
@@ -1074,18 +1114,19 @@ data Range = Range
 
 rangeToProto :: Range -> S.Range
 rangeToProto p =
-  defMessage
-    & S.start .~ p.start
-    & S.end .~ p.end
-    & S.step .~ p.step
+  mempty
+    { S.start = Just p.start
+    , S.end = Just p.end
+    , S.step = Just p.step
+    }
 
 
 rangeFromProto :: S.Range -> Range
 rangeFromProto p =
   Range
-    { start = p ^. S.start
-    , end = p ^. S.end
-    , step = p ^. S.step
+    { start = fromMaybe 0 (getField @"start" p)
+    , end = fromMaybe 0 (getField @"end" p)
+    , step = fromMaybe 0 (getField @"step" p)
     }
 
 
@@ -1135,28 +1176,29 @@ structuredCalendarSpec =
 
 structuredCalendarSpecToProto :: StructuredCalendarSpec -> S.StructuredCalendarSpec
 structuredCalendarSpecToProto p =
-  defMessage
-    & S.second .~ fmap rangeToProto p.second
-    & S.minute .~ fmap rangeToProto p.minute
-    & S.hour .~ fmap rangeToProto p.hour
-    & S.dayOfMonth .~ fmap rangeToProto p.dayOfMonth
-    & S.month .~ fmap rangeToProto p.month
-    & S.year .~ fmap rangeToProto p.year
-    & S.dayOfWeek .~ fmap rangeToProto p.dayOfWeek
-    & S.comment .~ p.comment
+  mempty
+    { S.second = V.fromList (rangeToProto <$> p.second)
+    , S.minute = V.fromList (rangeToProto <$> p.minute)
+    , S.hour = V.fromList (rangeToProto <$> p.hour)
+    , S.dayOfMonth = V.fromList (rangeToProto <$> p.dayOfMonth)
+    , S.month = V.fromList (rangeToProto <$> p.month)
+    , S.year = V.fromList (rangeToProto <$> p.year)
+    , S.dayOfWeek = V.fromList (rangeToProto <$> p.dayOfWeek)
+    , S.comment = Just p.comment
+    }
 
 
 structuredCalendarSpecFromProto :: S.StructuredCalendarSpec -> StructuredCalendarSpec
 structuredCalendarSpecFromProto p =
   StructuredCalendarSpec
-    { second = fmap rangeFromProto (p ^. S.second)
-    , minute = fmap rangeFromProto (p ^. S.minute)
-    , hour = fmap rangeFromProto (p ^. S.hour)
-    , dayOfMonth = fmap rangeFromProto (p ^. S.dayOfMonth)
-    , month = fmap rangeFromProto (p ^. S.month)
-    , year = fmap rangeFromProto (p ^. S.year)
-    , dayOfWeek = fmap rangeFromProto (p ^. S.dayOfWeek)
-    , comment = p ^. S.comment
+    { second = V.toList (rangeFromProto <$> getField @"second" p)
+    , minute = V.toList (rangeFromProto <$> getField @"minute" p)
+    , hour = V.toList (rangeFromProto <$> getField @"hour" p)
+    , dayOfMonth = V.toList (rangeFromProto <$> getField @"dayOfMonth" p)
+    , month = V.toList (rangeFromProto <$> getField @"month" p)
+    , year = V.toList (rangeFromProto <$> getField @"year" p)
+    , dayOfWeek = V.toList (rangeFromProto <$> getField @"dayOfWeek" p)
+    , comment = fromMaybe "" (getField @"comment" p)
     }
 
 
@@ -1197,28 +1239,29 @@ calendarSpec =
 
 calendarSpecToProto :: CalendarSpec -> S.CalendarSpec
 calendarSpecToProto p =
-  defMessage
-    & S.second .~ p.second
-    & S.minute .~ p.minute
-    & S.hour .~ p.hour
-    & S.dayOfMonth .~ p.dayOfMonth
-    & S.month .~ p.month
-    & S.year .~ p.year
-    & S.dayOfWeek .~ p.dayOfWeek
-    & S.comment .~ p.comment
+  mempty
+    { S.second = Just p.second
+    , S.minute = Just p.minute
+    , S.hour = Just p.hour
+    , S.dayOfMonth = Just p.dayOfMonth
+    , S.month = Just p.month
+    , S.year = Just p.year
+    , S.dayOfWeek = Just p.dayOfWeek
+    , S.comment = Just p.comment
+    }
 
 
 calendarSpecFromProto :: S.CalendarSpec -> CalendarSpec
 calendarSpecFromProto p =
   CalendarSpec
-    { second = p ^. S.second
-    , minute = p ^. S.minute
-    , hour = p ^. S.hour
-    , dayOfMonth = p ^. S.dayOfMonth
-    , month = p ^. S.month
-    , year = p ^. S.year
-    , dayOfWeek = p ^. S.dayOfWeek
-    , comment = p ^. S.comment
+    { second = fromMaybe "" (getField @"second" p)
+    , minute = fromMaybe "" (getField @"minute" p)
+    , hour = fromMaybe "" (getField @"hour" p)
+    , dayOfMonth = fromMaybe "" (getField @"dayOfMonth" p)
+    , month = fromMaybe "" (getField @"month" p)
+    , year = fromMaybe "" (getField @"year" p)
+    , dayOfWeek = fromMaybe "" (getField @"dayOfWeek" p)
+    , comment = fromMaybe "" (getField @"comment" p)
     }
 
 
@@ -1245,14 +1288,15 @@ data IntervalSpec = IntervalSpec
 
 intervalSpecToProto :: IntervalSpec -> S.IntervalSpec
 intervalSpecToProto p =
-  defMessage
-    & S.interval .~ durationToProto p.interval
-    & S.maybe'phase .~ fmap durationToProto p.phase
+  mempty
+    { S.interval = Just (durationToProto p.interval)
+    , S.phase = durationToProto <$> p.phase
+    }
 
 
 intervalSpecFromProto :: S.IntervalSpec -> IntervalSpec
 intervalSpecFromProto p =
   IntervalSpec
-    { interval = durationFromProto (p ^. S.interval)
-    , phase = fmap durationFromProto (p ^. S.maybe'phase)
+    { interval = durationFromProto (fromMaybe mempty (getField @"interval" p))
+    , phase = durationFromProto <$> getField @"phase" p
     }

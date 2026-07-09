@@ -12,18 +12,20 @@ import Control.Monad.Reader
 import Data.Bifunctor
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import Data.ProtoLens
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import Data.Text (Text)
+import Data.Time.Clock.System (SystemTime (..))
 import qualified Data.Text as T
-import Lens.Family2
+import qualified Data.Vector as V
 import qualified ListT
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as P
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
+import qualified Proto.Temporal.Api.Common.V1.Message as P
+import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as AR
-import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as AR
 import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask as AT
-import qualified Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields as AT
-import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as C
+import qualified Proto.Temporal.Sdk.Core.CoreInterface as C
 import qualified StmContainers.Map as StmMap
 import Temporal.Activity.Definition
 import Temporal.Activity.Types
@@ -98,28 +100,37 @@ execute worker = runActivityWorker worker go
 activityInfoFromProto :: MonadIO m => TaskToken -> TaskQueue -> AT.Start -> ActivityWorkerM actEnv m ActivityInfo
 activityInfoFromProto tt tq msg = do
   w <- ask
-  hdrs <- processorTryDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.headerFields))
-  heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'heartbeatDetails))
+  let rawHdrs =
+        V.foldr
+          ( \entry acc -> case (entry.key, entry.value) of
+              (Just key, Just value) -> Map.insert key (convertFromProtoPayload value) acc
+              _ -> acc
+          )
+          Map.empty
+          msg.headerFields
+  hdrs <- processorTryDecodePayloads w.payloadProcessor rawHdrs
+  heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload msg.heartbeatDetails)
   heartbeatsRef <- newIORef heartbeats
+  let workflowExecution = fromMaybe (P.WorkflowExecution Nothing Nothing []) msg.workflowExecution
   pure $
     ActivityInfo
-      { workflowNamespace = Namespace $ msg ^. AT.workflowNamespace
-      , workflowType = WorkflowType $ msg ^. AT.workflowType
-      , workflowId = WorkflowId $ msg ^. AT.workflowExecution . P.workflowId
-      , runId = RunId $ msg ^. AT.workflowExecution . P.runId
-      , activityId = ActivityId $ msg ^. AT.activityId
-      , activityType = msg ^. AT.activityType
+      { workflowNamespace = Namespace $ fromMaybe "" msg.workflowNamespace
+      , workflowType = WorkflowType $ fromMaybe "" msg.workflowType
+      , workflowId = WorkflowId $ fromMaybe "" workflowExecution.workflowId
+      , runId = RunId $ fromMaybe "" workflowExecution.runId
+      , activityId = ActivityId $ fromMaybe "" msg.activityId
+      , activityType = fromMaybe "" msg.activityType
       , headerFields = hdrs
       , rawHeartbeatDetails = heartbeatsRef
-      , scheduledTime = msg ^. AT.scheduledTime . to timespecFromTimestamp
-      , currentAttemptScheduledTime = msg ^. AT.currentAttemptScheduledTime . to timespecFromTimestamp
-      , startedTime = msg ^. AT.startedTime . to timespecFromTimestamp
-      , attempt = msg ^. AT.attempt
-      , scheduleToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'scheduleToCloseTimeout)
-      , startToCloseTimeout = fmap durationFromProto (msg ^. AT.maybe'startToCloseTimeout)
-      , heartbeatTimeout = fmap durationFromProto (msg ^. AT.maybe'heartbeatTimeout)
-      , retryPolicy = fmap retryPolicyFromProto (msg ^. AT.maybe'retryPolicy)
-      , isLocal = msg ^. AT.isLocal
+      , scheduledTime = maybe (MkSystemTime 0 0) timespecFromTimestamp msg.scheduledTime
+      , currentAttemptScheduledTime = maybe (MkSystemTime 0 0) timespecFromTimestamp msg.currentAttemptScheduledTime
+      , startedTime = maybe (MkSystemTime 0 0) timespecFromTimestamp msg.startedTime
+      , attempt = fromMaybe 0 msg.attempt
+      , scheduleToCloseTimeout = fmap durationFromProto msg.scheduleToCloseTimeout
+      , startToCloseTimeout = fmap durationFromProto msg.startToCloseTimeout
+      , heartbeatTimeout = fmap durationFromProto msg.heartbeatTimeout
+      , retryPolicy = fmap retryPolicyFromProto msg.retryPolicy
+      , isLocal = fromMaybe False msg.isLocal
       , taskToken = tt
       , taskQueue = tq
       }
@@ -139,12 +150,12 @@ completeAsync = throwIO CompleteAsync
 
 
 applyActivityTask :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> ActivityWorkerM actEnv m ()
-applyActivityTask task = case task ^. AT.maybe'variant of
+applyActivityTask task = case task.variant of
   Nothing -> throwIO $ RuntimeError "Activity task has no variant or an unknown variant"
-  Just (AT.ActivityTask'Start msg) -> applyActivityTaskStart task tt msg
-  Just (AT.ActivityTask'Cancel msg) -> applyActivityTaskCancel tt msg
+  Just (AT.ActivityTask'Variant'Start msg) -> applyActivityTaskStart task tt msg
+  Just (AT.ActivityTask'Variant'Cancel msg) -> applyActivityTaskCancel tt msg
   where
-    tt = TaskToken $ task ^. AT.taskToken
+    tt = TaskToken $ fromMaybe "" task.taskToken
 
 
 requireActivityNotRunning :: MonadUnliftIO m => TaskToken -> ActivityWorkerM actEnv m () -> ActivityWorkerM actEnv m ()
@@ -185,7 +196,7 @@ applyActivityTaskStart _tsk tt msg = do
       , rawActivityId info.activityId
       ]
   requireActivityNotRunning tt $ do
-    args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload (msg ^. AT.vec'input))
+    args <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload msg.input)
     env <- readIORef w.activityEnv
     let
       actEnv =
@@ -220,38 +231,42 @@ applyActivityTaskStart _tsk tt msg = do
             let appFailure = mkApplicationFailure err w.activityErrorConverters
                 enrichedApplicationFailure = applicationFailureToFailureProto appFailure
             pure $
-              defMessage
-                & C.taskToken .~ rawTaskToken tt
-                & C.result .~ case fromException err of
+              C.ActivityTaskCompletion
+                (Just (rawTaskToken tt))
+                (Just $ case fromException err of
                   Just (_cancelled :: ActivityCancelReason) ->
-                    defMessage
-                      & AR.cancelled
-                        .~ ( defMessage
-                              & AR.failure
-                                .~ ( defMessage
-                                      & F.message .~ "Activity cancelled"
-                                      & F.canceledFailureInfo
-                                        .~ ( defMessage
-                                              -- FIXME: provide some details if we have them
-                                              & F.details .~ defMessage
-                                           )
-                                   )
-                           )
+                    AR.ActivityExecutionResult
+                      ( Just $
+                          AR.ActivityExecutionResult'Status'Cancelled $
+                            AR.Cancellation
+                              (Just $
+                                F.Failure
+                                  (Just "Activity cancelled")
+                                  Nothing
+                                  Nothing
+                                  Nothing
+                                  Nothing
+                                  (Just $ F.Failure'FailureInfo'CanceledFailureInfo $ F.CanceledFailureInfo Nothing [])
+                                  [])
+                              []
+                      )
+                      []
                   Nothing ->
-                    defMessage
-                      & AR.failed
-                        .~ (defMessage & AR.failure .~ enrichedApplicationFailure)
+                    AR.ActivityExecutionResult
+                      (Just $ AR.ActivityExecutionResult'Status'Failed $ AR.Failure (Just enrichedApplicationFailure) [])
+                      [])
+                []
           Right ok -> do
             Logging.logDebug "Got activity result"
             ok' <- liftIO $ payloadProcessorEncode w.payloadProcessor ok
             pure $
-              defMessage
-                & C.taskToken .~ rawTaskToken tt
-                & C.result
-                  .~ ( defMessage
-                        & AR.completed
-                          .~ (defMessage & AR.result .~ convertToProtoPayload ok')
-                     )
+              C.ActivityTaskCompletion
+                (Just (rawTaskToken tt))
+                (Just $
+                  AR.ActivityExecutionResult
+                    (Just $ AR.ActivityExecutionResult'Status'Completed $ AR.Success (Just (convertToProtoPayload ok')) [])
+                    [])
+                []
         Logging.logDebug ("Activity completion message: " <> T.pack (show completionMsg))
         Logging.logInfo $
           T.concat
@@ -291,14 +306,14 @@ applyActivityTaskStart _tsk tt msg = do
       link runningActivity
       putMVar syncPoint ()
   where
-    statusFromCompletion :: Core.ActivityTaskCompletion -> Text
-    statusFromCompletion completionMsg = case completionMsg ^. C.maybe'result of
-      Just result -> case result ^. AR.maybe'status of
+    statusFromCompletion :: C.ActivityTaskCompletion -> Text
+    statusFromCompletion completionMsg = case completionMsg.result of
+      Just result -> case result.status of
         Just status -> case status of
-          AR.ActivityExecutionResult'Completed _ -> "success"
-          AR.ActivityExecutionResult'Failed _ -> "failed"
-          AR.ActivityExecutionResult'Cancelled _ -> "cancelled"
-          AR.ActivityExecutionResult'WillCompleteAsync _ -> "will-complete-async"
+          AR.ActivityExecutionResult'Status'Completed _ -> "success"
+          AR.ActivityExecutionResult'Status'Failed _ -> "failed"
+          AR.ActivityExecutionResult'Status'Cancelled _ -> "cancelled"
+          AR.ActivityExecutionResult'Status'WillCompleteAsync _ -> "will-complete-async"
         Nothing -> "unknown"
       Nothing -> "unknown"
 
@@ -308,11 +323,11 @@ applyActivityTaskCancel tt msg = do
   w <- ask
   Logging.logDebug $ "Cancelling activity: " <> T.pack (show tt)
   running <- atomically $ StmMap.lookup tt w.runningActivities
-  let cancelReason = case msg ^. AT.reason of
-        AT.NOT_FOUND -> NotFound
-        AT.CANCELLED -> CancelRequested
-        AT.TIMED_OUT -> Timeout
-        AT.WORKER_SHUTDOWN -> WorkerShutdown
+  let cancelReason = case msg.reason of
+        Just AT.ActivityCancelReason'NotFound -> NotFound
+        Just AT.ActivityCancelReason'Cancelled -> CancelRequested
+        Just AT.ActivityCancelReason'TimedOut -> Timeout
+        Just AT.ActivityCancelReason'WorkerShutdown -> WorkerShutdown
         -- TODO: PAUSED and RESET need dedicated ActivityCancelReason constructors (follow-up)
         _ -> UnknownCancellationReason
   forM_ running $ \a ->

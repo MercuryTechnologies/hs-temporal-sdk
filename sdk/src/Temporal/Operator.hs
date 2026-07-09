@@ -12,12 +12,13 @@ import Control.Monad.IO.Class
 import Data.Bifunctor (bimap)
 import Data.Int (Int64)
 import Data.Map.Strict (Map)
-import Data.ProtoLens (Message (defMessage))
+import qualified Data.Map.Strict as Map
+
 import Data.Text (Text)
-import Lens.Family2
+import qualified Data.Vector as V
 import qualified Proto.Temporal.Api.Enums.V1.Common as Proto
-import qualified Proto.Temporal.Api.Nexus.V1.Message_Fields as NexusProto
-import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse_Fields as Proto
+import qualified Proto.Temporal.Api.Nexus.V1.Message as NexusProto
+import qualified Proto.Temporal.Api.Operatorservice.V1.RequestResponse as OperatorProto
 import Temporal.Common (Namespace (..), NexusEndpointName (..), TaskQueue (..))
 import Temporal.Core.Client
 import qualified Temporal.Core.Client.OperatorService as Core
@@ -47,39 +48,76 @@ data SearchAttributes = SearchAttributes
 
 searchAttributeTypeFromProto :: Proto.IndexedValueType -> IndexedValueType
 searchAttributeTypeFromProto = \case
-  Proto.INDEXED_VALUE_TYPE_UNSPECIFIED -> UnrecognizedIndexedValueType
-  Proto.INDEXED_VALUE_TYPE_TEXT -> Text
-  Proto.INDEXED_VALUE_TYPE_KEYWORD -> Keyword
-  Proto.INDEXED_VALUE_TYPE_INT -> Int
-  Proto.INDEXED_VALUE_TYPE_DOUBLE -> Double
-  Proto.INDEXED_VALUE_TYPE_BOOL -> Bool
-  Proto.INDEXED_VALUE_TYPE_DATETIME -> Datetime
-  Proto.INDEXED_VALUE_TYPE_KEYWORD_LIST -> KeywordList
-  (Proto.IndexedValueType'Unrecognized _) -> UnrecognizedIndexedValueType
+  Proto.IndexedValueType'IndexedValueTypeUnspecified -> UnrecognizedIndexedValueType
+  Proto.IndexedValueType'IndexedValueTypeText -> Text
+  Proto.IndexedValueType'IndexedValueTypeKeyword -> Keyword
+  Proto.IndexedValueType'IndexedValueTypeInt -> Int
+  Proto.IndexedValueType'IndexedValueTypeDouble -> Double
+  Proto.IndexedValueType'IndexedValueTypeBool -> Bool
+  Proto.IndexedValueType'IndexedValueTypeDatetime -> Datetime
+  Proto.IndexedValueType'IndexedValueTypeKeywordList -> KeywordList
 
 
 searchAttributeTypeToProto :: IndexedValueType -> Proto.IndexedValueType
 searchAttributeTypeToProto = \case
-  UnrecognizedIndexedValueType -> Proto.INDEXED_VALUE_TYPE_UNSPECIFIED
-  Text -> Proto.INDEXED_VALUE_TYPE_TEXT
-  Keyword -> Proto.INDEXED_VALUE_TYPE_KEYWORD
-  Int -> Proto.INDEXED_VALUE_TYPE_INT
-  Double -> Proto.INDEXED_VALUE_TYPE_DOUBLE
-  Bool -> Proto.INDEXED_VALUE_TYPE_BOOL
-  Datetime -> Proto.INDEXED_VALUE_TYPE_DATETIME
-  KeywordList -> Proto.INDEXED_VALUE_TYPE_KEYWORD_LIST
+  UnrecognizedIndexedValueType -> Proto.IndexedValueType'IndexedValueTypeUnspecified
+  Text -> Proto.IndexedValueType'IndexedValueTypeText
+  Keyword -> Proto.IndexedValueType'IndexedValueTypeKeyword
+  Int -> Proto.IndexedValueType'IndexedValueTypeInt
+  Double -> Proto.IndexedValueType'IndexedValueTypeDouble
+  Bool -> Proto.IndexedValueType'IndexedValueTypeBool
+  Datetime -> Proto.IndexedValueType'IndexedValueTypeDatetime
+  KeywordList -> Proto.IndexedValueType'IndexedValueTypeKeywordList
 
+searchAttributeEntriesToProto :: Map Text Proto.IndexedValueType -> V.Vector OperatorProto.AddSearchAttributesRequest'SearchAttributesEntry
+searchAttributeEntriesToProto =
+  V.fromList
+    . fmap (\(k, v) -> OperatorProto.AddSearchAttributesRequest'SearchAttributesEntry (Just k) (Just v) [])
+    . Map.toList
+
+
+customAttributesFromProto :: V.Vector OperatorProto.ListSearchAttributesResponse'CustomAttributesEntry -> Map Text Proto.IndexedValueType
+customAttributesFromProto =
+  V.foldr
+    ( \(OperatorProto.ListSearchAttributesResponse'CustomAttributesEntry k v _) acc ->
+        case (k, v) of
+          (Just key, Just value) -> Map.insert key value acc
+          _ -> acc
+    )
+    Map.empty
+
+
+systemAttributesFromProto :: V.Vector OperatorProto.ListSearchAttributesResponse'SystemAttributesEntry -> Map Text Proto.IndexedValueType
+systemAttributesFromProto =
+  V.foldr
+    ( \(OperatorProto.ListSearchAttributesResponse'SystemAttributesEntry k v _) acc ->
+        case (k, v) of
+          (Just key, Just value) -> Map.insert key value acc
+          _ -> acc
+    )
+    Map.empty
+
+
+storageSchemaFromProto :: V.Vector OperatorProto.ListSearchAttributesResponse'StorageSchemaEntry -> Map Text Text
+storageSchemaFromProto =
+  V.foldr
+    ( \(OperatorProto.ListSearchAttributesResponse'StorageSchemaEntry k v _) acc ->
+        case (k, v) of
+          (Just key, Just value) -> Map.insert key value acc
+          _ -> acc
+    )
+    Map.empty
 
 listSearchAttributes :: MonadIO m => Client -> Namespace -> m (Either Temporal.Exception.RpcError SearchAttributes)
 listSearchAttributes c (Namespace n) = do
-  res <- liftIO $ Core.listSearchAttributes c (defMessage & Proto.namespace .~ n)
+  res <- liftIO $ Core.listSearchAttributes c (OperatorProto.ListSearchAttributesRequest (Just n) [])
   pure $ bimap Temporal.Exception.coreRpcErrorToRpcError convert res
   where
-    convert res =
+    convert (OperatorProto.ListSearchAttributesResponse customAttrs systemAttrs schema _) =
       SearchAttributes
-        { customAttributes = wrappedKeys $ fmap searchAttributeTypeFromProto $ res ^. Proto.customAttributes
-        , systemAttributes = wrappedKeys $ fmap searchAttributeTypeFromProto $ res ^. Proto.systemAttributes
-        , storageSchema = res ^. Proto.storageSchema
+        { customAttributes = wrappedKeys $ fmap searchAttributeTypeFromProto $ customAttributesFromProto customAttrs
+        , systemAttributes = wrappedKeys $ fmap searchAttributeTypeFromProto $ systemAttributesFromProto systemAttrs
+        , storageSchema = storageSchemaFromProto schema
         }
 
 
@@ -92,10 +130,7 @@ addSearchAttributes c (Namespace n) newAttrs = do
         liftIO $
           Core.addSearchAttributes
             c
-            ( defMessage
-                & Proto.namespace .~ n
-                & Proto.searchAttributes .~ converted
-            )
+            (OperatorProto.AddSearchAttributesRequest (searchAttributeEntriesToProto converted) (Just n) [])
       pure $ bimap Temporal.Exception.coreRpcErrorToRpcError (const ()) res
   where
     converted = rawKeys $ fmap searchAttributeTypeToProto newAttrs
@@ -115,28 +150,31 @@ createNexusEndpoint c (NexusEndpointName name) (Namespace ns) (TaskQueue tq) = d
     liftIO $
       Core.createNexusEndpoint
         c
-        ( defMessage
-            & Proto.spec
-              .~ ( defMessage
-                    & NexusProto.name .~ name
-                    & NexusProto.target
-                      .~ ( defMessage
-                            & NexusProto.worker
-                              .~ ( defMessage
-                                    & NexusProto.namespace .~ ns
-                                    & NexusProto.taskQueue .~ tq
-                                 )
-                         )
-                 )
+        ( OperatorProto.CreateNexusEndpointRequest
+            ( Just $
+                NexusProto.EndpointSpec
+                  (Just name)
+                  Nothing
+                  ( Just $
+                      NexusProto.EndpointTarget
+                        ( Just $
+                            NexusProto.EndpointTarget'Variant'Worker $
+                              NexusProto.EndpointTarget'Worker (Just ns) (Just tq) []
+                        )
+                        []
+                  )
+                  []
+            )
+            []
         )
   pure $ bimap Temporal.Exception.coreRpcErrorToRpcError extractEndpoint res
   where
-    extractEndpoint resp =
-      let ep = resp ^. Proto.endpoint
-      in NexusEndpoint
-          { endpointId = ep ^. NexusProto.id
-          , endpointVersion = ep ^. NexusProto.version
-          }
+    extractEndpoint (OperatorProto.CreateNexusEndpointResponse (Just (NexusProto.Endpoint version endpointId _ _ _ _ _)) _) =
+      NexusEndpoint
+        { endpointId = maybe "" id endpointId
+        , endpointVersion = maybe 0 id version
+        }
+    extractEndpoint _ = NexusEndpoint "" 0
 
 
 -- | Delete a Nexus endpoint by its ID and version.
@@ -146,8 +184,5 @@ deleteNexusEndpoint c ep = do
     liftIO $
       Core.deleteNexusEndpoint
         c
-        ( defMessage
-            & Proto.id .~ ep.endpointId
-            & Proto.version .~ ep.endpointVersion
-        )
+        (OperatorProto.DeleteNexusEndpointRequest (Just ep.endpointId) (Just ep.endpointVersion) [])
   pure $ bimap Temporal.Exception.coreRpcErrorToRpcError (const ()) res

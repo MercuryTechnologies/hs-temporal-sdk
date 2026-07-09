@@ -15,8 +15,7 @@ build-type:     Simple
 
 library
   exposed-modules:
-      Proto.Dependencies.Gogoproto.Gogo
-      Proto.Dependencies.Gogoproto.Gogo_Fields
+      Proto.Compat.HasField
       Proto.Health.V1.Health
       Proto.Health.V1.Health_Fields
       Proto.Rpc.Status
@@ -32,33 +31,19 @@ library
       Proto.Temporal.Api.Deployment.V1.Message
       Proto.Temporal.Api.Deployment.V1.Message_Fields
       Proto.Temporal.Api.Enums.V1.BatchOperation
-      Proto.Temporal.Api.Enums.V1.BatchOperation_Fields
       Proto.Temporal.Api.Enums.V1.CommandType
-      Proto.Temporal.Api.Enums.V1.CommandType_Fields
       Proto.Temporal.Api.Enums.V1.Common
-      Proto.Temporal.Api.Enums.V1.Common_Fields
       Proto.Temporal.Api.Enums.V1.Deployment
-      Proto.Temporal.Api.Enums.V1.Deployment_Fields
       Proto.Temporal.Api.Enums.V1.EventType
-      Proto.Temporal.Api.Enums.V1.EventType_Fields
       Proto.Temporal.Api.Enums.V1.FailedCause
-      Proto.Temporal.Api.Enums.V1.FailedCause_Fields
       Proto.Temporal.Api.Enums.V1.Namespace
-      Proto.Temporal.Api.Enums.V1.Namespace_Fields
       Proto.Temporal.Api.Enums.V1.Nexus
-      Proto.Temporal.Api.Enums.V1.Nexus_Fields
       Proto.Temporal.Api.Enums.V1.Query
-      Proto.Temporal.Api.Enums.V1.Query_Fields
       Proto.Temporal.Api.Enums.V1.Reset
-      Proto.Temporal.Api.Enums.V1.Reset_Fields
       Proto.Temporal.Api.Enums.V1.Schedule
-      Proto.Temporal.Api.Enums.V1.Schedule_Fields
       Proto.Temporal.Api.Enums.V1.TaskQueue
-      Proto.Temporal.Api.Enums.V1.TaskQueue_Fields
       Proto.Temporal.Api.Enums.V1.Update
-      Proto.Temporal.Api.Enums.V1.Update_Fields
       Proto.Temporal.Api.Enums.V1.Workflow
-      Proto.Temporal.Api.Enums.V1.Workflow_Fields
       Proto.Temporal.Api.Errordetails.V1.Message
       Proto.Temporal.Api.Errordetails.V1.Message_Fields
       Proto.Temporal.Api.Export.V1.Message
@@ -137,13 +122,25 @@ library
       Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields
   other-modules:
       Proto.Google.Api.Annotations
-      Proto.Google.Api.Annotations_Fields
       Proto.Google.Api.Http
-      Proto.Google.Api.Http_Fields
   hs-source-dirs:
       src
+  default-extensions:
+      ImportQualifiedPost
+      BangPatterns
+      LambdaCase
+      ScopedTypeVariables
   build-depends:
-      base >=4.14 && <5
-    , proto-lens-protobuf-types
-    , proto-lens-runtime
+      aeson
+    , base >=4.14 && <5
+    , bytestring
+    , containers
+    , deepseq
+    , hashable
+    , lens-family
+    , reflection
+    , text
+    , vector
+    , wireform-core
+    , wireform-proto
   default-language: Haskell2010

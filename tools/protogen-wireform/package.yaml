@@ -1,0 +1,20 @@
+<<: !include ../../hpack-defaults.yaml
+
+name: temporal-protogen-wireform
+version: 2025.10.1.0
+build-type: Simple
+description: protoc plugin wrapper for hs-temporal-sdk's wireform protobuf generation.
+
+dependencies:
+  - base >= 4.18 && < 5
+  - containers
+  - text
+  - vector
+  - wireform-proto
+
+executables:
+  temporal-protogen-wireform:
+    main: Main.hs
+    source-dirs: src
+    ghc-options:
+      - -Wall

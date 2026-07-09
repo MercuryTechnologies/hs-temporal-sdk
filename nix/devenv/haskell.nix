@@ -6,7 +6,7 @@ in
 {
   packages = [
     (pkgs.callPackage ../packages/protogen.nix {
-      inherit (pkgs.haskell.packages.${ghcVersion}) proto-lens-protoc;
+      inherit (pkgs.haskell.packages.${ghcVersion}) temporal-protogen-wireform;
     })
     pkgs.ghciwatch
   ];

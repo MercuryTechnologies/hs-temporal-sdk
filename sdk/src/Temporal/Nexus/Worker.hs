@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Temporal.Nexus.Worker (
@@ -14,16 +15,14 @@ import Control.Monad.IO.Class
 import Control.Monad.Logger
 import qualified Data.ByteString as BS
 import qualified Data.HashMap.Strict as HashMap
-import Data.ProtoLens (defMessage)
+
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Lens.Family2
 import qualified Proto.Temporal.Api.Enums.V1.Nexus as NexusEnum
 import qualified Proto.Temporal.Api.Nexus.V1.Message as NexusMsg
-import qualified Proto.Temporal.Api.Nexus.V1.Message_Fields as NexusMsg
 import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus as Nexus
-import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus_Fields as Nexus
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WS
+import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as WSMsg
 import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Worker as Core
 import UnliftIO
@@ -65,26 +64,26 @@ execute worker = go
 
 handleNexusTask :: (MonadUnliftIO m, MonadLogger m) => NexusWorker -> Nexus.NexusTask -> m ()
 handleNexusTask worker task = do
-  case task ^. Nexus.maybe'variant of
-    Just (Nexus.NexusTask'Task pollResp) -> do
-      let token = pollResp ^. WS.taskToken
-          mRequest = pollResp ^. WS.maybe'request
-      status <- liftIO $ case mRequest of
-        Nothing -> pure $ handlerErrorStatus "Missing request in nexus task" True
-        Just req -> case req ^. NexusMsg.maybe'variant of
-          Just (NexusMsg.Request'StartOperation startReq) ->
-            dispatchStart worker (startReq ^. NexusMsg.service) (startReq ^. NexusMsg.operation) startReq
-          Just (NexusMsg.Request'CancelOperation cancelReq) ->
-            dispatchCancel worker (cancelReq ^. NexusMsg.service) (cancelReq ^. NexusMsg.operation) cancelReq
-          Nothing -> pure $ handlerErrorStatus "Unknown request variant" True
-      completeTask worker.workerCore token status
+  case task of
+    Nexus.NexusTask mTaskVariant _ -> case mTaskVariant of
+      Just (Nexus.NexusTask'Variant'Task (WSMsg.PollNexusTaskQueueResponse mToken mRequest _ _)) -> do
+        let token = fromMaybe "" mToken
+        status <- liftIO $ case mRequest of
+          Nothing -> pure $ handlerErrorStatus "Missing request in nexus task" True
+          Just (NexusMsg.Request _ _ mRequestVariant _) -> case mRequestVariant of
+            Just (NexusMsg.Request'Variant'StartOperation startReq@(NexusMsg.StartOperationRequest service operation _ _ _ _ _ _)) ->
+              dispatchStart worker (fromMaybe "" service) (fromMaybe "" operation) startReq
+            Just (NexusMsg.Request'Variant'CancelOperation cancelReq@(NexusMsg.CancelOperationRequest service operation _ _ _)) ->
+              dispatchCancel worker (fromMaybe "" service) (fromMaybe "" operation) cancelReq
+            Nothing -> pure $ handlerErrorStatus "Unknown request variant" True
+        completeTask worker.workerCore token status
 
-    Just (Nexus.NexusTask'CancelTask cancelTask_) -> do
-      let token = cancelTask_ ^. Nexus.taskToken
-      completeTask worker.workerCore token (Nexus.NexusTaskCompletion'AckCancel True)
+      Just (Nexus.NexusTask'Variant'CancelTask (Nexus.CancelNexusTask mToken _ _)) -> do
+        let token = fromMaybe "" mToken
+        completeTask worker.workerCore token (Nexus.NexusTaskCompletion'Status'AckCancel True)
 
-    Nothing -> do
-      Logging.logError "Received nexus task with no variant"
+      Nothing -> do
+        Logging.logError "Received nexus task with no variant"
 
 
 dispatchStart :: NexusWorker -> Text -> Text -> NexusMsg.StartOperationRequest -> IO Nexus.NexusTaskCompletion'Status
@@ -108,9 +107,7 @@ dispatchCancel worker serviceName operationName req =
 completeTask :: (MonadUnliftIO m, MonadLogger m) => Core.Worker 'Core.Real -> BS.ByteString -> Nexus.NexusTaskCompletion'Status -> m ()
 completeTask core token status = do
   let completion :: Nexus.NexusTaskCompletion
-      completion = defMessage
-        & Nexus.taskToken .~ token
-        & Nexus.maybe'status .~ Just status
+      completion = Nexus.NexusTaskCompletion (Just token) (Just status) []
   result <- liftIO $ Core.completeNexusTask core completion
   case result of
     Left err ->
@@ -121,13 +118,14 @@ completeTask core token status = do
 
 handlerErrorStatus :: Text -> Bool -> Nexus.NexusTaskCompletion'Status
 handlerErrorStatus msg retryable =
-  Nexus.NexusTaskCompletion'Error
-    ( defMessage
-        & NexusMsg.errorType .~ "NOT_FOUND"
-        & NexusMsg.retryBehavior
-          .~ ( if retryable
-                then NexusEnum.NEXUS_HANDLER_ERROR_RETRY_BEHAVIOR_RETRYABLE
-                else NexusEnum.NEXUS_HANDLER_ERROR_RETRY_BEHAVIOR_NON_RETRYABLE
-             )
-        & NexusMsg.failure .~ (defMessage & NexusMsg.message .~ msg)
-    )
+  Nexus.NexusTaskCompletion'Status'Error $
+    NexusMsg.HandlerError
+      (Just "NOT_FOUND")
+      (Just (NexusMsg.Failure (Just msg) mempty Nothing []))
+      ( Just
+          ( if retryable
+              then NexusEnum.NexusHandlerErrorRetryBehavior'NexusHandlerErrorRetryBehaviorRetryable
+              else NexusEnum.NexusHandlerErrorRetryBehavior'NexusHandlerErrorRetryBehaviorNonRetryable
+          )
+      )
+      []

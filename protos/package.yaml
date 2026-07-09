@@ -12,12 +12,24 @@ description:  Temporal is a durable execution system that transparently makes yo
 
 library:
   source-dirs: src
+  default-extensions:
+    - ImportQualifiedPost
+    - BangPatterns
+    - LambdaCase
+    - ScopedTypeVariables
   dependencies:
     - base >= 4.14 && < 5
-    - proto-lens-runtime
-    - proto-lens-protobuf-types
+    - wireform-proto
+    - lens-family
+    - aeson
+    - bytestring
+    - containers
+    - deepseq
+    - hashable
+    - reflection
+    - text
+    - vector
+    - wireform-core
   other-modules:
     - Proto.Google.Api.Annotations
-    - Proto.Google.Api.Annotations_Fields
     - Proto.Google.Api.Http
-    - Proto.Google.Api.Http_Fields

@@ -120,28 +120,24 @@ import qualified Control.Monad.Trans.Writer.Lazy as LW
 import qualified Control.Monad.Trans.Writer.Strict as SW
 import Data.Foldable (for_)
 import Data.Map (Map)
+import qualified Data.Map as Map
 import Data.Maybe
-import Data.ProtoLens.Field
-import Data.ProtoLens.Message
 import Data.Text (Text)
 import Data.Typeable
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified Data.Vector as V
-import Lens.Family2
 import qualified Proto.Temporal.Api.Common.V1.Message as CommonMsg
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
 import qualified Proto.Temporal.Api.Enums.V1.Query as Query
 import qualified Proto.Temporal.Api.Enums.V1.Reset as Reset
 import Proto.Temporal.Api.Enums.V1.TaskQueue (TaskQueueKind (..))
 import qualified Proto.Temporal.Api.Enums.V1.Update as Update
 import Proto.Temporal.Api.Enums.V1.Workflow (HistoryEventFilterType (..), WorkflowExecutionStatus (..))
 import Proto.Temporal.Api.History.V1.Message (History, HistoryEvent, HistoryEvent'Attributes (..))
-import qualified Proto.Temporal.Api.History.V1.Message_Fields as History
-import qualified Proto.Temporal.Api.Query.V1.Message_Fields as Query
-import qualified Proto.Temporal.Api.Taskqueue.V1.Message_Fields as TQ
-import qualified Proto.Temporal.Api.Update.V1.Message as Update
-import qualified Proto.Temporal.Api.Update.V1.Message_Fields as Update
+import qualified Proto.Temporal.Api.History.V1.Message as HistoryMsg
+import qualified Proto.Temporal.Api.Query.V1.Message as QueryMsg
+import qualified Proto.Temporal.Api.Taskqueue.V1.Message as TQMsg
+import qualified Proto.Temporal.Api.Update.V1.Message as UpdateMsg
 import Proto.Temporal.Api.Workflow.V1.Message (WorkflowExecutionInfo)
 import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   CountWorkflowExecutionsRequest,
@@ -149,7 +145,6 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   GetWorkflowExecutionHistoryRequest,
   GetWorkflowExecutionHistoryResponse,
   ListClosedWorkflowExecutionsRequest,
-  ListOpenWorkflowExecutionsRequest,
   PollWorkflowExecutionUpdateRequest,
   QueryWorkflowRequest,
   QueryWorkflowResponse,
@@ -157,13 +152,12 @@ import Proto.Temporal.Api.Workflowservice.V1.RequestResponse (
   UpdateWorkflowExecutionRequest,
   UpdateWorkflowExecutionResponse,
  )
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as WF
+import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as RRMsg
 import qualified Temporal.Client.TestService as TestService
 import Temporal.Client.Types
 import Temporal.Common
 import qualified Temporal.Core.Client as Core
-import Temporal.Core.Client.WorkflowService hiding (deleteWorkflowExecution, describeWorkflowExecution, resetWorkflowExecution)
+import Temporal.Core.Client.WorkflowService hiding (describeWorkflowExecution, resetWorkflowExecution)
 import qualified Temporal.Core.Client.WorkflowService as WS
 import Temporal.Duration (durationToProto)
 import Temporal.Exception
@@ -318,11 +312,14 @@ waitWorkflowResult' h@(WorkflowHandle readResult _ c wf r _) = do
   mev <- runReaderT (waitResult wf r c.clientConfig.namespace) c
   case mev of
     Nothing -> error "Unexpected empty history"
-    Just ev -> case ev ^. History.maybe'attributes of
-      Nothing -> error "Unrecognized history event"
-      Just attrType -> case attrType of
-        HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> do
-          let payloads = convertFromProtoPayload <$> (attrs ^. History.result . Common.payloads)
+    Just (HistoryMsg.HistoryEvent _ _ _ _ _ _ _ _ Nothing _) -> error "Unrecognized history event"
+    Just (HistoryMsg.HistoryEvent _ _ _ _ _ _ _ _ (Just attrType) _) ->
+      case attrType of
+        HistoryEvent'Attributes'WorkflowExecutionCompletedEventAttributes (HistoryMsg.WorkflowExecutionCompletedEventAttributes result _ _ _) -> do
+          let payloads =
+                case result of
+                  Nothing -> []
+                  Just (CommonMsg.Payloads ps _) -> convertFromProtoPayload <$> V.toList ps
           -- LMAO this is such a comical coercion
           --
           -- We just need to ignore payloads if the result type is unit to allow workflows to evolve
@@ -332,12 +329,12 @@ waitWorkflowResult' h@(WorkflowHandle readResult _ c wf r _) = do
             else case payloads of
               (a : _) -> liftIO $ readResult a
               _ -> error "Missing result payload"
-        HistoryEvent'WorkflowExecutionFailedEventAttributes attrs ->
+        HistoryEvent'Attributes'WorkflowExecutionFailedEventAttributes attrs ->
           throwIO $ WorkflowExecutionFailed attrs
-        HistoryEvent'WorkflowExecutionTimedOutEventAttributes _attrs -> throwIO WorkflowExecutionTimedOut
-        HistoryEvent'WorkflowExecutionCanceledEventAttributes _attrs -> throwIO WorkflowExecutionCanceled
-        HistoryEvent'WorkflowExecutionTerminatedEventAttributes _attrs -> throwIO WorkflowExecutionTerminated
-        HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes _attrs -> throwIO WorkflowExecutionContinuedAsNew
+        HistoryEvent'Attributes'WorkflowExecutionTimedOutEventAttributes _attrs -> throwIO WorkflowExecutionTimedOut
+        HistoryEvent'Attributes'WorkflowExecutionCanceledEventAttributes _attrs -> throwIO WorkflowExecutionCanceled
+        HistoryEvent'Attributes'WorkflowExecutionTerminatedEventAttributes _attrs -> throwIO WorkflowExecutionTerminated
+        HistoryEvent'Attributes'WorkflowExecutionContinuedAsNewEventAttributes _attrs -> throwIO WorkflowExecutionContinuedAsNew
         e -> error ("History event not supported " <> show e)
 
 
@@ -398,23 +395,17 @@ signal (WorkflowHandle _ _t c wf r _) (signalRef -> (KnownSignal sName sCodec)) 
   inputs' <- processorEncodePayloads c.clientConfig.payloadProcessor =<< liftIO (sequence inputs)
   result <-
     signalWorkflowExecution c.clientCore $
-      defMessage
-        & WF.namespace .~ rawNamespace c.clientConfig.namespace
-        & WF.workflowExecution
-          .~ ( defMessage
-                & Common.workflowId .~ rawWorkflowId wf
-                & Common.runId .~ maybe "" rawRunId r
-             )
-        & WF.signalName .~ sName
-        & WF.input .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload inputs')
-        & WF.identity .~ Core.identity (Core.clientConfig c.clientCore)
-        & WF.requestId .~ fromMaybe "" opts.requestId
-        -- Deprecated, no need to set
-        -- & WF.control .~ _
-        -- TODO put other useful headers in here
-        & WF.header .~ headerToProto (fmap convertToProtoPayload opts.headers)
-  -- FIXME: Can we just ignore this now that it's no longer present?
-  -- & WF.skipGenerateWorkflowTask .~ opts.skipGenerateWorkflowTask
+      RRMsg.SignalWorkflowExecutionRequest
+        (Just (rawNamespace c.clientConfig.namespace))
+        (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId wf)) (Just (maybe "" rawRunId r)) []))
+        (Just sName)
+        (Just (CommonMsg.Payloads (fmap convertToProtoPayload inputs') []))
+        (Just (Core.identity (Core.clientConfig c.clientCore)))
+        (Just (fromMaybe "" opts.requestId))
+        Nothing
+        (Just (headerToProto (fmap convertToProtoPayload opts.headers)))
+        V.empty
+        []
   case result of
     Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
     Right _ -> pure ()
@@ -473,50 +464,59 @@ query h (queryRef -> KnownQuery qn codec) opts = withArgs @(QueryArgs query) @(m
     queryArgs <- processorEncodePayloads processor input.queryWorkflowArgs
     let msg :: QueryWorkflowRequest
         msg =
-          defMessage
-            & WF.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-            & WF.execution
-              .~ ( defMessage
-                    & Common.workflowId .~ rawWorkflowId input.queryWorkflowWorkflowId
-                    & Common.runId .~ maybe "" rawRunId input.queryWorkflowRunId
-                 )
-            & WF.query
-              .~ ( defMessage
-                    & Query.queryType .~ input.queryWorkflowType
-                    & Query.queryArgs
-                      .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload queryArgs)
-                    & Query.header .~ headerToProto (fmap convertToProtoPayload input.queryWorkflowHeaders)
-                 )
-            & WF.queryRejectCondition .~ case opts.queryRejectCondition of
-              QueryRejectConditionRejectNone -> Query.QUERY_REJECT_CONDITION_NONE
-              QueryRejectConditionNotOpen -> Query.QUERY_REJECT_CONDITION_NOT_OPEN
-              QueryRejectConditionNotCompletedCleanly -> Query.QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
+          RRMsg.QueryWorkflowRequest
+            (Just (rawNamespace h.workflowHandleClient.clientConfig.namespace))
+            ( Just
+                ( CommonMsg.WorkflowExecution
+                    (Just (rawWorkflowId input.queryWorkflowWorkflowId))
+                    (Just (maybe "" rawRunId input.queryWorkflowRunId))
+                    []
+                )
+            )
+            ( Just
+                ( QueryMsg.WorkflowQuery
+                    (Just input.queryWorkflowType)
+                    (Just (CommonMsg.Payloads (fmap convertToProtoPayload queryArgs) []))
+                    (Just (headerToProto (fmap convertToProtoPayload input.queryWorkflowHeaders)))
+                    []
+                )
+            )
+            ( Just
+                ( case opts.queryRejectCondition of
+                    QueryRejectConditionRejectNone -> Query.QueryRejectCondition'QueryRejectConditionNone
+                    QueryRejectConditionNotOpen -> Query.QueryRejectCondition'QueryRejectConditionNotOpen
+                    QueryRejectConditionNotCompletedCleanly -> Query.QueryRejectCondition'QueryRejectConditionNotCompletedCleanly
+                )
+            )
+            []
 
     (res :: QueryWorkflowResponse) <- do
       eRes <- liftIO $ Temporal.Core.Client.WorkflowService.queryWorkflow h.workflowHandleClient.clientCore msg
       case eRes of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
         Right res -> pure res
-    case res ^. WF.maybe'queryRejected of
-      Just rejection -> do
-        let status = queryRejectionStatusFromProto (rejection ^. Query.status)
-        pure $ Left $ QueryRejected {..}
-      Nothing -> case (res ^. WF.queryResult . Common.vec'payloads) V.!? 0 of
-        Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
-        Just p -> pure $ Right $ convertFromProtoPayload p
+    case res of
+      RRMsg.QueryWorkflowResponse _ (Just (QueryMsg.QueryRejected status _)) _ -> do
+        let rejectionStatus = queryRejectionStatusFromProto (fromMaybe WorkflowExecutionStatus'WorkflowExecutionStatusUnspecified status)
+        pure $ Left $ QueryRejected {status = rejectionStatus}
+      RRMsg.QueryWorkflowResponse queryResult Nothing _ ->
+        case queryResult of
+          Just (CommonMsg.Payloads payloads _) -> case payloads V.!? 0 of
+            Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
+            Just p -> pure $ Right $ convertFromProtoPayload p
+          Nothing -> throwIO $ ValueError "No return value payloads provided by query response"
   forM eRes $ \p ->
     payloadProcessorDecode processor p >>= either (throwIO . ValueError) pure >>= decode codec >>= either (throwIO . ValueError) pure
   where
     queryRejectionStatusFromProto = \case
-      WORKFLOW_EXECUTION_STATUS_UNSPECIFIED -> UnknownStatus
-      WORKFLOW_EXECUTION_STATUS_RUNNING -> Running
-      WORKFLOW_EXECUTION_STATUS_COMPLETED -> Completed
-      WORKFLOW_EXECUTION_STATUS_FAILED -> Failed
-      WORKFLOW_EXECUTION_STATUS_CANCELED -> Canceled
-      WORKFLOW_EXECUTION_STATUS_TERMINATED -> Terminated
-      WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW -> ContinuedAsNew
-      WORKFLOW_EXECUTION_STATUS_TIMED_OUT -> TimedOut
-      WorkflowExecutionStatus'Unrecognized _ -> UnknownStatus
+      WorkflowExecutionStatus'WorkflowExecutionStatusUnspecified -> UnknownStatus
+      WorkflowExecutionStatus'WorkflowExecutionStatusRunning -> Running
+      WorkflowExecutionStatus'WorkflowExecutionStatusCompleted -> Completed
+      WorkflowExecutionStatus'WorkflowExecutionStatusFailed -> Failed
+      WorkflowExecutionStatus'WorkflowExecutionStatusCanceled -> Canceled
+      WorkflowExecutionStatus'WorkflowExecutionStatusTerminated -> Terminated
+      WorkflowExecutionStatus'WorkflowExecutionStatusContinuedAsNew -> ContinuedAsNew
+      WorkflowExecutionStatus'WorkflowExecutionStatusTimedOut -> TimedOut
 
 
 data GetHandleOptions = GetHandleOptions
@@ -592,52 +592,49 @@ startFromPayloads k@(KnownWorkflow codec _) wfId opts payloads = do
     memo' <- processorEncodePayloads c.clientConfig.payloadProcessor opts'.memo
     let tq = rawTaskQueue opts'.taskQueue
         req =
-          defMessage
-            & WF.namespace .~ rawNamespace c.clientConfig.namespace
-            & WF.workflowId .~ rawWorkflowId wfId'
-            & WF.workflowType
-              .~ (defMessage & Common.name .~ rawWorkflowType wfName)
-            & WF.taskQueue
-              .~ ( defMessage
-                    & Common.name .~ tq
-                    & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-                 )
-            & WF.input
-              .~ (defMessage & Common.vec'payloads .~ (convertToProtoPayload <$> payloads''))
-            & WF.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.timeouts.executionTimeout)
-            & WF.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.timeouts.runTimeout)
-            & WF.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.timeouts.taskTimeout)
-            & WF.identity .~ Core.identity (Core.clientConfig c.clientCore)
-            & WF.requestId .~ UUID.toText reqId
-            & WF.workflowIdReusePolicy
-              .~ workflowIdReusePolicyToProto
-                (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
-            & WF.workflowIdConflictPolicy
-              .~ workflowIdConflictPolicyToProto
-                (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.workflowIdConflictPolicy)
-            & WF.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.retryPolicy)
-            & WF.cronSchedule .~ fromMaybe "" opts'.cronSchedule
-            & WF.memo .~ convertToProtoMemo memo'
-            & WF.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
-            --     TODO Not sure how to use these yet
-            & WF.header .~ headerToProto (fmap convertToProtoPayload opts'.headers)
-            & WF.requestEagerExecution .~ opts'.requestEagerExecution
-            {-
-              These values will be available as ContinuedFailure and LastCompletionResult in the
-              WorkflowExecutionStarted event and through SDKs. The are currently only used by the
-              server itself (for the schedules feature) and are not intended to be exposed in
-              StartWorkflowExecution.
-
-              WF.continuedFailure
-              WF.lastCompletionResult
-            -}
-            & WF.maybe'workflowStartDelay .~ (durationToProto <$> workflowStartDelay opts')
-            & WF.maybe'priority .~ fmap priorityToProto opts'.priority
+          RRMsg.defaultStartWorkflowExecutionRequest
+            { RRMsg.namespace = Just (rawNamespace c.clientConfig.namespace)
+            , RRMsg.workflowId = Just (rawWorkflowId wfId')
+            , RRMsg.workflowType = Just (CommonMsg.WorkflowType (Just (rawWorkflowType wfName)) [])
+            , RRMsg.taskQueue =
+                Just
+                  ( TQMsg.TaskQueue
+                      (Just tq)
+                      (Just TaskQueueKind'TaskQueueKindUnspecified)
+                      Nothing
+                      []
+                  )
+            , RRMsg.input = Just (CommonMsg.defaultPayloads {CommonMsg.payloads = convertToProtoPayload <$> payloads''})
+            , RRMsg.workflowExecutionTimeout = durationToProto <$> opts'.timeouts.executionTimeout
+            , RRMsg.workflowRunTimeout = durationToProto <$> opts'.timeouts.runTimeout
+            , RRMsg.workflowTaskTimeout = durationToProto <$> opts'.timeouts.taskTimeout
+            , RRMsg.identity = Just (Core.identity (Core.clientConfig c.clientCore))
+            , RRMsg.requestId = Just (UUID.toText reqId)
+            , RRMsg.workflowIdReusePolicy =
+                Just
+                  ( workflowIdReusePolicyToProto
+                      (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.workflowIdReusePolicy)
+                  )
+            , RRMsg.workflowIdConflictPolicy =
+                Just
+                  ( workflowIdConflictPolicyToProto
+                      (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.workflowIdConflictPolicy)
+                  )
+            , RRMsg.retryPolicy = retryPolicyToProto <$> opts'.retryPolicy
+            , RRMsg.cronSchedule = Just (fromMaybe "" opts'.cronSchedule)
+            , RRMsg.memo = Just (convertToProtoMemo memo')
+            , RRMsg.searchAttributes =
+                Just (CommonMsg.defaultSearchAttributes {CommonMsg.indexedFields = searchAttributeEntries searchAttrs})
+            , RRMsg.header = Just (headerToProto (fmap convertToProtoPayload opts'.headers))
+            , RRMsg.requestEagerExecution = Just opts'.requestEagerExecution
+            , RRMsg.workflowStartDelay = durationToProto <$> workflowStartDelay opts'
+            , RRMsg.priority = priorityToProto <$> opts'.priority
+            }
     res <- startWorkflowExecution c.clientCore req
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-      Right swer ->
-        let runId = RunId $ swer ^. WF.runId
+      Right (RRMsg.StartWorkflowExecutionResponse runId' _ _ _ _ _) ->
+        let runId = RunId $ fromMaybe "" runId'
         in pure $
             WorkflowHandle
               { workflowHandleReadResult = pure
@@ -705,55 +702,51 @@ signalWithStartFromPayloads (KnownSignal sigName _) w@(KnownWorkflow codec _) wf
     memo' <- processorEncodePayloads processor opts'.signalWithStartOptions.memo
     let tq = rawTaskQueue opts'.signalWithStartOptions.taskQueue
         msg =
-          defMessage
-            & RR.namespace .~ rawNamespace c.clientConfig.namespace
-            & RR.workflowId .~ rawWorkflowId opts'.signalWithStartWorkflowId
-            & RR.workflowType
-              .~ (defMessage & Common.name .~ rawWorkflowType opts'.signalWithStartWorkflowType)
-            & WF.requestId .~ UUID.toText reqId
-            & RR.searchAttributes .~ (defMessage & Common.indexedFields .~ searchAttrs)
-            & RR.taskQueue
-              .~ ( defMessage
-                    & Common.name .~ tq
-                    & TQ.kind .~ TASK_QUEUE_KIND_UNSPECIFIED
-                 )
-            & RR.input
-              .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload wfPayloads'')
-            & RR.maybe'workflowExecutionTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout)
-            & RR.maybe'workflowRunTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout)
-            & RR.maybe'workflowTaskTimeout .~ (durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout)
-            & RR.identity .~ Core.identity (Core.clientConfig c.clientCore)
-            & RR.requestId .~ UUID.toText reqId
-            & RR.workflowIdReusePolicy
-              .~ workflowIdReusePolicyToProto
-                (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.signalWithStartOptions.workflowIdReusePolicy)
-            & RR.workflowIdConflictPolicy
-              .~ workflowIdConflictPolicyToProto
-                (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.signalWithStartOptions.workflowIdConflictPolicy)
-            & RR.signalName .~ sigName
-            & RR.signalInput .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload sigPayloads'')
-            -- Deprecated, no need to set
-            -- & RR.control .~ _
-            & RR.maybe'retryPolicy .~ (retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy)
-            & RR.cronSchedule .~ fromMaybe "" opts'.signalWithStartOptions.cronSchedule
-            & RR.memo .~ convertToProtoMemo memo'
-            & RR.header .~ headerToProto (fmap convertToProtoPayload opts'.signalWithStartOptions.headers)
-    -- & RR.workflowStartDelay .~ _
-    -- & RR.skipGenerateWorkflowTask .~ _
+          RRMsg.defaultSignalWithStartWorkflowExecutionRequest
+            { RRMsg.namespace = Just (rawNamespace c.clientConfig.namespace)
+            , RRMsg.workflowId = Just (rawWorkflowId opts'.signalWithStartWorkflowId)
+            , RRMsg.workflowType = Just (CommonMsg.WorkflowType (Just (rawWorkflowType opts'.signalWithStartWorkflowType)) [])
+            , RRMsg.requestId = Just (UUID.toText reqId)
+            , RRMsg.searchAttributes =
+                Just (CommonMsg.SearchAttributes (searchAttributeEntries searchAttrs) [])
+            , RRMsg.taskQueue =
+                Just (TQMsg.TaskQueue (Just tq) (Just TaskQueueKind'TaskQueueKindUnspecified) Nothing [])
+            , RRMsg.input = Just (CommonMsg.Payloads (fmap convertToProtoPayload wfPayloads'') [])
+            , RRMsg.workflowExecutionTimeout = durationToProto <$> opts'.signalWithStartOptions.timeouts.executionTimeout
+            , RRMsg.workflowRunTimeout = durationToProto <$> opts'.signalWithStartOptions.timeouts.runTimeout
+            , RRMsg.workflowTaskTimeout = durationToProto <$> opts'.signalWithStartOptions.timeouts.taskTimeout
+            , RRMsg.identity = Just (Core.identity (Core.clientConfig c.clientCore))
+            , RRMsg.workflowIdReusePolicy =
+                Just
+                  ( workflowIdReusePolicyToProto
+                      (fromMaybe WorkflowIdReusePolicyAllowDuplicateFailedOnly opts'.signalWithStartOptions.workflowIdReusePolicy)
+                  )
+            , RRMsg.workflowIdConflictPolicy =
+                Just
+                  ( workflowIdConflictPolicyToProto
+                      (fromMaybe WorkflowIdConflictPolicyUnspecified opts'.signalWithStartOptions.workflowIdConflictPolicy)
+                  )
+            , RRMsg.signalName = Just sigName
+            , RRMsg.signalInput = Just (CommonMsg.Payloads (fmap convertToProtoPayload sigPayloads'') [])
+            , RRMsg.retryPolicy = retryPolicyToProto <$> opts'.signalWithStartOptions.retryPolicy
+            , RRMsg.cronSchedule = Just (fromMaybe "" opts'.signalWithStartOptions.cronSchedule)
+            , RRMsg.memo = Just (convertToProtoMemo memo')
+            , RRMsg.header = Just (headerToProto (fmap convertToProtoPayload opts'.signalWithStartOptions.headers))
+            }
     res <-
       signalWithStartWorkflowExecution
         c.clientCore
         msg
     case res of
       Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-      Right swer ->
+      Right (RRMsg.SignalWithStartWorkflowExecutionResponse runId' _ _) ->
         pure $
           WorkflowHandle
             { workflowHandleReadResult = pure
             , workflowHandleType = WorkflowType $ knownWorkflowName w
             , workflowHandleClient = c
             , workflowHandleWorkflowId = opts'.signalWithStartWorkflowId
-            , workflowHandleRunId = Just (RunId $ swer ^. WF.runId)
+            , workflowHandleRunId = Just (RunId $ fromMaybe "" runId')
             , -- We don't know if this handle represents a new workflow or an already-running one, so we don't
               -- know if the current run ID is for its first execution or not
               workflowHandleFirstExecutionRunId = Nothing
@@ -807,18 +800,15 @@ terminate h req =
       Right _ -> pure ()
   where
     msg =
-      defMessage
-        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-        & RR.workflowExecution
-          .~ ( defMessage
-                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
-                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
-             )
-        & RR.reason .~ req.terminationReason
-        & RR.details
-          .~ (defMessage & Common.payloads .~ fmap convertToProtoPayload req.terminationDetails)
-        & RR.identity .~ Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)
-        & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
+      RRMsg.TerminateWorkflowExecutionRequest
+        (Just (rawNamespace h.workflowHandleClient.clientConfig.namespace))
+        (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId h.workflowHandleWorkflowId)) (Just (maybe "" rawRunId h.workflowHandleRunId)) []))
+        (Just req.terminationReason)
+        (Just (CommonMsg.Payloads (V.fromList (fmap convertToProtoPayload req.terminationDetails)) []))
+        (Just (Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)))
+        (Just (maybe "" rawRunId h.workflowHandleFirstExecutionRunId))
+        V.empty
+        []
 
 
 data CancellationOptions = CancellationOptions
@@ -848,16 +838,15 @@ cancel h req =
       Right _ -> pure ()
   where
     msg =
-      defMessage
-        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-        & RR.workflowExecution
-          .~ ( defMessage
-                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
-                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
-             )
-        & RR.reason .~ req.cancellationReason
-        & RR.identity .~ Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)
-        & RR.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
+      RRMsg.RequestCancelWorkflowExecutionRequest
+        (Just (rawNamespace h.workflowHandleClient.clientConfig.namespace))
+        (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId h.workflowHandleWorkflowId)) (Just (maybe "" rawRunId h.workflowHandleRunId)) []))
+        (Just (Core.identity (Core.clientConfig h.workflowHandleClient.clientCore)))
+        Nothing
+        (Just (maybe "" rawRunId h.workflowHandleFirstExecutionRunId))
+        (Just req.cancellationReason)
+        V.empty
+        []
 
 
 {- | Reset a Workflow Execution to a previous point in its history.
@@ -872,18 +861,16 @@ resetWorkflowExecution :: (MonadIO m, HasWorkflowClient m) => WorkflowHandle a -
 resetWorkflowExecution h opts = do
   reqId <- liftIO UUID.nextRandom
   let msg =
-        defMessage
-          & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-          & RR.workflowExecution
-            .~ ( defMessage
-                  & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
-                  & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
-               )
-          & RR.reason .~ opts.resetReason
-          & RR.workflowTaskFinishEventId .~ fromIntegral (rawEventId opts.resetToWorkflowTaskFinishEventId)
-          & RR.requestId .~ UUID.toText reqId
-          & RR.resetReapplyType .~ resetReapplyTypeToProto opts.resetReapplyType
-          & RR.vec'resetReapplyExcludeTypes .~ V.fromList (fmap resetReapplyExcludeTypeToProto opts.resetReapplyExcludeTypes)
+        RRMsg.defaultResetWorkflowExecutionRequest
+          { RRMsg.namespace = Just (rawNamespace h.workflowHandleClient.clientConfig.namespace)
+          , RRMsg.workflowExecution =
+              Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId h.workflowHandleWorkflowId)) (Just (maybe "" rawRunId h.workflowHandleRunId)) [])
+          , RRMsg.reason = Just opts.resetReason
+          , RRMsg.workflowTaskFinishEventId = Just (fromIntegral (rawEventId opts.resetToWorkflowTaskFinishEventId))
+          , RRMsg.requestId = Just (UUID.toText reqId)
+          , RRMsg.resetReapplyType = Just (resetReapplyTypeToProto opts.resetReapplyType)
+          , RRMsg.resetReapplyExcludeTypes = V.fromList (fmap resetReapplyExcludeTypeToProto opts.resetReapplyExcludeTypes)
+          }
   res <-
     liftIO $
       WS.resetWorkflowExecution
@@ -891,8 +878,8 @@ resetWorkflowExecution h opts = do
         msg
   case res of
     Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-    Right response -> do
-      let newRunId = RunId $ response ^. RR.runId
+    Right (RRMsg.ResetWorkflowExecutionResponse runId' _) -> do
+      let newRunId = RunId $ fromMaybe "" runId'
       pure $
         h
           { workflowHandleRunId = Just newRunId
@@ -900,15 +887,15 @@ resetWorkflowExecution h opts = do
           }
   where
     resetReapplyTypeToProto = \case
-      ResetReapplySignal -> Reset.RESET_REAPPLY_TYPE_SIGNAL
-      ResetReapplyNone -> Reset.RESET_REAPPLY_TYPE_NONE
-      ResetReapplyAllEligible -> Reset.RESET_REAPPLY_TYPE_ALL_ELIGIBLE
+      ResetReapplySignal -> Reset.ResetReapplyType'ResetReapplyTypeSignal
+      ResetReapplyNone -> Reset.ResetReapplyType'ResetReapplyTypeNone
+      ResetReapplyAllEligible -> Reset.ResetReapplyType'ResetReapplyTypeAllEligible
 
     resetReapplyExcludeTypeToProto = \case
-      ResetReapplyExcludeSignal -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_SIGNAL
-      ResetReapplyExcludeUpdate -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_UPDATE
-      ResetReapplyExcludeNexus -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_NEXUS
-      ResetReapplyExcludeCancelRequest -> Reset.RESET_REAPPLY_EXCLUDE_TYPE_CANCEL_REQUEST
+      ResetReapplyExcludeSignal -> Reset.ResetReapplyExcludeType'ResetReapplyExcludeTypeSignal
+      ResetReapplyExcludeUpdate -> Reset.ResetReapplyExcludeType'ResetReapplyExcludeTypeUpdate
+      ResetReapplyExcludeNexus -> Reset.ResetReapplyExcludeType'ResetReapplyExcludeTypeNexus
+      ResetReapplyExcludeCancelRequest -> Reset.ResetReapplyExcludeType'ResetReapplyExcludeTypeCancelRequest
 
 
 {- | Get detailed information about a workflow execution.
@@ -925,26 +912,26 @@ describeWorkflowExecution h = do
         msg
   case res of
     Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-    Right response ->
-      pure $
-        WorkflowExecutionDescription
-          { workflowExecutionInfo = fromMaybe (error "Missing workflowExecutionInfo") (response ^. RR.maybe'workflowExecutionInfo)
-          , executionConfig = response ^. RR.maybe'executionConfig
-          , pendingActivities = response ^. RR.vec'pendingActivities
-          , pendingChildren = response ^. RR.vec'pendingChildren
-          , pendingWorkflowTask = response ^. RR.maybe'pendingWorkflowTask
-          , callbacks = response ^. RR.vec'callbacks
-          , pendingNexusOperations = response ^. RR.vec'pendingNexusOperations
-          }
+    Right (RRMsg.DescribeWorkflowExecutionResponse executionConfig' workflowExecutionInfo' pendingActivities' pendingChildren' pendingWorkflowTask' callbacks' pendingNexusOperations' _ _) ->
+      case workflowExecutionInfo' of
+        Nothing -> throwIO $ ValueError "Missing workflowExecutionInfo"
+        Just workflowExecutionInfo ->
+          pure $
+            WorkflowExecutionDescription
+              { workflowExecutionInfo
+              , executionConfig = executionConfig'
+              , pendingActivities = pendingActivities'
+              , pendingChildren = pendingChildren'
+              , pendingWorkflowTask = pendingWorkflowTask'
+              , callbacks = callbacks'
+              , pendingNexusOperations = pendingNexusOperations'
+              }
   where
     msg =
-      defMessage
-        & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-        & RR.execution
-          .~ ( defMessage
-                & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
-                & Common.runId .~ maybe "" rawRunId h.workflowHandleRunId
-             )
+      RRMsg.DescribeWorkflowExecutionRequest
+        (Just (rawNamespace h.workflowHandleClient.clientConfig.namespace))
+        (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId h.workflowHandleWorkflowId)) (Just (maybe "" rawRunId h.workflowHandleRunId)) []))
+        []
 
 
 data FollowOption = FollowRuns | ThisRunOnly
@@ -968,39 +955,42 @@ fetchHistory :: (MonadIO m) => WorkflowHandle a -> m History
 fetchHistory h = do
   let startingReq :: GetWorkflowExecutionHistoryRequest
       startingReq =
-        defMessage
-          & RR.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-          & RR.execution
-            .~ ( defMessage
-                  & Common.workflowId .~ rawWorkflowId h.workflowHandleWorkflowId
-                  & case h.workflowHandleRunId of
-                    Nothing -> Prelude.id
-                    Just rId -> Common.runId .~ rawRunId rId
-               )
-          & RR.maximumPageSize .~ 100
-          & RR.waitNewEvent .~ False
-          & RR.historyEventFilterType .~ HISTORY_EVENT_FILTER_TYPE_ALL_EVENT
-          & RR.skipArchival .~ True
+        RRMsg.GetWorkflowExecutionHistoryRequest
+          (Just (rawNamespace h.workflowHandleClient.clientConfig.namespace))
+          (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId h.workflowHandleWorkflowId)) (Just (maybe "" rawRunId h.workflowHandleRunId)) []))
+          (Just 100)
+          Nothing
+          (Just False)
+          (Just HistoryEventFilterType'HistoryEventFilterTypeAllEvent)
+          (Just True)
+          []
   allEvents <- runReaderT (sourceToList (streamEvents FollowRuns startingReq)) h.workflowHandleClient
-  pure $ build (History.events .~ allEvents)
+  pure $ HistoryMsg.History (V.fromList allEvents) []
 
 
 applyNewExecutionRunId
-  :: (HasField s "newExecutionRunId" Text)
-  => s
+  :: Maybe Text
   -> GetWorkflowExecutionHistoryRequest
   -> Maybe GetWorkflowExecutionHistoryRequest
   -> Maybe GetWorkflowExecutionHistoryRequest
-applyNewExecutionRunId attrs req alt =
-  if attrs ^. History.newExecutionRunId == ""
-    then alt
-    else
-      let exec = req ^. RR.execution
-      in Just
-          ( req
-              & RR.execution .~ (exec & RR.runId .~ (attrs ^. History.newExecutionRunId))
-              & RR.nextPageToken .~ ""
-          )
+applyNewExecutionRunId maybeNewRunId (RRMsg.GetWorkflowExecutionHistoryRequest namespace execution maximumPageSize _ waitNewEvent historyEventFilterType skipArchival unknownFields) alt =
+  let newRunId = fromMaybe "" maybeNewRunId
+  in if newRunId == ""
+      then alt
+      else
+        let CommonMsg.WorkflowExecution workflowId _ executionUnknownFields =
+              fromMaybe (CommonMsg.WorkflowExecution Nothing Nothing []) execution
+        in Just
+            ( RRMsg.GetWorkflowExecutionHistoryRequest
+                namespace
+                (Just (CommonMsg.WorkflowExecution workflowId (Just newRunId) executionUnknownFields))
+                maximumPageSize
+                (Just mempty)
+                waitNewEvent
+                historyEventFilterType
+                skipArchival
+                unknownFields
+            )
 
 
 {- | Workflow execution history is represented as a series of events. This function allows you to
@@ -1021,7 +1011,8 @@ streamEvents followOpt baseReq = do
 
 
 {- | 'streamEvents' with the history fetch injected. Factored out so the
-follow / pagination loop can be tested without a live server. -}
+follow / pagination loop can be tested without a live server.
+-}
 streamEventsWith
   :: (Monad m)
   => (GetWorkflowExecutionHistoryRequest -> m GetWorkflowExecutionHistoryResponse)
@@ -1031,98 +1022,121 @@ streamEventsWith
 streamEventsWith fetch followOpt = go
   where
     go req = do
-      x <- lift (fetch req)
-      yieldMany (x ^. RR.history . History.events)
-      for_ (decideLoop req x) go
-    decideLoop :: GetWorkflowExecutionHistoryRequest -> GetWorkflowExecutionHistoryResponse -> Maybe GetWorkflowExecutionHistoryRequest
-    decideLoop req res =
-      if V.null (res ^. RR.history . History.vec'events)
-        then nextPage
-        else case V.last (res ^. RR.history . History.vec'events) ^. History.maybe'attributes of
-          Nothing -> nextPage
-          Just attrType ->
-            case attrType of
-              HistoryEvent'WorkflowExecutionCompletedEventAttributes attrs -> case followOpt of
-                FollowRuns -> applyNewExecutionRunId attrs req nextPage
-                ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionFailedEventAttributes attrs -> case followOpt of
-                FollowRuns -> applyNewExecutionRunId attrs req nextPage
-                ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionTimedOutEventAttributes attrs -> case followOpt of
-                FollowRuns -> applyNewExecutionRunId attrs req nextPage
-                ThisRunOnly -> nextPage
-              HistoryEvent'WorkflowExecutionContinuedAsNewEventAttributes attrs -> case followOpt of
-                FollowRuns ->
-                  if attrs ^. History.newExecutionRunId == ""
-                    then error "Expected newExecutionRunId in WorkflowExecutionContinuedAsNewEventAttributes"
-                    else
-                      Just $
-                        req
-                          & RR.nextPageToken .~ ""
-                          & RR.execution %~ (RR.runId .~ (attrs ^. History.newExecutionRunId))
-                ThisRunOnly -> Nothing
-              -- A non-terminal last event means the run's history continues on
-              -- the next page; keep paginating rather than truncating here.
-              _ -> nextPage
+      response <- lift (fetch req)
+      let HistoryMsg.History events _ =
+            fromMaybe (HistoryMsg.History V.empty []) response.history
+      yieldMany events
+      for_ (decideLoop req response) go
+    decideLoop
+      :: GetWorkflowExecutionHistoryRequest
+      -> GetWorkflowExecutionHistoryResponse
+      -> Maybe GetWorkflowExecutionHistoryRequest
+    decideLoop req response =
+      let HistoryMsg.History events _ =
+            fromMaybe (HistoryMsg.History V.empty []) response.history
+      in if V.null events
+          then nextPage
+          else case V.last events of
+            HistoryMsg.HistoryEvent _ _ _ _ _ _ _ _ Nothing _ -> nextPage
+            HistoryMsg.HistoryEvent _ _ _ _ _ _ _ _ (Just attrType) _ ->
+              case attrType of
+                HistoryEvent'Attributes'WorkflowExecutionCompletedEventAttributes
+                  (HistoryMsg.WorkflowExecutionCompletedEventAttributes _ _ newRunId _) ->
+                    case followOpt of
+                      FollowRuns -> applyNewExecutionRunId newRunId req nextPage
+                      ThisRunOnly -> nextPage
+                HistoryEvent'Attributes'WorkflowExecutionFailedEventAttributes
+                  (HistoryMsg.WorkflowExecutionFailedEventAttributes _ _ _ newRunId _) ->
+                    case followOpt of
+                      FollowRuns -> applyNewExecutionRunId newRunId req nextPage
+                      ThisRunOnly -> nextPage
+                HistoryEvent'Attributes'WorkflowExecutionTimedOutEventAttributes
+                  (HistoryMsg.WorkflowExecutionTimedOutEventAttributes _ newRunId _) ->
+                    case followOpt of
+                      FollowRuns -> applyNewExecutionRunId newRunId req nextPage
+                      ThisRunOnly -> nextPage
+                HistoryEvent'Attributes'WorkflowExecutionContinuedAsNewEventAttributes
+                  (HistoryMsg.WorkflowExecutionContinuedAsNewEventAttributes newRunId _ _ _ _ _ _ _ _ _ _ _ _ _ _ _) ->
+                    case followOpt of
+                      FollowRuns -> applyNewExecutionRunId newRunId req nextPage
+                      ThisRunOnly -> Nothing
+                _ -> Nothing
       where
         nextPage =
-          if res ^. RR.nextPageToken == ""
-            then Nothing
-            else Just (req & RR.nextPageToken .~ (res ^. RR.nextPageToken))
+          let nextPageToken = fromMaybe mempty response.nextPageToken
+          in if nextPageToken == mempty
+              then Nothing
+              else
+                let RRMsg.GetWorkflowExecutionHistoryRequest namespace execution maximumPageSize _ waitNewEvent historyEventFilterType skipArchival unknownFields = req
+                in Just
+                    ( RRMsg.GetWorkflowExecutionHistoryRequest
+                        namespace
+                        execution
+                        maximumPageSize
+                        (Just nextPageToken)
+                        waitNewEvent
+                        historyEventFilterType
+                        skipArchival
+                        unknownFields
+                    )
 
 
 waitResult
   :: (MonadIO m, HasWorkflowClient m)
   => WorkflowId
   -> Maybe RunId
-  -> Namespace {- options incl namespace -}
+  -> Namespace
   -> m (Maybe HistoryEvent)
 waitResult wfId mrId (Namespace ns) = do
   let startingReq :: GetWorkflowExecutionHistoryRequest
       startingReq =
-        defMessage
-          & RR.namespace .~ ns
-          & RR.execution
-            .~ ( defMessage
-                  & Common.workflowId .~ rawWorkflowId wfId
-                  & case mrId of
-                    Nothing -> Prelude.id
-                    Just rId -> Common.runId .~ rawRunId rId
-               )
-          & RR.maximumPageSize .~ 100
-          & RR.waitNewEvent .~ True
-          & RR.historyEventFilterType .~ HISTORY_EVENT_FILTER_TYPE_CLOSE_EVENT
-          & RR.skipArchival .~ True
+        RRMsg.GetWorkflowExecutionHistoryRequest
+          (Just ns)
+          (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId wfId)) (Just (maybe "" rawRunId mrId)) []))
+          (Just 100)
+          Nothing
+          (Just True)
+          (Just HistoryEventFilterType'HistoryEventFilterTypeCloseEvent)
+          (Just True)
+          []
   connect (streamEvents FollowRuns startingReq) lastC
 
 
 listOpenWorkflowExecutions
   :: (MonadIO m, HasWorkflowClient m)
-  => ListOpenWorkflowExecutionsRequest
+  => RRMsg.ListOpenWorkflowExecutionsRequest
   -> ConduitT i WorkflowExecutionInfo m ()
-listOpenWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+listOpenWorkflowExecutions baseReq =
+  askWorkflowClient >>= \c ->
+    let RRMsg.ListOpenWorkflowExecutionsRequest _ maximumPageSize nextPageToken startTimeFilter filters unknownFields = baseReq
+    in go c (RRMsg.ListOpenWorkflowExecutionsRequest (Just (rawNamespace c.clientConfig.namespace)) maximumPageSize nextPageToken startTimeFilter filters unknownFields)
   where
-    go c req = do
-      res <- liftIO $ Temporal.Core.Client.WorkflowService.listOpenWorkflowExecutions c.clientCore req
+    go c (RRMsg.ListOpenWorkflowExecutionsRequest namespace maximumPageSize currentPageToken startTimeFilter filters unknownFields) = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listOpenWorkflowExecutions c.clientCore (RRMsg.ListOpenWorkflowExecutionsRequest namespace maximumPageSize currentPageToken startTimeFilter filters unknownFields)
       case res of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-        Right x -> do
-          yieldMany (x ^. field @"vec'executions")
-          unless (x ^. field @"nextPageToken" == "") do
-            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+        Right (RRMsg.ListOpenWorkflowExecutionsResponse executions nextPageToken' _) -> do
+          let nextPage = fromMaybe mempty nextPageToken'
+          yieldMany executions
+          unless (nextPage == mempty) do
+            go c (RRMsg.ListOpenWorkflowExecutionsRequest namespace maximumPageSize (Just nextPage) startTimeFilter filters unknownFields)
 
 
 listClosedWorkflowExecutions :: (MonadIO m, HasWorkflowClient m) => ListClosedWorkflowExecutionsRequest -> ConduitT i WorkflowExecutionInfo m ()
-listClosedWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+listClosedWorkflowExecutions baseReq =
+  askWorkflowClient >>= \c ->
+    let RRMsg.ListClosedWorkflowExecutionsRequest _ maximumPageSize nextPageToken startTimeFilter filters unknownFields = baseReq
+    in go c (RRMsg.ListClosedWorkflowExecutionsRequest (Just (rawNamespace c.clientConfig.namespace)) maximumPageSize nextPageToken startTimeFilter filters unknownFields)
   where
-    go c req = do
-      res <- liftIO $ Temporal.Core.Client.WorkflowService.listClosedWorkflowExecutions c.clientCore req
+    go c (RRMsg.ListClosedWorkflowExecutionsRequest namespace maximumPageSize currentPageToken startTimeFilter filters unknownFields) = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.listClosedWorkflowExecutions c.clientCore (RRMsg.ListClosedWorkflowExecutionsRequest namespace maximumPageSize currentPageToken startTimeFilter filters unknownFields)
       case res of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-        Right x -> do
-          yieldMany (x ^. field @"vec'executions")
-          unless (x ^. field @"nextPageToken" == "") do
-            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+        Right (RRMsg.ListClosedWorkflowExecutionsResponse executions nextPageToken' _) -> do
+          let nextPage = fromMaybe mempty nextPageToken'
+          yieldMany executions
+          unless (nextPage == mempty) do
+            go c (RRMsg.ListClosedWorkflowExecutionsRequest namespace maximumPageSize (Just nextPage) startTimeFilter filters unknownFields)
 
 
 -- TODO, replace with newer listWorkflowExecutions API, this is deprecated in the proto
@@ -1130,16 +1144,20 @@ scanWorkflowExecutions
   :: (MonadIO m, HasWorkflowClient m)
   => ScanWorkflowExecutionsRequest
   -> ConduitT i WorkflowExecutionInfo m ()
-scanWorkflowExecutions baseReq = askWorkflowClient >>= \c -> go c (baseReq & field @"namespace" .~ rawNamespace c.clientConfig.namespace)
+scanWorkflowExecutions baseReq =
+  askWorkflowClient >>= \c ->
+    let RRMsg.ScanWorkflowExecutionsRequest _ pageSize nextPageToken query' unknownFields = baseReq
+    in go c (RRMsg.ScanWorkflowExecutionsRequest (Just (rawNamespace c.clientConfig.namespace)) pageSize nextPageToken query' unknownFields)
   where
-    go c req = do
-      res <- liftIO $ Temporal.Core.Client.WorkflowService.scanWorkflowExecutions c.clientCore req
+    go c (RRMsg.ScanWorkflowExecutionsRequest namespace pageSize currentPageToken query' unknownFields) = do
+      res <- liftIO $ Temporal.Core.Client.WorkflowService.scanWorkflowExecutions c.clientCore (RRMsg.ScanWorkflowExecutionsRequest namespace pageSize currentPageToken query' unknownFields)
       case res of
         Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-        Right x -> do
-          yieldMany (x ^. field @"vec'executions")
-          unless (x ^. field @"nextPageToken" == "") do
-            go c (req & field @"nextPageToken" .~ (x ^. field @"nextPageToken"))
+        Right (RRMsg.ScanWorkflowExecutionsResponse executions nextPageToken' _) -> do
+          let nextPage = fromMaybe mempty nextPageToken'
+          yieldMany executions
+          unless (nextPage == mempty) do
+            go c (RRMsg.ScanWorkflowExecutionsRequest namespace pageSize (Just nextPage) query' unknownFields)
 
 
 countWorkflowExecutions
@@ -1190,33 +1208,32 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
     updateArgs <- processorEncodePayloads processor input.updateWorkflowArgs
     let msg :: UpdateWorkflowExecutionRequest
         msg =
-          defMessage
-            & WF.namespace .~ rawNamespace h.workflowHandleClient.clientConfig.namespace
-            & WF.workflowExecution
-              .~ ( defMessage
-                    & Common.workflowId .~ rawWorkflowId input.updateWorkflowWorkflowId
-                    & Common.runId .~ maybe "" rawRunId input.updateWorkflowRunId
-                 )
-            & WF.firstExecutionRunId .~ maybe "" rawRunId h.workflowHandleFirstExecutionRunId
-            & WF.waitPolicy
-              .~ ( defMessage
-                    & Update.lifecycleStage .~ Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_ACCEPTED
-                 )
-            & WF.request
-              .~ ( defMessage
-                    & Update.meta
-                      .~ ( defMessage
-                            & Update.updateId .~ rawUpdateId opts.updateId
-                            & Update.identity .~ Core.identity (Core.clientConfig c.clientCore)
-                         )
-                    & Update.input
-                      .~ ( defMessage
-                            & Update.header .~ headerToProto (fmap convertToProtoPayload input.updateWorkflowHeaders)
-                            & Update.name .~ input.updateWorkflowType
-                            & Update.args .~ (defMessage & Common.vec'payloads .~ fmap convertToProtoPayload updateArgs)
-                         )
-                 )
-
+          RRMsg.UpdateWorkflowExecutionRequest
+            (Just (rawNamespace h.workflowHandleClient.clientConfig.namespace))
+            ( Just
+                ( CommonMsg.WorkflowExecution
+                    (Just (rawWorkflowId input.updateWorkflowWorkflowId))
+                    (Just (maybe "" rawRunId input.updateWorkflowRunId))
+                    []
+                )
+            )
+            (Just (maybe "" rawRunId h.workflowHandleFirstExecutionRunId))
+            (Just (UpdateMsg.WaitPolicy (Just Update.UpdateWorkflowExecutionLifecycleStage'UpdateWorkflowExecutionLifecycleStageAccepted) []))
+            ( Just
+                ( UpdateMsg.Request
+                    (Just (UpdateMsg.Meta (Just (rawUpdateId opts.updateId)) (Just (Core.identity (Core.clientConfig c.clientCore))) []))
+                    ( Just
+                        ( UpdateMsg.Input
+                            (Just (headerToProto (fmap convertToProtoPayload input.updateWorkflowHeaders)))
+                            (Just input.updateWorkflowType)
+                            (Just (CommonMsg.Payloads (fmap convertToProtoPayload updateArgs) []))
+                            []
+                        )
+                    )
+                    []
+                )
+            )
+            []
     (res :: UpdateWorkflowExecutionResponse) <- do
       eRes <- liftIO $ Temporal.Core.Client.WorkflowService.updateWorkflowExecution h.workflowHandleClient.clientCore msg
       case eRes of
@@ -1225,16 +1242,18 @@ startUpdateFromPayloads h@(WorkflowHandle _ _ c _ _ _) (KnownUpdate updateCodec 
 
     -- We're not going to look for a successful result yet (waitUpdateResult will do that), but we do want to check for failures
     -- so that we can report validataion failures via UpdateFailure rather than RpcError.
-    case res ^. Update.maybe'outcome of
-      Just outcome -> do
-        case outcome ^. Update.maybe'value of
-          Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
-          _ -> pure ()
-      Nothing -> pure ()
+    let RRMsg.UpdateWorkflowExecutionResponse updateRef' outcome' _ _ = res
+    case outcome' of
+      Just (UpdateMsg.Outcome (Just (UpdateMsg.Outcome'Value'Failure failure)) _) -> throwIO $ UpdateFailure failure
+      _ -> pure ()
 
-    let updateId = UpdateId (res ^. (RR.updateRef . Update.updateId))
-        workflowId = WorkflowId (res ^. (RR.updateRef . WF.workflowExecution . WF.workflowId))
-        runId = RunId (res ^. (RR.updateRef . WF.workflowExecution . WF.runId))
+    let updateRef = fromMaybe (UpdateMsg.UpdateRef Nothing Nothing []) updateRef'
+        UpdateMsg.UpdateRef workflowExecution' updateId' _ = updateRef
+        workflowExecution = fromMaybe (CommonMsg.WorkflowExecution Nothing Nothing []) workflowExecution'
+        CommonMsg.WorkflowExecution workflowId' runId' _ = workflowExecution
+        updateId = UpdateId (fromMaybe "" updateId')
+        workflowId = WorkflowId (fromMaybe "" workflowId')
+        runId = RunId (fromMaybe "" runId')
 
     pure $
       UpdateHandle
@@ -1283,36 +1302,43 @@ waitUpdateResult :: (MonadIO m) => UpdateHandle a -> m a
 waitUpdateResult h = do
   let msg :: PollWorkflowExecutionUpdateRequest
       msg =
-        defMessage
-          & WF.namespace .~ rawNamespace h.updateHandleWorkflowClient.clientConfig.namespace
-          & WF.updateRef
-            .~ ( defMessage
-                  & WF.workflowExecution
-                    .~ ( defMessage
-                          & WF.workflowId .~ rawWorkflowId h.updateHandleWorkflowId
-                          & WF.runId .~ maybe "" rawRunId h.updateHandleWorkflowRunId
-                       )
-                  & Update.updateId .~ rawUpdateId h.updateHandleUpdateId
-               )
-          & WF.identity .~ Core.identity (Core.clientConfig h.updateHandleWorkflowClient.clientCore)
-          & WF.waitPolicy
-            .~ ( defMessage
-                  & Update.lifecycleStage .~ Update.UPDATE_WORKFLOW_EXECUTION_LIFECYCLE_STAGE_COMPLETED
-               )
+        RRMsg.PollWorkflowExecutionUpdateRequest
+          (Just (rawNamespace h.updateHandleWorkflowClient.clientConfig.namespace))
+          ( Just
+              ( UpdateMsg.UpdateRef
+                  ( Just
+                      ( CommonMsg.WorkflowExecution
+                          (Just (rawWorkflowId h.updateHandleWorkflowId))
+                          (Just (maybe "" rawRunId h.updateHandleWorkflowRunId))
+                          []
+                      )
+                  )
+                  (Just (rawUpdateId h.updateHandleUpdateId))
+                  []
+              )
+          )
+          (Just (Core.identity (Core.clientConfig h.updateHandleWorkflowClient.clientCore)))
+          ( Just
+              ( UpdateMsg.WaitPolicy
+                  (Just Update.UpdateWorkflowExecutionLifecycleStage'UpdateWorkflowExecutionLifecycleStageCompleted)
+                  []
+              )
+          )
+          []
       go = do
         eRes <- Temporal.Core.Client.WorkflowService.pollWorkflowExecutionUpdate h.updateHandleWorkflowClient.clientCore msg
         case eRes of
           Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-          Right res -> do
-            case res ^. Update.maybe'outcome of
-              Nothing -> go
-              Just outcome -> do
-                case outcome ^. Update.maybe'value of
-                  Just (Update.Outcome'Success payloads) -> case (payloads ^. Common.vec'payloads) V.!? 0 of
+          Right res ->
+            case res of
+              RRMsg.PollWorkflowExecutionUpdateResponse Nothing _ _ _ -> go
+              RRMsg.PollWorkflowExecutionUpdateResponse (Just (UpdateMsg.Outcome outcome' _)) _ _ _ ->
+                case outcome' of
+                  Just (UpdateMsg.Outcome'Value'Success payloads) -> case CommonMsg.payloads payloads V.!? 0 of
                     Nothing -> throwIO $ ValueError "No return value payloads provided by update response"
                     Just p -> pure $ convertFromProtoPayload p
-                  Just (Update.Outcome'Failure failure) -> throwIO $ UpdateFailure failure
-                  Nothing -> error "Unsupported update result"
+                  Just (UpdateMsg.Outcome'Value'Failure failure) -> throwIO $ UpdateFailure failure
+                  Nothing -> throwIO $ ValueError "Unsupported update result"
   payload <- liftIO go
   liftIO $ h.updateHandleReadResult payload
 
@@ -1344,13 +1370,10 @@ checkWorkflowExecutionExists _wfRef wfId = do
   c <- askWorkflowClient
   liftIO $ do
     let req =
-          defMessage
-            & field @"namespace" .~ rawNamespace c.clientConfig.namespace
-            & field @"execution"
-              .~ ( defMessage
-                    & field @"workflowId" .~ rawWorkflowId wfId
-                    & field @"runId" .~ ""
-                 )
+          RRMsg.DescribeWorkflowExecutionRequest
+            (Just (rawNamespace c.clientConfig.namespace))
+            (Just (CommonMsg.WorkflowExecution (Just (rawWorkflowId wfId)) (Just "") []))
+            []
     res <- WS.describeWorkflowExecution c.clientCore req
     case res of
       Left err -> case err of
@@ -1359,9 +1382,17 @@ checkWorkflowExecutionExists _wfRef wfId = do
       Right _ -> pure True
 
 
+searchAttributeEntries :: Map Text CommonMsg.Payload -> V.Vector CommonMsg.SearchAttributes'IndexedFieldsEntry
+searchAttributeEntries =
+  V.fromList
+    . fmap (\(key, value) -> CommonMsg.SearchAttributes'IndexedFieldsEntry (Just key) (Just value) [])
+    . Map.toList
+
+
 priorityToProto :: Priority -> CommonMsg.Priority
 priorityToProto p =
-  defMessage
-    & Common.priorityKey .~ p.priorityKey
-    & Common.fairnessKey .~ p.fairnessKey
-    & Common.fairnessWeight .~ p.fairnessWeight
+  CommonMsg.Priority
+    (Just p.priorityKey)
+    (Just p.fairnessKey)
+    (Just p.fairnessWeight)
+    []

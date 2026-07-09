@@ -66,12 +66,12 @@ module Temporal.Activity (
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Reader.Class
-import Data.ProtoLens
 import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Vector as V
-import Lens.Family2
-import qualified Proto.Temporal.Sdk.Core.CoreInterface_Fields as Proto
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
+import qualified Proto.Temporal.Sdk.Core.CoreInterface as Proto
 import Temporal.Activity.Definition
 import Temporal.Activity.Types
 import Temporal.Activity.Worker
@@ -144,9 +144,11 @@ rawHeartbeat baseDetails = do
   recordHeartbeat <- askActivityRecordHeartbeat
   info <- askActivityInfo
   let details =
-        defMessage
-          & Proto.taskToken .~ token
-          & Proto.vec'details .~ fmap convertToProtoPayload baseDetails
+        Proto.ActivityHeartbeat
+          { Proto.taskToken = Just token
+          , Proto.details = fmap convertToProtoPayload baseDetails
+          , Proto.activityHeartbeatUnknownFields = []
+          }
   -- TODO throw exception if this fails?
   void $ liftIO do
     writeIORef info.rawHeartbeatDetails baseDetails
@@ -222,6 +224,7 @@ activityWorkflowClient = Activity $ do
       , payloadProcessor = e.activityPayloadProcessor
       , enableTimeSkipping = False
       }
+
 
 -- NOTE: intentionally defined as an orphan to avoid a module cycle
 instance HasWorkflowClient (Activity env) where
