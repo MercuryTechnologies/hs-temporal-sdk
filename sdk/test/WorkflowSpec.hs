@@ -6,7 +6,7 @@ import Conduit
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, bracket)
 import Control.Exception.Annotated (checkpoint)
-import Control.Monad (forever)
+import Control.Monad (forever, replicateM_)
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger (logInfoN)
 import System.Timeout (timeout)
@@ -34,6 +34,7 @@ import Temporal.SearchAttributes
 import Temporal.Testing.Assertions
 import Temporal.Worker
 import qualified Temporal.Workflow as W
+import Temporal.Workflow.Unsafe (withoutDeadlockDetection)
 import Test.Hspec
 import TestHelpers
 
@@ -45,14 +46,15 @@ spec = withTestServer_ tests
 tests :: SpecWith TestEnv
 tests = do
   describe "Deadlock detection" $ do
-    -- Pending: the deadlock timeout wraps the whole activation step, but async
-    -- 'timeout' cannot interrupt CPU-bound workflow code — a 500ms timeout does
-    -- not fire during a multi-second non-suspending loop (GHC does not deliver
-    -- the async exception into the tight loop). Reliable detection needs a
-    -- watchdog that fails the task without interrupting the runaway computation.
-    xit "fails the workflow task when a non-suspending loop exhausts the deadlock timeout" $ \TestEnv {..} -> do
+    -- A non-suspending loop in workflow code cannot be interrupted by an async
+    -- 'timeout', so the deadline is enforced by a watchdog: the step runs on a
+    -- child thread and the worker thread fails the task if it overruns, then
+    -- abandons the runaway child.
+    it "fails the workflow task when a non-suspending loop exhausts the deadlock timeout" $ \TestEnv {..} -> do
       -- Capture a valid history from a normal run under the workflow type.
-      let normalWf = W.provideWorkflow defaultCodec "deadlockLoop" (pure () :: MyWorkflow ())
+      let noop :: MyWorkflow ()
+          noop = pure ()
+          normalWf = W.provideWorkflow defaultCodec "deadlockLoop" noop
           normalConf = configure () normalWf baseConf
       history <- withWorker normalConf $ do
         uuid <- uuidText
@@ -63,17 +65,47 @@ tests = do
           C.fetchHistory h
       -- Replay that history against a non-suspending body under the same type.
       -- The loop never yields, so the deadlock timeout must fail the task.
-      let loopWf = W.provideWorkflow defaultCodec "deadlockLoop" $ do
+      let spin :: MyWorkflow ()
+          spin = do
             counter <- W.newStateVar (0 :: Int)
-            forever (W.modifyStateVar counter (+ 1)) :: MyWorkflow ()
+            forever (W.modifyStateVar counter (+ 1))
+          loopWf = W.provideWorkflow defaultCodec "deadlockLoop" spin
           loopConf = configure () loopWf $ do
             baseConf
             setDeadlockTimeout (Just 500_000)
-      outcome <- timeout 15_000_000 (runReplayHistory globalRuntime loopConf history)
+      outcome <- timeout 5_000_000 (runReplayHistory globalRuntime loopConf history)
       case outcome of
-        Just (Left e) -> Text.unpack e.message `shouldContain` "eadlock"
+        Just (Left e) -> Text.unpack e.message `shouldContain` "[TMPRL1101]"
         Just (Right ()) -> expectationFailure "replay completed despite a non-suspending infinite loop"
         Nothing -> expectationFailure "deadlock not detected within the outer bound"
+
+    it "does not fail the task when slow synchronous work is wrapped in withoutDeadlockDetection" $ \TestEnv {..} -> do
+      let noop :: MyWorkflow ()
+          noop = pure ()
+          normalWf = W.provideWorkflow defaultCodec "bypassLoop" noop
+          normalConf = configure () normalWf baseConf
+      history <- withWorker normalConf $ do
+        uuid <- uuidText
+        let opts = defaultStartOptsWithTimeout taskQueue (seconds 10)
+        useClient $ do
+          h <- C.start normalWf.reference (W.WorkflowId uuid) opts
+          C.waitWorkflowResult h
+          C.fetchHistory h
+      -- A bounded heavy loop sized to overrun the deadlock timeout.
+      let slowWork :: MyWorkflow ()
+          slowWork = do
+            counter <- W.newStateVar (0 :: Int)
+            withoutDeadlockDetection $ do
+              replicateM_ 2_000_000 $ W.modifyStateVar counter (+ 1)
+          bypassWf = W.provideWorkflow defaultCodec "bypassLoop" slowWork
+          bypassConf = configure () bypassWf $ do
+            baseConf
+            setDeadlockTimeout (Just 200_000)
+      outcome <- timeout 30_000_000 $ runReplayHistory globalRuntime bypassConf history
+      case outcome of
+        Just (Left e) -> expectationFailure $ "bypassed block still failed the task: " <> Text.unpack e.message
+        Just (Right ()) -> pure ()
+        Nothing -> expectationFailure "bypass workflow did not finish within the outer bound"
 
   describe "Workflow Basics" $ do
     specify "should run a no-op workflow" $ \TestEnv {..} -> do
