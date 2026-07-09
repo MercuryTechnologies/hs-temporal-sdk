@@ -20,11 +20,16 @@ module Temporal.Workflow.Unsafe (
   performUnsafeNonDeterministicIO,
   unsafeReadWorkflowVault,
   unsafeIsReplaying,
+  withoutDeadlockDetection,
 ) where
 
+import qualified Control.Monad.Catch as Catch
 import Control.Monad.IO.Class
-import Data.IORef (readIORef)
+import Data.IORef (atomicWriteIORef, readIORef)
 import Data.Vault.Strict (Vault)
+import GHC.Clock (getMonotonicTimeNSec)
+import RequireCallStack (provideCallStack)
+import qualified Temporal.Common.Logging as Logging
 import Temporal.Workflow
 import Temporal.Workflow.Internal.Monad
 
@@ -86,3 +91,45 @@ unsafeIsReplaying :: Workflow Bool
 unsafeIsReplaying = do
   inst <- askInstance
   performUnsafeNonDeterministicIO (readIORef inst.workflowIsReplaying)
+
+
+{- | Run a workflow action with deadlock detection disabled for its duration.
+
+Intended for legitimately slow /synchronous/ deterministic work that would
+otherwise trip the deadlock timeout.
+
+The deadline is cleared on entry and, on exit, pushed out by the elapsed time
+so the surrounding activation keeps its remaining budget.
+
+Unsafe: a genuine deadlock inside the block goes undetected and hangs the
+activation.
+
+It is 'Workflow'-only, so it does not cover query or update handlers.
+
+It is meant for non-suspending blocks; if the block suspends across an
+activation boundary the next activation re-arms detection and protection is not
+carried across (although a warning is logged).
+-}
+withoutDeadlockDetection :: Workflow a -> Workflow a
+withoutDeadlockDetection act = do
+  inst <- askInstance
+  Catch.bracket (disarm inst) (rearm inst) (\_ -> act)
+  where
+    disarm inst = performUnsafeNonDeterministicIO $ do
+      previousDeadline <- readIORef inst.workflowDeadlineNs
+      t0 <- getMonotonicTimeNSec
+      atomicWriteIORef inst.workflowDeadlineNs Nothing
+      pure (previousDeadline, t0)
+    -- Deadlock detection was already disabled.
+    rearm _ (Nothing, _) = pure ()
+    rearm inst (Just deadline, t0) = do
+      currentDeadline <- performUnsafeNonDeterministicIO $ readIORef inst.workflowDeadlineNs
+      case currentDeadline of
+        -- Still disarmed by us: push the deadline out by the elapsed time.
+        Nothing -> performUnsafeNonDeterministicIO $ do
+          t1 <- getMonotonicTimeNSec
+          atomicWriteIORef inst.workflowDeadlineNs (Just $ deadline + (t1 - t0))
+        -- A new activation re-armed the deadline: the block suspended across an
+        -- activation boundary; leave the fresh deadline to avoid mixing epochs.
+        Just _ -> provideCallStack $ ilift $
+          Logging.logWarn "withoutDeadlockDetection: block suspended across an activation; deadlock detection re-armed mid-block"

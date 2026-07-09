@@ -289,12 +289,9 @@ addErrorConverter f = ConfigM $ modify' $ \conf ->
 {- | Set the per-activation deadlock-detection timeout, in microseconds.
 
 If a workflow activation does not complete within this budget, it is treated as
-a deadlock and the activation fails.
+a deadlock and the workflow task fails (a retriable failure).
 
 Defaults to @'Just' 1000000@ (1s); @'Nothing'@ disables detection.
-
-__NOTE__: Currently only covers activation-job application, not workflow code
-itself.
 -}
 setDeadlockTimeout :: Maybe Int -> ConfigM actEnv ()
 setDeadlockTimeout t = ConfigM $ modify' $ \conf ->
@@ -999,6 +996,9 @@ evictionWasNonRecoverable :: Workflow.EvictionWithRunID -> Bool
 evictionWasNonRecoverable Workflow.EvictionWithRunID {eviction} = case eviction ^. Activation.reason of
   RemoveFromCache'FATAL -> True
   RemoveFromCache'NONDETERMINISM -> True
+  -- The SDK failed the activation itself (e.g. a deadlock or an internal
+  -- error). There is no task retry in replay, so surface it as a failure.
+  RemoveFromCache'LANG_FAIL -> True
   _ -> False
 
 

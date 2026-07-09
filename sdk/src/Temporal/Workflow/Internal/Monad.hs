@@ -1133,6 +1133,11 @@ data WorkflowInstance = WorkflowInstance
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
+  , -- | Monotonic deadline (in nanoseconds) for the current activation, if
+    -- deadlock detection is enabled.
+    --
+    -- Set between activations (see 'runActivation').
+    workflowDeadlineNs :: {-# UNPACK #-} !(IORef (Maybe Word64))
   , workflowVault :: {-# UNPACK #-} !Vault
   , -- | The run's paused state, advanced one activation at a time by
     -- 'Temporal.WorkflowInstance.runActivation'. The 'MVar' serialises a

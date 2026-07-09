@@ -305,7 +305,10 @@ data LogicBug = LogicBug LogicBugType
   deriving stock (Show)
 
 
-instance Exception LogicBug
+instance Exception LogicBug where
+  displayException (LogicBug WorkflowActivationDeadlock) =
+    "[TMPRL1101] Potential deadlock detected: workflow task did not yield to the runtime within the deadlock timeout"
+  displayException lb = show lb
 
 
 data WorkflowAlreadyStarted = WorkflowAlreadyStarted

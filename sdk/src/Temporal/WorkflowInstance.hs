@@ -94,6 +94,8 @@ import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
+import qualified UnliftIO.Concurrent as UC
+import GHC.Clock (getMonotonicTimeNSec)
 
 
 create
@@ -151,6 +153,7 @@ create
     workflowInstanceInfo <- newIORef info
     workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
     workflowCancellationVar <- newIVar
+    workflowDeadlineNs <- newIORef Nothing
     executionState <- newEmptyMVar
     let inst = WorkflowInstance {..}
     -- Runs setup and the workflow to its first suspension. The prompt wraps
@@ -177,13 +180,36 @@ The 'executionState' 'MVar' is the per-run lock: a run's activations are
 serialised by taking it. A fault during the step (deadlock, or an internal
 error) poisons the run and yields a failed completion in-band; genuine async
 exceptions (worker shutdown) are re-raised.
+
+The deadline is enforced from here (the worker's thread), not from inside the
+runaway computation: an async 'timeout' cannot interrupt a tight loop in
+workflow code, so with a timeout configured the step runs on a child thread and
+we fail the task if it overruns, abandoning the runaway computation
+(best-effort kill) rather than blocking the worker on it.
 -}
 runActivation :: HasCallStack => WorkflowInstance -> WorkflowActivation -> IO Core.WorkflowActivationCompletion
 runActivation inst act = runInstanceM inst $ UnliftIO.mask $ \restore -> do
   -- 'mask' keeps the state MVar refilled even under an async exception;
-  -- 'restore' leaves the step itself interruptible (the deadlock timeout).
+  -- 'restore' leaves the wait/step interruptible.
   st <- takeMVar inst.executionState
-  eRes <- UnliftIO.try $ restore $ deadlockGuarded $ advance act st
+  eRes <- UnliftIO.try $ case inst.workflowDeadlockTimeout of
+    Nothing -> restore $ advance act st
+    Just micros -> do
+      setActivationDeadline inst micros
+      resVar <- newEmptyMVar
+      tid <- UC.forkFinally (advance act st) (putMVar resVar)
+      restore (liftIO $ awaitDeadline inst resVar) >>= \case
+        Just (Right r) -> pure r
+        Just (Left e) -> throwIO e
+        Nothing -> do
+          -- Deadline exceeded: abandon the runaway child without waiting on it.
+          -- 
+          -- 'killThread' lets an allocating loop unwind, which fabricates a
+          -- completion the poisoned run never reads, and a non-allocating spin
+          -- ignores it and leaks until the process exits.
+          void $ UC.forkIO (UC.killThread tid)
+          Logging.logError (Text.pack . E.displayException $ LogicBug WorkflowActivationDeadlock)
+          throwIO $ LogicBug WorkflowActivationDeadlock
   case eRes of
     Right (completion, st') -> do
       putMVar inst.executionState st'
@@ -191,8 +217,40 @@ runActivation inst act = runInstanceM inst $ UnliftIO.mask $ \restore -> do
     Left err -> do
       putMVar inst.executionState (ExecPoisoned err)
       rethrowAsyncExceptions err
-      Logging.logWarn ("Failed activation: " <> Text.pack (show err))
+      Logging.logWarn ("Failed activation: " <> Text.pack (E.displayException err))
       buildFailedCompletion err
+
+
+-- | Arm the deadlock deadline for the coming activation.
+setActivationDeadline :: MonadIO m => WorkflowInstance -> Int -> m ()
+setActivationDeadline inst micros = liftIO $ do
+  now <- getMonotonicTimeNSec
+  writeIORef inst.workflowDeadlineNs (Just $ now + fromIntegral micros * 1000)
+
+
+{- | Wait for the forked activation step, or fail the task if the deadline in
+'workflowDeadlineNs' passes.
+
+Races the step result against a watcher that sleeps to the (mutable) deadline,
+so calling 'withoutDeadlockDetection' is honored.
+
+'Nothing' means the deadline expired with the step unfinished.
+-}
+awaitDeadline :: WorkflowInstance -> MVar a -> IO (Maybe a)
+awaitDeadline inst resVar =
+  UnliftIO.race sleepUntilDeadline (takeMVar resVar) >>= \case
+    Right a -> pure $ Just a -- step finished first
+    Left () -> tryTakeMVar resVar -- deadline won; take a just-finished result, else fire
+  where
+    pollNs = 100_000_000 :: Int -- 100ms; only while a bypass has disarmed the deadline
+    toMicros ns = max 1 (fromIntegral ((ns + 999) `div` 1000))
+    sleepUntilDeadline = do
+      mDeadline <- readIORef inst.workflowDeadlineNs
+      now <- getMonotonicTimeNSec
+      case mDeadline of
+        Just deadline | now >= deadline -> pure ()
+        Just deadline -> UC.threadDelay (toMicros $ deadline - now) *> sleepUntilDeadline
+        Nothing -> UC.threadDelay (toMicros pollNs) *> sleepUntilDeadline
 
 
 -- | Advance the paused run one activation forward.
@@ -255,25 +313,6 @@ applyJobsOnly act st = do
 -- caller poisons the run.
 applyJobs' :: WorkflowActivation -> InstanceM ([ActivationResult], [Workflow ()])
 applyJobs' act = either throwIO pure =<< stepActivation act
-
-
--- | Run the workflow step under the deadlock timeout, if one is configured.
---
--- The timeout wraps the whole step, however it only catches steps that
--- reach a safepoint: an async 'timeout' cannot interrupt a tight non-suspending
--- loop in workflow code, so a genuine CPU-bound deadlock is not detected here
--- (see the pending deadlock spec).
-deadlockGuarded :: InstanceM a -> InstanceM a
-deadlockGuarded m = do
-  inst <- ask
-  case inst.workflowDeadlockTimeout of
-    Nothing -> m
-    Just micros ->
-      UnliftIO.timeout micros m >>= \case
-        Just a -> pure a
-        Nothing -> do
-          Logging.logError "Deadlock detected"
-          throwIO (LogicBug WorkflowActivationDeadlock)
 
 
 -- | Build a failed activation completion from an exception.
