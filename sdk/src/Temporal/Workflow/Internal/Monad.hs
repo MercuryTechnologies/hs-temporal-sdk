@@ -4,15 +4,15 @@
 module Temporal.Workflow.Internal.Monad where
 
 import Control.Applicative
-import Control.Concurrent.Async
 import Control.Monad
 import Control.Exception.Base (NoMatchingContinuationPrompt (..))
 import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
-import Data.Atomics (atomicModifyIORefCAS)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
+import Data.HashSet (HashSet)
+import qualified Data.HashSet as HashSet
 import Data.Kind
 import Data.Map.Strict (Map)
 import Data.Monoid (Endo (..))
@@ -44,7 +44,6 @@ import System.Random.Stateful (FrozenGen (..), RandomGenM (..), StatefulGen (..)
 #endif
                               )
 import Temporal.Common
-import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Payload
 import Temporal.Workflow.Types
@@ -93,8 +92,7 @@ askInstance = Workflow $ const ask
 addCommand :: WorkflowCommand -> InstanceM ()
 addCommand command = do
   inst <- ask
-  atomically $ do
-    modifyTVar' inst.workflowCommands $ \cmds -> push command cmds
+  modifyIORef' inst.workflowCommands $ \cmds -> push command cmds
 
 
 {- | This function can be used to trace a bunch of lines to stdout when
@@ -192,6 +190,24 @@ deliverResultVal :: MonadIO m => ResultVal a -> m a
 deliverResultVal (Ok a) = pure a
 deliverResultVal (ThrowWorkflow e) = throwWorkflow e
 deliverResultVal (ThrowInternal e) = liftIO $ throwIO e
+
+
+{- | A synthetic cancellation delivered to a fiber continuation that the
+scheduler is about to drop (the losing side of a 'race'\/'biselectOpt').
+
+It mirrors the async exception that 'Control.Concurrent.Async.cancel' throws
+into a thread: it unwinds the loser through its 'bracket'\/'finally'
+finalizers instead of abandoning them. Unlike a real async exception, it is
+/not/ swallowed by 'Temporal.Workflow.Internal.Monad.catch', 'try', or
+'Control.Applicative.<|>' (those rethrow it), so a catch-all handler in the
+loser cannot accidentally resurrect a cancelled fiber; only the bracket
+family ('generalBracket') observes it, runs its release, and re-raises.
+-}
+data WorkflowFiberCancelled = WorkflowFiberCancelled
+  deriving stock (Show)
+
+
+instance Exception WorkflowFiberCancelled
 
 
 instance Functor Workflow where
@@ -325,9 +341,15 @@ catch (Workflow m) h = Workflow $ \env ->
   m env `UnliftIO.catch` \(se :: SomeException) ->
     case fromException se of
       Just (WorkflowThrown inner)
+        -- A fiber cancellation ('WorkflowFiberCancelled') must never be
+        -- swallowed by an ordinary handler, or a catch-all in a cancelled
+        -- 'race' loser would resurrect it. Rethrow; only the bracket family
+        -- ('generalBracket') observes it, to run finalizers.
+        | Just WorkflowFiberCancelled <- fromException inner -> throwIO se
         | Just e <- fromException inner -> unWorkflow (h e) env
         | otherwise -> throwIO se
       Nothing
+        | Just WorkflowFiberCancelled <- fromException se -> throwIO se
         | Just e <- fromException se -> unWorkflow (h e) env
         | otherwise -> throwIO se
 
@@ -354,6 +376,82 @@ instance Catch.MonadThrow Workflow where throwM = Temporal.Workflow.Internal.Mon
 
 
 instance Catch.MonadCatch Workflow where catch = Temporal.Workflow.Internal.Monad.catch
+
+
+-- | Build an 'Catch.ExitCaseException' from a caught exception, unwrapping
+-- the internal 'WorkflowThrown' envelope so the release action observes the
+-- exception the workflow actually raised.
+exitCaseException :: SomeException -> Catch.ExitCase a
+exitCaseException se = Catch.ExitCaseException $ case fromException se of
+  Just (WorkflowThrown inner) -> inner
+  _ -> se
+
+
+{- | An intentionally UNLAWFUL 'Catch.MonadMask' instance for 'Workflow'.
+
+A lawful 'MonadMask' is impossible here: async-exception masking state lives
+in the thread-state object, not on the Haskell stack, so the
+delimited-continuation primops ('control0#') that suspend and resume a fiber
+neither capture nor restore it. A 'mask' therefore cannot span a suspension,
+and we do not pretend otherwise.
+
+The instance is nonetheless safe /in this monad/, because the sole thing a
+lawful 'MonadMask' buys you is async-exception-safe handling of a leakable
+resource — and 'Workflow' cannot allocate one. It has 'TypeError' instances
+for 'MonadIO' and 'MonadUnliftIO' (below), so no arbitrary IO, and hence no
+file handle, socket, or lock, can be acquired inside a workflow. The bracket
+family is provided purely for /control-flow/ instrumentation (interceptor
+spans, error reporting), where the semantics below are exactly what is
+wanted. If you find yourself wanting these methods to guard a real resource,
+you have gone wrong: acquire it in an activity instead.
+
+Caveats, made explicit:
+
+  * 'mask' and 'uninterruptibleMask' do NOT block async exceptions. The
+    @restore@ argument is 'id'. Do not rely on them for atomicity. A given
+    workflow run's activations are serialised by its per-run 'MVar' and its
+    fibers are scheduled cooperatively, so within a region there is no
+    concurrent thread racing to deliver an async exception anyway.
+
+  * 'generalBracket' runs @release@ for 'Catch.ExitCaseSuccess' and
+    'Catch.ExitCaseException', so @bracket@\/@finally@\/@onException@ close a
+    span on both the returning and the throwing path, even across a
+    suspension, since the handler frame rides the fiber's captured
+    continuation. It catches at the IO level (not via the user-facing
+    'catch'), so it observes and re-raises a 'WorkflowFiberCancelled' too:
+    the SDK's own combinators never leave a continuation in the
+    'Catch.ExitCaseAbort' state. When 'race'\/'biselectOpt' drops its losing
+    side, 'cancelSubFiber' resumes that continuation with a
+    'WorkflowFiberCancelled' (gated on 'sdkFlagRaceLoserCancellation' so it
+    stays off when replaying histories recorded before the change), so the
+    loser's finalizers run through the
+    'Catch.ExitCaseException' path rather than being abandoned. A genuine
+    'Catch.ExitCaseAbort' (a continuation neither resumed nor cancelled)
+    would skip @release@, but nothing in the SDK produces one, and there is
+    no resource to leak regardless.
+-}
+instance Catch.MonadMask Workflow where
+  mask restoreToRunner = restoreToRunner id
+  uninterruptibleMask restoreToRunner = restoreToRunner id
+  generalBracket acquire release use = Workflow $ \env -> do
+    resource <- unWorkflow acquire env
+    -- Catch at the IO level rather than via the user-facing 'catch', so that
+    -- @release@ runs for EVERY exit, including a 'WorkflowFiberCancelled'
+    -- (which 'catch' deliberately refuses to swallow). The catch frame rides
+    -- the fiber's captured continuation, so it stays armed across any
+    -- suspension inside @use@. The original exception is re-raised verbatim
+    -- (no 'WorkflowThrown' re-wrapping), preserving its identity for the
+    -- fiber runner and any outer handler.
+    result <-
+      (Right <$> unWorkflow (use resource) env)
+        `UnliftIO.catch` \(se :: SomeException) -> pure (Left se)
+    case result of
+      Left se -> do
+        _ <- unWorkflow (release resource (exitCaseException se)) env
+        throwIO se
+      Right b -> do
+        c <- unWorkflow (release resource (Catch.ExitCaseSuccess b)) env
+        pure (b, c)
 
 
 newtype WorkflowGenM = WorkflowGenM {unWorkflowGenM :: IORef StdGen}
@@ -410,10 +508,11 @@ instance ThawedGen StdGen Workflow where
 goes straight onto the front of the run queue.
 -}
 parkTask :: ContinuationEnv -> FiberLocals -> FiberTask b -> IVar b -> IVar a -> InstanceM ()
-parkTask env locals !task !resultIVar IVar {ivarRef = ref} =
-  join $ liftIO $ atomicModifyIORefCAS ref $ \case
-    IVarEmpty list -> (IVarEmpty (JobCons env locals task resultIVar list), pure ())
-    full -> (full, modifyIORef' env.runQueueRef (JobCons env locals task resultIVar))
+parkTask env locals !task !resultIVar IVar {ivarRef = ref} = do
+  contents <- readIORef ref
+  case contents of
+    IVarEmpty list -> writeIORef ref (IVarEmpty (JobCons env locals task resultIVar list))
+    _full -> modifyIORef' env.runQueueRef (JobCons env locals task resultIVar)
 
 
 {- | Yield control back to the workflow scheduler, re-queueing the current
@@ -461,6 +560,52 @@ fiber may suspend again. Each continuation must be resumed at most once.
 data Status a
   = SDone a
   | forall v. SBlocked {-# UNPACK #-} !(IVar v) (ResultVal v -> IO (Status a))
+
+
+{- | A run either finished, or suspended awaiting the next activation's
+results.
+
+Run-level analogue of 'Status': a suspended run is a first-class continuation
+captured with 'control0' (see 'Temporal.Workflow.Eval.awaitActivationVia'),
+resumed at most once with the activation results it was waiting for.
+-}
+data RunStatus a
+  = RunDone a
+  | RunBlocked ([ActivationResult] -> IO (RunStatus a))
+
+
+{- | Values that were blocking waiting for an activation, and have now been
+unblocked.
+
+The driver fills these 'IVar's from an activation's resolution jobs to resume
+the run.
+-}
+data ActivationResult
+  = forall a.
+    ActivationResult
+      (ResultVal a)
+      !(IVar a)
+
+
+{- | The paused state of a run between activations, advanced by
+'Temporal.WorkflowInstance.activate'.
+
+The enclosing 'MVar' doubles as the per-run lock: taking it serialises the
+activations of one run, so all per-run state is mutated single-threaded.
+
+A run begins 'ExecNotStarted', holding the thunk that sets up execution and runs
+to the first suspension; each step then parks the one-shot resume continuation
+('ExecPaused'), records terminal completion ('ExecDone'), or records a fault
+('ExecPoisoned') that fails subsequent activations.
+
+The continuation is one-shot, so a faulted step must move to 'ExecPoisoned'
+rather than reinstate 'ExecPaused'.
+-}
+data ExecState a
+  = ExecNotStarted (IO (RunStatus a))
+  | ExecPaused ([ActivationResult] -> IO (RunStatus a))
+  | ExecDone
+  | ExecPoisoned SomeException
 
 
 {- | Like 'Status', but for sub-fibers run inside another fiber
@@ -540,7 +685,8 @@ suspendVia tag ivar = do
   control0
     tag
     ( \k -> pure $ SBlocked ivar $ \rv -> do
-        alreadyResumed <- atomicModifyIORefCAS resumed (\r -> (True, r))
+        alreadyResumed <- readIORef resumed
+        writeIORef resumed True
         when alreadyResumed $
           throwIO $
             RuntimeError "Internal invariant violation: a suspended workflow fiber was resumed more than once. Please report this as a bug in hs-temporal-sdk."
@@ -612,6 +758,90 @@ driveSubFiber env = go
         SubBlocked ivar' k' -> go ivar' k'
 
 
+{- | Cancel a fiber continuation that the scheduler is about to drop (the
+losing side of a 'race'\/'biselectOpt'). Instead of silently discarding it,
+resume it once with a synthetic 'WorkflowFiberCancelled' so its
+'bracket'\/'finally' finalizers run, mirroring how
+'Control.Concurrent.Async.cancel' delivers an async exception to a thread.
+
+The loser's result (or the re-raised cancellation) is discarded. If a
+finalizer itself suspends, it is driven to completion, so 'race' does not
+return until the loser has finished unwinding (matching
+'Control.Concurrent.Async.race', which waits on the cancelled loser). Each
+continuation is still resumed at most once. A workflow-level exception
+escaping the loser is swallowed (it belongs to a computation whose result is
+being thrown away); an internal machinery exception still propagates, as it
+must.
+-}
+cancelSubFiber :: forall a v. FiberEnv -> IVar v -> (ResultVal v -> IO (Status a)) -> InstanceM ()
+cancelSubFiber env = go True
+  where
+    go :: forall w. Bool -> IVar w -> (ResultVal w -> IO (Status a)) -> InstanceM ()
+    go firstResume ivar k = do
+      rv <-
+        if firstResume
+          then pure (ThrowWorkflow (toException WorkflowFiberCancelled))
+          else liftIO $ fiberSuspend env ivar
+      next <-
+        liftIO $
+          (Just <$> k rv) `UnliftIO.catch` \(WorkflowThrown _) -> pure Nothing
+      case next of
+        Nothing -> pure ()
+        Just (SDone _) -> pure ()
+        Just (SBlocked ivar' k') -> go False ivar' k'
+
+
+{- | A Temporal SDK internal flag: a small, permanent per-SDK id that gates a
+replay-unsafe behaviour change.
+
+The mechanism (shared with the TypeScript\/Python\/Go SDKs): a flag is either
+recorded as used in a workflow's history or not. On a live task 'tryUseSdkFlag'
+turns the behaviour on and records the id; on replay it returns whether the id
+was present in the history up to the current task. So a behaviour introduced
+behind a flag is used by new executions yet stays off when replaying a history
+recorded before the flag existed, keeping replay deterministic. Ids are chosen
+per-SDK starting at 1, never reused or renumbered.
+-}
+newtype SdkFlag = SdkFlag {sdkFlagId :: Word32}
+  deriving stock (Eq, Ord, Show)
+
+
+{- | Gate: run finalizers on a dropped @race@\/@biselect@ loser by resuming it
+with a synthetic 'WorkflowFiberCancelled'. Off for histories recorded before
+this flag, which drop losers silently (see 'cancelSubFiber').
+-}
+sdkFlagRaceLoserCancellation :: SdkFlag
+sdkFlagRaceLoserCancellation = SdkFlag 1
+
+
+{- | Check whether an 'SdkFlag'-gated behaviour is enabled for the current
+workflow task, recording the flag as used when running live.
+
+  * If the id is already known (advertised by core from history, or used
+    earlier this run), return 'True'.
+  * Otherwise, if this is NOT a replay, mark the flag used (so it is echoed in
+    the completion's @used_internal_flags@ and lands in history) and return
+    'True'.
+  * Otherwise (replaying a history without the flag) return 'False'.
+
+This is the default-on variant (live executions always adopt the new
+behaviour); it MUST be called at the same logical point on replay as live.
+-}
+tryUseSdkFlag :: SdkFlag -> InstanceM Bool
+tryUseSdkFlag (SdkFlag fid) = do
+  inst <- ask
+  known <- readIORef inst.workflowKnownFlags
+  if fid `HashSet.member` known
+    then pure True
+    else do
+      replaying <- readIORef inst.workflowIsReplaying
+      if replaying
+        then pure False
+        else do
+          modifyIORef' inst.workflowKnownFlags (HashSet.insert fid)
+          pure True
+
+
 data IVarContents a
   = IVarFull (ResultVal a)
   | IVarEmpty JobList
@@ -655,7 +885,10 @@ newIVar = do
 newTrackedIVar :: InstanceM (IVar a)
 newTrackedIVar = do
   inst <- ask
-  ivarId <- liftIO $ atomicModifyIORefCAS inst.workflowIVarCounter (\n -> let !n' = n + 1 in (n', n'))
+  ivarId <- liftIO $ do
+    n <- readIORef inst.workflowIVarCounter
+    let !n' = n + 1
+    n' <$ writeIORef inst.workflowIVarCounter n'
   ivarRef <- newIORef $ IVarEmpty JobNil
   pure IVar {..}
 
@@ -760,26 +993,25 @@ newStateVar a = Workflow $ \_ -> do
 reevaluateDependentConditions :: StateVar a -> InstanceM ()
 reevaluateDependentConditions cref = do
   inst <- ask
-  join $ atomically $ do
-    seqMaps <- readTVar inst.workflowSequenceMaps
-    let pendingConds = seqMaps.conditionsAwaitingSignal
-        (reactivateConds, unactivatedConds) =
-          HashMap.foldlWithKey'
-            ( \(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) ->
-                if cref.stateVarId `Set.member` varDependencies
-                  then
-                    ( reactivateConds' >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
-                    , unactivatedConds'
-                    )
-                  else
-                    ( reactivateConds'
-                    , HashMap.insert k v unactivatedConds'
-                    )
-            )
-            (pure (), mempty)
-            pendingConds
-    writeTVar inst.workflowSequenceMaps (seqMaps {conditionsAwaitingSignal = unactivatedConds})
-    pure reactivateConds
+  seqMaps <- readIORef inst.workflowSequenceMaps
+  let pendingConds = seqMaps.conditionsAwaitingSignal
+      (reactivateConds, unactivatedConds) =
+        HashMap.foldlWithKey'
+          ( \(reactivateConds', unactivatedConds') k v@(ivar, varDependencies) ->
+              if cref.stateVarId `Set.member` varDependencies
+                then
+                  ( reactivateConds' >> liftIO (putIVar ivar (Ok ()) inst.workflowInstanceContinuationEnv)
+                  , unactivatedConds'
+                  )
+                else
+                  ( reactivateConds'
+                  , HashMap.insert k v unactivatedConds'
+                  )
+          )
+          (pure (), mempty)
+          pendingConds
+  writeIORef inst.workflowSequenceMaps (seqMaps {conditionsAwaitingSignal = unactivatedConds})
+  reactivateConds
 
 
 class MonadReadStateVar m where
@@ -879,8 +1111,15 @@ data WorkflowInstance = WorkflowInstance
   , workflowSequences :: {-# UNPACK #-} !(IORef Sequences)
   , workflowTime :: {-# UNPACK #-} !(IORef SystemTime)
   , workflowIsReplaying :: {-# UNPACK #-} !(IORef Bool)
-  , workflowCommands :: {-# UNPACK #-} !(TVar (Reversed WorkflowCommand))
-  , workflowSequenceMaps :: {-# UNPACK #-} !(TVar SequenceMaps)
+  , -- | SDK internal flags (see 'SdkFlag') recorded as usable for this run.
+    -- Seeded each activation from the core's advertised
+    -- @available_internal_flags@ and grown by live 'tryUseSdkFlag' hits; the
+    -- accumulated set is echoed back to core in every completion's
+    -- @used_internal_flags@ so behaviour changes gated on a flag replay
+    -- deterministically (histories predating a flag simply lack its id).
+    workflowKnownFlags :: {-# UNPACK #-} !(IORef (HashSet Word32))
+  , workflowCommands :: {-# UNPACK #-} !(IORef (Reversed WorkflowCommand))
+  , workflowSequenceMaps :: {-# UNPACK #-} !(IORef SequenceMaps)
   , workflowSignalHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (Vector Payload -> Workflow ())))
   , -- | Signals that arrived before their handler was registered.
     -- These are buffered and delivered when setSignalHandler is called.
@@ -891,14 +1130,14 @@ data WorkflowInstance = WorkflowInstance
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowIVarCounter :: {-# UNPACK #-} !(IORef Word64)
   , workflowBlockedStacks :: {-# UNPACK #-} !(IORef (HashMap Word64 CallStack))
-  , workflowCompleteActivation :: !(Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
   , workflowInstanceContinuationEnv :: {-# UNPACK #-} !ContinuationEnv
   , workflowCancellationVar :: {-# UNPACK #-} !(IVar ())
   , workflowDeadlockTimeout :: Maybe Int
   , workflowVault :: {-# UNPACK #-} !Vault
-  , -- These are how the instance gets its work done
-    activationChannel :: {-# UNPACK #-} !(TQueue Core.WorkflowActivation)
-  , executionThread :: {-# UNPACK #-} !(IORef (Async ()))
+  , -- | The run's paused state, advanced one activation at a time by
+    -- 'Temporal.WorkflowInstance.activate'. The 'MVar' serialises a
+    -- run's activations.
+    executionState :: {-# UNPACK #-} !(MVar (ExecState (WorkflowExitVariant Payload)))
   , inboundInterceptor :: {-# UNPACK #-} !WorkflowInboundInterceptor
   , outboundInterceptor :: {-# UNPACK #-} !WorkflowOutboundInterceptor
   , -- Improves error reporting
@@ -1153,6 +1392,7 @@ instance Monoid WorkflowOutboundInterceptor where
 nextVarIdSequence :: InstanceM Sequence
 nextVarIdSequence = do
   inst <- ask
-  liftIO $ atomicModifyIORefCAS inst.workflowSequences $ \seqs ->
+  liftIO $ do
+    seqs <- readIORef inst.workflowSequences
     let seq' = varId seqs
-    in (seqs {varId = succ seq'}, Sequence seq')
+    Sequence seq' <$ writeIORef inst.workflowSequences seqs {varId = succ seq'}

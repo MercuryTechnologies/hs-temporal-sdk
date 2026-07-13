@@ -10,7 +10,6 @@ dependencies:
 - proto-lens-protobuf-types
 - temporal-api-protos
 - temporal-sdk-core
-- atomic-primops
 - bytestring
 - discover-instances
 - mtl
@@ -95,7 +94,6 @@ library:
   - Temporal.Common
   - Temporal.Common.Async
   - Temporal.Common.TimeoutType
-  - Temporal.Coroutine
   - Temporal.Workflow.Definition
   - Temporal.WorkflowInstance
   - Temporal.Workflow.Worker
@@ -148,7 +146,3 @@ tests:
       - resourcet
     main: Main.hs
     source-dirs: test
-    # other-modules deliberately omitted: hpack infers every module under
-    # test/ automatically, so new hspec-discover specs are always listed
-    # (a stale explicit list breaks fourmolu extension detection and
-    # cabal's change tracking for unlisted modules).

@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 
 module Temporal.WorkflowInstance (
   WorkflowInstance,
@@ -29,14 +30,13 @@ import qualified Data.Aeson as Aeson
 #if __GLASGOW_HASKELL__ < 910
 import Data.Foldable (foldl')
 #endif
-import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
 import Data.Maybe (mapMaybe)
 import Data.Monoid (Endo (..))
 import Data.ProtoLens
-import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.HashSet as HashSet
 import qualified Data.Text as Text
 import Data.Time.Clock.System (SystemTime (..))
 import Data.Vault.Strict (Vault)
@@ -48,7 +48,6 @@ import qualified GHC.Stack
 import Lens.Family2
 import Paths_temporal_sdk (version)
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (
   StartChildWorkflowExecutionFailedCause (..),
  )
@@ -84,13 +83,13 @@ import System.Random (mkStdGen)
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Worker as Core
-import Temporal.Coroutine
 import Temporal.Duration
 import Temporal.Exception
 import qualified Temporal.Exception as Err
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecution, injectWorkflowSignalOrUpdate, runWorkflow)
+import Temporal.Workflow.Eval (awaitActivationVia, injectWorkflowSignalOrUpdate, rethrowAsyncExceptions, runWorkflow)
+import Temporal.Workflow.Internal.DelimCC (newPromptTag, prompt)
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -99,10 +98,9 @@ import UnliftIO
 
 create
   :: (HasCallStack, MonadLoggerIO m)
-  => (Core.WorkflowActivationCompletion -> IO (Either Core.WorkerError ()))
-  -> (Vector Payload -> IO (Either String (Workflow Payload)))
+  => (Vector Payload -> IO (Either String (Workflow Payload)))
   -> Maybe Int
-  -- ^ deadlock timeout in seconds
+  -- ^ deadlock timeout in microseconds
   -> [ApplicationFailureHandler]
   -> WorkflowInboundInterceptor
   -> WorkflowOutboundInterceptor
@@ -112,7 +110,6 @@ create
   -> InitializeWorkflow
   -> m WorkflowInstance
 create
-  workflowCompleteActivation
   workflowFn
   workflowDeadlockTimeout
   errorConverters
@@ -141,8 +138,9 @@ create
           }
     workflowTime <- newIORef $ MkSystemTime 0 0
     workflowIsReplaying <- newIORef False
-    workflowSequenceMaps <- newTVarIO $ SequenceMaps mempty mempty mempty mempty mempty mempty mempty
-    workflowCommands <- newTVarIO $ Reversed []
+    workflowKnownFlags <- newIORef mempty
+    workflowSequenceMaps <- newIORef $ SequenceMaps mempty mempty mempty mempty mempty mempty mempty
+    workflowCommands <- newIORef $ Reversed []
     workflowSignalHandlers <- newIORef mempty
     workflowBufferedSignals <- newIORef mempty
     workflowCallStack <- newIORef emptyCallStack
@@ -153,92 +151,143 @@ create
     workflowInstanceInfo <- newIORef info
     workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
     workflowCancellationVar <- newIVar
-    activationChannel <- newTQueueIO
-    executionThread <- newIORef (error "Workflow thread not yet started")
-    -- The execution thread is funny because it needs access to the instance, but the instance
-    -- needs access to the execution thread. It's a bit of a circular dependency, but
-    -- pretty innocuous since writing to the executionThread var happens before anything else
-    -- is allowed to interact with the instance.
+    executionState <- newEmptyMVar
     let inst = WorkflowInstance {..}
-    workerThread <- liftIO $ async $ runInstanceM inst $ do
-      Logging.logDebug "Start workflow execution thread"
-      exec <- setUpWorkflowExecution start
-      res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
-        Logging.logDebug "Executing workflow"
-        wf <- applyStartWorkflow exec' workflowFn
-        runWorkflowToCompletion wf
-      Logging.logDebug "Workflow execution completed"
-      addCommand =<< convertExitVariantToCommand res
-      flushCommands
-      Logging.logDebug "Handling leftover queries"
-      handleQueriesAfterCompletion
-    -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
-    -- otherwise it will just hang forever.
-    link workerThread
-    writeIORef executionThread workerThread
+    -- Runs setup and the workflow to its first suspension. The prompt wraps
+    -- the interceptor and runTopLevel so suspensions capture their frames.
+    let startRun = runInstanceM inst $ do
+          Logging.logDebug "Starting workflow execution"
+          exec <- setUpWorkflowExecution start
+          tag <- liftIO newPromptTag
+          liftIO $
+            prompt tag $
+              fmap RunDone $
+                inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
+                  Logging.logDebug "Executing workflow"
+                  wf <- applyStartWorkflow exec' workflowFn
+                  runWorkflow (awaitActivationVia tag) wf
+    putMVar executionState (ExecNotStarted startRun)
     pure inst
 
 
-runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM Payload
-runWorkflowToCompletion wf = do
-  inst <- ask
-  let completeStep :: Await [ActivationResult] (SuspendableWorkflowExecution Payload) -> InstanceM (SuspendableWorkflowExecution Payload)
-      completeStep suspension = do
-        Logging.logDebug "Awaiting activation results from workflow"
-        -- If the workflow is blocked, then we necessarily have to signal the temporal-core
-        -- that we are stuck. Once we get unstuck (e.g. something is in the activation channel)
-        -- then we can resume the workflow.
-        --
-        -- There are a few cases like singalWithStart where a workflow will reach a blocking
-        -- state, but we aren't actually ready to flush the commands yet. So, we read
-        -- from the activation channel and resume the workflow until the channel is emptied.
-        --
-        -- Once we're blocked in that way, then we should flush the commands and wait for
-        -- the next activation(s?).
-        activation <- join $ atomically $ do
-          mActivition <- tryReadTQueue inst.activationChannel
-          case mActivition of
-            Nothing -> do
-              pure $ do
-                flushCommands
-                atomically $ readTQueue inst.activationChannel
-            Just act -> pure $ pure act
-        fmap runIdentity $ activate activation $ Identity suspension
-  supplyM completeStep wf
+{- | Advance a run by exactly one activation, returning the completion for the
+worker to send.
 
-
-{- | This runs indefinitely, handling queries that come in after the workflow has completed.
-
-Termination occurs when we receive an eviction signal from Temporal. At that point,
-the thread has 'cancel' called on it, which breaks us out of the loop.
-
-TODO perhaps we need to ensure that any any completed queries have added their commands
-to the command queue before we exit this loop?
+The 'executionState' 'MVar' is the per-run lock: a run's activations are
+serialised by taking it. A fault during the step (deadlock, or an internal
+error) poisons the run and yields a failed completion in-band; genuine async
+exceptions (worker shutdown) are re-raised.
 -}
-handleQueriesAfterCompletion :: InstanceM ()
-handleQueriesAfterCompletion = forever $ do
-  w <- ask
-  activation <- atomically . readTQueue =<< asks activationChannel
-  completion <- UnliftIO.try $ activate activation Proxy
-
-  case completion of
+activate :: HasCallStack => WorkflowInstance -> WorkflowActivation -> IO Core.WorkflowActivationCompletion
+activate inst act = runInstanceM inst $ UnliftIO.mask $ \restore -> do
+  -- 'mask' keeps the state MVar refilled even under an async exception;
+  -- 'restore' leaves the step itself interruptible (the deadlock timeout).
+  st <- takeMVar inst.executionState
+  eRes <- UnliftIO.try $ restore $ deadlockGuarded $ advance act st
+  case eRes of
+    Right (completion, st') -> do
+      putMVar inst.executionState st'
+      pure completion
     Left err -> do
-      Logging.logDebug ("Workflow failure: " <> Text.pack (show err))
-      let appFailure = mkApplicationFailure err w.errorConverters
-          enrichedApplicationFailure = applicationFailureToFailureProto appFailure
+      putMVar inst.executionState (ExecPoisoned err)
+      rethrowAsyncExceptions err
+      Logging.logWarn ("Failed activation: " <> Text.pack (show err))
+      buildFailedCompletion err
 
-          failureProto :: Completion.Failure
-          failureProto = defMessage & Completion.failure .~ enrichedApplicationFailure
 
-          completionMessage =
-            defMessage
-              & Completion.runId .~ (activation ^. Activation.runId)
-              & Completion.failed .~ failureProto
-      inst <- ask
-      liftIO (inst.workflowCompleteActivation completionMessage >>= either throwIO pure)
-    Right Proxy -> do
-      -- At this point, the workflow isn't running, so we can always flush the commands.
-      flushCommands
+-- | Advance the paused run one activation forward.
+advance
+  :: WorkflowActivation
+  -> ExecState (WorkflowExitVariant Payload)
+  -> InstanceM (Core.WorkflowActivationCompletion, ExecState (WorkflowExitVariant Payload))
+advance act st = case st of
+  ExecNotStarted start -> stepStatus act =<< liftIO start
+  ExecPaused k -> stepStatus act (RunBlocked k)
+  -- Run already finished; apply the activation's jobs (post-completion
+  -- queries) and flush without resuming.
+  ExecDone -> applyJobsOnly act ExecDone
+  ExecPoisoned err -> (,ExecPoisoned err) <$> buildFailedCompletion err
+
+
+-- | Step the run given its current status and this activation's jobs.
+stepStatus
+  :: WorkflowActivation
+  -> RunStatus (WorkflowExitVariant Payload)
+  -> InstanceM (Core.WorkflowActivationCompletion, ExecState (WorkflowExitVariant Payload))
+stepStatus act (RunDone exit) = do
+  _ <- applyJobs' act
+  addCommand =<< convertExitVariantToCommand exit
+  (,ExecDone) <$> drainCommands
+stepStatus act (RunBlocked k) = do
+  (results, sigUpdateJobs) <- applyJobs' act
+  case (results, sigUpdateJobs) of
+    -- A query-only activation resolves nothing and delivers no handlers;
+    -- resuming would just block again and desync core's state machine, so
+    -- leave the run suspended and flush the query response.
+    ([], []) -> (,ExecPaused k) <$> drainCommands
+    _ -> do
+      mapM_ injectWorkflowSignalOrUpdate sigUpdateJobs
+      finalize =<< liftIO (k results)
+
+
+-- | Park the resumed run or, if it finished, emit its exit command.
+finalize
+  :: RunStatus (WorkflowExitVariant Payload)
+  -> InstanceM (Core.WorkflowActivationCompletion, ExecState (WorkflowExitVariant Payload))
+finalize (RunBlocked k) = (,ExecPaused k) <$> drainCommands
+finalize (RunDone exit) = do
+  addCommand =<< convertExitVariantToCommand exit
+  (,ExecDone) <$> drainCommands
+
+
+-- | Apply the activation's jobs on a completed run and flush, without
+-- resuming.
+applyJobsOnly
+  :: WorkflowActivation
+  -> ExecState (WorkflowExitVariant Payload)
+  -> InstanceM (Core.WorkflowActivationCompletion, ExecState (WorkflowExitVariant Payload))
+applyJobsOnly act st = do
+  _ <- applyJobs' act
+  (,st) <$> drainCommands
+
+
+-- | Apply an activation's jobs, re-raising a job-application failure so the
+-- caller poisons the run.
+applyJobs' :: WorkflowActivation -> InstanceM ([ActivationResult], [Workflow ()])
+applyJobs' act = either throwIO pure =<< stepActivation act
+
+
+-- | Run the workflow step under the deadlock timeout, if one is configured.
+--
+-- The timeout wraps the whole step, however it only catches steps that
+-- reach a safepoint: an async 'timeout' cannot interrupt a tight non-suspending
+-- loop in workflow code, so a genuine CPU-bound deadlock is not detected here
+-- (see the pending deadlock spec).
+deadlockGuarded :: InstanceM a -> InstanceM a
+deadlockGuarded m = do
+  inst <- ask
+  case inst.workflowDeadlockTimeout of
+    Nothing -> m
+    Just micros ->
+      UnliftIO.timeout micros m >>= \case
+        Just a -> pure a
+        Nothing -> do
+          Logging.logError "Deadlock detected"
+          throwIO (LogicBug WorkflowActivationDeadlock)
+
+
+-- | Build a failed activation completion from an exception.
+buildFailedCompletion :: SomeException -> InstanceM Core.WorkflowActivationCompletion
+buildFailedCompletion err = do
+  inst <- ask
+  info <- readIORef inst.workflowInstanceInfo
+  let appFailure = mkApplicationFailure err inst.errorConverters
+      failureProto :: Completion.Failure
+      failureProto = defMessage & Completion.failure .~ applicationFailureToFailureProto appFailure
+  pure $
+    defMessage
+      & Completion.runId .~ rawRunId info.runId
+      & Completion.failed .~ failureProto
 
 
 isBuiltinQuery :: Text.Text -> Bool
@@ -330,52 +379,23 @@ addBuiltinQueryHandlers inst = do
     sdkVersion = Text.pack (showVersion version)
 
 
--- This should never raise an exception, but instead catch all exceptions
--- and set as completion failure.
-activate
-  :: Functor f
-  => WorkflowActivation
-  -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload))
-  -> InstanceM (f (SuspendableWorkflowExecution Payload))
-activate act suspension = do
+-- | Update instance state from the activation and apply its jobs.
+--
+-- Callers decide whether to resume the run or send a completion.
+stepActivation
+  :: WorkflowActivation
+  -> InstanceM (Either SomeException ([ActivationResult], [Workflow ()]))
+stepActivation act = do
   inst <- ask
-  info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info ->
-    let info' =
-          info
-            { historyLength = act ^. Activation.historyLength
-            , continueAsNewSuggested = act ^. Activation.continueAsNewSuggested
-            }
-    in (info', info')
-  let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
+  modifyIORef' inst.workflowInstanceInfo $ \info ->
+    info
+      { historyLength = act ^. Activation.historyLength
+      , continueAsNewSuggested = act ^. Activation.continueAsNewSuggested
+      }
   writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
   writeIORef inst.workflowIsReplaying (act ^. Activation.isReplaying)
-  eResult <- case inst.workflowDeadlockTimeout of
-    Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
-    Just timeoutDuration -> do
-      res <- UnliftIO.timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs) suspension
-      case res of
-        Nothing -> do
-          Logging.logError "Deadlock detected"
-          pure $ Left $ toException $ LogicBug WorkflowActivationDeadlock
-        Just res' -> pure res'
-  -- TODO: Can the completion send both successful commands and a failure
-  -- message at the same time? In theory we can make partial progress on
-  -- a workflow, but still fail at some point?
-  case eResult of
-    Left err -> do
-      Logging.logWarn "Failed activation on workflow" -- <> toLogStr (show $ workflowType info) <> " with ID " <> toLogStr (workflowId info) <> " and run ID " <> toLogStr (runId info))
-      -- TODO, failures should have source / stack trace info
-      -- TODO, convert failure type using a supplied payload converter
-      let failure =
-            defMessage
-              & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
-          completion =
-            completionBase
-              & Completion.failed .~ failure
-      liftIO (inst.workflowCompleteActivation completion >>= either throwIO pure)
-      -- I think it's morally okay to crash the worker thread here.
-      throwIO err
-    Right f -> pure f
+  modifyIORef' inst.workflowKnownFlags (HashSet.union (HashSet.fromList (act ^. Activation.availableInternalFlags)))
+  applyJobs (act ^. Activation.vec'jobs)
 
 
 -- | This gives us the basic state for a workflow instance prior to initial evaluation.
@@ -401,7 +421,7 @@ setUpWorkflowExecution initializeWorkflow = do
       }
 
 
-applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (SuspendableWorkflowExecution Payload)
+applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (Workflow Payload)
 applyStartWorkflow execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
@@ -425,9 +445,7 @@ applyStartWorkflow execInput workflowFn = do
           Left msg -> do
             Logging.logError $ Text.pack ("Failed to decode workflow arguments: " <> msg)
             throwIO (ValueError msg)
-          Right act -> do
-            Logging.logDebug "Calling runWorkflow"
-            pure (runWorkflow act)
+          Right act -> pure act
 
   liftIO $ executeWorkflowBase execInput
 
@@ -670,7 +688,7 @@ applyNotifyHasPatch notifyHasPatch = do
   inst <- ask
   let patches :: IORef (Set PatchId)
       patches = inst.workflowNotifiedPatches
-  atomicModifyIORef' patches $ \patchSet -> (Set.insert (notifyHasPatch ^. Activation.patchId . to PatchId) patchSet, ())
+  modifyIORef' patches $ Set.insert (notifyHasPatch ^. Activation.patchId . to PatchId)
 
 
 data PendingJob
@@ -695,38 +713,19 @@ data JobGroups = JobGroups
   }
 
 
+-- | Run an activation's jobs, returning resolved results plus pending
+-- signal/update handlers (updates before signals).
 applyJobs
-  :: Functor f
-  => Vector WorkflowActivationJob
-  -- We use the functor here because we need to call applyJobs both before and after a workflow has completed.
-  -- During workflow execution, identity is the functor, but after a workflow has completed, Proxy is the functor
-  -- since we don't actually have any continuation to run.
-  -> f (Await [ActivationResult] (SuspendableWorkflowExecution Payload))
-  -> InstanceM (Either SomeException (f (SuspendableWorkflowExecution Payload)))
-applyJobs jobs fAwait = UnliftIO.try $ do
+  :: Vector WorkflowActivationJob
+  -> InstanceM (Either SomeException ([ActivationResult], [Workflow ()]))
+applyJobs jobs = UnliftIO.try $ do
   Logging.logDebug $ Text.pack ("Applying jobs: " <> show jobs)
   let JobGroups {..} = getJobGroups
   patchNotifications
   queryWorkflows
   otherJobs
   activationResults <- applyResolutions resolutions
-  let activations = activationResults
-  pure $
-    ( \(Await wf) ->
-        -- If we don't have any activations or signals, then no useful state could have changed.
-        -- This happens when we receive non-resolving jobs like queries. If we reactivate
-        -- the workflow, it will just block again, which we don't want, because it confuses
-        -- the SDK core's state machine.
-
-        case activations of
-          [] -> case updateWorkflows ++ signalWorkflows of
-            [] -> suspend (Await wf)
-            jobs' -> lift (traverse injectWorkflowSignalOrUpdate jobs') *> wf []
-          _ -> case updateWorkflows ++ signalWorkflows of
-            [] -> wf activations
-            jobs' -> lift (traverse injectWorkflowSignalOrUpdate jobs') *> wf activations
-    )
-      <$> fAwait
+  pure (activationResults, updateWorkflows ++ signalWorkflows)
   where
     getJobGroups =
       V.foldr
@@ -769,151 +768,150 @@ applyResolutions :: [PendingJob] -> InstanceM [ActivationResult]
 applyResolutions [] = pure []
 applyResolutions rs = do
   inst <- ask
-  atomically $ do
-    sequenceMaps <- readTVar inst.workflowSequenceMaps
-    let makeCompletion :: ([ActivationResult], SequenceMaps) -> PendingJob -> ([ActivationResult], SequenceMaps)
-        makeCompletion (!completions, !sequenceMaps') pj = case pj of
-          PendingJobResolveActivity msg -> do
-            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
-            case existingIVar of
+  sequenceMaps <- readIORef inst.workflowSequenceMaps
+  let makeCompletion :: ([ActivationResult], SequenceMaps) -> PendingJob -> ([ActivationResult], SequenceMaps)
+      makeCompletion (!completions, !sequenceMaps') pj = case pj of
+        PendingJobResolveActivity msg -> do
+          let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
+          case existingIVar of
+            Nothing ->
+              E.throw $ RuntimeError "Activity handle not found"
+            Just existing ->
+              ( ActivationResult (Ok msg) existing : completions
+              , sequenceMaps'
+                  { activities = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
+                  }
+              )
+        PendingJobResolveChildWorkflowExecutionStart msg -> do
+          let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+          case existingHandle of
+            Nothing ->
+              E.throw $ RuntimeError "Child workflow not found"
+            Just (SomeChildWorkflowHandle existing) -> case msg ^. Activation.maybe'status of
               Nothing ->
-                E.throw $ RuntimeError "Activity handle not found"
-              Just existing ->
-                ( ActivationResult (Ok msg) existing : completions
-                , sequenceMaps'
-                    { activities = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
-                    }
-                )
-          PendingJobResolveChildWorkflowExecutionStart msg -> do
-            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-            case existingHandle of
-              Nothing ->
-                E.throw $ RuntimeError "Child workflow not found"
-              Just (SomeChildWorkflowHandle existing) -> case msg ^. Activation.maybe'status of
-                Nothing ->
-                  E.throw $ RuntimeError "Child workflow start did not have a known status"
-                Just status -> case status of
-                  ResolveChildWorkflowExecutionStart'Succeeded succeeded ->
-                    ( ActivationResult (Ok ()) existing.startHandle
-                        : ActivationResult (Ok (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
-                        : completions
-                    , sequenceMaps'
-                    )
-                  ResolveChildWorkflowExecutionStart'Failed failed ->
-                    let updatedMaps =
-                          sequenceMaps'
-                            { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-                            }
-                    in case failed ^. Activation.cause of
-                        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
-                          let failure :: forall v. ResultVal v
-                              failure =
-                                ThrowWorkflow $
-                                  toException $
-                                    WorkflowAlreadyStarted
-                                      { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
-                                      , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
-                                      }
-                          in ( ActivationResult failure existing.startHandle
-                                : ActivationResult failure existing.firstExecutionRunId
-                                : completions
-                             , updatedMaps
-                             )
-                        _ ->
-                          ( ActivationResult
-                              (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
-                              existing.startHandle
-                              : completions
-                          , updatedMaps
-                          )
-                  ResolveChildWorkflowExecutionStart'Cancelled _cancelled ->
-                    ( ActivationResult (Ok ()) existing.startHandle
-                        : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.firstExecutionRunId
-                        : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle
-                        : completions
-                    , sequenceMaps'
-                        { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-                        }
-                    )
-          PendingWorkflowCancellation _ -> (ActivationResult (Ok ()) inst.workflowCancellationVar : completions, sequenceMaps')
-          PendingJobResolveChildWorkflowExecution msg -> do
-            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-            case existingHandle of
-              Nothing -> E.throw $ RuntimeError "Child Workflow Execution not found"
-              Just (SomeChildWorkflowHandle h) ->
-                ( ActivationResult (Ok msg) h.resultHandle : completions
-                , sequenceMaps'
-                    { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
-                    }
-                )
-          PendingJobResolveSignalExternalWorkflow msg -> do
-            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
-            case mresVar of
-              Nothing -> E.throw $ RuntimeError "External Signal IVar for sequence not found"
-              Just resVar ->
-                ( ActivationResult (Ok msg) resVar : completions
-                , sequenceMaps'
-                    { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
-                    }
-                )
-          PendingJobResolveRequestCancelExternalWorkflow msg -> do
-            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
-            case mresVar of
-              Nothing -> E.throw $ RuntimeError "External Cancel IVar for sequence not found"
-              Just resVar ->
-                ( ActivationResult (Ok msg) resVar : completions
-                , sequenceMaps'
-                    { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
-                    }
-                )
-          PendingJobFireTimer msg -> do
-            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
-            case existingIVar of
-              Nothing -> E.throw $ RuntimeError "Timer not found"
-              Just existing ->
-                ( ActivationResult (Ok ()) existing : completions
-                , sequenceMaps'
-                    { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
-                    }
-                )
-          PendingJobResolveNexusOperationStart msg -> do
-            let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
-            case existingHandles of
-              Nothing -> E.throw $ RuntimeError "Nexus operation not found for start resolution"
-              Just handles -> case msg ^. Activation.maybe'status of
-                Nothing -> E.throw $ RuntimeError "Nexus operation start had no status"
-                Just (ResolveNexusOperationStart'OperationToken token) ->
-                  ( ActivationResult (Ok (NexusOperationStartedAsync token)) handles.nexusStartHandle : completions
-                  , sequenceMaps'
-                  )
-                Just (ResolveNexusOperationStart'StartedSync _) ->
-                  ( ActivationResult (Ok NexusOperationStartedSync) handles.nexusStartHandle : completions
-                  , sequenceMaps'
-                  )
-                Just (ResolveNexusOperationStart'Failed failure) ->
-                  ( ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusStartHandle
-                      : ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusResultHandle
+                E.throw $ RuntimeError "Child workflow start did not have a known status"
+              Just status -> case status of
+                ResolveChildWorkflowExecutionStart'Succeeded succeeded ->
+                  ( ActivationResult (Ok ()) existing.startHandle
+                      : ActivationResult (Ok (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
                       : completions
                   , sequenceMaps'
-                      { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
-                      }
                   )
-          PendingJobResolveNexusOperation msg -> do
-            let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
-            case existingHandles of
-              Nothing -> E.throw $ RuntimeError "Nexus operation not found for result resolution"
-              Just handles -> case msg ^. Activation.maybe'result of
-                Nothing -> E.throw $ RuntimeError "Nexus operation resolution had no result"
-                Just result ->
-                  ( ActivationResult (Ok result) handles.nexusResultHandle : completions
+                ResolveChildWorkflowExecutionStart'Failed failed ->
+                  let updatedMaps =
+                        sequenceMaps'
+                          { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                          }
+                  in case failed ^. Activation.cause of
+                      START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
+                        let failure :: forall v. ResultVal v
+                            failure =
+                              ThrowWorkflow $
+                                toException $
+                                  WorkflowAlreadyStarted
+                                    { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
+                                    , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
+                                    }
+                        in ( ActivationResult failure existing.startHandle
+                              : ActivationResult failure existing.firstExecutionRunId
+                              : completions
+                           , updatedMaps
+                           )
+                      _ ->
+                        ( ActivationResult
+                            (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
+                            existing.startHandle
+                            : completions
+                        , updatedMaps
+                        )
+                ResolveChildWorkflowExecutionStart'Cancelled _cancelled ->
+                  ( ActivationResult (Ok ()) existing.startHandle
+                      : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.firstExecutionRunId
+                      : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle
+                      : completions
                   , sequenceMaps'
-                      { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                      { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
                       }
                   )
+        PendingWorkflowCancellation _ -> (ActivationResult (Ok ()) inst.workflowCancellationVar : completions, sequenceMaps')
+        PendingJobResolveChildWorkflowExecution msg -> do
+          let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+          case existingHandle of
+            Nothing -> E.throw $ RuntimeError "Child Workflow Execution not found"
+            Just (SomeChildWorkflowHandle h) ->
+              ( ActivationResult (Ok msg) h.resultHandle : completions
+              , sequenceMaps'
+                  { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                  }
+              )
+        PendingJobResolveSignalExternalWorkflow msg -> do
+          let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
+          case mresVar of
+            Nothing -> E.throw $ RuntimeError "External Signal IVar for sequence not found"
+            Just resVar ->
+              ( ActivationResult (Ok msg) resVar : completions
+              , sequenceMaps'
+                  { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
+                  }
+              )
+        PendingJobResolveRequestCancelExternalWorkflow msg -> do
+          let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
+          case mresVar of
+            Nothing -> E.throw $ RuntimeError "External Cancel IVar for sequence not found"
+            Just resVar ->
+              ( ActivationResult (Ok msg) resVar : completions
+              , sequenceMaps'
+                  { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
+                  }
+              )
+        PendingJobFireTimer msg -> do
+          let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
+          case existingIVar of
+            Nothing -> E.throw $ RuntimeError "Timer not found"
+            Just existing ->
+              ( ActivationResult (Ok ()) existing : completions
+              , sequenceMaps'
+                  { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
+                  }
+              )
+        PendingJobResolveNexusOperationStart msg -> do
+          let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+          case existingHandles of
+            Nothing -> E.throw $ RuntimeError "Nexus operation not found for start resolution"
+            Just handles -> case msg ^. Activation.maybe'status of
+              Nothing -> E.throw $ RuntimeError "Nexus operation start had no status"
+              Just (ResolveNexusOperationStart'OperationToken token) ->
+                ( ActivationResult (Ok (NexusOperationStartedAsync token)) handles.nexusStartHandle : completions
+                , sequenceMaps'
+                )
+              Just (ResolveNexusOperationStart'StartedSync _) ->
+                ( ActivationResult (Ok NexusOperationStartedSync) handles.nexusStartHandle : completions
+                , sequenceMaps'
+                )
+              Just (ResolveNexusOperationStart'Failed failure) ->
+                ( ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusStartHandle
+                    : ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusResultHandle
+                    : completions
+                , sequenceMaps'
+                    { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                    }
+                )
+        PendingJobResolveNexusOperation msg -> do
+          let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+          case existingHandles of
+            Nothing -> E.throw $ RuntimeError "Nexus operation not found for result resolution"
+            Just handles -> case msg ^. Activation.maybe'result of
+              Nothing -> E.throw $ RuntimeError "Nexus operation resolution had no result"
+              Just result ->
+                ( ActivationResult (Ok result) handles.nexusResultHandle : completions
+                , sequenceMaps'
+                    { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                    }
+                )
 
-    let (newCompletions, updatedSequenceMaps) = foldl' makeCompletion ([], sequenceMaps) rs
-    writeTVar inst.workflowSequenceMaps updatedSequenceMaps
-    pure newCompletions
+  let (newCompletions, updatedSequenceMaps) = foldl' makeCompletion ([], sequenceMaps) rs
+  writeIORef inst.workflowSequenceMaps updatedSequenceMaps
+  pure newCompletions
 
 
 convertExitVariantToCommand :: WorkflowExitVariant Payload -> InstanceM Command.WorkflowCommand

@@ -278,7 +278,6 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Aeson (Value)
-import Data.Atomics (atomicModifyIORefCAS)
 import qualified Data.Bits as Bits
 import qualified Data.ByteString.Short as SBS
 import Data.Coerce
@@ -414,7 +413,7 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
   s@(Sequence actSeq) <- nextActivitySequence
   rawTask <- liftIO $ intercept (ActivityInput name typedPayloads opts s) $ \activityInput -> runInIO $ do
     resultSlot <- newTrackedIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
 
     i <- readIORef inst.workflowInstanceInfo
@@ -544,7 +543,7 @@ startNexusOperation client operationName opts input = ilift $ do
   s@(Sequence nexusSeq) <- nextNexusOperationSequence
   startVar <- newIVar
   resultVar <- newIVar
-  atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+  modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
     seqMaps {nexusOperations = HashMap.insert s (NexusOperationHandles startVar resultVar) (nexusOperations seqMaps)}
 
   encodedInput <- liftIO $ payloadProcessorEncode inst.payloadProcessor input
@@ -654,7 +653,7 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
                     -- & Command.headers .~ _
                 )
     addCommand cmd
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalSignals = HashMap.insert s resVar seqMaps.externalSignals}
     pure $
       Task
@@ -740,7 +739,7 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
                 , childWorkflowId = wfId
                 }
 
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+        modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
           seqMaps {childWorkflows = HashMap.insert s (SomeChildWorkflowHandle wfHandle) seqMaps.childWorkflows}
 
         addCommand cmd
@@ -843,7 +842,7 @@ scheduleLocalActivityAttempt name opts typedPayloads attemptNum origSchedTime ca
       intercept = inst.outboundInterceptor.scheduleLocalActivity
   liftIO $ intercept (LocalActivityInput name typedPayloads opts s) $ \localInput -> runInIO $ do
     resultSlot <- newTrackedIVar
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {activities = HashMap.insert s resultSlot (activities seqMaps)}
     let localOpts = localInput.localOptions
     hdrs <- processorEncodePayloads inst.payloadProcessor localOpts.headers
@@ -1387,8 +1386,10 @@ setSignalHandler (signalRef -> KnownSignal n codec) f = do
       HashMap.insert (Just n) handle' handlers
     -- Get and clear any buffered signals for this signal name
     -- Uses appEndo to convert the Endo diff-list back to a regular list
-    liftIO $ atomicModifyIORefCAS inst.workflowBufferedSignals $ \buf ->
-      (HashMap.delete n buf, foldMap (`appEndo` []) $ HashMap.lookup n buf)
+    liftIO $ do
+      buf <- readIORef inst.workflowBufferedSignals
+      writeIORef inst.workflowBufferedSignals (HashMap.delete n buf)
+      pure $ foldMap (`appEndo` []) $ HashMap.lookup n buf
   -- Process any buffered signals (matching TypeScript SDK behavior), routing
   -- them through the signal inbound interceptor with their original headers.
   unless (null bufferedSignals) $ do
@@ -1468,7 +1469,7 @@ createTimer ts = provideCallStack $ ilift $ do
                    )
       Logging.logDebug "Add command: sleep"
       res <- newTrackedIVar
-      atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+      modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
         seqMaps {timers = HashMap.insert s res seqMaps.timers}
       addCommand cmd
       pure $ Just $ Timer {timerSequence = s, timerHandle = res}
@@ -1548,7 +1549,7 @@ instance Cancel Timer where
         (Ok ())
         inst.workflowInstanceContinuationEnv
 
-    atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+    modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {timers = HashMap.delete t.timerSequence seqMaps.timers}
 
     Logging.logDebug "finished putIVar: cancelTimer"
@@ -1632,7 +1633,7 @@ waitCondition c@(Condition m) = do
         inst <- ask
         res <- newTrackedIVar
         conditionSeq <- nextConditionSequence
-        atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
+        modifyIORef' inst.workflowSequenceMaps $ \seqMaps ->
           seqMaps
             { conditionsAwaitingSignal = HashMap.insert conditionSeq (res, touchedVars) seqMaps.conditionsAwaitingSignal
             }
@@ -1713,19 +1714,52 @@ biselectOpt
   -> Workflow r
   -> Workflow t
 biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
+  let cenv = fiberContEnv env
+      locals = fiberLocals env
+  -- Tombstone IVar; on exit, 'wakeupRef' points here to retire any wakers
+  -- still parked on a task that lost the race.
+  tombstone <- newIVar
+  liftIO $ putIVar tombstone (Ok ()) cenv
+  -- Shared mutable reference wakers can use to fill the tombstone.
+  wakeupRef <- newIORef tombstone
+  -- Whether each side needs a waker armed; set again whenever its waker fires.
+  rearmA <- newIORef True
+  rearmB <- newIORef True
   let
-    -- Each round: step the left side first (resuming it only if the IVar it
-    -- was blocked on has been filled), then, unless the left side
-    -- short-circuited, step the right side. When both sides remain blocked,
-    -- park unit jobs on both blocked IVars that fill a fresh
-    -- synchronisation IVar 'i', and block the parent on 'i' so that it
-    -- wakes up whenever either side's IVar is filled.
+    -- Arm this side's waker if it needs one.
+    armWaker :: forall x. IORef Bool -> IVar x -> InstanceM ()
+    armWaker rearm iv = do
+      needed <- readIORef rearm
+      when needed $ do
+        wakerRes <- newIVar
+        let waker = FreshTask $ ilift $ do
+              writeIORef rearm True
+              wakeup <- readIORef wakeupRef
+              liftIO $ putIVar wakeup (Ok ()) cenv
+        parkTask cenv locals waker wakerRes iv
+        writeIORef rearm False
+    -- Cancel a side we no longer need.
+    cancelSide :: forall x. InstanceM (SubStatus x) -> InstanceM ()
+    cancelSide step = do
+      enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
+      when enabled $ do
+        s <- step
+        case s of
+          SubBlocked ivar k -> cancelSubFiber env ivar k
+          _ -> pure ()
+    -- Like 'cancelSide', for a loser already held as a blocked continuation.
+    cancelBlocked :: forall x w. IVar w -> (ResultVal w -> IO (Status x)) -> InstanceM ()
+    cancelBlocked ivar k = do
+      enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
+      when enabled $ cancelSubFiber env ivar k
+    -- Step the left side, then the right; if both are blocked, sleep until a
+    -- waker signals that execution should resume.
     go :: InstanceM (SubStatus l) -> InstanceM (SubStatus r) -> InstanceM t
     go stepA stepB = do
       sa <- stepA
       case sa of
         SubDone ea -> case discrimA ea of
-          Left a -> pure (left a)
+          Left a -> cancelSide stepB *> pure (left a)
           Right b -> do
             sb <- stepB
             case sb of
@@ -1738,25 +1772,40 @@ biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
                 case discrimB eb of
                   Left a -> pure (left a)
                   Right c -> pure (right (b, c))
-        SubThrown e -> throwWorkflow e
+        SubThrown e -> cancelSide stepB *> throwWorkflow e
         SubBlocked ia ka -> do
           sb <- stepB
           case sb of
             SubDone eb -> case discrimB eb of
-              Left a -> pure (left a)
+              Left a -> cancelBlocked ia ka *> pure (left a)
               Right c -> do
                 ea <- driveSubFiber env ia ka
                 case discrimA ea of
                   Left a -> pure (left a)
                   Right b -> pure (right (b, c))
-            SubThrown e -> throwWorkflow e
+            SubThrown e -> cancelBlocked ia ka *> throwWorkflow e
             SubBlocked ib kb -> do
-              i <- newIVar
-              parkTask (fiberContEnv env) (fiberLocals env) (FreshTask (return ())) i ia
-              parkTask (fiberContEnv env) (fiberLocals env) (FreshTask (return ())) i ib
-              _ <- liftIO $ fiberSuspend env i
+              -- Both blocked: arm each side, then sleep on a fresh wakeup.
+              armWaker rearmA ia
+              armWaker rearmB ib
+              wakeup <- newIVar
+              writeIORef wakeupRef wakeup
+              rv <- liftIO $ fiberSuspend env wakeup
+              -- If the fiber was woken up by cancellation or error instead of
+              -- one of the wakers, retire them and then cancel the children
+              -- before re-raising.
+              case rv of
+                Ok () -> pure ()
+                _ -> do
+                  writeIORef wakeupRef tombstone
+                  cancelBlocked ia ka
+                  cancelBlocked ib kb
+              deliverResultVal rv
               go (stepSubFiber ia ka) (stepSubFiber ib kb)
+  -- On exit, retire this call's wakers: a leftover waker fills the full
+  -- tombstone and does nothing.
   go (runSubFiber env wfL) (runSubFiber env wfR)
+    `UnliftIO.finally` writeIORef wakeupRef tombstone
 
 
 {- | This function takes two Workflow computations as input, and returns the

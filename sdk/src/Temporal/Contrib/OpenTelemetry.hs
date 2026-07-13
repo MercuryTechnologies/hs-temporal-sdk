@@ -122,27 +122,34 @@ is inserted into the fiber-local OpenTelemetry context for the duration of
 the handler, so spans created inside it (e.g. @StartActivity@) nest under
 it — even across suspension points, since the scheduler snapshots and
 restores the context per fiber.
+
+The span's lifecycle is a 'generalBracket' over the handler: the span is
+created and attached in the acquire step, and ended in the release step for
+both the returning and the throwing exit (recording the exception on the
+latter). Because 'Workflow''s handler frames ride the fiber's captured
+continuation, this bracket stays armed across every suspension inside the
+handler — the span opened before an @await@ is still the one closed after
+the workflow resumes on a later activation.
 -}
 inWorkflowHandlerSpan :: Tracer -> Text -> SpanArguments -> Map Text Payload -> Workflow a -> Workflow a
-inWorkflowHandlerSpan tracer spanName spanArgs headers action = do
-  (span, prevCtxt) <- performUnsafeNonDeterministicIO $ do
-    hdrCtxt <- extract headersPropagator headers Ctxt.empty
-    prevCtxt <- getContext
-    let parentCtxt = maybe prevCtxt (const hdrCtxt) (Ctxt.lookupSpan hdrCtxt)
-    span <- createSpan tracer parentCtxt spanName spanArgs
-    _ <- attachContext (Ctxt.insertSpan span parentCtxt)
-    pure (span, prevCtxt)
-  result <- Control.Monad.Catch.try action
-  performUnsafeNonDeterministicIO $ do
-    case result of
-      Left err -> do
-        setStatus span (Error $ T.pack $ show err)
-        recordException span mempty Nothing err
-      Right _ -> pure ()
-    endSpan span Nothing
-    _ <- attachContext prevCtxt
-    pure ()
-  either (throwM @_ @SomeException) pure result
+inWorkflowHandlerSpan tracer spanName spanArgs headers action =
+  fst <$> generalBracket acquire release (const action)
+  where
+    acquire = performUnsafeNonDeterministicIO $ do
+      hdrCtxt <- extract headersPropagator headers Ctxt.empty
+      prevCtxt <- getContext
+      let parentCtxt = maybe prevCtxt (const hdrCtxt) (Ctxt.lookupSpan hdrCtxt)
+      span <- createSpan tracer parentCtxt spanName spanArgs
+      _ <- attachContext (Ctxt.insertSpan span parentCtxt)
+      pure (span, prevCtxt)
+    release (span, prevCtxt) ec = performUnsafeNonDeterministicIO $ do
+      case ec of
+        ExitCaseException err -> do
+          setStatus span (Error $ T.pack $ show err)
+          recordException span mempty Nothing err
+        _ -> pure ()
+      endSpan span Nothing
+      void $ attachContext prevCtxt
 
 
 --    * Workflow is scheduled by a client
