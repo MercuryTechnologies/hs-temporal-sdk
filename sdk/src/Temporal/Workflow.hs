@@ -1713,15 +1713,31 @@ biselectOpt
   -> Workflow r
   -> Workflow t
 biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
+  let cenv = fiberContEnv env
+      locals = fiberLocals env
+  -- Tombstone IVar; on exit, 'wakeupRef' points here to retire any wakers
+  -- still parked on a task that lost the race.
+  tombstone <- newIVar
+  liftIO $ putIVar tombstone (Ok ()) cenv
+  -- Shared mutable reference wakers can use to fill the tombstone.
+  wakeupRef <- newIORef tombstone
+  -- Whether each side needs a waker armed; set again whenever its waker fires.
+  rearmA <- newIORef True
+  rearmB <- newIORef True
   let
-    -- Cancel a side whose result we no longer need, gated on the
-    -- race-loser-cancellation SDK flag (see 'sdkFlagRaceLoserCancellation').
-    -- A history recorded before the flag existed takes the disabled branch:
-    -- the loser is dropped silently and @step@ is not even forced, exactly as
-    -- the SDK behaved before. When enabled we force @step@ (starting a
-    -- not-yet-started loser, as 'Control.Concurrent.Async.race' forks both
-    -- sides) and, if it is blocked, deliver a synthetic
-    -- 'WorkflowFiberCancelled' so its finalizers run (see 'cancelSubFiber').
+    -- Arm this side's waker if it needs one.
+    armWaker :: forall x. IORef Bool -> IVar x -> InstanceM ()
+    armWaker rearm iv = do
+      needed <- readIORef rearm
+      when needed $ do
+        wakerRes <- newIVar
+        let waker = FreshTask $ ilift $ do
+              writeIORef rearm True
+              wakeup <- readIORef wakeupRef
+              liftIO $ putIVar wakeup (Ok ()) cenv
+        parkTask cenv locals waker wakerRes iv
+        writeIORef rearm False
+    -- Cancel a side we no longer need.
     cancelSide :: forall x. InstanceM (SubStatus x) -> InstanceM ()
     cancelSide step = do
       enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
@@ -1730,19 +1746,13 @@ biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
         case s of
           SubBlocked ivar k -> cancelSubFiber env ivar k
           _ -> pure ()
-    -- Like 'cancelSide', but for a loser we already hold as a blocked
-    -- continuation (so there is nothing to force). Same flag gate.
+    -- Like 'cancelSide', for a loser already held as a blocked continuation.
     cancelBlocked :: forall x w. IVar w -> (ResultVal w -> IO (Status x)) -> InstanceM ()
     cancelBlocked ivar k = do
       enabled <- tryUseSdkFlag sdkFlagRaceLoserCancellation
       when enabled $ cancelSubFiber env ivar k
-    -- Each round: step the left side first (resuming it only if the IVar it
-    -- was blocked on has been filled), then, unless the left side
-    -- short-circuited, step the right side. When both sides remain blocked,
-    -- park unit jobs on both blocked IVars that fill a fresh
-    -- synchronisation IVar 'i', and block the parent on 'i' so that it
-    -- wakes up whenever either side's IVar is filled. Whenever one side wins
-    -- or throws, the still-running other side is cancelled.
+    -- Step the left side, then the right; if both are blocked, sleep until a
+    -- waker signals that execution should resume.
     go :: InstanceM (SubStatus l) -> InstanceM (SubStatus r) -> InstanceM t
     go stepA stepB = do
       sa <- stepA
@@ -1774,12 +1784,27 @@ biselectOpt discrimA discrimB left right wfL wfR = Workflow $ \env -> do
                   Right b -> pure (right (b, c))
             SubThrown e -> cancelBlocked ia ka *> throwWorkflow e
             SubBlocked ib kb -> do
-              i <- newIVar
-              parkTask (fiberContEnv env) (fiberLocals env) (FreshTask (return ())) i ia
-              parkTask (fiberContEnv env) (fiberLocals env) (FreshTask (return ())) i ib
-              _ <- liftIO $ fiberSuspend env i
+              -- Both blocked: arm each side, then sleep on a fresh wakeup.
+              armWaker rearmA ia
+              armWaker rearmB ib
+              wakeup <- newIVar
+              writeIORef wakeupRef wakeup
+              rv <- liftIO $ fiberSuspend env wakeup
+              -- If the fiber was woken up by cancellation or error instead of
+              -- one of the wakers, retire them and then cancel the children
+              -- before re-raising.
+              case rv of
+                Ok () -> pure ()
+                _ -> do
+                  writeIORef wakeupRef tombstone
+                  cancelBlocked ia ka
+                  cancelBlocked ib kb
+              deliverResultVal rv
               go (stepSubFiber ia ka) (stepSubFiber ib kb)
+  -- On exit, retire this call's wakers: a leftover waker fills the full
+  -- tombstone and does nothing.
   go (runSubFiber env wfL) (runSubFiber env wfR)
+    `UnliftIO.finally` writeIORef wakeupRef tombstone
 
 
 {- | This function takes two Workflow computations as input, and returns the
