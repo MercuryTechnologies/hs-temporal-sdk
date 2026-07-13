@@ -3,7 +3,7 @@
 module Main (main) where
 
 import Data.Char (isDigit)
-import Data.List (sortOn)
+import Data.List (foldl', sortOn)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import Data.Ord (Down (..))

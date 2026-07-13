@@ -8,7 +8,13 @@
 }:
 hfinal: _hprev:
 let
-  inherit (haskell.lib.compose) addTestToolDepends enableCabalFlag;
+  inherit (haskell.lib.compose)
+    addTestToolDepends
+    disableOptimization
+    dontCheck
+    enableCabalFlag
+    setBuildTarget
+    ;
   wireformSrc = fetchFromGitHub {
     owner = "iand675";
     repo = "wireform-";
@@ -17,19 +23,26 @@ let
   };
 in
 {
-  wireform-core = hfinal.callCabal2nix "wireform-core" "${wireformSrc}/wireform-core" { };
+  wireform-core = dontCheck (hfinal.callCabal2nix "wireform-core" "${wireformSrc}/wireform-core" { });
 
-  wireform-derive = hfinal.callCabal2nix "wireform-derive" "${wireformSrc}/wireform-derive" { };
+  wireform-derive = dontCheck (
+    hfinal.callCabal2nix "wireform-derive" "${wireformSrc}/wireform-derive" { }
+  );
 
-  wireform-proto = hfinal.callCabal2nix "wireform-proto" "${wireformSrc}/wireform-proto" { };
+  wireform-proto = setBuildTarget "lib:wireform-proto" (
+    dontCheck (hfinal.callCabal2nix "wireform-proto" "${wireformSrc}/wireform-proto" { })
+  );
 
-  temporal-api-protos = hfinal.callCabal2nix "temporal-api-protos" ../../../protos { };
+  temporal-api-protos = disableOptimization (
+    hfinal.callCabal2nix "temporal-api-protos" ../../../protos { }
+  );
 
   temporal-sdk-core = lib.pipe (hfinal.callCabal2nix "temporal-sdk-core" ../../../core { }) [
     (enableCabalFlag "external_lib")
   ];
 
   temporal-sdk = lib.pipe (hfinal.callCabal2nix "temporal-sdk" ../../../sdk { }) [
+    dontCheck
     (addTestToolDepends [
       temporal-cli
       temporal-test-server
@@ -54,7 +67,9 @@ in
     hfinal.callCabal2nix "temporal-sdk-optimal-codec" ../../../optimal-codec
       { };
 
-  temporal-protogen-wireform = hfinal.callCabal2nix "temporal-protogen-wireform" ../../../tools/protogen-wireform { };
+  temporal-protogen-wireform =
+    hfinal.callCabal2nix "temporal-protogen-wireform" ../../../tools/protogen-wireform
+      { };
 
   tix-to-markdown = hfinal.callCabal2nix "tix-to-markdown" ../../../tools/tix-to-markdown { };
 }

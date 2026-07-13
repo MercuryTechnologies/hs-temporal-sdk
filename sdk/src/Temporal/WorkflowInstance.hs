@@ -34,8 +34,6 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import Data.Monoid (Endo (..))
-import Proto.Decode (UnknownField, decodeMessage)
-import Proto.Encode (encodeMessage)
 import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -49,9 +47,11 @@ import GHC.Stack (HasCallStack, emptyCallStack, getCallStack)
 import qualified GHC.Stack
 import Lens.Family2
 import Paths_temporal_sdk (version)
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
+import Proto.Decode (UnknownField, decodeMessage)
+import Proto.Encode (encodeMessage)
 import qualified Proto.Temporal.Api.Common.V1.Message as Message
 import qualified Proto.Temporal.Api.Failure.V1.Message as FailureMsg
+import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (
   StartChildWorkflowExecutionFailedCause (..),
@@ -59,25 +59,25 @@ import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
   CancelWorkflow (..),
   DoUpdate (..),
+  DoUpdate'HeadersEntry (..),
   FireTimer (..),
   InitializeWorkflow (..),
-  NotifyHasPatch (..),
   InitializeWorkflow'HeadersEntry (..),
+  NotifyHasPatch (..),
   QueryWorkflow (..),
+  QueryWorkflow'HeadersEntry (..),
   ResolveActivity (..),
   ResolveChildWorkflowExecution (..),
   ResolveChildWorkflowExecutionStart (..),
+  ResolveChildWorkflowExecutionStart'Status (..),
   ResolveChildWorkflowExecutionStartFailure (..),
   ResolveChildWorkflowExecutionStartSuccess (..),
-  DoUpdate'HeadersEntry (..),
-  ResolveChildWorkflowExecutionStart'Status (..),
   ResolveNexusOperation (..),
   ResolveNexusOperationStart (..),
   ResolveNexusOperationStart'Status (..),
   ResolveRequestCancelExternalWorkflow (..),
   ResolveSignalExternalWorkflow (..),
   SignalWorkflow (..),
-  QueryWorkflow'HeadersEntry (..),
   SignalWorkflow'HeadersEntry (..),
   UpdateRandomSeed (..),
   WorkflowActivation (..),
@@ -104,6 +104,7 @@ import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecuti
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
+import qualified Temporal.Workflow.Types as Workflow
 import UnliftIO
 
 
@@ -280,6 +281,7 @@ mapPayloadEntries mkEntry =
     . fmap (\(key, value) -> mkEntry (Just key) (Just value) [])
     . Map.toList
 
+
 headerEntriesToMap :: Vector a -> (a -> Maybe Text.Text) -> (a -> Maybe Message.Payload) -> Map.Map Text.Text Message.Payload
 headerEntriesToMap entries getKey getValue =
   V.foldr
@@ -289,6 +291,7 @@ headerEntriesToMap entries getKey getValue =
     )
     Map.empty
     entries
+
 
 {- | Register built-in query handlers on a workflow instance.
 
@@ -384,8 +387,8 @@ activate act suspension = do
     let info' :: Info
         info' =
           info
-            { historyLength = fromMaybe 0 act.historyLength
-            , continueAsNewSuggested = fromMaybe False act.continueAsNewSuggested
+            { Workflow.historyLength = fromMaybe 0 act.historyLength
+            , Workflow.continueAsNewSuggested = fromMaybe False act.continueAsNewSuggested
             }
     in (info', info')
   let completionBase status = Completion.WorkflowActivationCompletion (Just $ rawRunId info.runId) (Just status) []
