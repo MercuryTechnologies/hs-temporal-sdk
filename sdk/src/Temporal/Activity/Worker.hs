@@ -101,7 +101,7 @@ activityInfoFromProto :: MonadIO m => TaskToken -> TaskQueue -> AT.Start -> Acti
 activityInfoFromProto tt tq msg = do
   w <- ask
   let rawHdrs =
-        V.foldr
+        foldr
           ( \entry acc -> case (entry.key, entry.value) of
               (Just key, Just value) -> Map.insert key (convertFromProtoPayload value) acc
               _ -> acc

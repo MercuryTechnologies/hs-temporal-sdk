@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -30,8 +31,9 @@ module Temporal.Core.Client (
   -- use the supplied functions in 'Temporal.Core.Client.WorkflowService' and
   -- other service modules.
   --
-  -- For higher-level access, see the@@temporal-sdk@ package for a more
+  -- For higher-level access, see the @temporal-sdk@ package for a more
   -- idiomatic Haskell API.
+  MessageCodec,
   call,
   RpcCall (..),
   RpcError (..),
@@ -76,10 +78,15 @@ import Network.BSD
 import Paths_temporal_sdk_core (version)
 import System.Posix.Process
 import Temporal.Core.CTypes
+
 import Temporal.Internal.FFI
 import Temporal.Runtime
 import UnliftIO (MonadUnliftIO, withRunInIO)
 import qualified UnliftIO
+
+-- | The constraints required to encode an RPC request and decode its response.
+type MessageCodec req res = (MessageEncode req, MessageDecode res)
+
 
 
 foreign import ccall "hs_temporal_connect_client" raw_connectClient :: Ptr Runtime -> CString -> TokioCall (CArray Word8) CoreClient
@@ -353,12 +360,11 @@ closeClient (Client clientPtrSlot _ _) = liftIO $ mask_ $ do
 
 type PrimRpcCall = Ptr CoreClient -> Ptr CRpcCall -> TokioCall CRPCError (CArray Word8)
 
-
 -- | Make an RPC call through the client.
 --
 -- This function is async-exception-safe: all Rust allocations are properly
 -- freed even if an async exception occurs during processing.
-call :: forall req res. (MessageEncode req, MessageDecode res) => PrimRpcCall -> Client -> req -> IO (Either RpcError res)
+call :: forall req res. MessageCodec req res => PrimRpcCall -> Client -> req -> IO (Either RpcError res)
 call f c req_ = withClient c $ \cPtr -> do
   let msgBytes = encodeMessage req_
   BS.useAsCStringLen msgBytes $ \(msgPtr, msgLen) -> do

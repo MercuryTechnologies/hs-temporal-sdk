@@ -229,14 +229,14 @@ searchAttributesMessageFromMap attrs =
 
 searchAttributesMapFromMessage :: C.SearchAttributes -> Map Text C.Payload
 searchAttributesMapFromMessage attrs =
-  V.foldr
+  foldr
     ( \(C.SearchAttributes'IndexedFieldsEntry mKey mValue _) acc ->
         case (mKey, mValue) of
           (Just key, Just value) -> Map.insert key value acc
           _ -> acc
     )
     Map.empty
-    (getField @"indexedFields" attrs)
+    attrs.indexedFields
 
 
 headerMessageFromMap :: Map Text C.Payload -> C.Header
@@ -526,7 +526,7 @@ scheduleInfoFromProto p =
     , futureActionTimes = V.toList (timespecFromTimestamp <$> getField @"futureActionTimes" p)
     , createTime = timespecFromTimestamp <$> getField @"createTime" p
     , updateTime = timespecFromTimestamp <$> getField @"updateTime" p
-    , invalidScheduleError = fromMaybe "" (getField @"invalidScheduleError" p)
+    , invalidScheduleError = fromMaybe "" p.invalidScheduleError
     }
 
 
