@@ -1,0 +1,23 @@
+-- Measurement build for the allocation benchmark, layered on the base project.
+--
+-- Purpose: pin an authoritative optimization level for the regression gate so
+-- benchmark numbers are comparable across developers and CI. A plain
+-- `cabal run temporal-sdk-bench` picks up the untracked `cabal.project.local`,
+-- which sets `optimization: 0` for fast dev builds — that silently makes
+-- allocation numbers incomparable with any committed baseline.
+--
+-- `--project-file=cabal.project.bench` does NOT load `cabal.project.local`
+-- (same mechanism `cabal.project.profiling` relies on), so the level below is
+-- authoritative. `-O2` is chosen to match the `-O2 -fprof-late` attribution
+-- build (`cabal.project.profiling`): the gate and the cost-centre profile then
+-- agree, and neither can miss `-O2`-only effects such as SPECIALIZE
+-- (opportunity #1 in notes/perf-optimization-plan.md).
+--
+-- Usage (always from the repo root — fixtures resolve via a relative path):
+--   cabal run -v0 --project-file=cabal.project.bench temporal-sdk-bench -- \
+--     --csv perf-out/runs/<run-id>/bench.csv
+-- In practice, drive it via scripts/perf/bench.sh rather than by hand.
+
+import: cabal.project
+
+optimization: 2

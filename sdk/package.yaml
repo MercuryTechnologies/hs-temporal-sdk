@@ -170,3 +170,43 @@ tests:
       TestHelpers,
       THCompiles,
       WorkerTunerSpec
+
+executables:
+  # One-time fixture recorder (needs a `temporal` dev server on PATH).
+  temporal-sdk-bench-record:
+    main: Record.hs
+    source-dirs: bench
+    ghc-options: -threaded -rtsopts
+    other-modules:
+      - Bench.Common
+    dependencies:
+      - base
+      - temporal-sdk
+      - temporal-sdk-core
+      - text
+      - directory
+      - monad-logger
+      - mtl
+      - unliftio
+      - require-callstack
+
+benchmarks:
+  # Replay-driven macro benchmark (server-free; replays checked-in fixtures).
+  temporal-sdk-bench:
+    main: Bench.hs
+    source-dirs: bench
+    ghc-options: -threaded -rtsopts "-with-rtsopts=-T"
+    other-modules:
+      - Bench.Common
+      - Bench.Stats
+    dependencies:
+      - base
+      - temporal-sdk
+      - temporal-sdk-core
+      - temporal-api-protos
+      - tasty
+      - tasty-bench
+      - text
+      - bytestring
+      - directory
+      - require-callstack

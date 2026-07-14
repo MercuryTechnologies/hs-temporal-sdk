@@ -22,3 +22,13 @@ core/rust/lib*
 .pre-commit-config.yaml
 .helix/
 .zed/
+
+# Perf suite: generated run artifacts + profiler output (scripts/perf/*).
+# Fixtures and committed baselines under sdk/bench/ are tracked; these are not.
+perf-out/
+*.prof
+*.eventlog
+*.eventlog.html
+*.hp
+*.ps
+*.aux

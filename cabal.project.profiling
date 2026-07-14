@@ -1,0 +1,46 @@
+-- Profiling build variant, layered on top of the base project.
+--
+-- Goal: extract *representative* profiling data from the benchmark harness —
+-- i.e. profile the program as it actually ships (optimized), not a perturbed
+-- -O0 build. Two deliberate choices make that work:
+--
+--   * optimization: 2  — profile the optimized program (the base project's
+--     cabal.project.local pins -O0 for fast dev builds; that .local is NOT
+--     loaded under --project-file, so -O2 here is authoritative).
+--
+--   * profiling-detail: late-toplevel  — GHC's -fprof-late: cost centres are
+--     inserted AFTER optimization, so inlining/specialization are preserved.
+--     Classic (pre-optimization) cost centres would hide exactly the dispatch/
+--     specialization effects we care about (#1/#9).
+--
+-- Plus info-table provenance on the SDK packages so heap profiles (+RTS -hi)
+-- and ghc-debug can attribute closures to source locations without cost centres
+-- (kept off deps to bound build time; profiled dep libs are still built).
+--
+-- Usage: drive this via scripts/perf/profile.sh, which selects a single fixture
+-- with BENCH_PROFILE (isolating its replay from tasty and the multi-fixture loop):
+--   scripts/perf/profile.sh fanout-1000            # cost-centre -> profile-top.csv
+--   scripts/perf/profile.sh sleeps-100 --mode heap # info-table heap -> .eventlog
+--
+-- Equivalent raw invocations (for debugging the script):
+--   cabal build --project-file=cabal.project.profiling temporal-sdk-bench   # slow first time
+--   BENCH_PROFILE=fanout-1000 cabal run -v0 --project-file=cabal.project.profiling \
+--     temporal-sdk-bench -- +RTS -pj -po<stem> -s<stem>.rts -RTS   # -> <stem>.prof (JSON)
+--   BENCH_PROFILE=fanout-1000 cabal run -v0 --project-file=cabal.project.profiling \
+--     temporal-sdk-bench -- +RTS -hi -l-au -ol<stem>.eventlog -RTS  # view w/ eventlog2html
+--
+-- NB: under -prof the *timings* are inflated and allocation is slightly higher
+-- (cost-centre overhead) — use this build for ATTRIBUTION (where cost comes
+-- from), and the normal build for the headline allocation/time numbers.
+
+import: cabal.project
+
+optimization: 2
+profiling: True
+profiling-detail: late-toplevel
+
+package temporal-sdk
+  ghc-options: -finfo-table-map -fdistinct-constructor-tables
+
+package temporal-sdk-core
+  ghc-options: -finfo-table-map -fdistinct-constructor-tables

@@ -9,6 +9,8 @@ in
       inherit (pkgs.haskell.packages.${ghcVersion}) proto-lens-protoc;
     })
     pkgs.ghciwatch
+    pkgs.haskell.packages.${ghcVersion}.eventlog2html
+    pkgs.haskell.packages.${ghcVersion}.hp2pretty
   ];
   languages.haskell = {
     languageServer = pkgs.haskell.packages.${ghcVersion}.haskell-language-server;
