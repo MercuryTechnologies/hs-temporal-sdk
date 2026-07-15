@@ -190,6 +190,33 @@ executables:
       - unliftio
       - require-callstack
 
+  # Long-running soak / leak-detection harness (needs a `temporal` dev server).
+  temporal-sdk-soak:
+    main: Soak.hs
+    source-dirs: bench
+    ghc-options: -threaded -rtsopts "-with-rtsopts=-T -N4"
+    other-modules:
+      - Bench.Common
+      - Bench.Stats
+      - Soak.Workload
+      - Soak.Workload.Defs
+      - Soak.Workload.Types
+    dependencies:
+      - base
+      - temporal-sdk
+      - temporal-sdk-core
+      - aeson
+      - text
+      - directory
+      - monad-logger
+      - mtl
+      - unliftio
+      - require-callstack
+      - containers
+      - stm
+      - process
+      - unix
+
 benchmarks:
   # Replay-driven macro benchmark (server-free; replays checked-in fixtures).
   temporal-sdk-bench:

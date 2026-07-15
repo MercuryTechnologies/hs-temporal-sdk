@@ -18,16 +18,21 @@ scripts/perf/
   profile.sh          -- profiling-build attribution (cc / heap)
   record-fixtures.sh  -- fixture regeneration (needs `temporal` dev server)
   report.sh           -- raw run dir -> report.csv / summary.csv (awk + jq)
+  soak.sh             -- long-run leak detection (residency slope; needs `temporal`)
 cabal.project.bench   -- ENFORCED -O2 measurement build (ignores cabal.project.local)
-cabal.project.profiling -- -O2 -fprof-late + info-table maps (attribution)
+cabal.project.profiling -- -O2 -fprof-late + info-table maps (cc attribution)
+cabal.project.soak    -- -O2 + info-table maps, NON-prof (undistorted residency + -hi)
 sdk/bench/
   Bench/Common.hs   -- shared: runtime, workflows, worker config, and the FIXTURE MANIFEST
-  Bench/Stats.hs    -- GHC.Stats allocation helper (global/cross-thread, GC-flushed)
+  Bench/Stats.hs    -- GHC.Stats helpers: allocation (replay) + residency sample (soak)
   Record.hs         -- fixture recorder (`--list` prints expected paths; needs `temporal`)
   Bench.hs          -- tasty-bench replay driver (server-free; runReplayHistoryProto + raw bytes)
+  Soak.hs           -- soak harness main (real worker + churn loop + residency sampling)
+  Soak/Workload.hs  -- soak worker config (discoverDefinitions) + archetype refs
+  Soak/Workload/Defs.hs -- TH-registered workload (SoakActivity, OutboxWorkflow, SyncWorkflow)
   fixtures/         -- checked-in histories: sleeps-{1,10,100} + fanout-{10,50,100,200,500,1000}
   baselines/        -- committed baselines, one CSV per commit + a CURRENT pointer
-perf-out/           -- gitignored: runs/<run-id>/ and profiles/<run-id>/ artifacts
+perf-out/           -- gitignored: runs/<id>/ (bench), profiles/<id>/ (profile), soak/<id>/ (soak)
 ```
 
 Two cabal stanzas in `sdk/package.yaml`: executable `temporal-sdk-bench-record`,
@@ -64,7 +69,22 @@ scripts/perf/profile.sh sleeps-100 --mode heap      # info-table heap -> .eventl
 
 # Report an existing run dir on its own / as a markdown table.
 scripts/perf/report.sh perf-out/runs/<run-id> --baseline sdk/bench/baselines/3e84de79.csv --md
+
+# Soak / leak detection (real worker + activities; needs `temporal`). Writes
+# perf-out/soak/<run-id>/{residency,summary}.csv + params.json. Primary signal:
+# Haskell live-bytes slope (bytes/execution); RSS slope is advisory.
+scripts/perf/soak.sh                                # 5000 executions + verdict
+scripts/perf/soak.sh --iterations 20000 --gate      # CI: exit 1 on a detected leak
+scripts/perf/soak.sh --duration 600                 # 10-min time-bounded soak
+scripts/perf/soak.sh --max-cached 200               # mirror a prod cache size
+scripts/perf/soak.sh --iterations 8000 --mode heap  # + info-table heap eventlog (attribution)
 ```
+
+> **Soak metric scope.** Live-bytes (post-GC `GHC.Stats`) is the Haskell heap — it *does* see
+> cached `WorkflowInstance`s and eviction-path retention (the prime leak suspect), so it gates.
+> Process RSS (via `ps`) is sampled too but advisory (catches Rust-core/native retention; conflates
+> allocator fragmentation) and may be unavailable in restricted sandboxes. Low `--max-cached` (default
+> 32) forces the eviction path to run within a short soak. See `notes/soak-harness-plan.md`.
 
 The equivalent raw invocations (for debugging): the scripts run `cabal run -v0
 --project-file=cabal.project.bench temporal-sdk-bench -- --csv <f>` with

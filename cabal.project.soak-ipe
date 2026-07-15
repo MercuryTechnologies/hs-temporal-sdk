@@ -1,0 +1,9 @@
+-- TEMPORARY: soak build with info-table-map on ALL packages (deps included), so
+-- `+RTS -hi` can attribute a retained thunk that lives in a dependency
+-- (proto-lens / bytestring / containers / stm / …) to its source, not just an
+-- unresolved info-table address. Full dep rebuild; drop once the residual leak
+-- contributor is named.
+import: cabal.project.soak
+
+package *
+  ghc-options: -finfo-table-map

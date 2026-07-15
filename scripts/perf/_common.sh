@@ -55,3 +55,16 @@ die() {
   printf '\033[0;31m[perf]\033[0m %s\n' "$*" >&2
   exit 1
 }
+
+# render_eventlog <eventlog-path> — render an HTML heap view if eventlog2html is
+# available, else print the manual command. Never fatal. Shared by profile.sh
+# (heap mode) and soak.sh (heap mode).
+render_eventlog() {
+  local ev="$1"
+  if command -v eventlog2html >/dev/null 2>&1; then
+    eventlog2html "$ev"
+    log "wrote $ev.html"
+  else
+    warn "eventlog2html not on PATH; view manually: eventlog2html $ev"
+  fi
+}

@@ -238,6 +238,96 @@ executable temporal-sdk-bench-record
     , zlib
   default-language: Haskell2010
 
+executable temporal-sdk-soak
+  main-is: Soak.hs
+  other-modules:
+      Bench.Common
+      Bench.Stats
+      Soak.Workload
+      Soak.Workload.Defs
+      Soak.Workload.Types
+  hs-source-dirs:
+      bench
+  default-extensions:
+      BangPatterns
+      BlockArguments
+      DataKinds
+      DerivingStrategies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      NumericUnderscores
+      RankNTypes
+      OverloadedRecordDot
+      OverloadedStrings
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      UndecidableInstances
+      ViewPatterns
+  ghc-options: -g -Weverything -Wno-missing-exported-signatures -Wno-missing-export-lists -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-operator-whitespace -fdiagnostics-color=always -Wno-missing-kind-signatures -Wno-implicit-lift -Wno-implicit-prelude -fwarn-tabs +RTS -A128m -n2m -RTS -fdefer-diagnostics -Wno-redundant-constraints -Wno-missing-role-annotations -Wno-missing-poly-kind-signatures -threaded -rtsopts "-with-rtsopts=-T -N4"
+  build-depends:
+      aeson
+    , annotated-exception
+    , async
+    , atomic-primops
+    , base
+    , base64
+    , bytestring
+    , conduit
+    , containers
+    , directory
+    , discover-instances
+    , exceptions
+    , first-class-families
+    , focus
+    , ghc
+    , hashable
+    , hs-opentelemetry-api
+    , hs-opentelemetry-propagator-w3c
+    , lens-family
+    , list-t
+    , monad-logger
+    , mtl
+    , network
+    , primitive
+    , process
+    , proto-lens
+    , proto-lens-protobuf-types
+    , random
+    , require-callstack
+    , scientific
+    , split
+    , stm
+    , stm-containers
+    , template-haskell
+    , temporal-api-protos
+    , temporal-sdk
+    , temporal-sdk-core
+    , text
+    , th-lift-instances
+    , these
+    , time
+    , transformers
+    , unix
+    , unliftio
+    , unordered-containers
+    , uuid
+    , uuid-types
+    , validation-selective
+    , vault
+    , vector
+    , zlib
+  default-language: Haskell2010
+
 test-suite temporal-sdk-tests
   type: exitcode-stdio-1.0
   main-is: Main.hs

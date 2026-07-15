@@ -90,12 +90,7 @@ case "$MODE" in
     BENCH_PROFILE="$KEY" cabal run -v0 --project-file="$PROJECT_FILE" temporal-sdk-bench -- \
       +RTS -hi -l-au "-ol$PROF_DIR/$KEY.eventlog" -RTS
     log "wrote $PROF_DIR/$KEY.eventlog"
-    if command -v eventlog2html >/dev/null 2>&1; then
-      eventlog2html "$PROF_DIR/$KEY.eventlog"
-      log "wrote $PROF_DIR/$KEY.eventlog.html"
-    else
-      warn "eventlog2html not on PATH; view manually: eventlog2html $PROF_DIR/$KEY.eventlog"
-    fi
+    render_eventlog "$PROF_DIR/$KEY.eventlog"
     ;;
   *) die "unknown mode: $MODE (want cc|heap)" ;;
 esac

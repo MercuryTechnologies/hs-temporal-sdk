@@ -1,0 +1,31 @@
+-- Build for the soak / leak-detection harness, layered on the base project.
+--
+-- Purpose: run the harness with UNDISTORTED residency. Two deliberate choices:
+--
+--   * optimization: 2  — profile the program as it ships (the base project's
+--     cabal.project.local pins -O0; that .local is NOT loaded under
+--     --project-file, so -O2 here is authoritative).
+--
+--   * -finfo-table-map (NO `profiling: True`) — info-table provenance lets
+--     `+RTS -hi` heap profiles attribute retained closures to source locations
+--     WITHOUT cost centres. Crucially this is a non-profiling build: cost-centre
+--     profiling perturbs allocation/residency, which is exactly the signal a leak
+--     harness measures. Info-table maps are static tables in the binary with
+--     negligible runtime cost, so residency stays faithful.
+--
+-- This one config serves both modes of scripts/perf/soak.sh:
+--   * detection  (default): +RTS -T  -> GHC.Stats live-bytes slope.
+--   * attribution (--mode heap): +RTS -hi -l-au -> eventlog -> eventlog2html.
+--
+-- Usage: drive via scripts/perf/soak.sh (don't hand-run — it needs a temporal
+-- dev server, an output dir, and the slope/verdict step).
+
+import: cabal.project
+
+optimization: 2
+
+package temporal-sdk
+  ghc-options: -finfo-table-map -fdistinct-constructor-tables
+
+package temporal-sdk-core
+  ghc-options: -finfo-table-map -fdistinct-constructor-tables
