@@ -80,19 +80,28 @@ runActivityWorker w m = runReaderT (unActivityWorkerM m) w
 
 
 execute :: (MonadUnliftIO m, MonadLogger m) => ActivityWorker actEnv -> m ()
-execute worker = runActivityWorker worker go
-  where
-    go = do
-      eTask <- liftIO $ Core.pollActivityTask worker.workerCore
-      case eTask of
-        Left (Core.WorkerError Core.PollShutdown _) -> do
-          pure ()
-        Left e -> do
-          Logging.logError (T.pack (show e))
-          throwIO e
-        Right task -> do
-          applyActivityTask task
-          go
+execute worker = withRunInIO $ \runInIO -> do
+  -- NOTE: The poll loop /must/ recurse in a concrete type (in this case that's
+  -- 'IO', but it could be a concrete transformer stack) as opposed to the
+  -- polymorphic 'm' that this function is constrained by.
+  --
+  -- Recursing in 'm' means that GHC can't specialize binds, which results in
+  -- a space leak per iteration; in this case that gives us an unbounded space
+  -- leak roughly proportional to the number of activity tasks handled by this
+  -- worker.
+  --
+  -- Pinning the type to 'IO' and dispatching the task's work to whatever its
+  -- 'm' is via 'runInIO' eliminates the space leak.
+  let go = do
+        eTask <- Core.pollActivityTask worker.workerCore
+        case eTask of
+          Left (Core.WorkerError Core.PollShutdown _) -> pure ()
+          Left e -> do
+            runInIO $ Logging.logError (T.pack $ show e)
+            throwIO e
+          Right task ->
+            runInIO (runActivityWorker worker $ applyActivityTask task) *> go
+  go
 
 
 activityInfoFromProto :: MonadIO m => TaskToken -> TaskQueue -> AT.Start -> ActivityWorkerM actEnv m ActivityInfo
