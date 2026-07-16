@@ -5,5 +5,4 @@ let
 in
 {
   uuid = doJailbreak hprev.uuid;
-  proto-lens = doJailbreak hprev.proto-lens;
 }

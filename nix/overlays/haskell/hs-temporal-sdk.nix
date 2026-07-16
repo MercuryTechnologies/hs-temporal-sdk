@@ -2,7 +2,7 @@
   lib,
   haskell,
   temporal-cli,
-  fetchFromGitHub,
+  fetchzip,
   temporal-test-server,
   ...
 }:
@@ -15,22 +15,28 @@ let
     enableCabalFlag
     setBuildTarget
     ;
-  wireformSrc = fetchFromGitHub {
-    owner = "iand675";
-    repo = "wireform-";
-    rev = "a3bae259ae4e35d1940a98e86ce460b1cefbbf81";
-    hash = "sha256-Qwx2MZ5r3g99piRjDFFGFS+0kqbense11rNtMs11kCE=";
+  wireformCoreSrc = fetchzip {
+    url = "https://hackage.haskell.org/package/wireform-core-0.2.0.1/wireform-core-0.2.0.1.tar.gz";
+    hash = "sha256-sGt6Pul+Z/G7mp94aZAgMBKp3e/dgUHLQg75ORB6rsI=";
+  };
+  wireformDeriveSrc = fetchzip {
+    url = "https://hackage.haskell.org/package/wireform-derive-0.2.0.0/wireform-derive-0.2.0.0.tar.gz";
+    hash = "sha256-LmrzgWl3QCpLJQH+k5J/430Z5CD3Q4Hap95Nw91OCSk=";
+  };
+  wireformProtoSrc = fetchzip {
+    url = "https://hackage.haskell.org/package/wireform-proto-0.2.0.0/wireform-proto-0.2.0.0.tar.gz";
+    hash = "sha256-kojP1AT2NLwC0cMMNRAVPaI2cxyET8NHjr+NThH9Z78=";
   };
 in
 {
-  wireform-core = dontCheck (hfinal.callCabal2nix "wireform-core" "${wireformSrc}/wireform-core" { });
+  wireform-core = dontCheck (hfinal.callCabal2nix "wireform-core" wireformCoreSrc { });
 
   wireform-derive = dontCheck (
-    hfinal.callCabal2nix "wireform-derive" "${wireformSrc}/wireform-derive" { }
+    hfinal.callCabal2nix "wireform-derive" wireformDeriveSrc { }
   );
 
   wireform-proto = setBuildTarget "lib:wireform-proto" (
-    dontCheck (hfinal.callCabal2nix "wireform-proto" "${wireformSrc}/wireform-proto" { })
+    dontCheck (hfinal.callCabal2nix "wireform-proto" wireformProtoSrc { })
   );
 
   temporal-api-protos = disableOptimization (

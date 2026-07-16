@@ -1,19 +1,2 @@
 packages: */*.cabal tools/*/*.cabal
 
-source-repository-package
-  type: git
-  location: https://github.com/iand675/wireform-.git
-  tag: a3bae259ae4e35d1940a98e86ce460b1cefbbf81
-  subdir: wireform-core
-
-source-repository-package
-  type: git
-  location: https://github.com/iand675/wireform-.git
-  tag: a3bae259ae4e35d1940a98e86ce460b1cefbbf81
-  subdir: wireform-derive
-
-source-repository-package
-  type: git
-  location: https://github.com/iand675/wireform-.git
-  tag: a3bae259ae4e35d1940a98e86ce460b1cefbbf81
-  subdir: wireform-proto
