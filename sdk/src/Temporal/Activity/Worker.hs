@@ -101,12 +101,12 @@ activityInfoFromProto :: MonadIO m => TaskToken -> TaskQueue -> AT.Start -> Acti
 activityInfoFromProto tt tq msg = do
   w <- ask
   let rawHdrs =
-        foldr
-          ( \entry acc -> case (entry.key, entry.value) of
-              (Just key, Just value) -> Map.insert key (convertFromProtoPayload value) acc
-              _ -> acc
+        foldMap
+          (\entry ->
+              case (entry.key, entry.value) of
+                (Just key, Just value) -> Map.singleton key (convertFromProtoPayload value)
+                _ -> mempty
           )
-          Map.empty
           msg.headerFields
   hdrs <- processorTryDecodePayloads w.payloadProcessor rawHdrs
   heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload msg.heartbeatDetails)
