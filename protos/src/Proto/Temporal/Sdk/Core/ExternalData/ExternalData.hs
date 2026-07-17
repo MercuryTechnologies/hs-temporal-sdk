@@ -1,734 +1,367 @@
-{- This file was auto-generated from temporal/sdk/core/external_data/external_data.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Sdk.Core.ExternalData.ExternalData (
-        LocalActivityMarkerData(), PatchedMarkerData()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Timestamp
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.seq' @:: Lens' LocalActivityMarkerData Data.Word.Word32@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.attempt' @:: Lens' LocalActivityMarkerData Data.Word.Word32@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.activityId' @:: Lens' LocalActivityMarkerData Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.activityType' @:: Lens' LocalActivityMarkerData Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.completeTime' @:: Lens' LocalActivityMarkerData Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.maybe'completeTime' @:: Lens' LocalActivityMarkerData (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.backoff' @:: Lens' LocalActivityMarkerData Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.maybe'backoff' @:: Lens' LocalActivityMarkerData (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.originalScheduleTime' @:: Lens' LocalActivityMarkerData Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.maybe'originalScheduleTime' @:: Lens' LocalActivityMarkerData (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data LocalActivityMarkerData
-  = LocalActivityMarkerData'_constructor {_LocalActivityMarkerData'seq :: !Data.Word.Word32,
-                                          _LocalActivityMarkerData'attempt :: !Data.Word.Word32,
-                                          _LocalActivityMarkerData'activityId :: !Data.Text.Text,
-                                          _LocalActivityMarkerData'activityType :: !Data.Text.Text,
-                                          _LocalActivityMarkerData'completeTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                          _LocalActivityMarkerData'backoff :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                          _LocalActivityMarkerData'originalScheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                          _LocalActivityMarkerData'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show LocalActivityMarkerData where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "seq" Data.Word.Word32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'seq
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'seq = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "attempt" Data.Word.Word32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'attempt
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'attempt = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "activityId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'activityId
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'activityId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "activityType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'activityType
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'activityType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "completeTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'completeTime
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'completeTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "maybe'completeTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'completeTime
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'completeTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "backoff" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'backoff
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'backoff = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "maybe'backoff" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'backoff
-           (\ x__ y__ -> x__ {_LocalActivityMarkerData'backoff = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "originalScheduleTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'originalScheduleTime
-           (\ x__ y__
-              -> x__ {_LocalActivityMarkerData'originalScheduleTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField LocalActivityMarkerData "maybe'originalScheduleTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LocalActivityMarkerData'originalScheduleTime
-           (\ x__ y__
-              -> x__ {_LocalActivityMarkerData'originalScheduleTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message LocalActivityMarkerData where
-  messageName _
-    = Data.Text.pack "coresdk.external_data.LocalActivityMarkerData"
-  packedMessageDescriptor _
-    = "\n\
-      \\ETBLocalActivityMarkerData\DC2\DLE\n\
-      \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2\CAN\n\
-      \\aattempt\CAN\STX \SOH(\rR\aattempt\DC2\US\n\
-      \\vactivity_id\CAN\ETX \SOH(\tR\n\
-      \activityId\DC2#\n\
-      \\ractivity_type\CAN\EOT \SOH(\tR\factivityType\DC2?\n\
-      \\rcomplete_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\fcompleteTime\DC23\n\
-      \\abackoff\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\abackoff\DC2P\n\
-      \\SYNoriginal_schedule_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\DC4originalScheduleTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        seq__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "seq"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"seq")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-        attempt__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "attempt"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"attempt")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-        activityId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"activityId")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-        activityType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"activityType")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-        completeTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "complete_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'completeTime")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-        backoff__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "backoff"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'backoff")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-        originalScheduleTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "original_schedule_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'originalScheduleTime")) ::
-              Data.ProtoLens.FieldDescriptor LocalActivityMarkerData
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, seq__field_descriptor),
-           (Data.ProtoLens.Tag 2, attempt__field_descriptor),
-           (Data.ProtoLens.Tag 3, activityId__field_descriptor),
-           (Data.ProtoLens.Tag 4, activityType__field_descriptor),
-           (Data.ProtoLens.Tag 5, completeTime__field_descriptor),
-           (Data.ProtoLens.Tag 6, backoff__field_descriptor),
-           (Data.ProtoLens.Tag 7, originalScheduleTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _LocalActivityMarkerData'_unknownFields
-        (\ x__ y__ -> x__ {_LocalActivityMarkerData'_unknownFields = y__})
-  defMessage
-    = LocalActivityMarkerData'_constructor
-        {_LocalActivityMarkerData'seq = Data.ProtoLens.fieldDefault,
-         _LocalActivityMarkerData'attempt = Data.ProtoLens.fieldDefault,
-         _LocalActivityMarkerData'activityId = Data.ProtoLens.fieldDefault,
-         _LocalActivityMarkerData'activityType = Data.ProtoLens.fieldDefault,
-         _LocalActivityMarkerData'completeTime = Prelude.Nothing,
-         _LocalActivityMarkerData'backoff = Prelude.Nothing,
-         _LocalActivityMarkerData'originalScheduleTime = Prelude.Nothing,
-         _LocalActivityMarkerData'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          LocalActivityMarkerData
-          -> Data.ProtoLens.Encoding.Bytes.Parser LocalActivityMarkerData
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "seq"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"seq") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "attempt"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"attempt") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "activity_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"activityId") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "activity_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityType") y x)
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "complete_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"completeTime") y x)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "backoff"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"backoff") y x)
-                        58
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "original_schedule_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"originalScheduleTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "LocalActivityMarkerData"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"seq") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"attempt") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view (Data.ProtoLens.Field.field @"activityId") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"activityType") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view
-                                (Data.ProtoLens.Field.field @"maybe'completeTime") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just _v)
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage _v))
-                         ((Data.Monoid.<>)
-                            (case
-                                 Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'backoff") _x
-                             of
-                               Prelude.Nothing -> Data.Monoid.mempty
-                               (Prelude.Just _v)
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                      ((Prelude..)
-                                         (\ bs
-                                            -> (Data.Monoid.<>)
-                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                    (Prelude.fromIntegral
-                                                       (Data.ByteString.length bs)))
-                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                         Data.ProtoLens.encodeMessage _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'originalScheduleTime") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
-                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
-instance Control.DeepSeq.NFData LocalActivityMarkerData where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_LocalActivityMarkerData'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_LocalActivityMarkerData'seq x__)
-                (Control.DeepSeq.deepseq
-                   (_LocalActivityMarkerData'attempt x__)
-                   (Control.DeepSeq.deepseq
-                      (_LocalActivityMarkerData'activityId x__)
-                      (Control.DeepSeq.deepseq
-                         (_LocalActivityMarkerData'activityType x__)
-                         (Control.DeepSeq.deepseq
-                            (_LocalActivityMarkerData'completeTime x__)
-                            (Control.DeepSeq.deepseq
-                               (_LocalActivityMarkerData'backoff x__)
-                               (Control.DeepSeq.deepseq
-                                  (_LocalActivityMarkerData'originalScheduleTime x__) ())))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.id' @:: Lens' PatchedMarkerData Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ExternalData.ExternalData_Fields.deprecated' @:: Lens' PatchedMarkerData Prelude.Bool@ -}
-data PatchedMarkerData
-  = PatchedMarkerData'_constructor {_PatchedMarkerData'id :: !Data.Text.Text,
-                                    _PatchedMarkerData'deprecated :: !Prelude.Bool,
-                                    _PatchedMarkerData'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show PatchedMarkerData where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField PatchedMarkerData "id" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _PatchedMarkerData'id
-           (\ x__ y__ -> x__ {_PatchedMarkerData'id = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField PatchedMarkerData "deprecated" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _PatchedMarkerData'deprecated
-           (\ x__ y__ -> x__ {_PatchedMarkerData'deprecated = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message PatchedMarkerData where
-  messageName _
-    = Data.Text.pack "coresdk.external_data.PatchedMarkerData"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1PatchedMarkerData\DC2\SO\n\
-      \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\RS\n\
-      \\n\
-      \deprecated\CAN\STX \SOH(\bR\n\
-      \deprecated"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        id__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
-              Data.ProtoLens.FieldDescriptor PatchedMarkerData
-        deprecated__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deprecated"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"deprecated")) ::
-              Data.ProtoLens.FieldDescriptor PatchedMarkerData
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, id__field_descriptor),
-           (Data.ProtoLens.Tag 2, deprecated__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _PatchedMarkerData'_unknownFields
-        (\ x__ y__ -> x__ {_PatchedMarkerData'_unknownFields = y__})
-  defMessage
-    = PatchedMarkerData'_constructor
-        {_PatchedMarkerData'id = Data.ProtoLens.fieldDefault,
-         _PatchedMarkerData'deprecated = Data.ProtoLens.fieldDefault,
-         _PatchedMarkerData'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          PatchedMarkerData
-          -> Data.ProtoLens.Encoding.Bytes.Parser PatchedMarkerData
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "deprecated"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"deprecated") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "PatchedMarkerData"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"deprecated") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData PatchedMarkerData where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_PatchedMarkerData'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_PatchedMarkerData'id x__)
-                (Control.DeepSeq.deepseq (_PatchedMarkerData'deprecated x__) ()))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \3temporal/sdk/core/external_data/external_data.proto\DC2\NAKcoresdk.external_data\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\"\211\STX\n\
-    \\ETBLocalActivityMarkerData\DC2\DLE\n\
-    \\ETXseq\CAN\SOH \SOH(\rR\ETXseq\DC2\CAN\n\
-    \\aattempt\CAN\STX \SOH(\rR\aattempt\DC2\US\n\
-    \\vactivity_id\CAN\ETX \SOH(\tR\n\
-    \activityId\DC2#\n\
-    \\ractivity_type\CAN\EOT \SOH(\tR\factivityType\DC2?\n\
-    \\rcomplete_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\fcompleteTime\DC23\n\
-    \\abackoff\CAN\ACK \SOH(\v2\EM.google.protobuf.DurationR\abackoff\DC2P\n\
-    \\SYNoriginal_schedule_time\CAN\a \SOH(\v2\SUB.google.protobuf.TimestampR\DC4originalScheduleTime\"C\n\
-    \\DC1PatchedMarkerData\DC2\SO\n\
-    \\STXid\CAN\SOH \SOH(\tR\STXid\DC2\RS\n\
-    \\n\
-    \deprecated\CAN\STX \SOH(\bR\n\
-    \deprecatedB2\234\STX/Temporalio::Internal::Bridge::Api::ExternalDataJ\231\r\n\
-    \\ACK\DC2\EOT\NUL\NUL%\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NULH\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NULH\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\ENQ\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\ACK\NUL)\n\
-    \\166\STX\n\
-    \\STX\EOT\NUL\DC2\EOT\f\NUL\RS\SOH2\153\STX This file defines data that Core might write externally. The first motivating case being\n\
-    \ storing data in markers in event history. Defining such data as protos provides an easy way\n\
-    \ for consumers which would like to just depend on the proto package to make sense of marker data.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\f\b\US\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\r\STX\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\r\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\r\t\f\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\r\SI\DLE\n\
-    \\186\SOH\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DLE\STX\NAK\SUB\172\SOH The number of attempts at execution before we recorded this result. Typically starts at 1,\n\
-    \ but it is possible to start at a higher number when backing off using a timer.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\DLE\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DLE\t\DLE\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DLE\DC3\DC4\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC1\STX\EM\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\DC1\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC1\t\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC1\ETB\CAN\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\DC2\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX\DC2\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\DC2\t\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\DC2\EM\SUB\n\
-    \\128\STX\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX\SYN\STX.\SUB\242\SOH You can think of this as \"perceived completion time\". It is the time the local activity thought\n\
-    \ it was when it completed. Which could be different from wall-clock time because of workflow\n\
-    \ replay. It's the WFT start time + the LA's runtime\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX\SYN\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX\SYN\FS)\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX\SYN,-\n\
-    \\240\SOH\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX\SUB\STX'\SUB\226\SOH If set, this local activity conceptually is retrying after the specified backoff.\n\
-    \ Implementation wise, they are really two different LA machines, but with the same type & input.\n\
-    \ The retry starts with an attempt number > 1.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ACK\DC2\ETX\SUB\STX\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX\SUB\ESC\"\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX\SUB%&\n\
-    \\160\SOH\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETX\GS\STX7\SUB\146\SOH The time the LA was originally scheduled (wall clock time). This is used to track\n\
-    \ schedule-to-close timeouts when timer-based backoffs are used\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ACK\DC2\ETX\GS\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX\GS\FS2\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX\GS56\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT \NUL%\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX \b\EM\n\
-    \\ESC\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\"\STX\DLE\SUB\SO The patch id\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\"\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\"\t\v\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\"\SO\SI\n\
-    \=\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX$\STX\SYN\SUB0 Whether or not the patch is marked deprecated.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX$\STX\ACK\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX$\a\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX$\DC4\NAKb\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @coresdk.external_data@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Sdk.Core.ExternalData.ExternalData where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x65\x78\x74\x65\x72\x6e\x61\x6c\x5f\x64\x61\x74\x61\x2f\x65\x78\x74\x65\x72\x6e\x61\x6c\x5f\x64\x61\x74\x61\x2e\x70\x72\x6f\x74\x6f\x12\x15\x63\x6f\x72\x65\x73\x64\x6b\x2e\x65\x78\x74\x65\x72\x6e\x61\x6c\x5f\x64\x61\x74\x61\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x22\xfb\x01\x0a\x17\x4c\x6f\x63\x61\x6c\x41\x63\x74\x69\x76\x69\x74\x79\x4d\x61\x72\x6b\x65\x72\x44\x61\x74\x61\x12\x0b\x0a\x03\x73\x65\x71\x18\x01\x20\x01\x28\x0d\x12\x0f\x0a\x07\x61\x74\x74\x65\x6d\x70\x74\x18\x02\x20\x01\x28\x0d\x12\x13\x0a\x0b\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x69\x64\x18\x03\x20\x01\x28\x09\x12\x15\x0a\x0d\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x79\x70\x65\x18\x04\x20\x01\x28\x09\x12\x30\x0a\x0d\x63\x6f\x6d\x70\x6c\x65\x74\x65\x5f\x74\x69\x6d\x65\x18\x05\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x29\x0a\x07\x62\x61\x63\x6b\x6f\x66\x66\x18\x06\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x39\x0a\x16\x6f\x72\x69\x67\x69\x6e\x61\x6c\x5f\x73\x63\x68\x65\x64\x75\x6c\x65\x5f\x74\x69\x6d\x65\x18\x07\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\x33\x0a\x11\x50\x61\x74\x63\x68\x65\x64\x4d\x61\x72\x6b\x65\x72\x44\x61\x74\x61\x12\x0a\x0a\x02\x69\x64\x18\x01\x20\x01\x28\x09\x12\x12\x0a\x0a\x64\x65\x70\x72\x65\x63\x61\x74\x65\x64\x18\x02\x20\x01\x28\x08\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data LocalActivityMarkerData = LocalActivityMarkerData
+  { seq :: !(Maybe Word32)
+  , attempt :: !(Maybe Word32)
+  , activityId :: !(Maybe Text)
+  , activityType :: !(Maybe Text)
+  , completeTime :: !(Maybe PB_Timestamp.Timestamp)
+  , backoff :: !(Maybe PB_Duration.Duration)
+  , originalScheduleTime :: !(Maybe PB_Timestamp.Timestamp)
+  , localActivityMarkerDataUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLocalActivityMarkerData :: LocalActivityMarkerData
+defaultLocalActivityMarkerData = LocalActivityMarkerData
+  { seq = Nothing
+  , attempt = Nothing
+  , activityId = Nothing
+  , activityType = Nothing
+  , completeTime = Nothing
+  , backoff = Nothing
+  , originalScheduleTime = Nothing
+  , localActivityMarkerDataUnknownFields = []
+  }
+
+instance MessageEncode LocalActivityMarkerData where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral v)) msg.seq)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral v)) msg.attempt)
+    <> (maybe mempty (\v -> archString 26 v) msg.activityId)
+    <> (maybe mempty (\v -> archString 34 v) msg.activityType)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.completeTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 50 sz (buildMessage v)) msg.backoff)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 58 sz (buildMessage v)) msg.originalScheduleTime)
+    <> encodeUnknownFields msg.localActivityMarkerDataUnknownFields
+
+instance MessageSize LocalActivityMarkerData where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.seq)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.attempt)
+    + (maybe 0 (\v -> archStringSize v) msg.activityId)
+    + (maybe 0 (\v -> archStringSize v) msg.activityType)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.completeTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.backoff)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.originalScheduleTime)
+    + unknownFieldsSize msg.localActivityMarkerDataUnknownFields
+
+instance MessageDecode LocalActivityMarkerData where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_ = withTagM
+        (pure (LocalActivityMarkerData {seq = acc_0, attempt = acc_1, activityId = acc_2, activityType = acc_3, completeTime = acc_4, backoff = acc_5, originalScheduleTime = acc_6, localActivityMarkerDataUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          2 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_unknown_
+          7 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (uf : acc_unknown_))
+
+instance ProtoMessage LocalActivityMarkerData where
+  protoMessageName _ = "coresdk.external_data.LocalActivityMarkerData"
+  protoPackageName _ = "coresdk.external_data"
+  protoDefaultValue = defaultLocalActivityMarkerData
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "seq"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType UInt32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.seq
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { seq = v } :: LocalActivityMarkerData)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "attempt"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType UInt32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.attempt
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { attempt = v } :: LocalActivityMarkerData)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "activity_id"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.activityId
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { activityId = v } :: LocalActivityMarkerData)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "activity_type"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.activityType
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { activityType = v } :: LocalActivityMarkerData)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "complete_time"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.completeTime
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { completeTime = v } :: LocalActivityMarkerData)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "backoff"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.backoff
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { backoff = v } :: LocalActivityMarkerData)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "original_schedule_time"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: LocalActivityMarkerData) -> m.originalScheduleTime
+        , fdSet = \v (m :: LocalActivityMarkerData) -> (m { originalScheduleTime = v } :: LocalActivityMarkerData)
+        })
+    ]
+
+instance IsMessage LocalActivityMarkerData
+
+instance Aeson.ToJSON LocalActivityMarkerData where
+  toJSON msg = jsonObject
+      [ "seq" .=: msg.seq
+      , "attempt" .=: msg.attempt
+      , "activityId" .=: msg.activityId
+      , "activityType" .=: msg.activityType
+      , "completeTime" .=: msg.completeTime
+      , "backoff" .=: msg.backoff
+      , "originalScheduleTime" .=: msg.originalScheduleTime
+      ]
+
+instance Aeson.FromJSON LocalActivityMarkerData where
+  parseJSON = Aeson.withObject "LocalActivityMarkerData" $ \obj -> do
+    fld_seq <- parseFieldMaybe obj "seq"
+    fld_attempt <- parseFieldMaybe obj "attempt"
+    fld_activityId <- parseFieldMaybe obj "activityId"
+    fld_activityType <- parseFieldMaybe obj "activityType"
+    fld_completeTime <- parseFieldMaybe obj "completeTime"
+    fld_backoff <- parseFieldMaybe obj "backoff"
+    fld_originalScheduleTime <- parseFieldMaybe obj "originalScheduleTime"
+    pure (defaultLocalActivityMarkerData
+      { seq = maybe (defaultLocalActivityMarkerData.seq) Prelude.id fld_seq
+      , attempt = maybe (defaultLocalActivityMarkerData.attempt) Prelude.id fld_attempt
+      , activityId = maybe (defaultLocalActivityMarkerData.activityId) Prelude.id fld_activityId
+      , activityType = maybe (defaultLocalActivityMarkerData.activityType) Prelude.id fld_activityType
+      , completeTime = maybe (defaultLocalActivityMarkerData.completeTime) Prelude.id fld_completeTime
+      , backoff = maybe (defaultLocalActivityMarkerData.backoff) Prelude.id fld_backoff
+      , originalScheduleTime = maybe (defaultLocalActivityMarkerData.originalScheduleTime) Prelude.id fld_originalScheduleTime
+      , localActivityMarkerDataUnknownFields = []
+      } :: LocalActivityMarkerData)
+
+instance Hashable LocalActivityMarkerData where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.seq) msg.attempt) msg.activityId) msg.activityType) msg.completeTime) msg.backoff) msg.originalScheduleTime
+
+instance Proto.Extension.HasExtensions LocalActivityMarkerData where
+  messageUnknownFields msg = msg.localActivityMarkerDataUnknownFields
+  setMessageUnknownFields !ufs msg = msg { localActivityMarkerDataUnknownFields = ufs }
+
+instance Semigroup LocalActivityMarkerData where
+  a <> b = LocalActivityMarkerData
+    { seq = case b.seq of { Nothing -> a.seq; x -> x }
+    , attempt = case b.attempt of { Nothing -> a.attempt; x -> x }
+    , activityId = case b.activityId of { Nothing -> a.activityId; x -> x }
+    , activityType = case b.activityType of { Nothing -> a.activityType; x -> x }
+    , completeTime = case b.completeTime of { Nothing -> a.completeTime; x -> x }
+    , backoff = case b.backoff of { Nothing -> a.backoff; x -> x }
+    , originalScheduleTime = case b.originalScheduleTime of { Nothing -> a.originalScheduleTime; x -> x }
+    , localActivityMarkerDataUnknownFields = a.localActivityMarkerDataUnknownFields <> b.localActivityMarkerDataUnknownFields
+    }
+
+instance Monoid LocalActivityMarkerData where
+  mempty = defaultLocalActivityMarkerData
+
+data PatchedMarkerData = PatchedMarkerData
+  { id :: !(Maybe Text)
+  , deprecated :: !(Maybe Bool)
+  , patchedMarkerDataUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultPatchedMarkerData :: PatchedMarkerData
+defaultPatchedMarkerData = PatchedMarkerData
+  { id = Nothing
+  , deprecated = Nothing
+  , patchedMarkerDataUnknownFields = []
+  }
+
+instance MessageEncode PatchedMarkerData where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.id)
+    <> (maybe mempty (\v -> archBool 16 v) msg.deprecated)
+    <> encodeUnknownFields msg.patchedMarkerDataUnknownFields
+
+instance MessageSize PatchedMarkerData where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.id)
+    + (maybe 0 (\v -> archBoolSize) msg.deprecated)
+    + unknownFieldsSize msg.patchedMarkerDataUnknownFields
+
+instance MessageDecode PatchedMarkerData where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (PatchedMarkerData {id = acc_0, deprecated = acc_1, patchedMarkerDataUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage PatchedMarkerData where
+  protoMessageName _ = "coresdk.external_data.PatchedMarkerData"
+  protoPackageName _ = "coresdk.external_data"
+  protoDefaultValue = defaultPatchedMarkerData
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: PatchedMarkerData) -> m.id
+        , fdSet = \v (m :: PatchedMarkerData) -> (m { id = v } :: PatchedMarkerData)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "deprecated"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: PatchedMarkerData) -> m.deprecated
+        , fdSet = \v (m :: PatchedMarkerData) -> (m { deprecated = v } :: PatchedMarkerData)
+        })
+    ]
+
+instance IsMessage PatchedMarkerData
+
+instance Aeson.ToJSON PatchedMarkerData where
+  toJSON msg = jsonObject
+      [ "id" .=: msg.id
+      , "deprecated" .=: msg.deprecated
+      ]
+
+instance Aeson.FromJSON PatchedMarkerData where
+  parseJSON = Aeson.withObject "PatchedMarkerData" $ \obj -> do
+    fld_id <- parseFieldMaybe obj "id"
+    fld_deprecated <- parseFieldMaybe obj "deprecated"
+    pure (defaultPatchedMarkerData
+      { id = maybe (defaultPatchedMarkerData.id) Prelude.id fld_id
+      , deprecated = maybe (defaultPatchedMarkerData.deprecated) Prelude.id fld_deprecated
+      , patchedMarkerDataUnknownFields = []
+      } :: PatchedMarkerData)
+
+instance Hashable PatchedMarkerData where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.id) msg.deprecated
+
+instance Proto.Extension.HasExtensions PatchedMarkerData where
+  messageUnknownFields msg = msg.patchedMarkerDataUnknownFields
+  setMessageUnknownFields !ufs msg = msg { patchedMarkerDataUnknownFields = ufs }
+
+instance Semigroup PatchedMarkerData where
+  a <> b = PatchedMarkerData
+    { id = case b.id of { Nothing -> a.id; x -> x }
+    , deprecated = case b.deprecated of { Nothing -> a.deprecated; x -> x }
+    , patchedMarkerDataUnknownFields = a.patchedMarkerDataUnknownFields <> b.patchedMarkerDataUnknownFields
+    }
+
+instance Monoid PatchedMarkerData where
+  mempty = defaultPatchedMarkerData

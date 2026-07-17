@@ -1,56 +1,109 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-module Temporal.Client.Namespace
-  ( Temporal.Client.Namespace.listNamespaces
-  , ListNamespacesRequest(..)
-  , DescribeNamespaceResponse(..)
-  , NamespaceFilter(..)
-  , NamespaceState(..)
-  , NamespaceInfo(..)
-  , NamespaceCapabilities(..)
-  , ArchivalState(..)
-  , BadBinaryInfo(..)
-  , BadBinaries(..)
-  , NamespaceConfig(..)
-  , NamespaceReplicationConfig(..)
-  , FailoverStatus(..)
-  ) where
 
-import Prelude hiding (filter)
-import Control.Monad.IO.Class
+module Temporal.Client.Namespace (
+  Temporal.Client.Namespace.listNamespaces,
+  ListNamespacesRequest (..),
+  DescribeNamespaceResponse (..),
+  NamespaceFilter (..),
+  NamespaceState (..),
+  NamespaceInfo (..),
+  NamespaceCapabilities (..),
+  ArchivalState (..),
+  BadBinaryInfo (..),
+  BadBinaries (..),
+  NamespaceConfig (..),
+  NamespaceReplicationConfig (..),
+  FailoverStatus (..),
+) where
+
 import Conduit
-import Data.Int (Int64, Int32)
+import Control.Monad
+import Control.Monad.IO.Class
+import qualified Data.ByteString as BS
+import Data.Int (Int32, Int64)
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Time.Clock.System (SystemTime)
 import qualified Data.Vector as V
-import Temporal.Duration (Duration, durationFromProto)
+import qualified Proto.Temporal.Api.Enums.V1.Namespace as E
+import qualified Proto.Temporal.Api.Namespace.V1.Message as M (
+  BadBinaries (BadBinaries),
+  BadBinaries'BinariesEntry (BadBinaries'BinariesEntry),
+  BadBinaryInfo (BadBinaryInfo),
+  NamespaceConfig (NamespaceConfig),
+  NamespaceConfig'CustomSearchAttributeAliasesEntry (NamespaceConfig'CustomSearchAttributeAliasesEntry),
+  NamespaceFilter (NamespaceFilter),
+  NamespaceInfo (NamespaceInfo),
+  NamespaceInfo'Capabilities (NamespaceInfo'Capabilities),
+  NamespaceInfo'DataEntry (NamespaceInfo'DataEntry),
+ )
+import qualified Proto.Temporal.Api.Replication.V1.Message as R (
+  ClusterReplicationConfig (ClusterReplicationConfig),
+  FailoverStatus (FailoverStatus),
+  NamespaceReplicationConfig (NamespaceReplicationConfig),
+ )
+import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as RR (
+  DescribeNamespaceResponse (DescribeNamespaceResponse),
+  ListNamespacesRequest (ListNamespacesRequest),
+  ListNamespacesResponse (ListNamespacesResponse),
+ )
 import Temporal.Client (HasWorkflowClient (..))
-import Temporal.Core.Client.WorkflowService (listNamespaces)
-import Temporal.Exception
-import Lens.Family2
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse as RR
-import qualified Proto.Temporal.Api.Workflowservice.V1.RequestResponse_Fields as RR
-import qualified Proto.Temporal.Api.Namespace.V1.Message as M
-import qualified Proto.Temporal.Api.Namespace.V1.Message_Fields as M
-import qualified Proto.Temporal.Api.Enums.V1.Namespace as M
-import qualified Proto.Temporal.Api.Replication.V1.Message as R
-import qualified Proto.Temporal.Api.Replication.V1.Message_Fields as R
 import Temporal.Client.Types
-
-import UnliftIO
-import Data.ProtoLens
-import Control.Monad
-import qualified Data.ByteString as BS
 import Temporal.Common
+import Temporal.Core.Client.WorkflowService (listNamespaces)
+import Temporal.Duration (Duration, durationFromProto)
+import Temporal.Exception
+import UnliftIO
+import Prelude hiding (filter)
+
+
+namespaceInfoDataFromProto
+  :: V.Vector M.NamespaceInfo'DataEntry
+  -> Map Text Text
+namespaceInfoDataFromProto =
+  V.foldr
+    ( \(M.NamespaceInfo'DataEntry mKey mValue _) acc ->
+        maybe acc (\key -> Map.insert key (fromMaybe "" mValue) acc) mKey
+    )
+    Map.empty
+
+
+badBinariesFromProtoEntries
+  :: V.Vector M.BadBinaries'BinariesEntry
+  -> Map Text BadBinaryInfo
+badBinariesFromProtoEntries =
+  V.foldr
+    ( \(M.BadBinaries'BinariesEntry mKey mValue _) acc ->
+        maybe acc (\key -> Map.insert key (badBinaryInfoFromProto (fromMaybe mempty mValue)) acc) mKey
+    )
+    Map.empty
+
+
+namespaceConfigAliasesFromProto
+  :: V.Vector M.NamespaceConfig'CustomSearchAttributeAliasesEntry
+  -> Map Text Text
+namespaceConfigAliasesFromProto =
+  V.foldr
+    ( \(M.NamespaceConfig'CustomSearchAttributeAliasesEntry mKey mValue _) acc ->
+        maybe acc (\key -> Map.insert key (fromMaybe "" mValue) acc) mKey
+    )
+    Map.empty
+
 
 data NamespaceFilter = NamespaceFilter
   { includeDeleted :: !Bool
-  } deriving stock (Show, Eq, Ord)
+  }
+  deriving stock (Show, Eq, Ord)
 
-namespaceFilterToProto :: NamespaceFilter -> M.NamespaceFilter
-namespaceFilterToProto NamespaceFilter{..} = defMessage
-  & M.includeDeleted .~ includeDeleted
+
+namespaceFilterToProto NamespaceFilter {..} =
+  M.NamespaceFilter
+    (Just includeDeleted)
+    []
+
 
 data NamespaceState
   = NamespaceStateUnspecified
@@ -60,13 +113,15 @@ data NamespaceState
   | NamespaceStateUnrecognized
   deriving stock (Show, Eq, Ord)
 
-namespaceStateFromProto :: M.NamespaceState -> NamespaceState
+
+namespaceStateFromProto :: E.NamespaceState -> NamespaceState
 namespaceStateFromProto = \case
-  M.NAMESPACE_STATE_UNSPECIFIED -> NamespaceStateUnspecified
-  M.NAMESPACE_STATE_REGISTERED -> NamespaceStateRegistered
-  M.NAMESPACE_STATE_DEPRECATED -> NamespaceStateDeprecated
-  M.NAMESPACE_STATE_DELETED -> NamespaceStateDeleted
-  (M.NamespaceState'Unrecognized _) -> NamespaceStateUnrecognized
+  E.NamespaceState'NamespaceStateUnspecified -> NamespaceStateUnspecified
+  E.NamespaceState'NamespaceStateRegistered -> NamespaceStateRegistered
+  E.NamespaceState'NamespaceStateDeprecated -> NamespaceStateDeprecated
+  E.NamespaceState'NamespaceStateDeleted -> NamespaceStateDeleted
+  _ -> NamespaceStateUnrecognized
+
 
 data NamespaceInfo = NamespaceInfo
   { name :: !Text
@@ -78,32 +133,38 @@ data NamespaceInfo = NamespaceInfo
   -- ^ A key-value map for any customized purpose.
   , capabilities :: !(Maybe NamespaceCapabilities)
   , supportsSchedules :: !Bool
-  } deriving stock (Show, Eq, Ord)
-
-namespaceInfoFromProto :: M.NamespaceInfo -> NamespaceInfo
-namespaceInfoFromProto x = NamespaceInfo
-  { name = x ^. M.name
-  , state = namespaceStateFromProto (x ^. M.state)
-  , description = x ^. M.description
-  , ownerEmail = x ^. M.ownerEmail
-  , id = x ^. M.id
-  , data' = x ^. M.data'
-  , capabilities = namespaceCapabilitiesFromProto <$> (x ^. M.maybe'capabilities)
-  , supportsSchedules = x ^. M.supportsSchedules
   }
+  deriving stock (Show, Eq, Ord)
+
+
+namespaceInfoFromProto (M.NamespaceInfo protoName protoState protoDescription protoOwnerEmail protoData protoId protoCapabilities protoSupportsSchedules _) =
+  NamespaceInfo
+    { name = fromMaybe "" protoName
+    , state = namespaceStateFromProto (fromMaybe E.NamespaceState'NamespaceStateUnspecified protoState)
+    , description = fromMaybe "" protoDescription
+    , ownerEmail = fromMaybe "" protoOwnerEmail
+    , id = fromMaybe "" protoId
+    , data' = namespaceInfoDataFromProto protoData
+    , capabilities = namespaceCapabilitiesFromProto <$> protoCapabilities
+    , supportsSchedules = fromMaybe False protoSupportsSchedules
+    }
+
 
 data NamespaceCapabilities = NamespaceCapabilities
   { eagerWorkflowStart :: !Bool
   , syncUpdate :: !Bool
   , asyncUpdate :: !Bool
-  } deriving stock (Show, Eq, Ord)
-
-namespaceCapabilitiesFromProto :: M.NamespaceInfo'Capabilities -> NamespaceCapabilities
-namespaceCapabilitiesFromProto x = NamespaceCapabilities
-  { eagerWorkflowStart = x ^. M.eagerWorkflowStart
-  , syncUpdate = x ^. M.syncUpdate
-  , asyncUpdate = x ^. M.asyncUpdate
   }
+  deriving stock (Show, Eq, Ord)
+
+
+namespaceCapabilitiesFromProto (M.NamespaceInfo'Capabilities protoEagerWorkflowStart protoSyncUpdate protoAsyncUpdate _ _ _) =
+  NamespaceCapabilities
+    { eagerWorkflowStart = fromMaybe False protoEagerWorkflowStart
+    , syncUpdate = fromMaybe False protoSyncUpdate
+    , asyncUpdate = fromMaybe False protoAsyncUpdate
+    }
+
 
 data ArchivalState
   = ArchivalStateUnspecified
@@ -112,34 +173,42 @@ data ArchivalState
   | ArchivalStateUnrecognized
   deriving stock (Show, Eq, Ord)
 
-archivalStateFromProto :: M.ArchivalState -> ArchivalState
+
+archivalStateFromProto :: E.ArchivalState -> ArchivalState
 archivalStateFromProto = \case
-  M.ARCHIVAL_STATE_UNSPECIFIED -> ArchivalStateUnspecified
-  M.ARCHIVAL_STATE_DISABLED -> ArchivalStateDisabled
-  M.ARCHIVAL_STATE_ENABLED -> ArchivalStateEnabled
-  (M.ArchivalState'Unrecognized _) -> ArchivalStateUnrecognized
+  E.ArchivalState'ArchivalStateUnspecified -> ArchivalStateUnspecified
+  E.ArchivalState'ArchivalStateDisabled -> ArchivalStateDisabled
+  E.ArchivalState'ArchivalStateEnabled -> ArchivalStateEnabled
+  _ -> ArchivalStateUnrecognized
+
 
 data BadBinaryInfo = BadBinaryInfo
   { reason :: !Text
   , operator :: !Text
   , createTime :: !SystemTime
-  } deriving stock (Show, Eq, Ord)
-
-badBinaryInfoFromProto :: M.BadBinaryInfo -> BadBinaryInfo
-badBinaryInfoFromProto x = BadBinaryInfo
-  { reason = x ^. M.reason
-  , operator = x ^. M.operator
-  , createTime = timespecFromTimestamp (x ^. M.createTime)
   }
+  deriving stock (Show, Eq, Ord)
+
+
+badBinaryInfoFromProto (M.BadBinaryInfo protoReason protoOperator protoCreateTime _) =
+  BadBinaryInfo
+    { reason = fromMaybe "" protoReason
+    , operator = fromMaybe "" protoOperator
+    , createTime = timespecFromTimestamp (fromMaybe mempty protoCreateTime)
+    }
+
 
 data BadBinaries = BadBinaries
   { binaries :: !(Map Text BadBinaryInfo)
-  } deriving stock (Show, Eq, Ord)
-
-badBinariesFromProto :: M.BadBinaries -> BadBinaries
-badBinariesFromProto x = BadBinaries
-  { binaries = badBinaryInfoFromProto <$> (x ^. M.binaries)
   }
+  deriving stock (Show, Eq, Ord)
+
+
+badBinariesFromProto (M.BadBinaries protoBinaries _) =
+  BadBinaries
+    { binaries = badBinariesFromProtoEntries protoBinaries
+    }
+
 
 data NamespaceConfig = NamespaceConfig
   { workflowExecutionRetentionTtl :: !(Maybe Duration)
@@ -149,18 +218,21 @@ data NamespaceConfig = NamespaceConfig
   , visibilityArchivalState :: !ArchivalState
   , visibilityArchivalUri :: !Text
   , customSearchAttributeAliases :: !(Map Text Text)
-  } deriving stock (Show, Eq, Ord)
-
-namespaceConfigFromProto :: M.NamespaceConfig -> NamespaceConfig
-namespaceConfigFromProto x = NamespaceConfig
-  { workflowExecutionRetentionTtl = durationFromProto <$> (x ^. M.maybe'workflowExecutionRetentionTtl)
-  , badBinaries = badBinariesFromProto <$> (x ^. M.maybe'badBinaries)
-  , historyArchivalState = archivalStateFromProto (x ^. M.historyArchivalState)
-  , historyArchivalUri = x ^. M.historyArchivalUri
-  , visibilityArchivalState = archivalStateFromProto (x ^. M.visibilityArchivalState)
-  , visibilityArchivalUri = x ^. M.visibilityArchivalUri
-  , customSearchAttributeAliases = x ^. M.customSearchAttributeAliases
   }
+  deriving stock (Show, Eq, Ord)
+
+
+namespaceConfigFromProto (M.NamespaceConfig protoWorkflowExecutionRetentionTtl protoBadBinaries protoHistoryArchivalState protoHistoryArchivalUri protoVisibilityArchivalState protoVisibilityArchivalUri protoCustomSearchAttributeAliases _) =
+  NamespaceConfig
+    { workflowExecutionRetentionTtl = durationFromProto <$> protoWorkflowExecutionRetentionTtl
+    , badBinaries = badBinariesFromProto <$> protoBadBinaries
+    , historyArchivalState = archivalStateFromProto (fromMaybe E.ArchivalState'ArchivalStateUnspecified protoHistoryArchivalState)
+    , historyArchivalUri = fromMaybe "" protoHistoryArchivalUri
+    , visibilityArchivalState = archivalStateFromProto (fromMaybe E.ArchivalState'ArchivalStateUnspecified protoVisibilityArchivalState)
+    , visibilityArchivalUri = fromMaybe "" protoVisibilityArchivalUri
+    , customSearchAttributeAliases = namespaceConfigAliasesFromProto protoCustomSearchAttributeAliases
+    }
+
 
 data ReplicationState
   = ReplicationStateUnspecified
@@ -169,45 +241,56 @@ data ReplicationState
   | ReplicationStateUnrecognized
   deriving stock (Show, Eq, Ord)
 
-replicationStateFromProto :: M.ReplicationState -> ReplicationState
+
+replicationStateFromProto :: E.ReplicationState -> ReplicationState
 replicationStateFromProto = \case
-  M.REPLICATION_STATE_UNSPECIFIED -> ReplicationStateUnspecified
-  M.REPLICATION_STATE_NORMAL -> ReplicationStateNormal
-  M.REPLICATION_STATE_HANDOVER -> ReplicationStateHandover
-  (M.ReplicationState'Unrecognized _) -> ReplicationStateUnrecognized
+  E.ReplicationState'ReplicationStateUnspecified -> ReplicationStateUnspecified
+  E.ReplicationState'ReplicationStateNormal -> ReplicationStateNormal
+  E.ReplicationState'ReplicationStateHandover -> ReplicationStateHandover
+  _ -> ReplicationStateUnrecognized
+
 
 data ClusterReplicationConfig = ClusterReplicationConfig
   { clusterName :: !Text
-  } deriving stock (Show, Eq, Ord)
-
-clusterReplicationConfigFromProto :: R.ClusterReplicationConfig -> ClusterReplicationConfig
-clusterReplicationConfigFromProto x = ClusterReplicationConfig
-  { clusterName = x ^. R.clusterName
   }
+  deriving stock (Show, Eq, Ord)
+
+
+clusterReplicationConfigFromProto (R.ClusterReplicationConfig protoClusterName _) =
+  ClusterReplicationConfig
+    { clusterName = fromMaybe "" protoClusterName
+    }
+
 
 data NamespaceReplicationConfig = NamespaceReplicationConfig
   { activeClusterName :: !Text
   , clusters :: !(V.Vector ClusterReplicationConfig)
   , state :: !ReplicationState
-  } deriving stock (Show, Eq, Ord)
-
-namespaceReplicationConfigFromProto :: R.NamespaceReplicationConfig -> NamespaceReplicationConfig
-namespaceReplicationConfigFromProto x = NamespaceReplicationConfig
-  { activeClusterName = x ^. R.activeClusterName
-  , clusters = clusterReplicationConfigFromProto <$> (x ^. R.vec'clusters)
-  , state = replicationStateFromProto (x ^. M.state)
   }
+  deriving stock (Show, Eq, Ord)
+
+
+namespaceReplicationConfigFromProto (R.NamespaceReplicationConfig protoActiveClusterName protoClusters protoState _) =
+  NamespaceReplicationConfig
+    { activeClusterName = fromMaybe "" protoActiveClusterName
+    , clusters = clusterReplicationConfigFromProto <$> protoClusters
+    , state = replicationStateFromProto (fromMaybe E.ReplicationState'ReplicationStateUnspecified protoState)
+    }
+
 
 data FailoverStatus = FailoverStatus
   { failoverTime :: !SystemTime
   , failoverVersion :: !Int64
-  } deriving stock (Show, Eq, Ord)
-
-failoverStatusFromProto :: R.FailoverStatus -> FailoverStatus
-failoverStatusFromProto x = FailoverStatus
-  { failoverTime = timespecFromTimestamp (x ^. R.failoverTime)
-  , failoverVersion = x ^. R.failoverVersion
   }
+  deriving stock (Show, Eq, Ord)
+
+
+failoverStatusFromProto (R.FailoverStatus protoFailoverTime protoFailoverVersion _) =
+  FailoverStatus
+    { failoverTime = timespecFromTimestamp (fromMaybe mempty protoFailoverTime)
+    , failoverVersion = fromMaybe 0 protoFailoverVersion
+    }
+
 
 data DescribeNamespaceResponse = DescribeNamespaceResponse
   { namespaceInfo :: !NamespaceInfo
@@ -216,27 +299,35 @@ data DescribeNamespaceResponse = DescribeNamespaceResponse
   , failoverVersion :: !Int64
   , isGlobalNamespace :: !Bool
   , failoverHistory :: !(V.Vector FailoverStatus)
-  } deriving stock (Show, Eq, Ord)
-
-describeNamespaceResponseFromProto :: RR.DescribeNamespaceResponse -> DescribeNamespaceResponse
-describeNamespaceResponseFromProto x = DescribeNamespaceResponse
-  { namespaceInfo = namespaceInfoFromProto (x ^. RR.namespaceInfo)
-  , config = namespaceConfigFromProto (x ^. RR.config)
-  , replicationConfig = namespaceReplicationConfigFromProto (x ^. RR.replicationConfig)
-  , failoverVersion = x ^. RR.failoverVersion
-  , isGlobalNamespace = x ^. RR.isGlobalNamespace
-  , failoverHistory = failoverStatusFromProto <$> (x ^. RR.vec'failoverHistory)
   }
+  deriving stock (Show, Eq, Ord)
+
+
+describeNamespaceResponseFromProto (RR.DescribeNamespaceResponse protoNamespaceInfo protoConfig protoReplicationConfig protoFailoverVersion protoIsGlobalNamespace protoFailoverHistory _) =
+  DescribeNamespaceResponse
+    { namespaceInfo = namespaceInfoFromProto (fromMaybe mempty protoNamespaceInfo)
+    , config = namespaceConfigFromProto (fromMaybe mempty protoConfig)
+    , replicationConfig = namespaceReplicationConfigFromProto (fromMaybe mempty protoReplicationConfig)
+    , failoverVersion = fromMaybe 0 protoFailoverVersion
+    , isGlobalNamespace = fromMaybe False protoIsGlobalNamespace
+    , failoverHistory = failoverStatusFromProto <$> protoFailoverHistory
+    }
+
 
 data ListNamespacesRequest = ListNamespacesRequest
   { filter :: !(Maybe NamespaceFilter)
   , pageSize :: !Int32
-  } deriving stock (Show, Eq, Ord)
+  }
+  deriving stock (Show, Eq, Ord)
 
-listNamespacesRequestToProto :: ListNamespacesRequest -> RR.ListNamespacesRequest
-listNamespacesRequestToProto ListNamespacesRequest{..} = defMessage
-  & RR.maybe'namespaceFilter .~ (namespaceFilterToProto <$> filter)
-  & RR.pageSize .~ pageSize
+
+listNamespacesRequestToProto ListNamespacesRequest {..} =
+  RR.ListNamespacesRequest
+    (Just pageSize)
+    Nothing
+    (namespaceFilterToProto <$> filter)
+    []
+
 
 -- | Returns the information and configuration for all namespaces.
 listNamespaces :: (MonadIO m, HasWorkflowClient m) => ListNamespacesRequest -> ConduitT () DescribeNamespaceResponse m ()
@@ -246,11 +337,14 @@ listNamespaces req = do
         res <- liftIO $ Temporal.Core.Client.WorkflowService.listNamespaces client.clientCore reqMsg
         case res of
           Left err -> throwIO $ Temporal.Exception.coreRpcErrorToRpcError err
-          Right x -> do
-            let namespaces = x ^. RR.vec'namespaces
+          Right (RR.ListNamespacesResponse namespaces nextPageToken _) -> do
             yieldMany $ describeNamespaceResponseFromProto <$> namespaces
-            unless (BS.null (x ^. RR.nextPageToken) || V.null (x ^. RR.vec'namespaces)) do
-              let reqMsg' = defMessage
-                    & RR.nextPageToken .~ (x ^. RR.nextPageToken)
+            unless (BS.null (fromMaybe "" nextPageToken) || V.null namespaces) do
+              let reqMsg' =
+                    RR.ListNamespacesRequest
+                      Nothing
+                      nextPageToken
+                      Nothing
+                      []
               go reqMsg'
   go $ listNamespacesRequestToProto req

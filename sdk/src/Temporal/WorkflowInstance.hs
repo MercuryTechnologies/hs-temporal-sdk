@@ -31,9 +31,9 @@ import Data.Foldable (foldl')
 #endif
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
-import Data.Maybe (mapMaybe)
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
 import Data.Monoid (Endo (..))
-import Data.ProtoLens
 import Data.Proxy
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -47,31 +47,41 @@ import GHC.Stack (HasCallStack, emptyCallStack, getCallStack)
 import qualified GHC.Stack
 import Lens.Family2
 import Paths_temporal_sdk (version)
+import Proto.Decode (UnknownField, decodeMessage)
+import Proto.Encode (encodeMessage)
+import qualified Proto.Temporal.Api.Common.V1.Message as Message
+import qualified Proto.Temporal.Api.Failure.V1.Message as FailureMsg
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
 import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
 import Proto.Temporal.Sdk.Core.ChildWorkflow.ChildWorkflow (
   StartChildWorkflowExecutionFailedCause (..),
  )
 import Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation (
-  CancelWorkflow,
-  DoUpdate,
-  FireTimer,
-  InitializeWorkflow,
-  NotifyHasPatch,
-  QueryWorkflow,
-  ResolveActivity,
-  ResolveChildWorkflowExecution,
-  ResolveChildWorkflowExecutionStart,
+  CancelWorkflow (..),
+  DoUpdate (..),
+  DoUpdate'HeadersEntry (..),
+  FireTimer (..),
+  InitializeWorkflow (..),
+  InitializeWorkflow'HeadersEntry (..),
+  NotifyHasPatch (..),
+  QueryWorkflow (..),
+  QueryWorkflow'HeadersEntry (..),
+  ResolveActivity (..),
+  ResolveChildWorkflowExecution (..),
+  ResolveChildWorkflowExecutionStart (..),
   ResolveChildWorkflowExecutionStart'Status (..),
-  ResolveNexusOperation,
-  ResolveNexusOperationStart,
+  ResolveChildWorkflowExecutionStartFailure (..),
+  ResolveChildWorkflowExecutionStartSuccess (..),
+  ResolveNexusOperation (..),
+  ResolveNexusOperationStart (..),
   ResolveNexusOperationStart'Status (..),
-  ResolveRequestCancelExternalWorkflow,
-  ResolveSignalExternalWorkflow,
-  SignalWorkflow,
-  UpdateRandomSeed,
-  WorkflowActivation,
-  WorkflowActivationJob,
+  ResolveRequestCancelExternalWorkflow (..),
+  ResolveSignalExternalWorkflow (..),
+  SignalWorkflow (..),
+  SignalWorkflow'HeadersEntry (..),
+  UpdateRandomSeed (..),
+  WorkflowActivation (..),
+  WorkflowActivationJob (..),
   WorkflowActivationJob'Variant (..),
  )
 import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
@@ -94,6 +104,7 @@ import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecuti
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
+import qualified Temporal.Workflow.Types as Workflow
 import UnliftIO
 
 
@@ -228,12 +239,13 @@ handleQueriesAfterCompletion = forever $ do
           enrichedApplicationFailure = applicationFailureToFailureProto appFailure
 
           failureProto :: Completion.Failure
-          failureProto = defMessage & Completion.failure .~ enrichedApplicationFailure
+          failureProto = Completion.Failure (Just enrichedApplicationFailure) Nothing []
 
           completionMessage =
-            defMessage
-              & Completion.runId .~ (activation ^. Activation.runId)
-              & Completion.failed .~ failureProto
+            Completion.WorkflowActivationCompletion
+              (activation.runId)
+              (Just $ Completion.WorkflowActivationCompletion'Status'Failed failureProto)
+              []
       inst <- ask
       liftIO (inst.workflowCompleteActivation completionMessage >>= either throwIO pure)
     Right Proxy -> do
@@ -247,6 +259,38 @@ isBuiltinQuery name =
     || "__enhanced_stack_trace" == name
     || "__temporal_workflow_metadata" == name
     || "__temporal_" `Text.isPrefixOf` name
+
+
+workflowCommand :: Command.WorkflowCommand'Variant -> Command.WorkflowCommand
+workflowCommand variant = Command.WorkflowCommand Nothing (Just variant) []
+
+
+updateResponseCommand :: Text.Text -> Command.UpdateResponse'Response -> Command.WorkflowCommand
+updateResponseCommand protocolInstanceId response =
+  workflowCommand $
+    Command.WorkflowCommand'Variant'UpdateResponse $
+      Command.UpdateResponse (Just protocolInstanceId) (Just response) []
+
+
+mapPayloadEntries
+  :: (Maybe Text.Text -> Maybe Message.Payload -> [UnknownField] -> entry)
+  -> Map.Map Text.Text Message.Payload
+  -> Vector entry
+mapPayloadEntries mkEntry =
+  V.fromList
+    . fmap (\(key, value) -> mkEntry (Just key) (Just value) [])
+    . Map.toList
+
+
+headerEntriesToMap :: Vector a -> (a -> Maybe Text.Text) -> (a -> Maybe Message.Payload) -> Map.Map Text.Text Message.Payload
+headerEntriesToMap entries getKey getValue =
+  V.foldr
+    ( \entry acc -> case (getKey entry, getValue entry) of
+        (Just key, Just value) -> Map.insert key value acc
+        _ -> acc
+    )
+    Map.empty
+    entries
 
 
 {- | Register built-in query handlers on a workflow instance.
@@ -340,19 +384,20 @@ activate
 activate act suspension = do
   inst <- ask
   info <- atomicModifyIORef' inst.workflowInstanceInfo $ \info ->
-    let info' =
+    let info' :: Info
+        info' =
           info
-            { historyLength = act ^. Activation.historyLength
-            , continueAsNewSuggested = act ^. Activation.continueAsNewSuggested
+            { Workflow.historyLength = fromMaybe 0 act.historyLength
+            , Workflow.continueAsNewSuggested = fromMaybe False act.continueAsNewSuggested
             }
     in (info', info')
-  let completionBase = defMessage & Completion.runId .~ rawRunId info.runId
-  writeIORef inst.workflowTime (act ^. Activation.timestamp . to timespecFromTimestamp)
-  writeIORef inst.workflowIsReplaying (act ^. Activation.isReplaying)
+  let completionBase status = Completion.WorkflowActivationCompletion (Just $ rawRunId info.runId) (Just status) []
+  writeIORef inst.workflowTime (maybe (MkSystemTime 0 0) timespecFromTimestamp act.timestamp)
+  writeIORef inst.workflowIsReplaying (fromMaybe False act.isReplaying)
   eResult <- case inst.workflowDeadlockTimeout of
-    Nothing -> applyJobs (act ^. Activation.vec'jobs) suspension
+    Nothing -> applyJobs (act.jobs) suspension
     Just timeoutDuration -> do
-      res <- UnliftIO.timeout timeoutDuration $ applyJobs (act ^. Activation.vec'jobs) suspension
+      res <- UnliftIO.timeout timeoutDuration $ applyJobs (act.jobs) suspension
       case res of
         Nothing -> do
           Logging.logError "Deadlock detected"
@@ -367,11 +412,12 @@ activate act suspension = do
       -- TODO, failures should have source / stack trace info
       -- TODO, convert failure type using a supplied payload converter
       let failure =
-            defMessage
-              & Completion.failure .~ (defMessage & Failure.message .~ Text.pack (show err))
+            Completion.Failure
+              (Just $ FailureMsg.Failure (Just $ Text.pack $ show err) Nothing Nothing Nothing Nothing Nothing [])
+              Nothing
+              []
           completion =
-            completionBase
-              & Completion.failed .~ failure
+            completionBase (Completion.WorkflowActivationCompletion'Status'Failed failure)
       liftIO (inst.workflowCompleteActivation completion >>= either throwIO pure)
       -- I think it's morally okay to crash the worker thread here.
       throwIO err
@@ -383,15 +429,15 @@ setUpWorkflowExecution :: InitializeWorkflow -> InstanceM ExecuteWorkflowInput
 setUpWorkflowExecution initializeWorkflow = do
   inst <- ask
   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
-  writeIORef genRef (mkStdGen $ fromIntegral $ initializeWorkflow ^. Activation.randomnessSeed)
-  writeIORef inst.workflowTime (initializeWorkflow ^. Activation.startTime . to timespecFromTimestamp)
+  writeIORef genRef (mkStdGen $ fromIntegral $ fromMaybe 0 initializeWorkflow.randomnessSeed)
+  writeIORef inst.workflowTime (maybe (MkSystemTime 0 0) timespecFromTimestamp initializeWorkflow.startTime)
   info <- readIORef inst.workflowInstanceInfo
 
-  hdrs <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (initializeWorkflow ^. Activation.headers))
+  hdrs <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (headerEntriesToMap initializeWorkflow.headers (.key) (.value)))
   pure $
     ExecuteWorkflowInput
-      { executeWorkflowInputType = WorkflowType (initializeWorkflow ^. Activation.workflowType)
-      , executeWorkflowInputArgs = fmap convertFromProtoPayload (initializeWorkflow ^. Command.vec'arguments)
+      { executeWorkflowInputType = WorkflowType (fromMaybe "" initializeWorkflow.workflowType)
+      , executeWorkflowInputArgs = fmap convertFromProtoPayload (initializeWorkflow.arguments)
       , executeWorkflowInputHeaders = hdrs
       , executeWorkflowInputInfo = info
       }
@@ -432,7 +478,7 @@ applyUpdateRandomSeed :: UpdateRandomSeed -> InstanceM ()
 applyUpdateRandomSeed updateRandomSeed = do
   inst <- ask
   let (WorkflowGenM genRef) = inst.workflowRandomnessSeed
-  writeIORef genRef (mkStdGen $ fromIntegral $ updateRandomSeed ^. Activation.randomnessSeed)
+  writeIORef genRef (mkStdGen $ fromIntegral $ fromMaybe 0 updateRandomSeed.randomnessSeed)
 
 
 applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
@@ -440,14 +486,14 @@ applyQueryWorkflow queryWorkflow = do
   inst <- ask
   instInfo <- readIORef inst.workflowInstanceInfo
   handles <- readIORef inst.workflowQueryHandlers
-  Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
+  Logging.logDebug $ Text.pack ("Applying query: " <> show (fromMaybe "" queryWorkflow.queryType))
   let processor = inst.payloadProcessor
-  args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Command.vec'arguments))
-  hdrs <- processorTryDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow ^. Activation.headers))
+  args <- processorDecodePayloads processor (fmap convertFromProtoPayload (queryWorkflow.arguments))
+  hdrs <- processorTryDecodePayloads processor (fmap convertFromProtoPayload (headerEntriesToMap queryWorkflow.headers (.key) (.value)))
   let baseInput =
         HandleQueryInput
-          { handleQueryId = QueryId (queryWorkflow ^. Activation.queryId)
-          , handleQueryInputType = queryWorkflow ^. Activation.queryType
+          { handleQueryId = QueryId (fromMaybe "" queryWorkflow.queryId)
+          , handleQueryInputType = fromMaybe "" queryWorkflow.queryType
           , handleQueryInputArgs = args
           , handleQueryInputHeaders = hdrs
           , handleQueryWorkflowInfo = instInfo
@@ -466,28 +512,25 @@ applyQueryWorkflow queryWorkflow = do
                   input.handleQueryInputArgs
                   input.handleQueryInputHeaders
   res <-
-    if isBuiltinQuery (queryWorkflow ^. Activation.queryType)
+    if isBuiltinQuery (fromMaybe "" queryWorkflow.queryType)
       then liftIO $ lookupHandler baseInput
       else liftIO $ inst.inboundInterceptor.handleQuery baseInput lookupHandler
   cmd <- case res of
     Left err ->
       -- TODO, more useful error message
       pure $
-        defMessage
-          & Command.failed
-            .~ ( defMessage
-                  & F.message .~ Text.pack (show err)
-               )
+        Command.QueryResult
+          Nothing
+          (Just $ Command.QueryResult'Variant'Failed $ FailureMsg.Failure (Just $ Text.pack $ show err) Nothing Nothing Nothing Nothing Nothing [])
+          []
     Right ok -> do
       res' <- liftIO $ payloadProcessorEncode processor ok
       pure $
-        defMessage
-          & Command.queryId .~ rawQueryId baseInput.handleQueryId
-          & Command.succeeded
-            .~ ( defMessage
-                  & Command.response .~ convertToProtoPayload res'
-               )
-  addCommand $ defMessage & Command.respondToQuery .~ cmd
+        Command.QueryResult
+          (Just $ rawQueryId baseInput.handleQueryId)
+          (Just $ Command.QueryResult'Variant'Succeeded $ Command.QuerySuccess (Just $ convertToProtoPayload res') [])
+          []
+  addCommand $ workflowCommand $ Command.WorkflowCommand'Variant'RespondToQuery cmd
 
 
 applySignalWorkflow :: SignalWorkflow -> Workflow ()
@@ -495,12 +538,12 @@ applySignalWorkflow signalWorkflow = join $ do
   Workflow $ \_ -> do
     inst <- ask
     handlers <- readIORef inst.workflowSignalHandlers
-    let signalName = signalWorkflow ^. Activation.signalName
+    let signalName = fromMaybe "" signalWorkflow.signalName
         handlerOrDefault =
           HashMap.lookup (Just signalName) handlers
             <|> HashMap.lookup Nothing handlers
     -- Decode inputs first - we need them whether we have a handler or are buffering
-    eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow ^. Command.vec'input))
+    eInputs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (signalWorkflow.input))
     case eInputs of
       Left err -> pure $ Throw err
       Right args -> case handlerOrDefault of
@@ -525,38 +568,32 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
     instInfo <- readIORef inst.workflowInstanceInfo
     handlers <- readIORef inst.workflowUpdateHandlers
     let handlerAndValidatorOrDefault =
-          HashMap.lookup (Just (doUpdate ^. Activation.name)) handlers
+          HashMap.lookup (Just (fromMaybe "" doUpdate.name)) handlers
             <|> HashMap.lookup Nothing handlers
     case handlerAndValidatorOrDefault of
       Nothing -> do
-        let errMessage = Text.pack ("No update handler found for update: " <> show (doUpdate ^. Activation.name))
+        let errMessage = Text.pack ("No update handler found for update: " <> show (fromMaybe "" doUpdate.name))
         let err = mkApplicationFailure (toException $ UpdateNotFound errMessage) inst.errorConverters
         Logging.logWarn errMessage
         let cmd =
-              defMessage
-                & Command.updateResponse
-                  .~ ( defMessage
-                        & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                        & Command.rejected .~ applicationFailureToFailureProto err
-                     )
+              updateResponseCommand
+                (fromMaybe "" doUpdate.protocolInstanceId)
+                (Command.UpdateResponse'Response'Rejected $ applicationFailureToFailureProto err)
         addCommand cmd
         pure (pure False, error "This should never happen")
       Just WorkflowUpdateImplementation {..} -> do
-        updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.vec'input))
-        updateHeaders <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate ^. Activation.headers))
-        let runValidator = doUpdate ^. Activation.runValidator
-            updateId = UpdateId $ doUpdate ^. Activation.id
+        updateArgs <- UnliftIO.try $ processorDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (doUpdate.input))
+        updateHeaders <- processorTryDecodePayloads inst.payloadProcessor (fmap convertFromProtoPayload (headerEntriesToMap doUpdate.headers (.key) (.value)))
+        let runValidator = fromMaybe False doUpdate.runValidator
+            updateId = UpdateId $ fromMaybe "" doUpdate.id
         case updateArgs of
           Left err ->
             pure
               ( do
                   addCommand $
-                    defMessage
-                      & Command.updateResponse
-                        .~ ( defMessage
-                              & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                              & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
-                           )
+                    updateResponseCommand
+                      (fromMaybe "" doUpdate.protocolInstanceId)
+                      (Command.UpdateResponse'Response'Rejected $ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters))
                   pure False
               , error "Error processing update args"
               )
@@ -564,7 +601,7 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
             let baseInput =
                   HandleUpdateInput
                     { handleUpdateId = updateId
-                    , handleUpdateInputType = doUpdate ^. Activation.name
+                    , handleUpdateInputType = fromMaybe "" doUpdate.name
                     , handleUpdateInputArgs = args
                     , handleUpdateInputHeaders = updateHeaders
                     , handleUpdateWorkflowInfo = instInfo
@@ -586,33 +623,24 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
                       case eValidatorResult of
                         Left err -> do
                           addCommand $
-                            defMessage
-                              & Command.updateResponse
-                                .~ ( defMessage
-                                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                                      & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
-                                   )
+                            updateResponseCommand
+                              (fromMaybe "" doUpdate.protocolInstanceId)
+                              (Command.UpdateResponse'Response'Rejected $ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters))
                           pure False
                         Right () -> do
                           addCommand $
-                            defMessage
-                              & Command.updateResponse
-                                .~ ( defMessage
-                                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                                      & Command.accepted .~ defMessage
-                                   )
+                            updateResponseCommand
+                              (fromMaybe "" doUpdate.protocolInstanceId)
+                              (Command.UpdateResponse'Response'Accepted mempty)
                           pure True
                   , runUpdate
                   )
                 else
                   ( do
                       addCommand $
-                        defMessage
-                          & Command.updateResponse
-                            .~ ( defMessage
-                                  & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                                  & Command.accepted .~ defMessage
-                               )
+                        updateResponseCommand
+                          (fromMaybe "" doUpdate.protocolInstanceId)
+                          (Command.UpdateResponse'Response'Accepted mempty)
                       pure True
                   , runUpdate
                   )
@@ -626,23 +654,17 @@ applyDoUpdateWorkflow doUpdate = provideCallStack do
         Left err -> do
           Logging.logDebug "gonna send an update rejected message!"
           addCommand $
-            defMessage
-              & Command.updateResponse
-                .~ ( defMessage
-                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                      & Command.rejected .~ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters)
-                   )
+            updateResponseCommand
+              (fromMaybe "" doUpdate.protocolInstanceId)
+              (Command.UpdateResponse'Response'Rejected $ applicationFailureToFailureProto (mkApplicationFailure err inst.errorConverters))
           pure $ Throw err
         Right payload -> do
           Logging.logDebug "gonna send an update completed message!"
           payload' <- liftIO $ payloadProcessorEncode inst.payloadProcessor payload
           addCommand $
-            defMessage
-              & Command.updateResponse
-                .~ ( defMessage
-                      & Command.protocolInstanceId .~ (doUpdate ^. Activation.protocolInstanceId)
-                      & Command.completed .~ convertToProtoPayload payload'
-                   )
+            updateResponseCommand
+              (fromMaybe "" doUpdate.protocolInstanceId)
+              (Command.UpdateResponse'Response'Completed $ convertToProtoPayload payload')
           pure $ Done ()
 
 
@@ -651,7 +673,7 @@ applyNotifyHasPatch notifyHasPatch = do
   inst <- ask
   let patches :: IORef (Set PatchId)
       patches = inst.workflowNotifiedPatches
-  atomicModifyIORef' patches $ \patchSet -> (Set.insert (notifyHasPatch ^. Activation.patchId . to PatchId) patchSet, ())
+  atomicModifyIORef' patches $ \patchSet -> (Set.insert (PatchId (fromMaybe "" notifyHasPatch.patchId)) patchSet, ())
 
 
 data PendingJob
@@ -711,27 +733,27 @@ applyJobs jobs fAwait = UnliftIO.try $ do
   where
     getJobGroups =
       V.foldr
-        ( \job jobGroups -> case job ^. Activation.maybe'variant of
-            Just (WorkflowActivationJob'NotifyHasPatch n) -> jobGroups {patchNotifications = applyNotifyHasPatch n *> jobGroups.patchNotifications}
-            Just (WorkflowActivationJob'SignalWorkflow sig) -> jobGroups {signalWorkflows = applySignalWorkflow sig : jobGroups.signalWorkflows}
-            Just (WorkflowActivationJob'QueryWorkflow q) -> jobGroups {queryWorkflows = applyQueryWorkflow q *> jobGroups.queryWorkflows}
+        ( \job jobGroups -> case job.variant of
+            Just (WorkflowActivationJob'Variant'NotifyHasPatch n) -> jobGroups {patchNotifications = applyNotifyHasPatch n *> jobGroups.patchNotifications}
+            Just (WorkflowActivationJob'Variant'SignalWorkflow sig) -> jobGroups {signalWorkflows = applySignalWorkflow sig : jobGroups.signalWorkflows}
+            Just (WorkflowActivationJob'Variant'QueryWorkflow q) -> jobGroups {queryWorkflows = applyQueryWorkflow q *> jobGroups.queryWorkflows}
             -- We collect these in bulk and resolve them in one go by pushing them into the completed queue. This reactivates the suspended workflow
             -- and it tries to execute further.
-            Just (WorkflowActivationJob'FireTimer r) -> jobGroups {resolutions = PendingJobFireTimer r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'ResolveActivity r) -> jobGroups {resolutions = PendingJobResolveActivity r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'ResolveChildWorkflowExecutionStart r) -> jobGroups {resolutions = PendingJobResolveChildWorkflowExecutionStart r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'ResolveChildWorkflowExecution r) -> jobGroups {resolutions = PendingJobResolveChildWorkflowExecution r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'ResolveSignalExternalWorkflow r) -> jobGroups {resolutions = PendingJobResolveSignalExternalWorkflow r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'ResolveRequestCancelExternalWorkflow r) -> jobGroups {resolutions = PendingJobResolveRequestCancelExternalWorkflow r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'UpdateRandomSeed updateRandomSeed) -> jobGroups {otherJobs = jobGroups.otherJobs *> applyUpdateRandomSeed updateRandomSeed}
-            Just (WorkflowActivationJob'CancelWorkflow cancelWorkflow) -> jobGroups {resolutions = PendingWorkflowCancellation cancelWorkflow : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'FireTimer r) -> jobGroups {resolutions = PendingJobFireTimer r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'ResolveActivity r) -> jobGroups {resolutions = PendingJobResolveActivity r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'ResolveChildWorkflowExecutionStart r) -> jobGroups {resolutions = PendingJobResolveChildWorkflowExecutionStart r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'ResolveChildWorkflowExecution r) -> jobGroups {resolutions = PendingJobResolveChildWorkflowExecution r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'ResolveSignalExternalWorkflow r) -> jobGroups {resolutions = PendingJobResolveSignalExternalWorkflow r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'ResolveRequestCancelExternalWorkflow r) -> jobGroups {resolutions = PendingJobResolveRequestCancelExternalWorkflow r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'UpdateRandomSeed updateRandomSeed) -> jobGroups {otherJobs = jobGroups.otherJobs *> applyUpdateRandomSeed updateRandomSeed}
+            Just (WorkflowActivationJob'Variant'CancelWorkflow cancelWorkflow) -> jobGroups {resolutions = PendingWorkflowCancellation cancelWorkflow : jobGroups.resolutions}
             -- By the time we get here, the workflow should already be running.
-            Just (WorkflowActivationJob'InitializeWorkflow _initializeWorkflow) -> jobGroups
+            Just (WorkflowActivationJob'Variant'InitializeWorkflow _initializeWorkflow) -> jobGroups
             -- Handled in the worker.
-            Just (WorkflowActivationJob'RemoveFromCache _removeFromCache) -> jobGroups
-            Just (WorkflowActivationJob'DoUpdate u) -> jobGroups {updateWorkflows = applyDoUpdateWorkflow u : jobGroups.updateWorkflows}
-            Just (WorkflowActivationJob'ResolveNexusOperation r) -> jobGroups {resolutions = PendingJobResolveNexusOperation r : jobGroups.resolutions}
-            Just (WorkflowActivationJob'ResolveNexusOperationStart r) -> jobGroups {resolutions = PendingJobResolveNexusOperationStart r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'RemoveFromCache _removeFromCache) -> jobGroups
+            Just (WorkflowActivationJob'Variant'DoUpdate u) -> jobGroups {updateWorkflows = applyDoUpdateWorkflow u : jobGroups.updateWorkflows}
+            Just (WorkflowActivationJob'Variant'ResolveNexusOperation r) -> jobGroups {resolutions = PendingJobResolveNexusOperation r : jobGroups.resolutions}
+            Just (WorkflowActivationJob'Variant'ResolveNexusOperationStart r) -> jobGroups {resolutions = PendingJobResolveNexusOperationStart r : jobGroups.resolutions}
             Nothing -> E.throw $ RuntimeError "Uncrecognized workflow activation job variant"
         )
         ( JobGroups
@@ -755,45 +777,45 @@ applyResolutions rs = do
     let makeCompletion :: ([ActivationResult], SequenceMaps) -> PendingJob -> ([ActivationResult], SequenceMaps)
         makeCompletion (!completions, !sequenceMaps') pj = case pj of
           PendingJobResolveActivity msg -> do
-            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
+            let existingIVar = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.activities
             case existingIVar of
               Nothing ->
                 E.throw $ RuntimeError "Activity handle not found"
               Just existing ->
                 ( ActivationResult (Ok msg) existing : completions
                 , sequenceMaps'
-                    { activities = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.activities
+                    { activities = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.activities
                     }
                 )
           PendingJobResolveChildWorkflowExecutionStart msg -> do
-            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+            let existingHandle = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.childWorkflows
             case existingHandle of
               Nothing ->
                 E.throw $ RuntimeError "Child workflow not found"
-              Just (SomeChildWorkflowHandle existing) -> case msg ^. Activation.maybe'status of
+              Just (SomeChildWorkflowHandle existing) -> case msg.status of
                 Nothing ->
                   E.throw $ RuntimeError "Child workflow start did not have a known status"
                 Just status -> case status of
-                  ResolveChildWorkflowExecutionStart'Succeeded succeeded ->
+                  ResolveChildWorkflowExecutionStart'Status'Succeeded succeeded ->
                     ( ActivationResult (Ok ()) existing.startHandle
-                        : ActivationResult (Ok (succeeded ^. Activation.runId . to RunId)) existing.firstExecutionRunId
+                        : ActivationResult (Ok (RunId (fromMaybe "" succeeded.runId))) existing.firstExecutionRunId
                         : completions
                     , sequenceMaps'
                     )
-                  ResolveChildWorkflowExecutionStart'Failed failed ->
+                  ResolveChildWorkflowExecutionStart'Status'Failed failed ->
                     let updatedMaps =
                           sequenceMaps'
-                            { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                            { childWorkflows = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.childWorkflows
                             }
-                    in case failed ^. Activation.cause of
-                        START_CHILD_WORKFLOW_EXECUTION_FAILED_CAUSE_WORKFLOW_ALREADY_EXISTS ->
+                    in case fromMaybe StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified failed.cause of
+                        StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseWorkflowAlreadyExists ->
                           let failure :: forall v. ResultVal v
                               failure =
                                 ThrowWorkflow $
                                   toException $
                                     WorkflowAlreadyStarted
-                                      { workflowAlreadyStartedWorkflowId = WorkflowId (failed ^. Activation.workflowId)
-                                      , workflowAlreadyStartedWorkflowType = WorkflowType (failed ^. Activation.workflowType)
+                                      { workflowAlreadyStartedWorkflowId = WorkflowId (fromMaybe "" failed.workflowId)
+                                      , workflowAlreadyStartedWorkflowType = WorkflowType (fromMaybe "" failed.workflowType)
                                       }
                           in ( ActivationResult failure existing.startHandle
                                 : ActivationResult failure existing.firstExecutionRunId
@@ -802,93 +824,93 @@ applyResolutions rs = do
                              )
                         _ ->
                           ( ActivationResult
-                              (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (failed ^. Activation.cause)))
+                              (ThrowInternal $ toException $ RuntimeError ("Unknown child workflow start failure: " <> show (fromMaybe StartChildWorkflowExecutionFailedCause'StartChildWorkflowExecutionFailedCauseUnspecified failed.cause)))
                               existing.startHandle
                               : completions
                           , updatedMaps
                           )
-                  ResolveChildWorkflowExecutionStart'Cancelled _cancelled ->
+                  ResolveChildWorkflowExecutionStart'Status'Cancelled _cancelled ->
                     ( ActivationResult (Ok ()) existing.startHandle
                         : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.firstExecutionRunId
                         : ActivationResult (ThrowWorkflow $ toException ChildWorkflowCancelled) existing.resultHandle
                         : completions
                     , sequenceMaps'
-                        { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                        { childWorkflows = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.childWorkflows
                         }
                     )
           PendingWorkflowCancellation _ -> (ActivationResult (Ok ()) inst.workflowCancellationVar : completions, sequenceMaps')
           PendingJobResolveChildWorkflowExecution msg -> do
-            let existingHandle = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+            let existingHandle = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.childWorkflows
             case existingHandle of
               Nothing -> E.throw $ RuntimeError "Child Workflow Execution not found"
               Just (SomeChildWorkflowHandle h) ->
                 ( ActivationResult (Ok msg) h.resultHandle : completions
                 , sequenceMaps'
-                    { childWorkflows = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.childWorkflows
+                    { childWorkflows = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.childWorkflows
                     }
                 )
           PendingJobResolveSignalExternalWorkflow msg -> do
-            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
+            let mresVar = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.externalSignals
             case mresVar of
               Nothing -> E.throw $ RuntimeError "External Signal IVar for sequence not found"
               Just resVar ->
                 ( ActivationResult (Ok msg) resVar : completions
                 , sequenceMaps'
-                    { externalSignals = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalSignals
+                    { externalSignals = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.externalSignals
                     }
                 )
           PendingJobResolveRequestCancelExternalWorkflow msg -> do
-            let mresVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
+            let mresVar = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.externalCancels
             case mresVar of
               Nothing -> E.throw $ RuntimeError "External Cancel IVar for sequence not found"
               Just resVar ->
                 ( ActivationResult (Ok msg) resVar : completions
                 , sequenceMaps'
-                    { externalCancels = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.externalCancels
+                    { externalCancels = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.externalCancels
                     }
                 )
           PendingJobFireTimer msg -> do
-            let existingIVar = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
+            let existingIVar = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.timers
             case existingIVar of
               Nothing -> E.throw $ RuntimeError "Timer not found"
               Just existing ->
                 ( ActivationResult (Ok ()) existing : completions
                 , sequenceMaps'
-                    { timers = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.timers
+                    { timers = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.timers
                     }
                 )
           PendingJobResolveNexusOperationStart msg -> do
-            let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+            let existingHandles = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.nexusOperations
             case existingHandles of
               Nothing -> E.throw $ RuntimeError "Nexus operation not found for start resolution"
-              Just handles -> case msg ^. Activation.maybe'status of
+              Just handles -> case msg.status of
                 Nothing -> E.throw $ RuntimeError "Nexus operation start had no status"
-                Just (ResolveNexusOperationStart'OperationToken token) ->
+                Just (ResolveNexusOperationStart'Status'OperationToken token) ->
                   ( ActivationResult (Ok (NexusOperationStartedAsync token)) handles.nexusStartHandle : completions
                   , sequenceMaps'
                   )
-                Just (ResolveNexusOperationStart'StartedSync _) ->
+                Just (ResolveNexusOperationStart'Status'StartedSync _) ->
                   ( ActivationResult (Ok NexusOperationStartedSync) handles.nexusStartHandle : completions
                   , sequenceMaps'
                   )
-                Just (ResolveNexusOperationStart'Failed failure) ->
-                  ( ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusStartHandle
-                      : ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (failure ^. Activation.message)) handles.nexusResultHandle
+                Just (ResolveNexusOperationStart'Status'Failed failure) ->
+                  ( ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (fromMaybe "" failure.message)) handles.nexusStartHandle
+                      : ActivationResult (ThrowWorkflow $ toException $ NexusOperationStartFailed (fromMaybe "" failure.message)) handles.nexusResultHandle
                       : completions
                   , sequenceMaps'
-                      { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                      { nexusOperations = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.nexusOperations
                       }
                   )
           PendingJobResolveNexusOperation msg -> do
-            let existingHandles = HashMap.lookup (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+            let existingHandles = HashMap.lookup (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.nexusOperations
             case existingHandles of
               Nothing -> E.throw $ RuntimeError "Nexus operation not found for result resolution"
-              Just handles -> case msg ^. Activation.maybe'result of
+              Just handles -> case msg.result of
                 Nothing -> E.throw $ RuntimeError "Nexus operation resolution had no result"
                 Just result ->
                   ( ActivationResult (Ok result) handles.nexusResultHandle : completions
                   , sequenceMaps'
-                      { nexusOperations = HashMap.delete (msg ^. Activation.seq . to Sequence) sequenceMaps'.nexusOperations
+                      { nexusOperations = HashMap.delete (Sequence (fromMaybe 0 msg.seq)) sequenceMaps'.nexusOperations
                       }
                   )
 
@@ -905,8 +927,9 @@ convertExitVariantToCommand variant = do
     WorkflowExitSuccess result -> do
       result' <- liftIO $ payloadProcessorEncode processor result
       pure $
-        defMessage
-          & Command.completeWorkflowExecution .~ (defMessage & Command.result .~ convertToProtoPayload result')
+        workflowCommand $
+          Command.WorkflowCommand'Variant'CompleteWorkflowExecution $
+            Command.CompleteWorkflowExecution (Just $ convertToProtoPayload result') []
     WorkflowExitContinuedAsNew (ContinueAsNewException {..}) -> do
       i <- readIORef inst.workflowInstanceInfo
       searchAttrs <-
@@ -919,56 +942,57 @@ convertExitVariantToCommand variant = do
       args <- processorEncodePayloads processor continueAsNewArguments
       memo <- processorEncodePayloads processor continueAsNewOptions.memo
       pure $
-        defMessage
-          & Command.continueAsNewWorkflowExecution
-            .~ ( defMessage
-                  & Command.workflowType .~ rawWorkflowType continueAsNewWorkflowType
-                  & Command.taskQueue .~ maybe "" rawTaskQueue continueAsNewOptions.taskQueue
-                  & Command.vec'arguments .~ fmap convertToProtoPayload args
-                  & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> continueAsNewOptions.retryPolicy)
-                  & Command.searchAttributes .~ searchAttrs
-                  & Command.headers .~ fmap convertToProtoPayload continueAsNewOptions.headers
-                  & Command.memo .~ fmap convertToProtoPayload memo
-                  & Command.maybe'workflowTaskTimeout .~ (durationToProto <$> continueAsNewOptions.taskTimeout)
-                  & Command.maybe'workflowRunTimeout .~ (durationToProto <$> continueAsNewOptions.runTimeout)
-               )
+        workflowCommand $
+          Command.WorkflowCommand'Variant'ContinueAsNewWorkflowExecution $
+            Command.ContinueAsNewWorkflowExecution
+              (Just $ rawWorkflowType continueAsNewWorkflowType)
+              (fmap rawTaskQueue continueAsNewOptions.taskQueue)
+              (fmap convertToProtoPayload args)
+              (durationToProto <$> continueAsNewOptions.runTimeout)
+              (durationToProto <$> continueAsNewOptions.taskTimeout)
+              (mapPayloadEntries Command.ContinueAsNewWorkflowExecution'MemoEntry (fmap convertToProtoPayload memo))
+              (mapPayloadEntries Command.ContinueAsNewWorkflowExecution'HeadersEntry (fmap convertToProtoPayload continueAsNewOptions.headers))
+              (mapPayloadEntries Command.ContinueAsNewWorkflowExecution'SearchAttributesEntry searchAttrs)
+              (retryPolicyToProto <$> continueAsNewOptions.retryPolicy)
+              Nothing
+              []
     WorkflowExitCancelled WorkflowCancelRequested -> do
-      pure $ defMessage & Command.cancelWorkflowExecution .~ defMessage
+      pure $ workflowCommand $ Command.WorkflowCommand'Variant'CancelWorkflowExecution $ Command.CancelWorkflowExecution []
     WorkflowExitFailed e | Just (actFailure :: ActivityFailure) <- fromException e -> do
       let appFailure = actFailure.cause
+          cause =
+            FailureMsg.Failure
+              (Just appFailure.message)
+              (Just "hs-temporal-sdk")
+              (Just appFailure.stack)
+              Nothing
+              Nothing
+              ( Just $
+                  FailureMsg.Failure'FailureInfo'ApplicationFailureInfo $
+                    FailureMsg.ApplicationFailureInfo (Just $ Err.type' appFailure) (Just $ Err.nonRetryable appFailure) Nothing Nothing Nothing []
+              )
+              []
           enrichedApplicationFailure =
-            defMessage
-              & F.message .~ actFailure.message
-              & F.source .~ "hs-temporal-sdk"
-              & F.activityFailureInfo .~ actFailure.original
-              & F.stackTrace .~ actFailure.stack
-              & F.cause
-                .~ ( defMessage
-                      & F.message .~ appFailure.message
-                      & F.source .~ "hs-temporal-sdk"
-                      & F.stackTrace .~ appFailure.stack
-                      & F.applicationFailureInfo
-                        .~ ( defMessage
-                              & F.type' .~ Err.type' appFailure
-                              & F.nonRetryable .~ Err.nonRetryable appFailure
-                           )
-                   )
+            FailureMsg.Failure
+              (Just actFailure.message)
+              (Just "hs-temporal-sdk")
+              (Just actFailure.stack)
+              Nothing
+              (Just cause)
+              (Just $ FailureMsg.Failure'FailureInfo'ActivityFailureInfo actFailure.original)
+              []
       pure $
-        defMessage
-          & Command.failWorkflowExecution
-            .~ ( defMessage
-                  & Command.failure .~ enrichedApplicationFailure
-               )
+        workflowCommand $
+          Command.WorkflowCommand'Variant'FailWorkflowExecution $
+            Command.FailWorkflowExecution (Just enrichedApplicationFailure) []
     WorkflowExitFailed e -> do
       w <- ask
       let appFailure = mkApplicationFailure e w.errorConverters
           enrichedApplicationFailure = applicationFailureToFailureProto appFailure
       pure $
-        defMessage
-          & Command.failWorkflowExecution
-            .~ ( defMessage
-                  & Command.failure .~ enrichedApplicationFailure
-               )
+        workflowCommand $
+          Command.WorkflowCommand'Variant'FailWorkflowExecution $
+            Command.FailWorkflowExecution (Just enrichedApplicationFailure) []
 
 
 -- Note: this is intended to exclusively handle top-level workflow execution.

@@ -1,39 +1,31 @@
-{- This file was auto-generated from health/v1/health.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists -Wno-name-shadowing #-}
+
 module Proto.Health.V1.Health_Fields where
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-service ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "service" a) =>
-  Lens.Family2.LensLike' f s a
-service = Data.ProtoLens.Field.field @"service"
-status ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "status" a) =>
-  Lens.Family2.LensLike' f s a
-status = Data.ProtoLens.Field.field @"status"
+
+import Proto.Compat.HasField ()
+import Proto.Lens qualified as Lens
+
+check = Lens.field @"check"
+maybe'check = Lens.field @"check"
+vec'check = Lens.field @"check"
+checkHandler = Lens.field @"checkHandler"
+maybe'checkHandler = Lens.field @"checkHandler"
+vec'checkHandler = Lens.field @"checkHandler"
+service = Lens.field @"service"
+maybe'service = Lens.field @"service"
+vec'service = Lens.field @"service"
+status = Lens.field @"status"
+maybe'status = Lens.field @"status"
+vec'status = Lens.field @"status"
+watch = Lens.field @"watch"
+maybe'watch = Lens.field @"watch"
+vec'watch = Lens.field @"watch"
+watchHandler = Lens.field @"watchHandler"
+maybe'watchHandler = Lens.field @"watchHandler"
+vec'watchHandler = Lens.field @"watchHandler"

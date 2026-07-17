@@ -1,64 +1,25 @@
-{- This file was auto-generated from temporal/api/sdk/v1/task_complete_metadata.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists -Wno-name-shadowing #-}
+
 module Proto.Temporal.Api.Sdk.V1.TaskCompleteMetadata_Fields where
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-coreUsedFlags ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "coreUsedFlags" a) =>
-  Lens.Family2.LensLike' f s a
-coreUsedFlags = Data.ProtoLens.Field.field @"coreUsedFlags"
-langUsedFlags ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "langUsedFlags" a) =>
-  Lens.Family2.LensLike' f s a
-langUsedFlags = Data.ProtoLens.Field.field @"langUsedFlags"
-sdkName ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "sdkName" a) =>
-  Lens.Family2.LensLike' f s a
-sdkName = Data.ProtoLens.Field.field @"sdkName"
-sdkVersion ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "sdkVersion" a) =>
-  Lens.Family2.LensLike' f s a
-sdkVersion = Data.ProtoLens.Field.field @"sdkVersion"
-vec'coreUsedFlags ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'coreUsedFlags" a) =>
-  Lens.Family2.LensLike' f s a
-vec'coreUsedFlags = Data.ProtoLens.Field.field @"vec'coreUsedFlags"
-vec'langUsedFlags ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'langUsedFlags" a) =>
-  Lens.Family2.LensLike' f s a
-vec'langUsedFlags = Data.ProtoLens.Field.field @"vec'langUsedFlags"
+
+import Proto.Compat.HasField ()
+import Proto.Lens qualified as Lens
+
+coreUsedFlags = Lens.field @"coreUsedFlags"
+maybe'coreUsedFlags = Lens.field @"coreUsedFlags"
+vec'coreUsedFlags = Lens.field @"coreUsedFlags"
+langUsedFlags = Lens.field @"langUsedFlags"
+maybe'langUsedFlags = Lens.field @"langUsedFlags"
+vec'langUsedFlags = Lens.field @"langUsedFlags"
+sdkName = Lens.field @"sdkName"
+maybe'sdkName = Lens.field @"sdkName"
+vec'sdkName = Lens.field @"sdkName"
+sdkVersion = Lens.field @"sdkVersion"
+maybe'sdkVersion = Lens.field @"sdkVersion"
+vec'sdkVersion = Lens.field @"sdkVersion"

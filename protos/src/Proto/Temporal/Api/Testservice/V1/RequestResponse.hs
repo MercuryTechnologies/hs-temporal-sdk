@@ -1,884 +1,633 @@
-{- This file was auto-generated from temporal/api/testservice/v1/request_response.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Testservice.V1.RequestResponse (
-        GetCurrentTimeResponse(), LockTimeSkippingRequest(),
-        LockTimeSkippingResponse(), SleepRequest(), SleepResponse(),
-        SleepUntilRequest(), UnlockTimeSkippingRequest(),
-        UnlockTimeSkippingResponse()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Timestamp
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields.time' @:: Lens' GetCurrentTimeResponse Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields.maybe'time' @:: Lens' GetCurrentTimeResponse (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data GetCurrentTimeResponse
-  = GetCurrentTimeResponse'_constructor {_GetCurrentTimeResponse'time :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                         _GetCurrentTimeResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show GetCurrentTimeResponse where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField GetCurrentTimeResponse "time" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _GetCurrentTimeResponse'time
-           (\ x__ y__ -> x__ {_GetCurrentTimeResponse'time = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField GetCurrentTimeResponse "maybe'time" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _GetCurrentTimeResponse'time
-           (\ x__ y__ -> x__ {_GetCurrentTimeResponse'time = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message GetCurrentTimeResponse where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.testservice.v1.GetCurrentTimeResponse"
-  packedMessageDescriptor _
-    = "\n\
-      \\SYNGetCurrentTimeResponse\DC2.\n\
-      \\EOTtime\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\EOTtime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        time__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'time")) ::
-              Data.ProtoLens.FieldDescriptor GetCurrentTimeResponse
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, time__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _GetCurrentTimeResponse'_unknownFields
-        (\ x__ y__ -> x__ {_GetCurrentTimeResponse'_unknownFields = y__})
-  defMessage
-    = GetCurrentTimeResponse'_constructor
-        {_GetCurrentTimeResponse'time = Prelude.Nothing,
-         _GetCurrentTimeResponse'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          GetCurrentTimeResponse
-          -> Data.ProtoLens.Encoding.Bytes.Parser GetCurrentTimeResponse
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "time"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"time") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "GetCurrentTimeResponse"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'time") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData GetCurrentTimeResponse where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_GetCurrentTimeResponse'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_GetCurrentTimeResponse'time x__) ())
-{- | Fields :
-      -}
-data LockTimeSkippingRequest
-  = LockTimeSkippingRequest'_constructor {_LockTimeSkippingRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show LockTimeSkippingRequest where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message LockTimeSkippingRequest where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.testservice.v1.LockTimeSkippingRequest"
-  packedMessageDescriptor _
-    = "\n\
-      \\ETBLockTimeSkippingRequest"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _LockTimeSkippingRequest'_unknownFields
-        (\ x__ y__ -> x__ {_LockTimeSkippingRequest'_unknownFields = y__})
-  defMessage
-    = LockTimeSkippingRequest'_constructor
-        {_LockTimeSkippingRequest'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          LockTimeSkippingRequest
-          -> Data.ProtoLens.Encoding.Bytes.Parser LockTimeSkippingRequest
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "LockTimeSkippingRequest"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData LockTimeSkippingRequest where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_LockTimeSkippingRequest'_unknownFields x__) ()
-{- | Fields :
-      -}
-data LockTimeSkippingResponse
-  = LockTimeSkippingResponse'_constructor {_LockTimeSkippingResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show LockTimeSkippingResponse where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message LockTimeSkippingResponse where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.testservice.v1.LockTimeSkippingResponse"
-  packedMessageDescriptor _
-    = "\n\
-      \\CANLockTimeSkippingResponse"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _LockTimeSkippingResponse'_unknownFields
-        (\ x__ y__ -> x__ {_LockTimeSkippingResponse'_unknownFields = y__})
-  defMessage
-    = LockTimeSkippingResponse'_constructor
-        {_LockTimeSkippingResponse'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          LockTimeSkippingResponse
-          -> Data.ProtoLens.Encoding.Bytes.Parser LockTimeSkippingResponse
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "LockTimeSkippingResponse"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData LockTimeSkippingResponse where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_LockTimeSkippingResponse'_unknownFields x__) ()
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields.duration' @:: Lens' SleepRequest Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields.maybe'duration' @:: Lens' SleepRequest (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@ -}
-data SleepRequest
-  = SleepRequest'_constructor {_SleepRequest'duration :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                               _SleepRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show SleepRequest where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField SleepRequest "duration" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SleepRequest'duration
-           (\ x__ y__ -> x__ {_SleepRequest'duration = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField SleepRequest "maybe'duration" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SleepRequest'duration
-           (\ x__ y__ -> x__ {_SleepRequest'duration = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message SleepRequest where
-  messageName _
-    = Data.Text.pack "temporal.api.testservice.v1.SleepRequest"
-  packedMessageDescriptor _
-    = "\n\
-      \\fSleepRequest\DC25\n\
-      \\bduration\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bduration"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        duration__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "duration"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'duration")) ::
-              Data.ProtoLens.FieldDescriptor SleepRequest
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, duration__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SleepRequest'_unknownFields
-        (\ x__ y__ -> x__ {_SleepRequest'_unknownFields = y__})
-  defMessage
-    = SleepRequest'_constructor
-        {_SleepRequest'duration = Prelude.Nothing,
-         _SleepRequest'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SleepRequest -> Data.ProtoLens.Encoding.Bytes.Parser SleepRequest
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "duration"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"duration") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SleepRequest"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'duration") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData SleepRequest where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SleepRequest'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_SleepRequest'duration x__) ())
-{- | Fields :
-      -}
-data SleepResponse
-  = SleepResponse'_constructor {_SleepResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show SleepResponse where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message SleepResponse where
-  messageName _
-    = Data.Text.pack "temporal.api.testservice.v1.SleepResponse"
-  packedMessageDescriptor _
-    = "\n\
-      \\rSleepResponse"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SleepResponse'_unknownFields
-        (\ x__ y__ -> x__ {_SleepResponse'_unknownFields = y__})
-  defMessage
-    = SleepResponse'_constructor {_SleepResponse'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SleepResponse -> Data.ProtoLens.Encoding.Bytes.Parser SleepResponse
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SleepResponse"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData SleepResponse where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq (_SleepResponse'_unknownFields x__) ()
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields.timestamp' @:: Lens' SleepUntilRequest Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields.maybe'timestamp' @:: Lens' SleepUntilRequest (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data SleepUntilRequest
-  = SleepUntilRequest'_constructor {_SleepUntilRequest'timestamp :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                    _SleepUntilRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show SleepUntilRequest where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField SleepUntilRequest "timestamp" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SleepUntilRequest'timestamp
-           (\ x__ y__ -> x__ {_SleepUntilRequest'timestamp = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField SleepUntilRequest "maybe'timestamp" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SleepUntilRequest'timestamp
-           (\ x__ y__ -> x__ {_SleepUntilRequest'timestamp = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message SleepUntilRequest where
-  messageName _
-    = Data.Text.pack "temporal.api.testservice.v1.SleepUntilRequest"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1SleepUntilRequest\DC28\n\
-      \\ttimestamp\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestamp"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        timestamp__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "timestamp"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'timestamp")) ::
-              Data.ProtoLens.FieldDescriptor SleepUntilRequest
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, timestamp__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SleepUntilRequest'_unknownFields
-        (\ x__ y__ -> x__ {_SleepUntilRequest'_unknownFields = y__})
-  defMessage
-    = SleepUntilRequest'_constructor
-        {_SleepUntilRequest'timestamp = Prelude.Nothing,
-         _SleepUntilRequest'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SleepUntilRequest
-          -> Data.ProtoLens.Encoding.Bytes.Parser SleepUntilRequest
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "timestamp"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"timestamp") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SleepUntilRequest"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'timestamp") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData SleepUntilRequest where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SleepUntilRequest'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_SleepUntilRequest'timestamp x__) ())
-{- | Fields :
-      -}
-data UnlockTimeSkippingRequest
-  = UnlockTimeSkippingRequest'_constructor {_UnlockTimeSkippingRequest'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show UnlockTimeSkippingRequest where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message UnlockTimeSkippingRequest where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.testservice.v1.UnlockTimeSkippingRequest"
-  packedMessageDescriptor _
-    = "\n\
-      \\EMUnlockTimeSkippingRequest"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _UnlockTimeSkippingRequest'_unknownFields
-        (\ x__ y__
-           -> x__ {_UnlockTimeSkippingRequest'_unknownFields = y__})
-  defMessage
-    = UnlockTimeSkippingRequest'_constructor
-        {_UnlockTimeSkippingRequest'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          UnlockTimeSkippingRequest
-          -> Data.ProtoLens.Encoding.Bytes.Parser UnlockTimeSkippingRequest
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "UnlockTimeSkippingRequest"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData UnlockTimeSkippingRequest where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_UnlockTimeSkippingRequest'_unknownFields x__) ()
-{- | Fields :
-      -}
-data UnlockTimeSkippingResponse
-  = UnlockTimeSkippingResponse'_constructor {_UnlockTimeSkippingResponse'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show UnlockTimeSkippingResponse where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message UnlockTimeSkippingResponse where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.testservice.v1.UnlockTimeSkippingResponse"
-  packedMessageDescriptor _
-    = "\n\
-      \\SUBUnlockTimeSkippingResponse"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _UnlockTimeSkippingResponse'_unknownFields
-        (\ x__ y__
-           -> x__ {_UnlockTimeSkippingResponse'_unknownFields = y__})
-  defMessage
-    = UnlockTimeSkippingResponse'_constructor
-        {_UnlockTimeSkippingResponse'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          UnlockTimeSkippingResponse
-          -> Data.ProtoLens.Encoding.Bytes.Parser UnlockTimeSkippingResponse
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "UnlockTimeSkippingResponse"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData UnlockTimeSkippingResponse where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_UnlockTimeSkippingResponse'_unknownFields x__) ()
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \2temporal/api/testservice/v1/request_response.proto\DC2\ESCtemporal.api.testservice.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\"\EM\n\
-    \\ETBLockTimeSkippingRequest\"\SUB\n\
-    \\CANLockTimeSkippingResponse\"\ESC\n\
-    \\EMUnlockTimeSkippingRequest\"\FS\n\
-    \\SUBUnlockTimeSkippingResponse\"M\n\
-    \\DC1SleepUntilRequest\DC28\n\
-    \\ttimestamp\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\ttimestamp\"E\n\
-    \\fSleepRequest\DC25\n\
-    \\bduration\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\bduration\"\SI\n\
-    \\rSleepResponse\"H\n\
-    \\SYNGetCurrentTimeResponse\DC2.\n\
-    \\EOTtime\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\EOTtimeB\170\SOH\n\
-    \\RSio.temporal.api.testservice.v1B\DC4RequestResponseProtoP\SOHZ-go.temporal.io/api/testservice/v1;testservice\170\STX\GSTemporalio.Api.TestService.V1\234\STX Temporalio::Api::TestService::V1J\255\f\n\
-    \\ACK\DC2\EOT\SYN\NUL=\SOH\n\
-    \\241\b\n\
-    \\SOH\f\DC2\ETX\SYN\NUL\DC22\230\b The MIT License\n\
-    \\n\
-    \ Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.\n\
-    \\n\
-    \ Permission is hereby granted, free of charge, to any person obtaining a copy\n\
-    \ of this software and associated documentation files (the \"Software\"), to deal\n\
-    \ in the Software without restriction, including without limitation the rights\n\
-    \ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n\
-    \ copies of the Software, and to permit persons to whom the Software is\n\
-    \ furnished to do so, subject to the following conditions:\n\
-    \\n\
-    \ The above copyright notice and this permission notice shall be included in\n\
-    \ all copies or substantial portions of the Software.\n\
-    \\n\
-    \ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n\
-    \ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n\
-    \ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n\
-    \ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n\
-    \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n\
-    \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n\
-    \ THE SOFTWARE.\n\
-    \\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\CAN\NUL$\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\SUB\NULD\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\SUB\NULD\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ESC\NUL7\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ESC\NUL7\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\FS\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\FS\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\GS\NUL5\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\GS\NUL5\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\RS\NUL9\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\RS\NUL9\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\US\NUL:\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\US\NUL:\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX!\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\"\NUL)\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT$\NUL%\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX$\b\US\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT'\NUL(\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX'\b \n\
-    \\n\
-    \\n\
-    \\STX\EOT\STX\DC2\EOT*\NUL+\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX*\b!\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ETX\DC2\EOT-\NUL.\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX-\b\"\n\
-    \\n\
-    \\n\
-    \\STX\EOT\EOT\DC2\EOT0\NUL2\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX0\b\EM\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX1\EOT,\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX1\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX1\RS'\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX1*+\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ENQ\DC2\EOT4\NUL6\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX4\b\DC4\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX5\EOT*\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX5\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX5\GS%\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX5()\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ACK\DC2\EOT8\NUL9\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX8\b\NAK\n\
-    \\n\
-    \\n\
-    \\STX\EOT\a\DC2\EOT;\NUL=\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX;\b\RS\n\
-    \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX<\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETX<\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX<\RS\"\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX<%&b\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.testservice.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Testservice.V1.RequestResponse where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x32\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2f\x76\x31\x2f\x72\x65\x71\x75\x65\x73\x74\x5f\x72\x65\x73\x70\x6f\x6e\x73\x65\x2e\x70\x72\x6f\x74\x6f\x12\x1b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x22\x19\x0a\x17\x4c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x71\x75\x65\x73\x74\x22\x1a\x0a\x18\x4c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x73\x70\x6f\x6e\x73\x65\x22\x1b\x0a\x19\x55\x6e\x6c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x71\x75\x65\x73\x74\x22\x1c\x0a\x1a\x55\x6e\x6c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x73\x70\x6f\x6e\x73\x65\x22\x41\x0a\x11\x53\x6c\x65\x65\x70\x55\x6e\x74\x69\x6c\x52\x65\x71\x75\x65\x73\x74\x12\x2c\x0a\x09\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x18\x01\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\x3a\x0a\x0c\x53\x6c\x65\x65\x70\x52\x65\x71\x75\x65\x73\x74\x12\x2a\x0a\x08\x64\x75\x72\x61\x74\x69\x6f\x6e\x18\x01\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x22\x0f\x0a\x0d\x53\x6c\x65\x65\x70\x52\x65\x73\x70\x6f\x6e\x73\x65\x22\x41\x0a\x16\x47\x65\x74\x43\x75\x72\x72\x65\x6e\x74\x54\x69\x6d\x65\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x27\x0a\x04\x74\x69\x6d\x65\x18\x01\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data LockTimeSkippingRequest = LockTimeSkippingRequest
+  { lockTimeSkippingRequestUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLockTimeSkippingRequest :: LockTimeSkippingRequest
+defaultLockTimeSkippingRequest = LockTimeSkippingRequest
+  { lockTimeSkippingRequestUnknownFields = []
+  }
+
+instance MessageEncode LockTimeSkippingRequest where
+  buildMessage msg =
+    encodeUnknownFields msg.lockTimeSkippingRequestUnknownFields
+
+instance MessageSize LockTimeSkippingRequest where
+  messageSize msg =
+    unknownFieldsSize msg.lockTimeSkippingRequestUnknownFields
+
+instance MessageDecode LockTimeSkippingRequest where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (LockTimeSkippingRequest {lockTimeSkippingRequestUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage LockTimeSkippingRequest where
+  protoMessageName _ = "temporal.api.testservice.v1.LockTimeSkippingRequest"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultLockTimeSkippingRequest
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage LockTimeSkippingRequest
+
+instance Aeson.ToJSON LockTimeSkippingRequest where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON LockTimeSkippingRequest where
+  parseJSON _ = pure defaultLockTimeSkippingRequest
+
+instance Hashable LockTimeSkippingRequest where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions LockTimeSkippingRequest where
+  messageUnknownFields msg = msg.lockTimeSkippingRequestUnknownFields
+  setMessageUnknownFields !ufs msg = msg { lockTimeSkippingRequestUnknownFields = ufs }
+
+instance Semigroup LockTimeSkippingRequest where
+  a <> b = LockTimeSkippingRequest
+    { lockTimeSkippingRequestUnknownFields = a.lockTimeSkippingRequestUnknownFields <> b.lockTimeSkippingRequestUnknownFields
+    }
+
+instance Monoid LockTimeSkippingRequest where
+  mempty = defaultLockTimeSkippingRequest
+
+data LockTimeSkippingResponse = LockTimeSkippingResponse
+  { lockTimeSkippingResponseUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLockTimeSkippingResponse :: LockTimeSkippingResponse
+defaultLockTimeSkippingResponse = LockTimeSkippingResponse
+  { lockTimeSkippingResponseUnknownFields = []
+  }
+
+instance MessageEncode LockTimeSkippingResponse where
+  buildMessage msg =
+    encodeUnknownFields msg.lockTimeSkippingResponseUnknownFields
+
+instance MessageSize LockTimeSkippingResponse where
+  messageSize msg =
+    unknownFieldsSize msg.lockTimeSkippingResponseUnknownFields
+
+instance MessageDecode LockTimeSkippingResponse where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (LockTimeSkippingResponse {lockTimeSkippingResponseUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage LockTimeSkippingResponse where
+  protoMessageName _ = "temporal.api.testservice.v1.LockTimeSkippingResponse"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultLockTimeSkippingResponse
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage LockTimeSkippingResponse
+
+instance Aeson.ToJSON LockTimeSkippingResponse where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON LockTimeSkippingResponse where
+  parseJSON _ = pure defaultLockTimeSkippingResponse
+
+instance Hashable LockTimeSkippingResponse where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions LockTimeSkippingResponse where
+  messageUnknownFields msg = msg.lockTimeSkippingResponseUnknownFields
+  setMessageUnknownFields !ufs msg = msg { lockTimeSkippingResponseUnknownFields = ufs }
+
+instance Semigroup LockTimeSkippingResponse where
+  a <> b = LockTimeSkippingResponse
+    { lockTimeSkippingResponseUnknownFields = a.lockTimeSkippingResponseUnknownFields <> b.lockTimeSkippingResponseUnknownFields
+    }
+
+instance Monoid LockTimeSkippingResponse where
+  mempty = defaultLockTimeSkippingResponse
+
+data UnlockTimeSkippingRequest = UnlockTimeSkippingRequest
+  { unlockTimeSkippingRequestUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultUnlockTimeSkippingRequest :: UnlockTimeSkippingRequest
+defaultUnlockTimeSkippingRequest = UnlockTimeSkippingRequest
+  { unlockTimeSkippingRequestUnknownFields = []
+  }
+
+instance MessageEncode UnlockTimeSkippingRequest where
+  buildMessage msg =
+    encodeUnknownFields msg.unlockTimeSkippingRequestUnknownFields
+
+instance MessageSize UnlockTimeSkippingRequest where
+  messageSize msg =
+    unknownFieldsSize msg.unlockTimeSkippingRequestUnknownFields
+
+instance MessageDecode UnlockTimeSkippingRequest where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (UnlockTimeSkippingRequest {unlockTimeSkippingRequestUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage UnlockTimeSkippingRequest where
+  protoMessageName _ = "temporal.api.testservice.v1.UnlockTimeSkippingRequest"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultUnlockTimeSkippingRequest
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage UnlockTimeSkippingRequest
+
+instance Aeson.ToJSON UnlockTimeSkippingRequest where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON UnlockTimeSkippingRequest where
+  parseJSON _ = pure defaultUnlockTimeSkippingRequest
+
+instance Hashable UnlockTimeSkippingRequest where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions UnlockTimeSkippingRequest where
+  messageUnknownFields msg = msg.unlockTimeSkippingRequestUnknownFields
+  setMessageUnknownFields !ufs msg = msg { unlockTimeSkippingRequestUnknownFields = ufs }
+
+instance Semigroup UnlockTimeSkippingRequest where
+  a <> b = UnlockTimeSkippingRequest
+    { unlockTimeSkippingRequestUnknownFields = a.unlockTimeSkippingRequestUnknownFields <> b.unlockTimeSkippingRequestUnknownFields
+    }
+
+instance Monoid UnlockTimeSkippingRequest where
+  mempty = defaultUnlockTimeSkippingRequest
+
+data UnlockTimeSkippingResponse = UnlockTimeSkippingResponse
+  { unlockTimeSkippingResponseUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultUnlockTimeSkippingResponse :: UnlockTimeSkippingResponse
+defaultUnlockTimeSkippingResponse = UnlockTimeSkippingResponse
+  { unlockTimeSkippingResponseUnknownFields = []
+  }
+
+instance MessageEncode UnlockTimeSkippingResponse where
+  buildMessage msg =
+    encodeUnknownFields msg.unlockTimeSkippingResponseUnknownFields
+
+instance MessageSize UnlockTimeSkippingResponse where
+  messageSize msg =
+    unknownFieldsSize msg.unlockTimeSkippingResponseUnknownFields
+
+instance MessageDecode UnlockTimeSkippingResponse where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (UnlockTimeSkippingResponse {unlockTimeSkippingResponseUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage UnlockTimeSkippingResponse where
+  protoMessageName _ = "temporal.api.testservice.v1.UnlockTimeSkippingResponse"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultUnlockTimeSkippingResponse
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage UnlockTimeSkippingResponse
+
+instance Aeson.ToJSON UnlockTimeSkippingResponse where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON UnlockTimeSkippingResponse where
+  parseJSON _ = pure defaultUnlockTimeSkippingResponse
+
+instance Hashable UnlockTimeSkippingResponse where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions UnlockTimeSkippingResponse where
+  messageUnknownFields msg = msg.unlockTimeSkippingResponseUnknownFields
+  setMessageUnknownFields !ufs msg = msg { unlockTimeSkippingResponseUnknownFields = ufs }
+
+instance Semigroup UnlockTimeSkippingResponse where
+  a <> b = UnlockTimeSkippingResponse
+    { unlockTimeSkippingResponseUnknownFields = a.unlockTimeSkippingResponseUnknownFields <> b.unlockTimeSkippingResponseUnknownFields
+    }
+
+instance Monoid UnlockTimeSkippingResponse where
+  mempty = defaultUnlockTimeSkippingResponse
+
+data SleepUntilRequest = SleepUntilRequest
+  { timestamp :: !(Maybe PB_Timestamp.Timestamp)
+  , sleepUntilRequestUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultSleepUntilRequest :: SleepUntilRequest
+defaultSleepUntilRequest = SleepUntilRequest
+  { timestamp = Nothing
+  , sleepUntilRequestUnknownFields = []
+  }
+
+instance MessageEncode SleepUntilRequest where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.timestamp)
+    <> encodeUnknownFields msg.sleepUntilRequestUnknownFields
+
+instance MessageSize SleepUntilRequest where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.timestamp)
+    + unknownFieldsSize msg.sleepUntilRequestUnknownFields
+
+instance MessageDecode SleepUntilRequest where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (SleepUntilRequest {timestamp = acc_0, sleepUntilRequestUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage SleepUntilRequest where
+  protoMessageName _ = "temporal.api.testservice.v1.SleepUntilRequest"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultSleepUntilRequest
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "timestamp"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: SleepUntilRequest) -> m.timestamp
+        , fdSet = \v (m :: SleepUntilRequest) -> (m { timestamp = v } :: SleepUntilRequest)
+        })
+    ]
+
+instance IsMessage SleepUntilRequest
+
+instance Aeson.ToJSON SleepUntilRequest where
+  toJSON msg = jsonObject
+      [ "timestamp" .=: msg.timestamp
+
+      ]
+
+instance Aeson.FromJSON SleepUntilRequest where
+  parseJSON = Aeson.withObject "SleepUntilRequest" $ \obj -> do
+    fld_timestamp <- parseFieldMaybe obj "timestamp"
+    pure (defaultSleepUntilRequest
+      { timestamp = maybe (defaultSleepUntilRequest.timestamp) Prelude.id fld_timestamp
+      , sleepUntilRequestUnknownFields = []
+      } :: SleepUntilRequest)
+
+instance Hashable SleepUntilRequest where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.timestamp
+
+instance Proto.Extension.HasExtensions SleepUntilRequest where
+  messageUnknownFields msg = msg.sleepUntilRequestUnknownFields
+  setMessageUnknownFields !ufs msg = msg { sleepUntilRequestUnknownFields = ufs }
+
+instance Semigroup SleepUntilRequest where
+  a <> b = SleepUntilRequest
+    { timestamp = case b.timestamp of { Nothing -> a.timestamp; x -> x }
+    , sleepUntilRequestUnknownFields = a.sleepUntilRequestUnknownFields <> b.sleepUntilRequestUnknownFields
+    }
+
+instance Monoid SleepUntilRequest where
+  mempty = defaultSleepUntilRequest
+
+data SleepRequest = SleepRequest
+  { duration :: !(Maybe PB_Duration.Duration)
+  , sleepRequestUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultSleepRequest :: SleepRequest
+defaultSleepRequest = SleepRequest
+  { duration = Nothing
+  , sleepRequestUnknownFields = []
+  }
+
+instance MessageEncode SleepRequest where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.duration)
+    <> encodeUnknownFields msg.sleepRequestUnknownFields
+
+instance MessageSize SleepRequest where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.duration)
+    + unknownFieldsSize msg.sleepRequestUnknownFields
+
+instance MessageDecode SleepRequest where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (SleepRequest {duration = acc_0, sleepRequestUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage SleepRequest where
+  protoMessageName _ = "temporal.api.testservice.v1.SleepRequest"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultSleepRequest
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "duration"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: SleepRequest) -> m.duration
+        , fdSet = \v (m :: SleepRequest) -> (m { duration = v } :: SleepRequest)
+        })
+    ]
+
+instance IsMessage SleepRequest
+
+instance Aeson.ToJSON SleepRequest where
+  toJSON msg = jsonObject
+      [ "duration" .=: msg.duration
+
+      ]
+
+instance Aeson.FromJSON SleepRequest where
+  parseJSON = Aeson.withObject "SleepRequest" $ \obj -> do
+    fld_duration <- parseFieldMaybe obj "duration"
+    pure (defaultSleepRequest
+      { duration = maybe (defaultSleepRequest.duration) Prelude.id fld_duration
+      , sleepRequestUnknownFields = []
+      } :: SleepRequest)
+
+instance Hashable SleepRequest where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.duration
+
+instance Proto.Extension.HasExtensions SleepRequest where
+  messageUnknownFields msg = msg.sleepRequestUnknownFields
+  setMessageUnknownFields !ufs msg = msg { sleepRequestUnknownFields = ufs }
+
+instance Semigroup SleepRequest where
+  a <> b = SleepRequest
+    { duration = case b.duration of { Nothing -> a.duration; x -> x }
+    , sleepRequestUnknownFields = a.sleepRequestUnknownFields <> b.sleepRequestUnknownFields
+    }
+
+instance Monoid SleepRequest where
+  mempty = defaultSleepRequest
+
+data SleepResponse = SleepResponse
+  { sleepResponseUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultSleepResponse :: SleepResponse
+defaultSleepResponse = SleepResponse
+  { sleepResponseUnknownFields = []
+  }
+
+instance MessageEncode SleepResponse where
+  buildMessage msg =
+    encodeUnknownFields msg.sleepResponseUnknownFields
+
+instance MessageSize SleepResponse where
+  messageSize msg =
+    unknownFieldsSize msg.sleepResponseUnknownFields
+
+instance MessageDecode SleepResponse where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (SleepResponse {sleepResponseUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage SleepResponse where
+  protoMessageName _ = "temporal.api.testservice.v1.SleepResponse"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultSleepResponse
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage SleepResponse
+
+instance Aeson.ToJSON SleepResponse where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON SleepResponse where
+  parseJSON _ = pure defaultSleepResponse
+
+instance Hashable SleepResponse where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions SleepResponse where
+  messageUnknownFields msg = msg.sleepResponseUnknownFields
+  setMessageUnknownFields !ufs msg = msg { sleepResponseUnknownFields = ufs }
+
+instance Semigroup SleepResponse where
+  a <> b = SleepResponse
+    { sleepResponseUnknownFields = a.sleepResponseUnknownFields <> b.sleepResponseUnknownFields
+    }
+
+instance Monoid SleepResponse where
+  mempty = defaultSleepResponse
+
+data GetCurrentTimeResponse = GetCurrentTimeResponse
+  { time :: !(Maybe PB_Timestamp.Timestamp)
+  , getCurrentTimeResponseUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultGetCurrentTimeResponse :: GetCurrentTimeResponse
+defaultGetCurrentTimeResponse = GetCurrentTimeResponse
+  { time = Nothing
+  , getCurrentTimeResponseUnknownFields = []
+  }
+
+instance MessageEncode GetCurrentTimeResponse where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.time)
+    <> encodeUnknownFields msg.getCurrentTimeResponseUnknownFields
+
+instance MessageSize GetCurrentTimeResponse where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.time)
+    + unknownFieldsSize msg.getCurrentTimeResponseUnknownFields
+
+instance MessageDecode GetCurrentTimeResponse where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (GetCurrentTimeResponse {time = acc_0, getCurrentTimeResponseUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage GetCurrentTimeResponse where
+  protoMessageName _ = "temporal.api.testservice.v1.GetCurrentTimeResponse"
+  protoPackageName _ = "temporal.api.testservice.v1"
+  protoDefaultValue = defaultGetCurrentTimeResponse
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "time"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: GetCurrentTimeResponse) -> m.time
+        , fdSet = \v (m :: GetCurrentTimeResponse) -> (m { time = v } :: GetCurrentTimeResponse)
+        })
+    ]
+
+instance IsMessage GetCurrentTimeResponse
+
+instance Aeson.ToJSON GetCurrentTimeResponse where
+  toJSON msg = jsonObject
+      [ "time" .=: msg.time
+
+      ]
+
+instance Aeson.FromJSON GetCurrentTimeResponse where
+  parseJSON = Aeson.withObject "GetCurrentTimeResponse" $ \obj -> do
+    fld_time <- parseFieldMaybe obj "time"
+    pure (defaultGetCurrentTimeResponse
+      { time = maybe (defaultGetCurrentTimeResponse.time) Prelude.id fld_time
+      , getCurrentTimeResponseUnknownFields = []
+      } :: GetCurrentTimeResponse)
+
+instance Hashable GetCurrentTimeResponse where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.time
+
+instance Proto.Extension.HasExtensions GetCurrentTimeResponse where
+  messageUnknownFields msg = msg.getCurrentTimeResponseUnknownFields
+  setMessageUnknownFields !ufs msg = msg { getCurrentTimeResponseUnknownFields = ufs }
+
+instance Semigroup GetCurrentTimeResponse where
+  a <> b = GetCurrentTimeResponse
+    { time = case b.time of { Nothing -> a.time; x -> x }
+    , getCurrentTimeResponseUnknownFields = a.getCurrentTimeResponseUnknownFields <> b.getCurrentTimeResponseUnknownFields
+    }
+
+instance Monoid GetCurrentTimeResponse where
+  mempty = defaultGetCurrentTimeResponse

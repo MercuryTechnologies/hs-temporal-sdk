@@ -16,6 +16,7 @@ rec {
       temporal-codec-encryption
       temporal-sdk-optimal-codec
       temporal-api-protos
+      temporal-protogen-wireform
       tix-to-markdown
       ;
   };

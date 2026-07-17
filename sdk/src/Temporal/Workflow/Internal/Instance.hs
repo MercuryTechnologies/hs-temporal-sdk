@@ -20,12 +20,13 @@ module Temporal.Workflow.Internal.Instance (
 
 import Control.Monad.Reader
 import Data.Atomics (atomicModifyIORefCAS)
-import Data.ProtoLens
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import qualified Data.Text as T
 import GHC.Stack
-import Lens.Family2
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
 import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion as Core
-import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_Fields as Completion
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Workflow.Internal.Monad
@@ -46,12 +47,13 @@ flushCommands = do
     writeTVar inst.workflowCommands $ Reversed []
     pure currentCmds
   let completionSuccessful :: Core.Success
-      completionSuccessful = defMessage & Completion.commands .~ fromReversed cmds
+      completionSuccessful = Core.Success (V.fromList (fromReversed cmds)) VU.empty Nothing []
       completionMessage :: Core.WorkflowActivationCompletion
       completionMessage =
-        defMessage
-          & Completion.runId .~ rawRunId info.runId
-          & Completion.successful .~ completionSuccessful
+        Core.WorkflowActivationCompletion
+          (Just (rawRunId info.runId))
+          (Just (Core.WorkflowActivationCompletion'Status'Successful completionSuccessful))
+          []
   Logging.logDebug ("flushCommands: " <> T.pack (show completionMessage) <> " " <> T.pack (prettyCallStack callStack))
   res <- liftIO $ inst.workflowCompleteActivation completionMessage
   case res of

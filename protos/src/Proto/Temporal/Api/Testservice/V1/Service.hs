@@ -1,85 +1,127 @@
-{- This file was auto-generated from temporal/api/testservice/v1/service.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Testservice.V1.Service (
-        TestService(..)
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Empty
-import qualified Proto.Temporal.Api.Testservice.V1.RequestResponse
-data TestService = TestService {}
-instance Data.ProtoLens.Service.Types.Service TestService where
-  type ServiceName TestService = "TestService"
-  type ServicePackage TestService = "temporal.api.testservice.v1"
-  type ServiceMethods TestService = '["getCurrentTime",
-                                      "lockTimeSkipping",
-                                      "sleep",
-                                      "sleepUntil",
-                                      "unlockTimeSkipping",
-                                      "unlockTimeSkippingWithSleep"]
-  packedServiceDescriptor _
-    = "\n\
-      \\vTestService\DC2\129\SOH\n\
-      \\DLELockTimeSkipping\DC24.temporal.api.testservice.v1.LockTimeSkippingRequest\SUB5.temporal.api.testservice.v1.LockTimeSkippingResponse\"\NUL\DC2\135\SOH\n\
-      \\DC2UnlockTimeSkipping\DC26.temporal.api.testservice.v1.UnlockTimeSkippingRequest\SUB7.temporal.api.testservice.v1.UnlockTimeSkippingResponse\"\NUL\DC2`\n\
-      \\ENQSleep\DC2).temporal.api.testservice.v1.SleepRequest\SUB*.temporal.api.testservice.v1.SleepResponse\"\NUL\DC2j\n\
-      \\n\
-      \SleepUntil\DC2..temporal.api.testservice.v1.SleepUntilRequest\SUB*.temporal.api.testservice.v1.SleepResponse\"\NUL\DC2v\n\
-      \\ESCUnlockTimeSkippingWithSleep\DC2).temporal.api.testservice.v1.SleepRequest\SUB*.temporal.api.testservice.v1.SleepResponse\"\NUL\DC2_\n\
-      \\SOGetCurrentTime\DC2\SYN.google.protobuf.Empty\SUB3.temporal.api.testservice.v1.GetCurrentTimeResponse\"\NUL"
-instance Data.ProtoLens.Service.Types.HasMethodImpl TestService "lockTimeSkipping" where
-  type MethodName TestService "lockTimeSkipping" = "LockTimeSkipping"
-  type MethodInput TestService "lockTimeSkipping" = Proto.Temporal.Api.Testservice.V1.RequestResponse.LockTimeSkippingRequest
-  type MethodOutput TestService "lockTimeSkipping" = Proto.Temporal.Api.Testservice.V1.RequestResponse.LockTimeSkippingResponse
-  type MethodStreamingType TestService "lockTimeSkipping" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl TestService "unlockTimeSkipping" where
-  type MethodName TestService "unlockTimeSkipping" = "UnlockTimeSkipping"
-  type MethodInput TestService "unlockTimeSkipping" = Proto.Temporal.Api.Testservice.V1.RequestResponse.UnlockTimeSkippingRequest
-  type MethodOutput TestService "unlockTimeSkipping" = Proto.Temporal.Api.Testservice.V1.RequestResponse.UnlockTimeSkippingResponse
-  type MethodStreamingType TestService "unlockTimeSkipping" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl TestService "sleep" where
-  type MethodName TestService "sleep" = "Sleep"
-  type MethodInput TestService "sleep" = Proto.Temporal.Api.Testservice.V1.RequestResponse.SleepRequest
-  type MethodOutput TestService "sleep" = Proto.Temporal.Api.Testservice.V1.RequestResponse.SleepResponse
-  type MethodStreamingType TestService "sleep" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl TestService "sleepUntil" where
-  type MethodName TestService "sleepUntil" = "SleepUntil"
-  type MethodInput TestService "sleepUntil" = Proto.Temporal.Api.Testservice.V1.RequestResponse.SleepUntilRequest
-  type MethodOutput TestService "sleepUntil" = Proto.Temporal.Api.Testservice.V1.RequestResponse.SleepResponse
-  type MethodStreamingType TestService "sleepUntil" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl TestService "unlockTimeSkippingWithSleep" where
-  type MethodName TestService "unlockTimeSkippingWithSleep" = "UnlockTimeSkippingWithSleep"
-  type MethodInput TestService "unlockTimeSkippingWithSleep" = Proto.Temporal.Api.Testservice.V1.RequestResponse.SleepRequest
-  type MethodOutput TestService "unlockTimeSkippingWithSleep" = Proto.Temporal.Api.Testservice.V1.RequestResponse.SleepResponse
-  type MethodStreamingType TestService "unlockTimeSkippingWithSleep" = 'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl TestService "getCurrentTime" where
-  type MethodName TestService "getCurrentTime" = "GetCurrentTime"
-  type MethodInput TestService "getCurrentTime" = Proto.Google.Protobuf.Empty.Empty
-  type MethodOutput TestService "getCurrentTime" = Proto.Temporal.Api.Testservice.V1.RequestResponse.GetCurrentTimeResponse
-  type MethodStreamingType TestService "getCurrentTime" = 'Data.ProtoLens.Service.Types.NonStreaming
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.testservice.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Testservice.V1.Service where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+import Proto.Temporal.Api.Testservice.V1.RequestResponse
+import Proto.Google.Protobuf.Empty (Empty)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x29\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2f\x76\x31\x2f\x73\x65\x72\x76\x69\x63\x65\x2e\x70\x72\x6f\x74\x6f\x12\x1b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x1a\x32\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2f\x76\x31\x2f\x72\x65\x71\x75\x65\x73\x74\x5f\x72\x65\x73\x70\x6f\x6e\x73\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x1b\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x65\x6d\x70\x74\x79\x2e\x70\x72\x6f\x74\x6f\x32\xb5\x05\x0a\x0b\x54\x65\x73\x74\x53\x65\x72\x76\x69\x63\x65\x12\x7f\x0a\x10\x4c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x12\x34\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x71\x75\x65\x73\x74\x1a\x35\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x4c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x85\x01\x0a\x12\x55\x6e\x6c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x12\x36\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x55\x6e\x6c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x71\x75\x65\x73\x74\x1a\x37\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x55\x6e\x6c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x5e\x0a\x05\x53\x6c\x65\x65\x70\x12\x29\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x53\x6c\x65\x65\x70\x52\x65\x71\x75\x65\x73\x74\x1a\x2a\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x53\x6c\x65\x65\x70\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x68\x0a\x0a\x53\x6c\x65\x65\x70\x55\x6e\x74\x69\x6c\x12\x2e\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x53\x6c\x65\x65\x70\x55\x6e\x74\x69\x6c\x52\x65\x71\x75\x65\x73\x74\x1a\x2a\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x53\x6c\x65\x65\x70\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x74\x0a\x1b\x55\x6e\x6c\x6f\x63\x6b\x54\x69\x6d\x65\x53\x6b\x69\x70\x70\x69\x6e\x67\x57\x69\x74\x68\x53\x6c\x65\x65\x70\x12\x29\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x53\x6c\x65\x65\x70\x52\x65\x71\x75\x65\x73\x74\x1a\x2a\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x53\x6c\x65\x65\x70\x52\x65\x73\x70\x6f\x6e\x73\x65\x12\x5d\x0a\x0e\x47\x65\x74\x43\x75\x72\x72\x65\x6e\x74\x54\x69\x6d\x65\x12\x16\x2e\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x45\x6d\x70\x74\x79\x1a\x33\x2e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x74\x65\x73\x74\x73\x65\x72\x76\x69\x63\x65\x2e\x76\x31\x2e\x47\x65\x74\x43\x75\x72\x72\x65\x6e\x74\x54\x69\x6d\x65\x52\x65\x73\x70\x6f\x6e\x73\x65\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+-- | gRPC service @temporal.api.testservice.v1.TestService@.
+--
+-- Methods:
+-- * LockTimeSkipping (.temporal.api.testservice.v1.LockTimeSkippingRequest -> .temporal.api.testservice.v1.LockTimeSkippingResponse)
+-- * UnlockTimeSkipping (.temporal.api.testservice.v1.UnlockTimeSkippingRequest -> .temporal.api.testservice.v1.UnlockTimeSkippingResponse)
+-- * Sleep (.temporal.api.testservice.v1.SleepRequest -> .temporal.api.testservice.v1.SleepResponse)
+-- * SleepUntil (.temporal.api.testservice.v1.SleepUntilRequest -> .temporal.api.testservice.v1.SleepResponse)
+-- * UnlockTimeSkippingWithSleep (.temporal.api.testservice.v1.SleepRequest -> .temporal.api.testservice.v1.SleepResponse)
+-- * GetCurrentTime (.google.protobuf.Empty -> .temporal.api.testservice.v1.GetCurrentTimeResponse)
+-- | Server handler record for @TestService@.
+-- Each field is a handler function for one RPC method.
+-- Implement all fields to create a server.
+data TestServiceServer m = TestServiceServer
+  { locktimeskippingHandler :: LockTimeSkippingRequest -> m LockTimeSkippingResponse
+  , unlocktimeskippingHandler :: UnlockTimeSkippingRequest -> m UnlockTimeSkippingResponse
+  , sleepHandler :: SleepRequest -> m SleepResponse
+  , sleepuntilHandler :: SleepUntilRequest -> m SleepResponse
+  , unlocktimeskippingwithsleepHandler :: SleepRequest -> m SleepResponse
+  , getcurrenttimeHandler :: Empty -> m GetCurrentTimeResponse
+  }
+
+-- | Client stub record for @TestService@.
+-- Each field is a function for calling one RPC method.
+data TestServiceClient m = TestServiceClient
+  { locktimeskipping :: LockTimeSkippingRequest -> m LockTimeSkippingResponse
+  , unlocktimeskipping :: UnlockTimeSkippingRequest -> m UnlockTimeSkippingResponse
+  , sleep :: SleepRequest -> m SleepResponse
+  , sleepuntil :: SleepUntilRequest -> m SleepResponse
+  , unlocktimeskippingwithsleep :: SleepRequest -> m SleepResponse
+  , getcurrenttime :: Empty -> m GetCurrentTimeResponse
+  }
+
+-- | Method metadata for @TestService@.
+data TestServiceMethod
+  = LockTimeSkippingMethod
+  | UnlockTimeSkippingMethod
+  | SleepMethod
+  | SleepUntilMethod
+  | UnlockTimeSkippingWithSleepMethod
+  | GetCurrentTimeMethod
+  deriving stock (Show, Eq, Ord, Enum, Bounded)
+
+testserviceMethodName :: TestServiceMethod -> Text
+testserviceMethodName LockTimeSkippingMethod = "LockTimeSkipping"
+testserviceMethodName UnlockTimeSkippingMethod = "UnlockTimeSkipping"
+testserviceMethodName SleepMethod = "Sleep"
+testserviceMethodName SleepUntilMethod = "SleepUntil"
+testserviceMethodName UnlockTimeSkippingWithSleepMethod = "UnlockTimeSkippingWithSleep"
+testserviceMethodName GetCurrentTimeMethod = "GetCurrentTime"
+
+-- | Fully-qualified service name: @TestService@
+testserviceServiceName :: Text
+testserviceServiceName = "TestService"
+
+-- | All method paths for @TestService@.
+testserviceMethodPaths :: [Text]
+testserviceMethodPaths = ["/TestService/LockTimeSkipping","/TestService/UnlockTimeSkipping","/TestService/Sleep","/TestService/SleepUntil","/TestService/UnlockTimeSkippingWithSleep","/TestService/GetCurrentTime"]

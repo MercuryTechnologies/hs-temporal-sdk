@@ -3,9 +3,9 @@
 
 module Temporal.Core.Client.TestService where
 
-import Data.ProtoLens (Message (defMessage))
+
+import Proto.Google.Protobuf.Empty (Empty)
 import Proto.Temporal.Api.Testservice.V1.RequestResponse
-import Proto.Temporal.Api.Testservice.V1.Service
 import Temporal.Core.Client
 
 
@@ -17,7 +17,7 @@ foreign import ccall "hs_get_current_time" hs_get_current_time :: PrimRpcCall
 This time might not be equal to {@link System#currentTimeMillis()} due to time skipping.
 -}
 getCurrentTime :: Client -> IO (Either RpcError GetCurrentTimeResponse)
-getCurrentTime client = call @TestService @"getCurrentTime" hs_get_current_time client defMessage
+getCurrentTime client = call hs_get_current_time client (mempty @Empty)
 
 
 foreign import ccall "hs_lock_time_skipping" hs_lock_time_skipping :: PrimRpcCall
@@ -32,7 +32,7 @@ Test Server is typically started with locked time skipping and Time Locking Coun
 LockTimeSkipping and UnlockTimeSkipping calls are counted.
 -}
 lockTimeSkipping :: Client -> LockTimeSkippingRequest -> IO (Either RpcError LockTimeSkippingResponse)
-lockTimeSkipping = call @TestService @"lockTimeSkipping" hs_lock_time_skipping
+lockTimeSkipping = call hs_lock_time_skipping
 
 
 foreign import ccall "hs_sleep_until" hs_sleep_until :: PrimRpcCall
@@ -44,7 +44,7 @@ If the current Test Server Time is beyond the specified timestamp, returns immed
 This is an EXPERIMENTAL API.
 -}
 sleepUntil :: Client -> SleepUntilRequest -> IO (Either RpcError SleepResponse)
-sleepUntil = call @TestService @"sleepUntil" hs_sleep_until
+sleepUntil = call hs_sleep_until
 
 
 foreign import ccall "hs_sleep" hs_sleep :: PrimRpcCall
@@ -54,7 +54,7 @@ foreign import ccall "hs_sleep" hs_sleep :: PrimRpcCall
 This is an EXPERIMENTAL API.
 -}
 sleep :: Client -> SleepRequest -> IO (Either RpcError SleepResponse)
-sleep = call @TestService @"sleep" hs_sleep
+sleep = call hs_sleep
 
 
 foreign import ccall "hs_unlock_time_skipping_with_sleep" hs_unlock_time_skipping_with_sleep :: PrimRpcCall
@@ -71,7 +71,7 @@ If it is called when Time Locking Counter is
   - 0 will lead to rpc call failure same way as an unbalanced UnlockTimeSkipping.
 -}
 unlockTimeSkippingWithSleep :: Client -> SleepRequest -> IO (Either RpcError SleepResponse)
-unlockTimeSkippingWithSleep = call @TestService @"unlockTimeSkippingWithSleep" hs_unlock_time_skipping_with_sleep
+unlockTimeSkippingWithSleep = call hs_unlock_time_skipping_with_sleep
 
 
 {- | UnlockTimeSkipping decrements Time Locking Counter by one.
@@ -86,4 +86,4 @@ foreign import ccall "hs_unlock_time_skipping" hs_unlock_time_skipping :: PrimRp
 
 
 unlockTimeSkipping :: Client -> UnlockTimeSkippingRequest -> IO (Either RpcError UnlockTimeSkippingResponse)
-unlockTimeSkipping = call @TestService @"unlockTimeSkipping" hs_unlock_time_skipping
+unlockTimeSkipping = call hs_unlock_time_skipping

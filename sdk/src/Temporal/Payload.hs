@@ -11,6 +11,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -88,13 +89,15 @@ import qualified Data.ByteString.Base64 as Base64 (decodeBase64Untyped, encodeBa
 #else
 import qualified Data.ByteString.Base64 as Base64 (decodeBase64, encodeBase64)
 #endif
+import Data.Bifunctor (first)
 import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as BL
 import Data.Kind
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.ProtoLens (Message (..), defMessage)
-import Data.ProtoLens.Encoding (decodeMessage, encodeMessage)
+import Proto.Decode (MessageDecode, decodeMessage)
+import Proto.Encode (MessageEncode, encodeMessage)
+import Proto.Schema (ProtoMessage (protoMessageName))
 import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -107,9 +110,7 @@ import qualified Data.Vector.Fusion.Bundle as B
 import qualified Data.Vector.Generic as VG
 import GHC.TypeLits
 import Language.Haskell.TH.Syntax (Lift)
-import Lens.Family2
-import qualified Proto.Temporal.Api.Common.V1.Message as Proto (Payload)
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Proto (data', metadata)
+import qualified Proto.Temporal.Api.Common.V1.Message as Proto
 
 
 -- | Used to denote that a payload either failed to encode or decode
@@ -220,11 +221,11 @@ data Protobuf = Protobuf
   deriving stock (Eq, Show, Lift)
 
 
-instance (Message a) => Codec Protobuf a where
-  messageType _ x = encodeUtf8 $ messageName $ pure x
+instance (ProtoMessage a, MessageEncode a, MessageDecode a) => Codec Protobuf a where
+  messageType _ x = encodeUtf8 $ protoMessageName $ pure x
   encoding _ _ = "binary/protobuf"
   encode c x = pure $ insertStandardMetadata c x $ Payload (encodeMessage x) mempty
-  decode _ = pure . decodeMessage . payloadData
+  decode _ = pure . first show . decodeMessage . payloadData
 
 
 data Zlib = Zlib
@@ -260,10 +261,11 @@ instance Codec Zlib Payload where
     Just "binary/zlib" ->
       pure $
         fmap convertFromProtoPayload $
-          decodeMessage $
-            BS.toStrict $
-              decompress zlibFormat decompressParams $
-                BL.fromStrict p.payloadData
+          first show $
+            decodeMessage $
+              BS.toStrict $
+                decompress zlibFormat decompressParams $
+                  BL.fromStrict p.payloadData
     _ -> pure $ Right p
 
 
@@ -542,14 +544,24 @@ instance ToJSON Payload where
 
 
 convertFromProtoPayload :: Proto.Payload -> Payload
-convertFromProtoPayload p = Payload (p ^. Proto.data') (p ^. Proto.metadata)
+convertFromProtoPayload p =
+  Payload (maybe "" id p.data') (metadataFromProto p.metadata)
+  where
+    metadataFromProto = V.foldr insertEntry Map.empty
+    insertEntry entry acc =
+      case (entry.key, entry.value) of
+        (Just k, Just v) -> Map.insert k v acc
+        _ -> acc
 
 
 convertToProtoPayload :: Payload -> Proto.Payload
 convertToProtoPayload (Payload d m) =
-  defMessage
-    & Proto.data' .~ d
-    & Proto.metadata .~ m
+  Proto.Payload (metadataToProto m) (Just d) []
+  where
+    metadataToProto =
+      V.fromList
+        . fmap (\(k, v) -> Proto.Payload'MetadataEntry (Just k) (Just v) [])
+        . Map.toList
 
 
 class ApplyPayloads codec (args :: [Type]) where

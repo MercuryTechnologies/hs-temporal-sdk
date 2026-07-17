@@ -2,6 +2,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -289,7 +290,8 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
 import Data.Monoid (Endo (..))
-import Data.ProtoLens
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import Data.Proxy
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -305,23 +307,21 @@ import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Word (Word32, Word64, Word8)
 import GHC.Stack
-import Lens.Family2
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Payloads
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as Failure
-import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as ActivityResult
-import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields as ActivityResult
-import qualified Proto.Temporal.Sdk.Core.Common.Common_Fields as Common
-import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation_Fields as Activation
+import qualified Proto.Temporal.Api.Enums.V1.Workflow as WorkflowEnums
+import qualified Proto.Temporal.Api.Common.V1.Message as Message
+import qualified Proto.Temporal.Api.Failure.V1.Message as FailureMsg
+import qualified Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult as ActivityResult hiding (attempt, backoffDuration, failure, originalScheduleTime, result)
+import qualified Proto.Temporal.Sdk.Core.WorkflowActivation.WorkflowActivation as Activation
+import qualified Proto.Temporal.Sdk.Core.Common.Common as Common
 import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus as NexusProto
-import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus_Fields as NexusFields
 import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands as Command
-import qualified Proto.Temporal.Sdk.Core.WorkflowCommands.WorkflowCommands_Fields as Command
 import RequireCallStack
 import System.Random.Stateful
 import Temporal.Activity.Definition (ActivityRef (..), KnownActivity (..))
 import Temporal.Common
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Common.TimeoutType
+import qualified Proto.Google.Protobuf.Duration as ProtoDuration
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
 import Temporal.Duration (Duration (..), diffSystemTime, durationFromProto, durationToProto, nanoseconds, seconds)
 import Temporal.Exception
@@ -338,6 +338,85 @@ import Temporal.Workflow.Update
 import Temporal.Workflow.WorkflowInstance
 import Temporal.WorkflowInstance
 import UnliftIO
+
+mapPayloadEntries mk values =
+  V.fromList $ fmap (\(key, value) -> mk (Just key) (Just $ convertToProtoPayload value) []) $ Map.toList values
+
+mapProtoPayloadEntries mk values =
+  V.fromList $ fmap (\(key, value) -> mk (Just key) (Just value) []) $ Map.toList values
+
+mapTextEntries mk values =
+  V.fromList $ fmap (\(key, value) -> mk (Just key) (Just value) []) $ Map.toList values
+
+workflowCommand variant =
+  Command.WorkflowCommand Nothing (Just variant) []
+
+
+resolveActivityStatus :: Activation.ResolveActivity -> Maybe ActivityResult.ActivityResolution'Status
+resolveActivityStatus (Activation.ResolveActivity _ result _ _) = result >>= \(ActivityResult.ActivityResolution status _) -> status
+
+resolveSignalFailure :: Activation.ResolveSignalExternalWorkflow -> Maybe FailureMsg.Failure
+resolveSignalFailure (Activation.ResolveSignalExternalWorkflow _ failure _) = failure
+
+successPayload :: ActivityResult.Success -> Message.Payload
+successPayload (ActivityResult.Success result _) = fromMaybe mempty result
+
+activityFailure :: ActivityResult.Failure -> FailureMsg.Failure
+activityFailure (ActivityResult.Failure failure _) = fromMaybe mempty failure
+
+activityCancellationFailure :: ActivityResult.Cancellation -> Maybe FailureMsg.Failure
+activityCancellationFailure (ActivityResult.Cancellation failure _) = failure
+
+activityBackoffDuration :: ActivityResult.DoBackoff -> Maybe ProtoDuration.Duration
+activityBackoffDuration (ActivityResult.DoBackoff _ backoffDuration _ _) = backoffDuration
+
+activityBackoffOriginalScheduleTime :: ActivityResult.DoBackoff -> Maybe Timestamp.Timestamp
+activityBackoffOriginalScheduleTime (ActivityResult.DoBackoff _ _ originalScheduleTime _) = originalScheduleTime
+
+activityBackoffAttempt :: ActivityResult.DoBackoff -> Maybe Word32
+activityBackoffAttempt (ActivityResult.DoBackoff attempt _ _ _) = attempt
+
+failureMessage :: FailureMsg.Failure -> Text
+failureMessage (FailureMsg.Failure msg _ _ _ _ _ _) = fromMaybe "" msg
+
+failureStack :: FailureMsg.Failure -> Text
+failureStack (FailureMsg.Failure _ _ stack _ _ _ _) = fromMaybe "" stack
+
+failureCause :: FailureMsg.Failure -> FailureMsg.Failure
+failureCause (FailureMsg.Failure _ _ _ _ cause _ _) = fromMaybe mempty cause
+
+failureActivityInfo :: FailureMsg.Failure -> FailureMsg.ActivityFailureInfo
+failureActivityInfo (FailureMsg.Failure _ _ _ _ _ (Just (FailureMsg.Failure'FailureInfo'ActivityFailureInfo info)) _) = info
+failureActivityInfo _ = mempty
+
+failureApplicationInfo :: FailureMsg.Failure -> FailureMsg.ApplicationFailureInfo
+failureApplicationInfo (FailureMsg.Failure _ _ _ _ _ (Just (FailureMsg.Failure'FailureInfo'ApplicationFailureInfo info)) _) = info
+failureApplicationInfo _ = mempty
+
+activityInfoRetryState (FailureMsg.ActivityFailureInfo _ _ _ _ _ retryState _) = fromMaybe WorkflowEnums.RetryState'RetryStateUnspecified retryState
+
+activityInfoIdentity :: FailureMsg.ActivityFailureInfo -> Text
+activityInfoIdentity (FailureMsg.ActivityFailureInfo _ _ identity _ _ _ _) = fromMaybe "" identity
+
+activityInfoScheduledEventId :: FailureMsg.ActivityFailureInfo -> Int64
+activityInfoScheduledEventId (FailureMsg.ActivityFailureInfo scheduledEventId _ _ _ _ _ _) = fromMaybe 0 scheduledEventId
+
+activityInfoStartedEventId :: FailureMsg.ActivityFailureInfo -> Int64
+activityInfoStartedEventId (FailureMsg.ActivityFailureInfo _ startedEventId _ _ _ _ _) = fromMaybe 0 startedEventId
+
+applicationInfoType :: FailureMsg.ApplicationFailureInfo -> Text
+applicationInfoType (FailureMsg.ApplicationFailureInfo type' _ _ _ _ _) = fromMaybe "" type'
+
+applicationInfoNonRetryable :: FailureMsg.ApplicationFailureInfo -> Bool
+applicationInfoNonRetryable (FailureMsg.ApplicationFailureInfo _ nonRetryable _ _ _ _) = fromMaybe False nonRetryable
+
+applicationInfoDetails :: FailureMsg.ApplicationFailureInfo -> [Payload]
+applicationInfoDetails (FailureMsg.ApplicationFailureInfo _ _ details _ _ _) =
+  toList $ fmap convertFromProtoPayload $ maybe V.empty (\(Message.Payloads payloads _) -> payloads) details
+
+applicationInfoNextRetryDelay :: FailureMsg.ApplicationFailureInfo -> Maybe Duration
+applicationInfoNextRetryDelay (FailureMsg.ApplicationFailureInfo _ _ _ nextRetryDelay _ _) =
+  fmap durationFromProto nextRetryDelay
 
 
 -- class MonadWorkflow m where
@@ -420,77 +499,77 @@ startActivityFromPayloads (KnownActivity codec name) opts typedPayloads = ilift 
     i <- readIORef inst.workflowInstanceInfo
     args <- processorEncodePayloads inst.payloadProcessor activityInput.args
     let actId = maybe (Text.pack $ show actSeq) rawActivityId (activityInput.options.activityId)
-        scheduleActivity =
-          defMessage
-            & Command.seq .~ actSeq
-            & Command.activityId .~ actId
-            & Command.activityType .~ activityInput.activityType
-            & Command.taskQueue .~ rawTaskQueue (fromMaybe i.taskQueue activityInput.options.taskQueue)
-            & Command.headers .~ fmap convertToProtoPayload activityInput.options.headers
-            & Command.vec'arguments .~ fmap convertToProtoPayload args
-            & Command.maybe'retryPolicy .~ fmap retryPolicyToProto activityInput.options.retryPolicy
-            & Command.cancellationType .~ activityCancellationTypeToProto activityInput.options.cancellationType
-            & Command.maybe'scheduleToStartTimeout .~ fmap durationToProto activityInput.options.scheduleToStartTimeout
-            & Command.maybe'heartbeatTimeout .~ fmap durationToProto activityInput.options.heartbeatTimeout
-            & \msg ->
-              case activityInput.options.timeout of
-                StartToCloseTimeout t -> msg & Command.startToCloseTimeout .~ durationToProto t
-                ScheduleToCloseTimeout t -> msg & Command.scheduleToCloseTimeout .~ durationToProto t
-                StartToCloseAndScheduleToCloseTimeout stc stc' ->
-                  msg
-                    & Command.startToCloseTimeout .~ durationToProto stc
-                    & Command.scheduleToCloseTimeout .~ durationToProto stc'
-                & Command.doNotEagerlyExecute .~ activityInput.options.disableEagerExecution
+        scheduleActivityBase :: Command.ScheduleActivity
+        scheduleActivityBase =
+          Command.defaultScheduleActivity
+            { Command.seq = Just actSeq
+            , Command.activityId = Just actId
+            , Command.activityType = Just activityInput.activityType
+            , Command.taskQueue = Just (rawTaskQueue (fromMaybe i.taskQueue activityInput.options.taskQueue))
+            , Command.headers = mapPayloadEntries Command.ScheduleActivity'HeadersEntry activityInput.options.headers
+            , Command.arguments = fmap convertToProtoPayload args
+            , Command.retryPolicy = fmap retryPolicyToProto activityInput.options.retryPolicy
+            , Command.cancellationType = Just (activityCancellationTypeToProto activityInput.options.cancellationType)
+            , Command.scheduleToStartTimeout = fmap durationToProto activityInput.options.scheduleToStartTimeout
+            , Command.heartbeatTimeout = fmap durationToProto activityInput.options.heartbeatTimeout
+            , Command.doNotEagerlyExecute = Just activityInput.options.disableEagerExecution
+            }
+        setStartToClose t msg = (msg :: Command.ScheduleActivity) {Command.startToCloseTimeout = Just (durationToProto t)}
+        setScheduleToClose t msg = (msg :: Command.ScheduleActivity) {Command.scheduleToCloseTimeout = Just (durationToProto t)}
+        scheduleActivity = case activityInput.options.timeout of
+          StartToCloseTimeout t -> setStartToClose t scheduleActivityBase
+          ScheduleToCloseTimeout t -> setScheduleToClose t scheduleActivityBase
+          StartToCloseAndScheduleToCloseTimeout stc stc' ->
+            setScheduleToClose stc' $ setStartToClose stc scheduleActivityBase
 
-    let cmd = defMessage & Command.scheduleActivity .~ scheduleActivity
+    let cmd = workflowCommand (Command.WorkflowCommand'Variant'ScheduleActivity scheduleActivity)
     addCommand cmd
     pure $
       Task
         { waitAction = do
             res <- getIVar resultSlot
             Logging.logInfo ("Activity result: " <> Text.pack (show res))
-            Workflow $ \_ -> case res ^. Activation.result . ActivityResult.maybe'status of
+            Workflow $ \_ -> case (resolveActivityStatus res) of
               Nothing -> error "Activity result missing status"
-              Just (ActivityResult.ActivityResolution'Completed success) -> do
-                decoded <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result)
+              Just (ActivityResult.ActivityResolution'Status'Completed success) -> do
+                decoded <- liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (successPayload success)
                 pure $ case decoded of
                   Left err -> Throw $ toException $ ValueError err
                   Right val -> Done val
-              Just (ActivityResult.ActivityResolution'Failed failure_) ->
-                let failure = failure_ ^. ActivityResult.failure
+              Just (ActivityResult.ActivityResolution'Status'Failed failure_) ->
+                let failure = activityFailure failure_
+                    activityInfo = failureActivityInfo failure
+                    cause_ = failureCause failure
+                    appInfo = failureApplicationInfo cause_
                 in pure $
                     Throw $
                       toException $
                         ActivityFailure
-                          { message = failure ^. Failure.message
+                          { message = failureMessage failure
                           , activityType = ActivityType activityInput.activityType
                           , activityId = ActivityId actId
-                          , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
-                          , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+                          , retryState = retryStateFromProto $ activityInfoRetryState activityInfo
+                          , identity = activityInfoIdentity activityInfo
                           , cause =
-                              let cause_ = failure ^. Failure.cause
+                              let cause_ = failureCause failure
                               in ApplicationFailure
-                                  { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
-                                  , message = cause_ ^. Failure.message
-                                  , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
-                                  , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
-                                  , stack = cause_ ^. Failure.stackTrace
-                                  , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
+                                  { type' = applicationInfoType appInfo
+                                  , message = failureMessage cause_
+                                  , nonRetryable = applicationInfoNonRetryable appInfo
+                                  , details = applicationInfoDetails appInfo
+                                  , stack = failureStack cause_
+                                  , nextRetryDelay = applicationInfoNextRetryDelay appInfo
                                   }
-                          , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
-                          , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
-                          , original = failure ^. Failure.activityFailureInfo
+                          , scheduledEventId = activityInfoScheduledEventId activityInfo
+                          , startedEventId = activityInfoStartedEventId activityInfo
+                          , original = activityInfo
                           , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
                           }
-              Just (ActivityResult.ActivityResolution'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (details ^. ActivityResult.failure)
-              Just (ActivityResult.ActivityResolution'Backoff _doBackoff) -> error "not implemented"
+              Just (ActivityResult.ActivityResolution'Status'Cancelled details) -> pure $ Throw $ toException $ ActivityCancelled (fromMaybe mempty (activityCancellationFailure details))
+              Just (ActivityResult.ActivityResolution'Status'Backoff _doBackoff) -> error "not implemented"
         , cancelAction = do
             let cancelCmd =
-                  defMessage
-                    & Command.requestCancelActivity
-                      .~ ( defMessage
-                            & Command.seq .~ actSeq
-                         )
+                  workflowCommand (Command.WorkflowCommand'Variant'RequestCancelActivity (Command.defaultRequestCancelActivity {Command.seq = Just actSeq}))
             ilift $ addCommand cancelCmd
         }
   pure
@@ -549,40 +628,39 @@ startNexusOperation client operationName opts input = ilift $ do
 
   encodedInput <- liftIO $ payloadProcessorEncode inst.payloadProcessor input
   let scheduleCmd =
-        defMessage
-          & Command.seq .~ nexusSeq
-          & Command.endpoint .~ rawNexusEndpointName client.nexusEndpoint
-          & Command.service .~ rawNexusServiceName client.nexusService
-          & Command.operation .~ rawNexusOperationName operationName
-          & Command.maybe'input .~ Just (convertToProtoPayload encodedInput)
-          & Command.maybe'scheduleToCloseTimeout .~ fmap durationToProto opts.scheduleToCloseTimeout
-          & Command.nexusHeader .~ opts.nexusHeaders
-          & Command.cancellationType .~ nexusOperationCancellationTypeToProto opts.cancellationType
-      cmd = defMessage & Command.scheduleNexusOperation .~ scheduleCmd
+        Command.defaultScheduleNexusOperation
+          { Command.seq = Just nexusSeq
+          , Command.endpoint = Just (rawNexusEndpointName client.nexusEndpoint)
+          , Command.service = Just (rawNexusServiceName client.nexusService)
+          , Command.operation = Just (rawNexusOperationName operationName)
+          , Command.input = Just (convertToProtoPayload encodedInput)
+          , Command.scheduleToCloseTimeout = fmap durationToProto opts.scheduleToCloseTimeout
+          , Command.nexusHeader = mapTextEntries Command.ScheduleNexusOperation'NexusHeaderEntry opts.nexusHeaders
+          , Command.cancellationType = Just (nexusOperationCancellationTypeToProto opts.cancellationType)
+          }
+      cmd = workflowCommand (Command.WorkflowCommand'Variant'ScheduleNexusOperation scheduleCmd)
   addCommand cmd
   pure $
     Task
       { waitAction = do
           _ <- getIVar startVar
           result <- getIVar resultVar
-          Workflow $ \_ -> case result ^. NexusFields.maybe'status of
+          Workflow $ \_ -> case result.status of
             Nothing -> pure $ Throw $ toException $ RuntimeError "Nexus operation result missing status"
-            Just (NexusProto.NexusOperationResult'Completed payload) -> do
+            Just (NexusProto.NexusOperationResult'Status'Completed payload) -> do
               decoded <- liftIO $ payloadProcessorDecode inst.payloadProcessor (convertFromProtoPayload payload)
               pure $ case decoded of
                 Left err -> Throw $ toException $ ValueError err
                 Right val -> Done val
-            Just (NexusProto.NexusOperationResult'Failed failure) ->
-              pure $ Throw $ toException $ NexusOperationFailed (failure ^. Failure.message) Nothing
-            Just (NexusProto.NexusOperationResult'Cancelled _) ->
+            Just (NexusProto.NexusOperationResult'Status'Failed failure) ->
+              pure $ Throw $ toException $ NexusOperationFailed (failureMessage failure) Nothing
+            Just (NexusProto.NexusOperationResult'Status'Cancelled _) ->
               pure $ Throw $ toException NexusOperationCancelled
-            Just (NexusProto.NexusOperationResult'TimedOut _) ->
+            Just (NexusProto.NexusOperationResult'Status'TimedOut _) ->
               pure $ Throw $ toException NexusOperationTimedOut
       , cancelAction = do
           let cancelCmd =
-                defMessage
-                  & Command.requestCancelNexusOperation
-                    .~ (defMessage & Command.seq .~ nexusSeq)
+                workflowCommand (Command.WorkflowCommand'Variant'RequestCancelNexusOperation (Command.defaultRequestCancelNexusOperation {Command.seq = Just nexusSeq}))
           ilift $ addCommand cancelCmd
       }
 
@@ -611,17 +689,19 @@ class WorkflowHandle h where
 
 instance WorkflowHandle ChildWorkflowHandle where
   signal h =
-    signalWorkflow h (Command.childWorkflowId .~ rawWorkflowId h.childWorkflowId)
+    signalWorkflow h (\command -> command {Command.target = Just (Command.SignalExternalWorkflowExecution'Target'ChildWorkflowId (rawWorkflowId h.childWorkflowId))})
 
 
 instance WorkflowHandle ExternalWorkflowHandle where
   signal h =
-    signalWorkflow h (Command.workflowExecution .~ converted)
+    signalWorkflow h (\command -> command {Command.target = Just (Command.SignalExternalWorkflowExecution'Target'WorkflowExecution converted)})
     where
       converted =
-        defMessage
-          & Common.workflowId .~ rawWorkflowId h.externalWorkflowWorkflowId
-          & Common.runId .~ maybe "" rawRunId h.externalWorkflowRunId
+        Common.NamespacedWorkflowExecution
+          Nothing
+          (Just $ rawWorkflowId h.externalWorkflowWorkflowId)
+          (Just $ maybe "" rawRunId h.externalWorkflowRunId)
+          []
 
 
 -- TODO
@@ -642,17 +722,16 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
     inst <- ask
     s <- nextExternalSignalSequence
     args <- processorEncodePayloads inst.payloadProcessor ps
-    let cmd =
-          defMessage
-            & Command.signalExternalWorkflowExecution
-              .~ f
-                ( defMessage
-                    & Command.seq .~ rawSequence s
-                    & Command.signalName .~ signalName
-                    & Command.vec'args .~ fmap convertToProtoPayload args
-                    -- TODO
-                    -- & Command.headers .~ _
-                )
+    let signalCommand =
+          f
+            Command.defaultSignalExternalWorkflowExecution
+              { Command.seq = Just (rawSequence s)
+              , Command.signalName = Just signalName
+              , Command.args = fmap convertToProtoPayload args
+              -- TODO: headers
+              }
+        cmd =
+          workflowCommand (Command.WorkflowCommand'Variant'SignalExternalWorkflowExecution signalCommand)
     addCommand cmd
     atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
       seqMaps {externalSignals = HashMap.insert s resVar seqMaps.externalSignals}
@@ -660,16 +739,12 @@ signalWorkflow _ f (signalRef -> KnownSignal signalName signalCodec) = withWorkf
       Task
         { waitAction = do
             res <- getIVar resVar
-            case res ^. Activation.maybe'failure of
+            case resolveSignalFailure res of
               Nothing -> pure ()
               Just failureInfo -> throw $ SignalExternalWorkflowFailed failureInfo
         , cancelAction = do
             let cancelCmd =
-                  defMessage
-                    & Command.cancelSignalWorkflow
-                      .~ ( defMessage
-                            & Command.seq .~ rawSequence s
-                         )
+                  workflowCommand (Command.WorkflowCommand'Variant'CancelSignalWorkflow (Command.defaultCancelSignalWorkflow {Command.seq = Just (rawSequence s)}))
             ilift $ addCommand cancelCmd
         }
 
@@ -707,28 +782,28 @@ startChildWorkflowFromPayloads (workflowRef -> k@(KnownWorkflow codec _)) opts p
         i <- readIORef inst.workflowInstanceInfo
         searchAttrs <- liftIO $ searchAttributesToProto opts'.searchAttributes
         let childWorkflowOptions =
-              defMessage
-                & Command.seq .~ wfSeq
-                & Command.namespace .~ rawNamespace i.namespace
-                & Command.workflowId .~ rawWorkflowId wfId
-                & Command.workflowType .~ wfName
-                & Command.taskQueue .~ rawTaskQueue (fromMaybe i.taskQueue opts'.taskQueue)
-                & Command.vec'input .~ convertedPayloads
-                & Command.maybe'workflowExecutionTimeout .~ fmap durationToProto opts'.timeoutOptions.executionTimeout
-                & Command.maybe'workflowRunTimeout .~ fmap durationToProto opts'.timeoutOptions.runTimeout
-                & Command.maybe'workflowTaskTimeout .~ fmap durationToProto opts'.timeoutOptions.taskTimeout
-                & Command.parentClosePolicy .~ parentClosePolicyToProto opts'.parentClosePolicy
-                & Command.workflowIdReusePolicy .~ workflowIdReusePolicyToProto opts'.workflowIdReusePolicy
-                & Command.maybe'retryPolicy .~ fmap retryPolicyToProto opts'.retryPolicy
-                & Command.cronSchedule .~ fromMaybe "" opts'.cronSchedule
-                & Command.headers .~ fmap convertToProtoPayload opts'.headers
-                & Command.memo .~ fmap convertToProtoPayload memo
-                & Command.searchAttributes .~ searchAttrs
-                & Command.cancellationType .~ childWorkflowCancellationTypeToProto opts'.cancellationType
+              Command.defaultStartChildWorkflowExecution
+                { Command.seq = Just wfSeq
+                , Command.namespace = Just (rawNamespace i.namespace)
+                , Command.workflowId = Just (rawWorkflowId wfId)
+                , Command.workflowType = Just wfName
+                , Command.taskQueue = Just (rawTaskQueue (fromMaybe i.taskQueue opts'.taskQueue))
+                , Command.input = convertedPayloads
+                , Command.workflowExecutionTimeout = fmap durationToProto opts'.timeoutOptions.executionTimeout
+                , Command.workflowRunTimeout = fmap durationToProto opts'.timeoutOptions.runTimeout
+                , Command.workflowTaskTimeout = fmap durationToProto opts'.timeoutOptions.taskTimeout
+                , Command.parentClosePolicy = Just (parentClosePolicyToProto opts'.parentClosePolicy)
+                , Command.workflowIdReusePolicy = Just (workflowIdReusePolicyToProto opts'.workflowIdReusePolicy)
+                , Command.retryPolicy = fmap retryPolicyToProto opts'.retryPolicy
+                , Command.cronSchedule = opts'.cronSchedule
+                , Command.headers = mapPayloadEntries Command.StartChildWorkflowExecution'HeadersEntry opts'.headers
+                , Command.memo = mapPayloadEntries Command.StartChildWorkflowExecution'MemoEntry memo
+                , Command.searchAttributes = mapProtoPayloadEntries Command.StartChildWorkflowExecution'SearchAttributesEntry searchAttrs
+                , Command.cancellationType = Just (childWorkflowCancellationTypeToProto opts'.cancellationType)
+                }
 
             cmd =
-              defMessage
-                & Command.startChildWorkflowExecution .~ childWorkflowOptions
+              workflowCommand (Command.WorkflowCommand'Variant'StartChildWorkflowExecution childWorkflowOptions)
 
             wfHandle =
               ChildWorkflowHandle
@@ -848,81 +923,79 @@ scheduleLocalActivityAttempt name opts typedPayloads attemptNum origSchedTime ca
     hdrs <- processorEncodePayloads inst.payloadProcessor localOpts.headers
     args <- processorEncodePayloads inst.payloadProcessor localInput.localArgs
     let actId = maybe (Text.pack $ show actSeq) rawActivityId localOpts.activityId
+        scheduleLocalActivity =
+          Command.defaultScheduleLocalActivity
+            { Command.seq = Just actSeq
+            , Command.activityId = Just actId
+            , Command.activityType = Just localInput.localActivityType
+            , Command.headers = mapPayloadEntries Command.ScheduleLocalActivity'HeadersEntry hdrs
+            , Command.attempt = Just attemptNum
+            , Command.originalScheduleTime = Just origSchedTime
+            , Command.arguments = fmap convertToProtoPayload args
+            , Command.scheduleToCloseTimeout = durationToProto <$> localOpts.scheduleToCloseTimeout
+            , Command.scheduleToStartTimeout = durationToProto <$> localOpts.scheduleToStartTimeout
+            , Command.startToCloseTimeout = durationToProto <$> localOpts.startToCloseTimeout
+            , Command.retryPolicy = retryPolicyToProto <$> localOpts.retryPolicy
+            , Command.localRetryThreshold = durationToProto <$> localOpts.localRetryThreshold
+            , Command.cancellationType = Just (activityCancellationTypeToProto localOpts.cancellationType)
+            }
         cmd =
-          defMessage
-            & Command.scheduleLocalActivity
-              .~ ( defMessage
-                    & Command.seq .~ actSeq
-                    & Command.activityId .~ actId
-                    & Command.activityType .~ localInput.localActivityType
-                    & Command.headers .~ fmap convertToProtoPayload hdrs
-                    & Command.attempt .~ attemptNum
-                    & Command.originalScheduleTime .~ origSchedTime
-                    & Command.vec'arguments .~ fmap convertToProtoPayload args
-                    & Command.maybe'scheduleToCloseTimeout .~ (durationToProto <$> localOpts.scheduleToCloseTimeout)
-                    & Command.maybe'scheduleToStartTimeout .~ (durationToProto <$> localOpts.scheduleToStartTimeout)
-                    & Command.maybe'startToCloseTimeout .~ (durationToProto <$> localOpts.startToCloseTimeout)
-                    & Command.maybe'retryPolicy .~ (retryPolicyToProto <$> localOpts.retryPolicy)
-                    & Command.maybe'localRetryThreshold .~ (durationToProto <$> localOpts.localRetryThreshold)
-                    & Command.cancellationType .~ activityCancellationTypeToProto localOpts.cancellationType
-                 )
+          workflowCommand (Command.WorkflowCommand'Variant'ScheduleLocalActivity scheduleLocalActivity)
     addCommand cmd
     pure $
       Task
         { waitAction = do
             res <- getIVar resultSlot
-            case res ^. Activation.result . ActivityResult.maybe'status of
+            case (resolveActivityStatus res) of
               Nothing -> error "Local activity result missing status"
-              Just (ActivityResult.ActivityResolution'Completed success) -> do
-                res' <- ilift $ liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (success ^. ActivityResult.result)
+              Just (ActivityResult.ActivityResolution'Status'Completed success) -> do
+                res' <- ilift $ liftIO $ payloadProcessorDecode inst.payloadProcessor $ convertFromProtoPayload (successPayload success)
                 case res' of
                   Left err -> Temporal.Workflow.Internal.Monad.throw $ ValueError err
                   Right val -> pure val
-              Just (ActivityResult.ActivityResolution'Failed failure_) ->
-                let failure = failure_ ^. ActivityResult.failure
-                    cause_ = failure ^. Failure.cause
+              Just (ActivityResult.ActivityResolution'Status'Failed failure_) ->
+                let failure = activityFailure failure_
+                    activityInfo = failureActivityInfo failure
+                    cause_ = failureCause failure
+                    appInfo = failureApplicationInfo cause_
                 in Temporal.Workflow.Internal.Monad.throw $
                     ActivityFailure
-                      { message = failure ^. Failure.message
+                      { message = failureMessage failure
                       , activityType = ActivityType localInput.localActivityType
                       , activityId = ActivityId actId
-                      , retryState = retryStateFromProto $ failure ^. Failure.activityFailureInfo . Failure.retryState
-                      , identity = failure ^. Failure.activityFailureInfo . Failure.identity
+                      , retryState = retryStateFromProto $ activityInfoRetryState activityInfo
+                      , identity = activityInfoIdentity activityInfo
                       , cause =
                           ApplicationFailure
-                            { type' = cause_ ^. Failure.applicationFailureInfo . Failure.type'
-                            , message = cause_ ^. Failure.message
-                            , nonRetryable = cause_ ^. Failure.applicationFailureInfo . Failure.nonRetryable
-                            , details = cause_ ^. Failure.applicationFailureInfo . Failure.details . Payloads.payloads . to (fmap convertFromProtoPayload)
-                            , stack = cause_ ^. Failure.stackTrace
-                            , nextRetryDelay = fmap durationFromProto (cause_ ^. Failure.applicationFailureInfo . Failure.maybe'nextRetryDelay)
+                            { type' = applicationInfoType appInfo
+                            , message = failureMessage cause_
+                            , nonRetryable = applicationInfoNonRetryable appInfo
+                            , details = applicationInfoDetails appInfo
+                            , stack = failureStack cause_
+                            , nextRetryDelay = applicationInfoNextRetryDelay appInfo
                             }
-                      , scheduledEventId = failure ^. Failure.activityFailureInfo . Failure.scheduledEventId
-                      , startedEventId = failure ^. Failure.activityFailureInfo . Failure.startedEventId
-                      , original = failure ^. Failure.activityFailureInfo
+                      , scheduledEventId = activityInfoScheduledEventId activityInfo
+                      , startedEventId = activityInfoStartedEventId activityInfo
+                      , original = activityInfo
                       , stack = Text.pack $ Temporal.Exception.prettyCallStack callStack
                       }
-              Just (ActivityResult.ActivityResolution'Cancelled details) ->
-                Temporal.Workflow.Internal.Monad.throw $ ActivityCancelled (details ^. ActivityResult.failure)
-              Just (ActivityResult.ActivityResolution'Backoff doBackoff) -> do
+              Just (ActivityResult.ActivityResolution'Status'Cancelled details) ->
+                Temporal.Workflow.Internal.Monad.throw $ ActivityCancelled (fromMaybe mempty (activityCancellationFailure details))
+              Just (ActivityResult.ActivityResolution'Status'Backoff doBackoff) -> do
                 cancelled <- ilift $ liftIO $ readIORef cancelledRef
                 if cancelled
-                  then Temporal.Workflow.Internal.Monad.throw $ ActivityCancelled defMessage
+                  then Temporal.Workflow.Internal.Monad.throw $ ActivityCancelled mempty
                   else do
-                    let dur = durationFromProto (doBackoff ^. ActivityResult.backoffDuration)
-                        newOrigTime = doBackoff ^. ActivityResult.originalScheduleTime
-                        newAttempt = doBackoff ^. ActivityResult.attempt
+                    let dur = durationFromProto (fromMaybe mempty (activityBackoffDuration doBackoff))
+                        newOrigTime = fromMaybe mempty (activityBackoffOriginalScheduleTime doBackoff)
+                        newAttempt = fromMaybe 0 (activityBackoffAttempt doBackoff)
                     sleep dur
                     retryTask <- scheduleLocalActivityAttempt name opts typedPayloads newAttempt newOrigTime cancelledRef
                     Temporal.Workflow.Unsafe.Handle.wait retryTask
         , cancelAction = do
             ilift $ liftIO $ writeIORef cancelledRef True
             let cancelCmd =
-                  defMessage
-                    & Command.requestCancelLocalActivity
-                      .~ ( defMessage
-                            & Command.seq .~ actSeq
-                         )
+                  workflowCommand (Command.WorkflowCommand'Variant'RequestCancelLocalActivity (Command.defaultRequestCancelLocalActivity {Command.seq = Just actSeq}))
             ilift $ addCommand cancelCmd
         }
 
@@ -985,11 +1058,7 @@ upsertSearchAttributes values = ilift $ do
   updateCallStack
   attrs <- liftIO $ searchAttributesToProto values
   let cmd =
-        defMessage
-          & Command.upsertWorkflowSearchAttributes
-            .~ ( defMessage
-                  & Command.searchAttributes .~ attrs
-               )
+        workflowCommand (Command.WorkflowCommand'Variant'UpsertWorkflowSearchAttributes (Command.defaultUpsertWorkflowSearchAttributes {Command.searchAttributes = mapProtoPayloadEntries Command.UpsertWorkflowSearchAttributes'SearchAttributesEntry attrs}))
   addCommand cmd
   inst <- ask
   modifyIORef' inst.workflowInstanceInfo $ \Info {..} ->
@@ -1004,11 +1073,7 @@ upsertMemo values = ilift $ do
   updateCallStack
   let encodedMap = fmap encodeJSON values
   let cmd =
-        defMessage
-          & Command.modifyWorkflowProperties
-            .~ ( defMessage
-                  & Command.upsertedMemo .~ convertToProtoMemo encodedMap
-               )
+        workflowCommand (Command.WorkflowCommand'Variant'ModifyWorkflowProperties (Command.defaultModifyWorkflowProperties {Command.upsertedMemo = Just (convertToProtoMemo encodedMap)}))
   addCommand cmd
   inst <- ask
   modifyIORef' inst.workflowInstanceInfo $ \Info {..} ->
@@ -1083,8 +1148,7 @@ applyPatch pid deprecated = ilift $ do
       writeIORef inst.workflowMemoizedPatches $ HashMap.insert pid usePatch memoized
       when usePatch $ do
         addCommand $
-          defMessage
-            & Command.setPatchMarker .~ (defMessage & Command.patchId .~ rawPatchId pid & Command.deprecated .~ deprecated)
+          workflowCommand (Command.WorkflowCommand'Variant'SetPatchMarker (Command.defaultSetPatchMarker {Command.patchId = Just (rawPatchId pid), Command.deprecated = Just deprecated}))
       pure usePatch
 
 
@@ -1447,12 +1511,7 @@ createTimer ts = provideCallStack $ ilift $ do
     then pure Nothing
     else do
       let cmd =
-            defMessage
-              & Command.startTimer
-                .~ ( defMessage
-                      & Command.seq .~ seqId
-                      & Command.startToFireTimeout .~ durationToProto ts
-                   )
+            workflowCommand (Command.WorkflowCommand'Variant'StartTimer (Command.defaultStartTimer {Command.seq = Just seqId, Command.startToFireTimeout = Just (durationToProto ts)}))
       Logging.logDebug "Add command: sleep"
       res <- newTrackedIVar
       atomically $ modifyTVar' inst.workflowSequenceMaps $ \seqMaps ->
@@ -1522,11 +1581,7 @@ instance Cancel Timer where
     updateCallStack
     inst <- ask
     let cmd =
-          defMessage
-            & Command.cancelTimer
-              .~ ( defMessage
-                    & Command.seq .~ rawSequence (timerSequence t)
-                 )
+          workflowCommand (Command.WorkflowCommand'Variant'CancelTimer (Command.defaultCancelTimer {Command.seq = Just (rawSequence (timerSequence t))}))
     addCommand cmd
     Logging.logDebug "about to putIVar: cancelTimer"
     liftIO $

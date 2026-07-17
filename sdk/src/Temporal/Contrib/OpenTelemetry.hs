@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -70,7 +71,12 @@ defaultOpenTelemetryInterceptorOptions =
 headersPropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersPropagator =
   Propagator
-    { propagatorNames = ["tracecontext"]
+    {
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
+      propagatorFields = ["tracecontext"]
+#else
+      propagatorNames = ["tracecontext"]
+#endif
     , extractor = \hs c -> do
         let traceParentHeader = payloadData <$> Map.lookup "traceparent" hs
             traceStateHeader = payloadData <$> Map.lookup "tracestate" hs
@@ -91,7 +97,12 @@ headersPropagator =
 headersBaggagePropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersBaggagePropagator =
   Propagator
-    { propagatorNames = ["baggage"]
+    {
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
+      propagatorFields = ["baggage"]
+#else
+      propagatorNames = ["baggage"]
+#endif
     , extractor = \headers ctxt ->
         let payload = payloadData <$> Map.lookup "baggage" headers
         in pure $! case payload >>= decodeBaggage of
@@ -147,7 +158,11 @@ makeOpenTelemetryInterceptor = do
         makeTracer
           tracerProvider
           "temporal-sdk"
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
+          (TracerOptions Nothing [])
+#else
           (TracerOptions Nothing)
+#endif
   pure $
     Interceptors
       { workflowInboundInterceptors =

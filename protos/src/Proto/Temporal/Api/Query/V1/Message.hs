@@ -1,793 +1,416 @@
-{- This file was auto-generated from temporal/api/query/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Query.V1.Message (
-        QueryRejected(), WorkflowQuery(), WorkflowQueryResult()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Api.Enums.V1.Query
-import qualified Proto.Temporal.Api.Enums.V1.Workflow
-import qualified Proto.Temporal.Api.Failure.V1.Message
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.status' @:: Lens' QueryRejected Proto.Temporal.Api.Enums.V1.Workflow.WorkflowExecutionStatus@ -}
-data QueryRejected
-  = QueryRejected'_constructor {_QueryRejected'status :: !Proto.Temporal.Api.Enums.V1.Workflow.WorkflowExecutionStatus,
-                                _QueryRejected'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show QueryRejected where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField QueryRejected "status" Proto.Temporal.Api.Enums.V1.Workflow.WorkflowExecutionStatus where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _QueryRejected'status
-           (\ x__ y__ -> x__ {_QueryRejected'status = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message QueryRejected where
-  messageName _
-    = Data.Text.pack "temporal.api.query.v1.QueryRejected"
-  packedMessageDescriptor _
-    = "\n\
-      \\rQueryRejected\DC2F\n\
-      \\ACKstatus\CAN\SOH \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatus"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        status__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "status"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Workflow.WorkflowExecutionStatus)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"status")) ::
-              Data.ProtoLens.FieldDescriptor QueryRejected
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, status__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _QueryRejected'_unknownFields
-        (\ x__ y__ -> x__ {_QueryRejected'_unknownFields = y__})
-  defMessage
-    = QueryRejected'_constructor
-        {_QueryRejected'status = Data.ProtoLens.fieldDefault,
-         _QueryRejected'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          QueryRejected -> Data.ProtoLens.Encoding.Bytes.Parser QueryRejected
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "status"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"status") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "QueryRejected"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"status") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                         Prelude.fromEnum _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData QueryRejected where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_QueryRejected'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_QueryRejected'status x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.queryType' @:: Lens' WorkflowQuery Data.Text.Text@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.queryArgs' @:: Lens' WorkflowQuery Proto.Temporal.Api.Common.V1.Message.Payloads@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.maybe'queryArgs' @:: Lens' WorkflowQuery (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.header' @:: Lens' WorkflowQuery Proto.Temporal.Api.Common.V1.Message.Header@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.maybe'header' @:: Lens' WorkflowQuery (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header)@ -}
-data WorkflowQuery
-  = WorkflowQuery'_constructor {_WorkflowQuery'queryType :: !Data.Text.Text,
-                                _WorkflowQuery'queryArgs :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
-                                _WorkflowQuery'header :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header),
-                                _WorkflowQuery'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowQuery where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowQuery "queryType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQuery'queryType
-           (\ x__ y__ -> x__ {_WorkflowQuery'queryType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowQuery "queryArgs" Proto.Temporal.Api.Common.V1.Message.Payloads where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQuery'queryArgs
-           (\ x__ y__ -> x__ {_WorkflowQuery'queryArgs = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowQuery "maybe'queryArgs" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQuery'queryArgs
-           (\ x__ y__ -> x__ {_WorkflowQuery'queryArgs = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowQuery "header" Proto.Temporal.Api.Common.V1.Message.Header where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQuery'header
-           (\ x__ y__ -> x__ {_WorkflowQuery'header = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowQuery "maybe'header" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Header) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQuery'header
-           (\ x__ y__ -> x__ {_WorkflowQuery'header = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowQuery where
-  messageName _
-    = Data.Text.pack "temporal.api.query.v1.WorkflowQuery"
-  packedMessageDescriptor _
-    = "\n\
-      \\rWorkflowQuery\DC2\GS\n\
-      \\n\
-      \query_type\CAN\SOH \SOH(\tR\tqueryType\DC2?\n\
-      \\n\
-      \query_args\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\tqueryArgs\DC26\n\
-      \\ACKheader\CAN\ETX \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        queryType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "query_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"queryType")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQuery
-        queryArgs__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "query_args"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'queryArgs")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQuery
-        header__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "header"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Header)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'header")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQuery
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, queryType__field_descriptor),
-           (Data.ProtoLens.Tag 2, queryArgs__field_descriptor),
-           (Data.ProtoLens.Tag 3, header__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowQuery'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowQuery'_unknownFields = y__})
-  defMessage
-    = WorkflowQuery'_constructor
-        {_WorkflowQuery'queryType = Data.ProtoLens.fieldDefault,
-         _WorkflowQuery'queryArgs = Prelude.Nothing,
-         _WorkflowQuery'header = Prelude.Nothing,
-         _WorkflowQuery'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowQuery -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowQuery
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "query_type"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"queryType") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "query_args"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"queryArgs") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "header"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"header") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowQuery"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"queryType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'queryArgs") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'header") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData WorkflowQuery where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowQuery'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowQuery'queryType x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkflowQuery'queryArgs x__)
-                   (Control.DeepSeq.deepseq (_WorkflowQuery'header x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.resultType' @:: Lens' WorkflowQueryResult Proto.Temporal.Api.Enums.V1.Query.QueryResultType@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.answer' @:: Lens' WorkflowQueryResult Proto.Temporal.Api.Common.V1.Message.Payloads@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.maybe'answer' @:: Lens' WorkflowQueryResult (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads)@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.errorMessage' @:: Lens' WorkflowQueryResult Data.Text.Text@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.failure' @:: Lens' WorkflowQueryResult Proto.Temporal.Api.Failure.V1.Message.Failure@
-         * 'Proto.Temporal.Api.Query.V1.Message_Fields.maybe'failure' @:: Lens' WorkflowQueryResult (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@ -}
-data WorkflowQueryResult
-  = WorkflowQueryResult'_constructor {_WorkflowQueryResult'resultType :: !Proto.Temporal.Api.Enums.V1.Query.QueryResultType,
-                                      _WorkflowQueryResult'answer :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads),
-                                      _WorkflowQueryResult'errorMessage :: !Data.Text.Text,
-                                      _WorkflowQueryResult'failure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
-                                      _WorkflowQueryResult'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowQueryResult where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowQueryResult "resultType" Proto.Temporal.Api.Enums.V1.Query.QueryResultType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQueryResult'resultType
-           (\ x__ y__ -> x__ {_WorkflowQueryResult'resultType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowQueryResult "answer" Proto.Temporal.Api.Common.V1.Message.Payloads where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQueryResult'answer
-           (\ x__ y__ -> x__ {_WorkflowQueryResult'answer = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowQueryResult "maybe'answer" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payloads) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQueryResult'answer
-           (\ x__ y__ -> x__ {_WorkflowQueryResult'answer = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowQueryResult "errorMessage" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQueryResult'errorMessage
-           (\ x__ y__ -> x__ {_WorkflowQueryResult'errorMessage = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowQueryResult "failure" Proto.Temporal.Api.Failure.V1.Message.Failure where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQueryResult'failure
-           (\ x__ y__ -> x__ {_WorkflowQueryResult'failure = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowQueryResult "maybe'failure" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowQueryResult'failure
-           (\ x__ y__ -> x__ {_WorkflowQueryResult'failure = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowQueryResult where
-  messageName _
-    = Data.Text.pack "temporal.api.query.v1.WorkflowQueryResult"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC3WorkflowQueryResult\DC2G\n\
-      \\vresult_type\CAN\SOH \SOH(\SO2&.temporal.api.enums.v1.QueryResultTypeR\n\
-      \resultType\DC28\n\
-      \\ACKanswer\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\ACKanswer\DC2#\n\
-      \\rerror_message\CAN\ETX \SOH(\tR\ferrorMessage\DC2:\n\
-      \\afailure\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        resultType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "result_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Query.QueryResultType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resultType")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQueryResult
-        answer__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "answer"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payloads)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'answer")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQueryResult
-        errorMessage__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "error_message"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"errorMessage")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQueryResult
-        failure__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "failure"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'failure")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowQueryResult
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, resultType__field_descriptor),
-           (Data.ProtoLens.Tag 2, answer__field_descriptor),
-           (Data.ProtoLens.Tag 3, errorMessage__field_descriptor),
-           (Data.ProtoLens.Tag 4, failure__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowQueryResult'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowQueryResult'_unknownFields = y__})
-  defMessage
-    = WorkflowQueryResult'_constructor
-        {_WorkflowQueryResult'resultType = Data.ProtoLens.fieldDefault,
-         _WorkflowQueryResult'answer = Prelude.Nothing,
-         _WorkflowQueryResult'errorMessage = Data.ProtoLens.fieldDefault,
-         _WorkflowQueryResult'failure = Prelude.Nothing,
-         _WorkflowQueryResult'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowQueryResult
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowQueryResult
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "result_type"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"resultType") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "answer"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"answer") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "error_message"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"errorMessage") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "failure"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"failure") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowQueryResult"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"resultType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                         Prelude.fromEnum _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'answer") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view (Data.ProtoLens.Field.field @"errorMessage") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'failure") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData WorkflowQueryResult where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowQueryResult'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowQueryResult'resultType x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkflowQueryResult'answer x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkflowQueryResult'errorMessage x__)
-                      (Control.DeepSeq.deepseq (_WorkflowQueryResult'failure x__) ()))))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \#temporal/api/query/v1/message.proto\DC2\NAKtemporal.api.query.v1\SUB!temporal/api/enums/v1/query.proto\SUB$temporal/api/enums/v1/workflow.proto\SUB$temporal/api/common/v1/message.proto\SUB%temporal/api/failure/v1/message.proto\"\167\SOH\n\
-    \\rWorkflowQuery\DC2\GS\n\
-    \\n\
-    \query_type\CAN\SOH \SOH(\tR\tqueryType\DC2?\n\
-    \\n\
-    \query_args\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\tqueryArgs\DC26\n\
-    \\ACKheader\CAN\ETX \SOH(\v2\RS.temporal.api.common.v1.HeaderR\ACKheader\"\249\SOH\n\
-    \\DC3WorkflowQueryResult\DC2G\n\
-    \\vresult_type\CAN\SOH \SOH(\SO2&.temporal.api.enums.v1.QueryResultTypeR\n\
-    \resultType\DC28\n\
-    \\ACKanswer\CAN\STX \SOH(\v2 .temporal.api.common.v1.PayloadsR\ACKanswer\DC2#\n\
-    \\rerror_message\CAN\ETX \SOH(\tR\ferrorMessage\DC2:\n\
-    \\afailure\CAN\EOT \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\"W\n\
-    \\rQueryRejected\DC2F\n\
-    \\ACKstatus\CAN\SOH \SOH(\SO2..temporal.api.enums.v1.WorkflowExecutionStatusR\ACKstatusB\132\SOH\n\
-    \\CANio.temporal.api.query.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/query/v1;query\170\STX\ETBTemporalio.Api.Query.V1\234\STX\SUBTemporalio::Api::Query::V1J\142\f\n\
-    \\ACK\DC2\EOT\NUL\NUL-\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL8\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL3\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL3\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL4\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL4\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL+\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\f\NUL.\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\r\NUL.\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\SO\NUL/\n\
-    \A\n\
-    \\STX\EOT\NUL\DC2\EOT\DC1\NUL\EM\SOH\SUB5 See https://docs.temporal.io/docs/concepts/queries/\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\NAK\n\
-    \^\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC3\EOT\SUB\SUBQ The workflow-author-defined identifier of the query. Typically a function name.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC3\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC3\v\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC3\CAN\EM\n\
-    \O\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\NAK\EOT3\SUBB Serialized arguments that will be provided to the query handler.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\NAK\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\NAK$.\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\NAK12\n\
-    \y\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\CAN\EOT-\SUBl Headers that were passed by the caller of the query and copied by temporal\n\
-    \ server into the workflow task.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\CAN\EOT!\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\CAN\"(\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\CAN+,\n\
-    \)\n\
-    \\STX\EOT\SOH\DC2\EOT\FS\NUL)\SOH\SUB\GS Answer to a `WorkflowQuery`\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\FS\b\ESC\n\
-    \-\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\RS\EOT:\SUB  Did the query succeed or fail?\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\RS\EOT)\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\RS*5\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\RS89\n\
-    \t\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX!\EOT/\SUBg Set when the query succeeds with the results.\n\
-    \ Mutually exclusive with `error_message` and `failure`.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX!\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX!$*\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX!-.\n\
-    \o\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX$\EOT\GS\SUBb Mutually exclusive with `answer`. Set when the query fails.\n\
-    \ See also the newer `failure` field.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX$\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX$\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX$\ESC\FS\n\
-    \\136\STX\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX(\EOT0\SUB\250\SOH The full reason for this query failure. This field is newer than `error_message` and can be encoded by the SDK's\n\
-    \ failure converter to support E2E encryption of messages and stack traces.\n\
-    \ Mutually exclusive with `answer`. Set when the query fails.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX(\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX($+\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX(./\n\
-    \\n\
-    \\n\
-    \\STX\EOT\STX\DC2\EOT+\NUL-\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX+\b\NAK\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX,\EOT=\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX,\EOT1\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX,28\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX,;<b\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.query.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Query.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+import qualified Proto.Temporal.Api.Enums.V1.Query as TE_Enums_V1_Query
+import qualified Proto.Temporal.Api.Enums.V1.Workflow as TE_Enums_V1_Workflow
+import qualified Proto.Temporal.Api.Failure.V1.Message as TE_Failure_V1_Message
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x71\x75\x65\x72\x79\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x71\x75\x65\x72\x79\x2e\x76\x31\x1a\x21\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x71\x75\x65\x72\x79\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x66\x61\x69\x6c\x75\x72\x65\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x22\x87\x01\x0a\x0d\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x51\x75\x65\x72\x79\x12\x12\x0a\x0a\x71\x75\x65\x72\x79\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x09\x12\x33\x0a\x0a\x71\x75\x65\x72\x79\x5f\x61\x72\x67\x73\x18\x02\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x73\x12\x2d\x0a\x06\x68\x65\x61\x64\x65\x72\x18\x03\x20\x01\x28\x0b\x32\x1d\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x48\x65\x61\x64\x65\x72\x22\xcb\x01\x0a\x13\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x51\x75\x65\x72\x79\x52\x65\x73\x75\x6c\x74\x12\x3a\x0a\x0b\x72\x65\x73\x75\x6c\x74\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x0b\x32\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x51\x75\x65\x72\x79\x52\x65\x73\x75\x6c\x74\x54\x79\x70\x65\x12\x2f\x0a\x06\x61\x6e\x73\x77\x65\x72\x18\x02\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x73\x12\x15\x0a\x0d\x65\x72\x72\x6f\x72\x5f\x6d\x65\x73\x73\x61\x67\x65\x18\x03\x20\x01\x28\x09\x12\x30\x0a\x07\x66\x61\x69\x6c\x75\x72\x65\x18\x04\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x66\x61\x69\x6c\x75\x72\x65\x2e\x76\x31\x2e\x46\x61\x69\x6c\x75\x72\x65\x22\x4e\x0a\x0d\x51\x75\x65\x72\x79\x52\x65\x6a\x65\x63\x74\x65\x64\x12\x3d\x0a\x06\x73\x74\x61\x74\x75\x73\x18\x01\x20\x01\x28\x0b\x32\x2d\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x53\x74\x61\x74\x75\x73\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data WorkflowQuery = WorkflowQuery
+  { queryType :: !(Maybe Text)
+  , queryArgs :: !(Maybe TE_Common_V1_Message.Payloads)
+  , header :: !(Maybe TE_Common_V1_Message.Header)
+  , workflowQueryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowQuery :: WorkflowQuery
+defaultWorkflowQuery = WorkflowQuery
+  { queryType = Nothing
+  , queryArgs = Nothing
+  , header = Nothing
+  , workflowQueryUnknownFields = []
+  }
+
+instance MessageEncode WorkflowQuery where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.queryType)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.queryArgs)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.header)
+    <> encodeUnknownFields msg.workflowQueryUnknownFields
+
+instance MessageSize WorkflowQuery where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.queryType)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.queryArgs)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.header)
+    + unknownFieldsSize msg.workflowQueryUnknownFields
+
+instance MessageDecode WorkflowQuery where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (WorkflowQuery {queryType = acc_0, queryArgs = acc_1, header = acc_2, workflowQueryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowQuery where
+  protoMessageName _ = "temporal.api.query.v1.WorkflowQuery"
+  protoPackageName _ = "temporal.api.query.v1"
+  protoDefaultValue = defaultWorkflowQuery
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "query_type"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQuery) -> m.queryType
+        , fdSet = \v (m :: WorkflowQuery) -> (m { queryType = v } :: WorkflowQuery)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "query_args"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payloads"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQuery) -> m.queryArgs
+        , fdSet = \v (m :: WorkflowQuery) -> (m { queryArgs = v } :: WorkflowQuery)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "header"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Header"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQuery) -> m.header
+        , fdSet = \v (m :: WorkflowQuery) -> (m { header = v } :: WorkflowQuery)
+        })
+    ]
+
+instance IsMessage WorkflowQuery
+
+instance Aeson.ToJSON WorkflowQuery where
+  toJSON msg = jsonObject
+      [ "queryType" .=: msg.queryType
+      , "queryArgs" .=: msg.queryArgs
+      , "header" .=: msg.header
+      ]
+
+instance Aeson.FromJSON WorkflowQuery where
+  parseJSON = Aeson.withObject "WorkflowQuery" $ \obj -> do
+    fld_queryType <- parseFieldMaybe obj "queryType"
+    fld_queryArgs <- parseFieldMaybe obj "queryArgs"
+    fld_header <- parseFieldMaybe obj "header"
+    pure (defaultWorkflowQuery
+      { queryType = maybe (defaultWorkflowQuery.queryType) Prelude.id fld_queryType
+      , queryArgs = maybe (defaultWorkflowQuery.queryArgs) Prelude.id fld_queryArgs
+      , header = maybe (defaultWorkflowQuery.header) Prelude.id fld_header
+      , workflowQueryUnknownFields = []
+      } :: WorkflowQuery)
+
+instance Hashable WorkflowQuery where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.queryType) msg.queryArgs) msg.header
+
+instance Proto.Extension.HasExtensions WorkflowQuery where
+  messageUnknownFields msg = msg.workflowQueryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowQueryUnknownFields = ufs }
+
+instance Semigroup WorkflowQuery where
+  a <> b = WorkflowQuery
+    { queryType = case b.queryType of { Nothing -> a.queryType; x -> x }
+    , queryArgs = case b.queryArgs of { Nothing -> a.queryArgs; x -> x }
+    , header = case b.header of { Nothing -> a.header; x -> x }
+    , workflowQueryUnknownFields = a.workflowQueryUnknownFields <> b.workflowQueryUnknownFields
+    }
+
+instance Monoid WorkflowQuery where
+  mempty = defaultWorkflowQuery
+
+data WorkflowQueryResult = WorkflowQueryResult
+  { resultType :: !(Maybe TE_Enums_V1_Query.QueryResultType)
+  , answer :: !(Maybe TE_Common_V1_Message.Payloads)
+  , errorMessage :: !(Maybe Text)
+  , failure :: !(Maybe TE_Failure_V1_Message.Failure)
+  , workflowQueryResultUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowQueryResult :: WorkflowQueryResult
+defaultWorkflowQueryResult = WorkflowQueryResult
+  { resultType = Nothing
+  , answer = Nothing
+  , errorMessage = Nothing
+  , failure = Nothing
+  , workflowQueryResultUnknownFields = []
+  }
+
+instance MessageEncode WorkflowQueryResult where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral (fromEnum v))) msg.resultType)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.answer)
+    <> (maybe mempty (\v -> archString 26 v) msg.errorMessage)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 34 sz (buildMessage v)) msg.failure)
+    <> encodeUnknownFields msg.workflowQueryResultUnknownFields
+
+instance MessageSize WorkflowQueryResult where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.resultType)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.answer)
+    + (maybe 0 (\v -> archStringSize v) msg.errorMessage)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.failure)
+    + unknownFieldsSize msg.workflowQueryResultUnknownFields
+
+instance MessageDecode WorkflowQueryResult where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (WorkflowQueryResult {resultType = acc_0, answer = acc_1, errorMessage = acc_2, failure = acc_3, workflowQueryResultUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldEnum
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_3 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowQueryResult where
+  protoMessageName _ = "temporal.api.query.v1.WorkflowQueryResult"
+  protoPackageName _ = "temporal.api.query.v1"
+  protoDefaultValue = defaultWorkflowQueryResult
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "result_type"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.QueryResultType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQueryResult) -> m.resultType
+        , fdSet = \v (m :: WorkflowQueryResult) -> (m { resultType = v } :: WorkflowQueryResult)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "answer"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payloads"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQueryResult) -> m.answer
+        , fdSet = \v (m :: WorkflowQueryResult) -> (m { answer = v } :: WorkflowQueryResult)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "error_message"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQueryResult) -> m.errorMessage
+        , fdSet = \v (m :: WorkflowQueryResult) -> (m { errorMessage = v } :: WorkflowQueryResult)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "failure"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.failure.v1.Failure"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowQueryResult) -> m.failure
+        , fdSet = \v (m :: WorkflowQueryResult) -> (m { failure = v } :: WorkflowQueryResult)
+        })
+    ]
+
+instance IsMessage WorkflowQueryResult
+
+instance Aeson.ToJSON WorkflowQueryResult where
+  toJSON msg = jsonObject
+      [ "resultType" .=: msg.resultType
+      , "answer" .=: msg.answer
+      , "errorMessage" .=: msg.errorMessage
+      , "failure" .=: msg.failure
+      ]
+
+instance Aeson.FromJSON WorkflowQueryResult where
+  parseJSON = Aeson.withObject "WorkflowQueryResult" $ \obj -> do
+    fld_resultType <- parseFieldMaybe obj "resultType"
+    fld_answer <- parseFieldMaybe obj "answer"
+    fld_errorMessage <- parseFieldMaybe obj "errorMessage"
+    fld_failure <- parseFieldMaybe obj "failure"
+    pure (defaultWorkflowQueryResult
+      { resultType = maybe (defaultWorkflowQueryResult.resultType) Prelude.id fld_resultType
+      , answer = maybe (defaultWorkflowQueryResult.answer) Prelude.id fld_answer
+      , errorMessage = maybe (defaultWorkflowQueryResult.errorMessage) Prelude.id fld_errorMessage
+      , failure = maybe (defaultWorkflowQueryResult.failure) Prelude.id fld_failure
+      , workflowQueryResultUnknownFields = []
+      } :: WorkflowQueryResult)
+
+instance Hashable WorkflowQueryResult where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.resultType) msg.answer) msg.errorMessage) msg.failure
+
+instance Proto.Extension.HasExtensions WorkflowQueryResult where
+  messageUnknownFields msg = msg.workflowQueryResultUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowQueryResultUnknownFields = ufs }
+
+instance Semigroup WorkflowQueryResult where
+  a <> b = WorkflowQueryResult
+    { resultType = case b.resultType of { Nothing -> a.resultType; x -> x }
+    , answer = case b.answer of { Nothing -> a.answer; x -> x }
+    , errorMessage = case b.errorMessage of { Nothing -> a.errorMessage; x -> x }
+    , failure = case b.failure of { Nothing -> a.failure; x -> x }
+    , workflowQueryResultUnknownFields = a.workflowQueryResultUnknownFields <> b.workflowQueryResultUnknownFields
+    }
+
+instance Monoid WorkflowQueryResult where
+  mempty = defaultWorkflowQueryResult
+
+data QueryRejected = QueryRejected
+  { status :: !(Maybe TE_Enums_V1_Workflow.WorkflowExecutionStatus)
+  , queryRejectedUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultQueryRejected :: QueryRejected
+defaultQueryRejected = QueryRejected
+  { status = Nothing
+  , queryRejectedUnknownFields = []
+  }
+
+instance MessageEncode QueryRejected where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral (fromEnum v))) msg.status)
+    <> encodeUnknownFields msg.queryRejectedUnknownFields
+
+instance MessageSize QueryRejected where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.status)
+    + unknownFieldsSize msg.queryRejectedUnknownFields
+
+instance MessageDecode QueryRejected where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (QueryRejected {status = acc_0, queryRejectedUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldEnum
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage QueryRejected where
+  protoMessageName _ = "temporal.api.query.v1.QueryRejected"
+  protoPackageName _ = "temporal.api.query.v1"
+  protoDefaultValue = defaultQueryRejected
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "status"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.WorkflowExecutionStatus"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: QueryRejected) -> m.status
+        , fdSet = \v (m :: QueryRejected) -> (m { status = v } :: QueryRejected)
+        })
+    ]
+
+instance IsMessage QueryRejected
+
+instance Aeson.ToJSON QueryRejected where
+  toJSON msg = jsonObject
+      [ "status" .=: msg.status
+
+      ]
+
+instance Aeson.FromJSON QueryRejected where
+  parseJSON = Aeson.withObject "QueryRejected" $ \obj -> do
+    fld_status <- parseFieldMaybe obj "status"
+    pure (defaultQueryRejected
+      { status = maybe (defaultQueryRejected.status) Prelude.id fld_status
+      , queryRejectedUnknownFields = []
+      } :: QueryRejected)
+
+instance Hashable QueryRejected where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.status
+
+instance Proto.Extension.HasExtensions QueryRejected where
+  messageUnknownFields msg = msg.queryRejectedUnknownFields
+  setMessageUnknownFields !ufs msg = msg { queryRejectedUnknownFields = ufs }
+
+instance Semigroup QueryRejected where
+  a <> b = QueryRejected
+    { status = case b.status of { Nothing -> a.status; x -> x }
+    , queryRejectedUnknownFields = a.queryRejectedUnknownFields <> b.queryRejectedUnknownFields
+    }
+
+instance Monoid QueryRejected where
+  mempty = defaultQueryRejected

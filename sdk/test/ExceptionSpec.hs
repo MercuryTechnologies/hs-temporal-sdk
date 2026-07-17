@@ -1,8 +1,8 @@
 module ExceptionSpec where
 
-import Data.ProtoLens
-import Data.ProtoLens.Field (field)
-import Lens.Family2
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
+import Proto.Temporal.Api.Errordetails.V1.Message (WorkflowExecutionAlreadyStartedFailure (..))
 import Proto.Temporal.Api.Failure.V1.Message ()
 import qualified Temporal.Core.Client as Core
 import Temporal.Exception (
@@ -28,13 +28,13 @@ spec = do
   describe "RpcError conversion" do
     specify "Core RpcError values should convert to useful Temporal.Exception.RpcError values" $ do
       let rpcError = coreRpcErrorToRpcError exampleError
-      rpcError.code `shouldBe` StatusAlreadyExists
-      rpcError.message `shouldBe` "Workflow execution is already running. WorkflowId: zendesk/organization/c4e43516-a488-11eb-bbd4-1b5d0069e6eb, RunId: 0195f782-4076-7e1f-8d9f-6567e745033e."
-      rpcError.details
+      rpcError . code `shouldBe` StatusAlreadyExists
+      rpcError . message `shouldBe` "Workflow execution is already running. WorkflowId: zendesk/organization/c4e43516-a488-11eb-bbd4-1b5d0069e6eb, RunId: 0195f782-4076-7e1f-8d9f-6567e745033e."
+      rpcError . details
         `shouldBe` [ RpcErrorWorkflowExecutionAlreadyStarted $
-                      defMessage
-                        & field @"startRequestId"
-                        .~ "3f7d236b-fcda-4482-a02d-834c225e5e91"
-                        & field @"runId"
-                        .~ "0195f782-4076-7e1f-8d9f-6567e745033e"
+                      WorkflowExecutionAlreadyStartedFailure
+                        { startRequestId = Just "3f7d236b-fcda-4482-a02d-834c225e5e91"
+                        , runId = Just "0195f782-4076-7e1f-8d9f-6567e745033e"
+                        , workflowExecutionAlreadyStartedFailureUnknownFields = []
+                        }
                    ]

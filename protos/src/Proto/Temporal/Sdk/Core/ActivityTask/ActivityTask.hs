@@ -1,2582 +1,1034 @@
-{- This file was auto-generated from temporal/sdk/core/activity_task/activity_task.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask (
-        ActivityCancelReason(..), ActivityCancelReason(),
-        ActivityCancelReason'UnrecognizedValue,
-        ActivityCancellationDetails(), ActivityTask(),
-        ActivityTask'Variant(..), _ActivityTask'Start,
-        _ActivityTask'Cancel, Cancel(), Start(), Start'HeaderFieldsEntry()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Sdk.Core.Common.Common
-newtype ActivityCancelReason'UnrecognizedValue
-  = ActivityCancelReason'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data ActivityCancelReason
-  = NOT_FOUND |
-    CANCELLED |
-    TIMED_OUT |
-    WORKER_SHUTDOWN |
-    PAUSED |
-    RESET |
-    ActivityCancelReason'Unrecognized !ActivityCancelReason'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum ActivityCancelReason where
-  maybeToEnum 0 = Prelude.Just NOT_FOUND
-  maybeToEnum 1 = Prelude.Just CANCELLED
-  maybeToEnum 2 = Prelude.Just TIMED_OUT
-  maybeToEnum 3 = Prelude.Just WORKER_SHUTDOWN
-  maybeToEnum 4 = Prelude.Just PAUSED
-  maybeToEnum 5 = Prelude.Just RESET
-  maybeToEnum k
-    = Prelude.Just
-        (ActivityCancelReason'Unrecognized
-           (ActivityCancelReason'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum NOT_FOUND = "NOT_FOUND"
-  showEnum CANCELLED = "CANCELLED"
-  showEnum TIMED_OUT = "TIMED_OUT"
-  showEnum WORKER_SHUTDOWN = "WORKER_SHUTDOWN"
-  showEnum PAUSED = "PAUSED"
-  showEnum RESET = "RESET"
-  showEnum
-    (ActivityCancelReason'Unrecognized (ActivityCancelReason'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "NOT_FOUND" = Prelude.Just NOT_FOUND
-    | (Prelude.==) k "CANCELLED" = Prelude.Just CANCELLED
-    | (Prelude.==) k "TIMED_OUT" = Prelude.Just TIMED_OUT
-    | (Prelude.==) k "WORKER_SHUTDOWN" = Prelude.Just WORKER_SHUTDOWN
-    | (Prelude.==) k "PAUSED" = Prelude.Just PAUSED
-    | (Prelude.==) k "RESET" = Prelude.Just RESET
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded ActivityCancelReason where
-  minBound = NOT_FOUND
-  maxBound = RESET
-instance Prelude.Enum ActivityCancelReason where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum ActivityCancelReason: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum NOT_FOUND = 0
-  fromEnum CANCELLED = 1
-  fromEnum TIMED_OUT = 2
-  fromEnum WORKER_SHUTDOWN = 3
-  fromEnum PAUSED = 4
-  fromEnum RESET = 5
-  fromEnum
-    (ActivityCancelReason'Unrecognized (ActivityCancelReason'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ RESET
-    = Prelude.error
-        "ActivityCancelReason.succ: bad argument RESET. This value would be out of bounds."
-  succ NOT_FOUND = CANCELLED
-  succ CANCELLED = TIMED_OUT
-  succ TIMED_OUT = WORKER_SHUTDOWN
-  succ WORKER_SHUTDOWN = PAUSED
-  succ PAUSED = RESET
-  succ (ActivityCancelReason'Unrecognized _)
-    = Prelude.error
-        "ActivityCancelReason.succ: bad argument: unrecognized value"
-  pred NOT_FOUND
-    = Prelude.error
-        "ActivityCancelReason.pred: bad argument NOT_FOUND. This value would be out of bounds."
-  pred CANCELLED = NOT_FOUND
-  pred TIMED_OUT = CANCELLED
-  pred WORKER_SHUTDOWN = TIMED_OUT
-  pred PAUSED = WORKER_SHUTDOWN
-  pred RESET = PAUSED
-  pred (ActivityCancelReason'Unrecognized _)
-    = Prelude.error
-        "ActivityCancelReason.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault ActivityCancelReason where
-  fieldDefault = NOT_FOUND
-instance Control.DeepSeq.NFData ActivityCancelReason where
-  rnf x__ = Prelude.seq x__ ()
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isNotFound' @:: Lens' ActivityCancellationDetails Prelude.Bool@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isCancelled' @:: Lens' ActivityCancellationDetails Prelude.Bool@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isPaused' @:: Lens' ActivityCancellationDetails Prelude.Bool@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isTimedOut' @:: Lens' ActivityCancellationDetails Prelude.Bool@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isWorkerShutdown' @:: Lens' ActivityCancellationDetails Prelude.Bool@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isReset' @:: Lens' ActivityCancellationDetails Prelude.Bool@ -}
-data ActivityCancellationDetails
-  = ActivityCancellationDetails'_constructor {_ActivityCancellationDetails'isNotFound :: !Prelude.Bool,
-                                              _ActivityCancellationDetails'isCancelled :: !Prelude.Bool,
-                                              _ActivityCancellationDetails'isPaused :: !Prelude.Bool,
-                                              _ActivityCancellationDetails'isTimedOut :: !Prelude.Bool,
-                                              _ActivityCancellationDetails'isWorkerShutdown :: !Prelude.Bool,
-                                              _ActivityCancellationDetails'isReset :: !Prelude.Bool,
-                                              _ActivityCancellationDetails'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityCancellationDetails where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isNotFound" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityCancellationDetails'isNotFound
-           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isNotFound = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isCancelled" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityCancellationDetails'isCancelled
-           (\ x__ y__
-              -> x__ {_ActivityCancellationDetails'isCancelled = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isPaused" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityCancellationDetails'isPaused
-           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isPaused = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isTimedOut" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityCancellationDetails'isTimedOut
-           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isTimedOut = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isWorkerShutdown" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityCancellationDetails'isWorkerShutdown
-           (\ x__ y__
-              -> x__ {_ActivityCancellationDetails'isWorkerShutdown = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityCancellationDetails "isReset" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityCancellationDetails'isReset
-           (\ x__ y__ -> x__ {_ActivityCancellationDetails'isReset = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ActivityCancellationDetails where
-  messageName _
-    = Data.Text.pack
-        "coresdk.activity_task.ActivityCancellationDetails"
-  packedMessageDescriptor _
-    = "\n\
-      \\ESCActivityCancellationDetails\DC2 \n\
-      \\fis_not_found\CAN\SOH \SOH(\bR\n\
-      \isNotFound\DC2!\n\
-      \\fis_cancelled\CAN\STX \SOH(\bR\visCancelled\DC2\ESC\n\
-      \\tis_paused\CAN\ETX \SOH(\bR\bisPaused\DC2 \n\
-      \\fis_timed_out\CAN\EOT \SOH(\bR\n\
-      \isTimedOut\DC2,\n\
-      \\DC2is_worker_shutdown\CAN\ENQ \SOH(\bR\DLEisWorkerShutdown\DC2\EM\n\
-      \\bis_reset\CAN\ACK \SOH(\bR\aisReset"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        isNotFound__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_not_found"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isNotFound")) ::
-              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
-        isCancelled__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_cancelled"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isCancelled")) ::
-              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
-        isPaused__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_paused"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isPaused")) ::
-              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
-        isTimedOut__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_timed_out"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isTimedOut")) ::
-              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
-        isWorkerShutdown__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_worker_shutdown"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"isWorkerShutdown")) ::
-              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
-        isReset__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_reset"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"isReset")) ::
-              Data.ProtoLens.FieldDescriptor ActivityCancellationDetails
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, isNotFound__field_descriptor),
-           (Data.ProtoLens.Tag 2, isCancelled__field_descriptor),
-           (Data.ProtoLens.Tag 3, isPaused__field_descriptor),
-           (Data.ProtoLens.Tag 4, isTimedOut__field_descriptor),
-           (Data.ProtoLens.Tag 5, isWorkerShutdown__field_descriptor),
-           (Data.ProtoLens.Tag 6, isReset__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityCancellationDetails'_unknownFields
-        (\ x__ y__
-           -> x__ {_ActivityCancellationDetails'_unknownFields = y__})
-  defMessage
-    = ActivityCancellationDetails'_constructor
-        {_ActivityCancellationDetails'isNotFound = Data.ProtoLens.fieldDefault,
-         _ActivityCancellationDetails'isCancelled = Data.ProtoLens.fieldDefault,
-         _ActivityCancellationDetails'isPaused = Data.ProtoLens.fieldDefault,
-         _ActivityCancellationDetails'isTimedOut = Data.ProtoLens.fieldDefault,
-         _ActivityCancellationDetails'isWorkerShutdown = Data.ProtoLens.fieldDefault,
-         _ActivityCancellationDetails'isReset = Data.ProtoLens.fieldDefault,
-         _ActivityCancellationDetails'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityCancellationDetails
-          -> Data.ProtoLens.Encoding.Bytes.Parser ActivityCancellationDetails
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_not_found"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isNotFound") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_cancelled"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isCancelled") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_paused"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isPaused") y x)
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_timed_out"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isTimedOut") y x)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_worker_shutdown"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"isWorkerShutdown") y x)
-                        48
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_reset"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"isReset") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityCancellationDetails"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"isNotFound") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                         _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"isCancelled") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isPaused") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                               _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"isTimedOut") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (\ b -> if b then 1 else 0) _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"isWorkerShutdown") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (\ b -> if b then 1 else 0) _v))
-                         ((Data.Monoid.<>)
-                            (let
-                               _v = Lens.Family2.view (Data.ProtoLens.Field.field @"isReset") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 48)
-                                     ((Prelude..)
-                                        Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (\ b -> if b then 1 else 0) _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
-instance Control.DeepSeq.NFData ActivityCancellationDetails where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityCancellationDetails'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ActivityCancellationDetails'isNotFound x__)
-                (Control.DeepSeq.deepseq
-                   (_ActivityCancellationDetails'isCancelled x__)
-                   (Control.DeepSeq.deepseq
-                      (_ActivityCancellationDetails'isPaused x__)
-                      (Control.DeepSeq.deepseq
-                         (_ActivityCancellationDetails'isTimedOut x__)
-                         (Control.DeepSeq.deepseq
-                            (_ActivityCancellationDetails'isWorkerShutdown x__)
-                            (Control.DeepSeq.deepseq
-                               (_ActivityCancellationDetails'isReset x__) ()))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.taskToken' @:: Lens' ActivityTask Data.ByteString.ByteString@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'variant' @:: Lens' ActivityTask (Prelude.Maybe ActivityTask'Variant)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'start' @:: Lens' ActivityTask (Prelude.Maybe Start)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.start' @:: Lens' ActivityTask Start@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'cancel' @:: Lens' ActivityTask (Prelude.Maybe Cancel)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.cancel' @:: Lens' ActivityTask Cancel@ -}
-data ActivityTask
-  = ActivityTask'_constructor {_ActivityTask'taskToken :: !Data.ByteString.ByteString,
-                               _ActivityTask'variant :: !(Prelude.Maybe ActivityTask'Variant),
-                               _ActivityTask'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityTask where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @coresdk.activity_task@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x70\x72\x6f\x74\x6f\x12\x15\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x22\x87\x01\x0a\x0c\x41\x63\x74\x69\x76\x69\x74\x79\x54\x61\x73\x6b\x12\x12\x0a\x0a\x74\x61\x73\x6b\x5f\x74\x6f\x6b\x65\x6e\x18\x01\x20\x01\x28\x0c\x12\x2a\x0a\x05\x73\x74\x61\x72\x74\x18\x03\x20\x01\x28\x0b\x32\x1b\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x53\x74\x61\x72\x74\x12\x2c\x0a\x06\x63\x61\x6e\x63\x65\x6c\x18\x04\x20\x01\x28\x0b\x32\x1c\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x43\x61\x6e\x63\x65\x6c\x42\x09\x0a\x07\x76\x61\x72\x69\x61\x6e\x74\x22\x90\x07\x0a\x05\x53\x74\x61\x72\x74\x12\x1a\x0a\x12\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x18\x01\x20\x01\x28\x09\x12\x15\x0a\x0d\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x74\x79\x70\x65\x18\x02\x20\x01\x28\x09\x12\x44\x0a\x12\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x65\x78\x65\x63\x75\x74\x69\x6f\x6e\x18\x03\x20\x01\x28\x0b\x32\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x12\x13\x0a\x0b\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x69\x64\x18\x04\x20\x01\x28\x09\x12\x15\x0a\x0d\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x79\x70\x65\x18\x05\x20\x01\x28\x09\x12\x44\x0a\x0d\x68\x65\x61\x64\x65\x72\x5f\x66\x69\x65\x6c\x64\x73\x18\x06\x20\x03\x28\x0b\x32\x2d\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x53\x74\x61\x72\x74\x2e\x48\x65\x61\x64\x65\x72\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x12\x2d\x0a\x05\x69\x6e\x70\x75\x74\x18\x07\x20\x03\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x12\x39\x0a\x11\x68\x65\x61\x72\x74\x62\x65\x61\x74\x5f\x64\x65\x74\x61\x69\x6c\x73\x18\x08\x20\x03\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x12\x31\x0a\x0e\x73\x63\x68\x65\x64\x75\x6c\x65\x64\x5f\x74\x69\x6d\x65\x18\x09\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x41\x0a\x1e\x63\x75\x72\x72\x65\x6e\x74\x5f\x61\x74\x74\x65\x6d\x70\x74\x5f\x73\x63\x68\x65\x64\x75\x6c\x65\x64\x5f\x74\x69\x6d\x65\x18\x0a\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x2f\x0a\x0c\x73\x74\x61\x72\x74\x65\x64\x5f\x74\x69\x6d\x65\x18\x0b\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x0f\x0a\x07\x61\x74\x74\x65\x6d\x70\x74\x18\x0c\x20\x01\x28\x0d\x12\x3b\x0a\x19\x73\x63\x68\x65\x64\x75\x6c\x65\x5f\x74\x6f\x5f\x63\x6c\x6f\x73\x65\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x0d\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x38\x0a\x16\x73\x74\x61\x72\x74\x5f\x74\x6f\x5f\x63\x6c\x6f\x73\x65\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x0e\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x33\x0a\x11\x68\x65\x61\x72\x74\x62\x65\x61\x74\x5f\x74\x69\x6d\x65\x6f\x75\x74\x18\x0f\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x38\x0a\x0c\x72\x65\x74\x72\x79\x5f\x70\x6f\x6c\x69\x63\x79\x18\x10\x20\x01\x28\x0b\x32\x22\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x52\x65\x74\x72\x79\x50\x6f\x6c\x69\x63\x79\x12\x31\x0a\x08\x70\x72\x69\x6f\x72\x69\x74\x79\x18\x12\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x72\x69\x6f\x72\x69\x74\x79\x12\x10\x0a\x08\x69\x73\x5f\x6c\x6f\x63\x61\x6c\x18\x11\x20\x01\x28\x08\x1a\x4f\x0a\x11\x48\x65\x61\x64\x65\x72\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x88\x01\x0a\x06\x43\x61\x6e\x63\x65\x6c\x12\x3a\x0a\x06\x72\x65\x61\x73\x6f\x6e\x18\x01\x20\x01\x28\x0b\x32\x2a\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x41\x63\x74\x69\x76\x69\x74\x79\x43\x61\x6e\x63\x65\x6c\x52\x65\x61\x73\x6f\x6e\x12\x42\x0a\x07\x64\x65\x74\x61\x69\x6c\x73\x18\x02\x20\x01\x28\x0b\x32\x31\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x74\x61\x73\x6b\x2e\x41\x63\x74\x69\x76\x69\x74\x79\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x44\x65\x74\x61\x69\x6c\x73\x22\xa0\x01\x0a\x1b\x41\x63\x74\x69\x76\x69\x74\x79\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x44\x65\x74\x61\x69\x6c\x73\x12\x14\x0a\x0c\x69\x73\x5f\x6e\x6f\x74\x5f\x66\x6f\x75\x6e\x64\x18\x01\x20\x01\x28\x08\x12\x14\x0a\x0c\x69\x73\x5f\x63\x61\x6e\x63\x65\x6c\x6c\x65\x64\x18\x02\x20\x01\x28\x08\x12\x11\x0a\x09\x69\x73\x5f\x70\x61\x75\x73\x65\x64\x18\x03\x20\x01\x28\x08\x12\x14\x0a\x0c\x69\x73\x5f\x74\x69\x6d\x65\x64\x5f\x6f\x75\x74\x18\x04\x20\x01\x28\x08\x12\x1a\x0a\x12\x69\x73\x5f\x77\x6f\x72\x6b\x65\x72\x5f\x73\x68\x75\x74\x64\x6f\x77\x6e\x18\x05\x20\x01\x28\x08\x12\x10\x0a\x08\x69\x73\x5f\x72\x65\x73\x65\x74\x18\x06\x20\x01\x28\x08\x2a\x6d\x0a\x14\x41\x63\x74\x69\x76\x69\x74\x79\x43\x61\x6e\x63\x65\x6c\x52\x65\x61\x73\x6f\x6e\x12\x0b\x0a\x09\x4e\x4f\x54\x5f\x46\x4f\x55\x4e\x44\x12\x0d\x0a\x09\x43\x41\x4e\x43\x45\x4c\x4c\x45\x44\x10\x01\x12\x0d\x0a\x09\x54\x49\x4d\x45\x44\x5f\x4f\x55\x54\x10\x02\x12\x13\x0a\x0f\x57\x4f\x52\x4b\x45\x52\x5f\x53\x48\x55\x54\x44\x4f\x57\x4e\x10\x03\x12\x0a\x0a\x06\x50\x41\x55\x53\x45\x44\x10\x04\x12\x09\x0a\x05\x52\x45\x53\x45\x54\x10\x05\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data ActivityTask = ActivityTask
+  { taskToken :: !(Maybe ByteString)
+  , variant :: !(Maybe ActivityTask'Variant)
+  , activityTaskUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data ActivityTask'Variant
-  = ActivityTask'Start !Start | ActivityTask'Cancel !Cancel
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField ActivityTask "taskToken" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTask'taskToken
-           (\ x__ y__ -> x__ {_ActivityTask'taskToken = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityTask "maybe'variant" (Prelude.Maybe ActivityTask'Variant) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTask'variant
-           (\ x__ y__ -> x__ {_ActivityTask'variant = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityTask "maybe'start" (Prelude.Maybe Start) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTask'variant
-           (\ x__ y__ -> x__ {_ActivityTask'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityTask'Start x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityTask'Start y__))
-instance Data.ProtoLens.Field.HasField ActivityTask "start" Start where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTask'variant
-           (\ x__ y__ -> x__ {_ActivityTask'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityTask'Start x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityTask'Start y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityTask "maybe'cancel" (Prelude.Maybe Cancel) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTask'variant
-           (\ x__ y__ -> x__ {_ActivityTask'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityTask'Cancel x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityTask'Cancel y__))
-instance Data.ProtoLens.Field.HasField ActivityTask "cancel" Cancel where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityTask'variant
-           (\ x__ y__ -> x__ {_ActivityTask'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityTask'Cancel x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityTask'Cancel y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message ActivityTask where
-  messageName _ = Data.Text.pack "coresdk.activity_task.ActivityTask"
-  packedMessageDescriptor _
-    = "\n\
-      \\fActivityTask\DC2\GS\n\
-      \\n\
-      \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC24\n\
-      \\ENQstart\CAN\ETX \SOH(\v2\FS.coresdk.activity_task.StartH\NULR\ENQstart\DC27\n\
-      \\ACKcancel\CAN\EOT \SOH(\v2\GS.coresdk.activity_task.CancelH\NULR\ACKcancelB\t\n\
-      \\avariant"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        taskToken__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "task_token"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"taskToken")) ::
-              Data.ProtoLens.FieldDescriptor ActivityTask
-        start__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "start"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Start)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'start")) ::
-              Data.ProtoLens.FieldDescriptor ActivityTask
-        cancel__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "cancel"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Cancel)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'cancel")) ::
-              Data.ProtoLens.FieldDescriptor ActivityTask
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, taskToken__field_descriptor),
-           (Data.ProtoLens.Tag 3, start__field_descriptor),
-           (Data.ProtoLens.Tag 4, cancel__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityTask'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityTask'_unknownFields = y__})
-  defMessage
-    = ActivityTask'_constructor
-        {_ActivityTask'taskToken = Data.ProtoLens.fieldDefault,
-         _ActivityTask'variant = Prelude.Nothing,
-         _ActivityTask'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityTask -> Data.ProtoLens.Encoding.Bytes.Parser ActivityTask
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "task_token"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"taskToken") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "start"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"start") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "cancel"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"cancel") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityTask"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"taskToken") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((\ bs
-                          -> (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
-                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'variant") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just (ActivityTask'Start v))
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage v)
-                   (Prelude.Just (ActivityTask'Cancel v))
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData ActivityTask where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityTask'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ActivityTask'taskToken x__)
-                (Control.DeepSeq.deepseq (_ActivityTask'variant x__) ()))
-instance Control.DeepSeq.NFData ActivityTask'Variant where
-  rnf (ActivityTask'Start x__) = Control.DeepSeq.rnf x__
-  rnf (ActivityTask'Cancel x__) = Control.DeepSeq.rnf x__
-_ActivityTask'Start ::
-  Data.ProtoLens.Prism.Prism' ActivityTask'Variant Start
-_ActivityTask'Start
-  = Data.ProtoLens.Prism.prism'
-      ActivityTask'Start
-      (\ p__
-         -> case p__ of
-              (ActivityTask'Start p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityTask'Cancel ::
-  Data.ProtoLens.Prism.Prism' ActivityTask'Variant Cancel
-_ActivityTask'Cancel
-  = Data.ProtoLens.Prism.prism'
-      ActivityTask'Cancel
-      (\ p__
-         -> case p__ of
-              (ActivityTask'Cancel p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.reason' @:: Lens' Cancel ActivityCancelReason@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.details' @:: Lens' Cancel ActivityCancellationDetails@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'details' @:: Lens' Cancel (Prelude.Maybe ActivityCancellationDetails)@ -}
-data Cancel
-  = Cancel'_constructor {_Cancel'reason :: !ActivityCancelReason,
-                         _Cancel'details :: !(Prelude.Maybe ActivityCancellationDetails),
-                         _Cancel'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Cancel where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Cancel "reason" ActivityCancelReason where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Cancel'reason (\ x__ y__ -> x__ {_Cancel'reason = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Cancel "details" ActivityCancellationDetails where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Cancel'details (\ x__ y__ -> x__ {_Cancel'details = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Cancel "maybe'details" (Prelude.Maybe ActivityCancellationDetails) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Cancel'details (\ x__ y__ -> x__ {_Cancel'details = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Cancel where
-  messageName _ = Data.Text.pack "coresdk.activity_task.Cancel"
-  packedMessageDescriptor _
-    = "\n\
-      \\ACKCancel\DC2C\n\
-      \\ACKreason\CAN\SOH \SOH(\SO2+.coresdk.activity_task.ActivityCancelReasonR\ACKreason\DC2L\n\
-      \\adetails\CAN\STX \SOH(\v22.coresdk.activity_task.ActivityCancellationDetailsR\adetails"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        reason__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reason"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor ActivityCancelReason)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"reason")) ::
-              Data.ProtoLens.FieldDescriptor Cancel
-        details__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "details"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor ActivityCancellationDetails)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'details")) ::
-              Data.ProtoLens.FieldDescriptor Cancel
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, reason__field_descriptor),
-           (Data.ProtoLens.Tag 2, details__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Cancel'_unknownFields
-        (\ x__ y__ -> x__ {_Cancel'_unknownFields = y__})
-  defMessage
-    = Cancel'_constructor
-        {_Cancel'reason = Data.ProtoLens.fieldDefault,
-         _Cancel'details = Prelude.Nothing, _Cancel'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Cancel -> Data.ProtoLens.Encoding.Bytes.Parser Cancel
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "reason"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "details"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"details") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Cancel"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"reason") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                         Prelude.fromEnum _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'details") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Cancel where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Cancel'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Cancel'reason x__)
-                (Control.DeepSeq.deepseq (_Cancel'details x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.workflowNamespace' @:: Lens' Start Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.workflowType' @:: Lens' Start Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.workflowExecution' @:: Lens' Start Proto.Temporal.Api.Common.V1.Message.WorkflowExecution@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'workflowExecution' @:: Lens' Start (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.activityId' @:: Lens' Start Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.activityType' @:: Lens' Start Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.headerFields' @:: Lens' Start (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.input' @:: Lens' Start [Proto.Temporal.Api.Common.V1.Message.Payload]@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.vec'input' @:: Lens' Start (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.heartbeatDetails' @:: Lens' Start [Proto.Temporal.Api.Common.V1.Message.Payload]@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.vec'heartbeatDetails' @:: Lens' Start (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.scheduledTime' @:: Lens' Start Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'scheduledTime' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.currentAttemptScheduledTime' @:: Lens' Start Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'currentAttemptScheduledTime' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.startedTime' @:: Lens' Start Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'startedTime' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.attempt' @:: Lens' Start Data.Word.Word32@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.scheduleToCloseTimeout' @:: Lens' Start Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'scheduleToCloseTimeout' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.startToCloseTimeout' @:: Lens' Start Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'startToCloseTimeout' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.heartbeatTimeout' @:: Lens' Start Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'heartbeatTimeout' @:: Lens' Start (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.retryPolicy' @:: Lens' Start Proto.Temporal.Api.Common.V1.Message.RetryPolicy@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'retryPolicy' @:: Lens' Start (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.priority' @:: Lens' Start Proto.Temporal.Api.Common.V1.Message.Priority@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'priority' @:: Lens' Start (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority)@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.isLocal' @:: Lens' Start Prelude.Bool@ -}
-data Start
-  = Start'_constructor {_Start'workflowNamespace :: !Data.Text.Text,
-                        _Start'workflowType :: !Data.Text.Text,
-                        _Start'workflowExecution :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution),
-                        _Start'activityId :: !Data.Text.Text,
-                        _Start'activityType :: !Data.Text.Text,
-                        _Start'headerFields :: !(Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload),
-                        _Start'input :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload),
-                        _Start'heartbeatDetails :: !(Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload),
-                        _Start'scheduledTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                        _Start'currentAttemptScheduledTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                        _Start'startedTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                        _Start'attempt :: !Data.Word.Word32,
-                        _Start'scheduleToCloseTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                        _Start'startToCloseTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                        _Start'heartbeatTimeout :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                        _Start'retryPolicy :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy),
-                        _Start'priority :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority),
-                        _Start'isLocal :: !Prelude.Bool,
-                        _Start'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Start where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Start "workflowNamespace" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'workflowNamespace
-           (\ x__ y__ -> x__ {_Start'workflowNamespace = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "workflowType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'workflowType (\ x__ y__ -> x__ {_Start'workflowType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "workflowExecution" Proto.Temporal.Api.Common.V1.Message.WorkflowExecution where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'workflowExecution
-           (\ x__ y__ -> x__ {_Start'workflowExecution = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'workflowExecution" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.WorkflowExecution) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'workflowExecution
-           (\ x__ y__ -> x__ {_Start'workflowExecution = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "activityId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'activityId (\ x__ y__ -> x__ {_Start'activityId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "activityType" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'activityType (\ x__ y__ -> x__ {_Start'activityType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "headerFields" (Data.Map.Map Data.Text.Text Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'headerFields (\ x__ y__ -> x__ {_Start'headerFields = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "input" [Proto.Temporal.Api.Common.V1.Message.Payload] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'input (\ x__ y__ -> x__ {_Start'input = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Start "vec'input" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'input (\ x__ y__ -> x__ {_Start'input = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "heartbeatDetails" [Proto.Temporal.Api.Common.V1.Message.Payload] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'heartbeatDetails
-           (\ x__ y__ -> x__ {_Start'heartbeatDetails = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Start "vec'heartbeatDetails" (Data.Vector.Vector Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'heartbeatDetails
-           (\ x__ y__ -> x__ {_Start'heartbeatDetails = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "scheduledTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'scheduledTime
-           (\ x__ y__ -> x__ {_Start'scheduledTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'scheduledTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'scheduledTime
-           (\ x__ y__ -> x__ {_Start'scheduledTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "currentAttemptScheduledTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'currentAttemptScheduledTime
-           (\ x__ y__ -> x__ {_Start'currentAttemptScheduledTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'currentAttemptScheduledTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'currentAttemptScheduledTime
-           (\ x__ y__ -> x__ {_Start'currentAttemptScheduledTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "startedTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'startedTime (\ x__ y__ -> x__ {_Start'startedTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'startedTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'startedTime (\ x__ y__ -> x__ {_Start'startedTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "attempt" Data.Word.Word32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'attempt (\ x__ y__ -> x__ {_Start'attempt = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "scheduleToCloseTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'scheduleToCloseTimeout
-           (\ x__ y__ -> x__ {_Start'scheduleToCloseTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'scheduleToCloseTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'scheduleToCloseTimeout
-           (\ x__ y__ -> x__ {_Start'scheduleToCloseTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "startToCloseTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'startToCloseTimeout
-           (\ x__ y__ -> x__ {_Start'startToCloseTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'startToCloseTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'startToCloseTimeout
-           (\ x__ y__ -> x__ {_Start'startToCloseTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "heartbeatTimeout" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'heartbeatTimeout
-           (\ x__ y__ -> x__ {_Start'heartbeatTimeout = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'heartbeatTimeout" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'heartbeatTimeout
-           (\ x__ y__ -> x__ {_Start'heartbeatTimeout = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "retryPolicy" Proto.Temporal.Api.Common.V1.Message.RetryPolicy where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'retryPolicy (\ x__ y__ -> x__ {_Start'retryPolicy = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'retryPolicy" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.RetryPolicy) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'retryPolicy (\ x__ y__ -> x__ {_Start'retryPolicy = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "priority" Proto.Temporal.Api.Common.V1.Message.Priority where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'priority (\ x__ y__ -> x__ {_Start'priority = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start "maybe'priority" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Priority) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'priority (\ x__ y__ -> x__ {_Start'priority = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start "isLocal" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'isLocal (\ x__ y__ -> x__ {_Start'isLocal = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Start where
-  messageName _ = Data.Text.pack "coresdk.activity_task.Start"
-  packedMessageDescriptor _
-    = "\n\
-      \\ENQStart\DC2-\n\
-      \\DC2workflow_namespace\CAN\SOH \SOH(\tR\DC1workflowNamespace\DC2#\n\
-      \\rworkflow_type\CAN\STX \SOH(\tR\fworkflowType\DC2X\n\
-      \\DC2workflow_execution\CAN\ETX \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC1workflowExecution\DC2\US\n\
-      \\vactivity_id\CAN\EOT \SOH(\tR\n\
-      \activityId\DC2#\n\
-      \\ractivity_type\CAN\ENQ \SOH(\tR\factivityType\DC2S\n\
-      \\rheader_fields\CAN\ACK \ETX(\v2..coresdk.activity_task.Start.HeaderFieldsEntryR\fheaderFields\DC25\n\
-      \\ENQinput\CAN\a \ETX(\v2\US.temporal.api.common.v1.PayloadR\ENQinput\DC2L\n\
-      \\DC1heartbeat_details\CAN\b \ETX(\v2\US.temporal.api.common.v1.PayloadR\DLEheartbeatDetails\DC2A\n\
-      \\SOscheduled_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTime\DC2_\n\
-      \\RScurrent_attempt_scheduled_time\CAN\n\
-      \ \SOH(\v2\SUB.google.protobuf.TimestampR\ESCcurrentAttemptScheduledTime\DC2=\n\
-      \\fstarted_time\CAN\v \SOH(\v2\SUB.google.protobuf.TimestampR\vstartedTime\DC2\CAN\n\
-      \\aattempt\CAN\f \SOH(\rR\aattempt\DC2T\n\
-      \\EMschedule_to_close_timeout\CAN\r \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToCloseTimeout\DC2N\n\
-      \\SYNstart_to_close_timeout\CAN\SO \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
-      \\DC1heartbeat_timeout\CAN\SI \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
-      \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2<\n\
-      \\bpriority\CAN\DC2 \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\DC2\EM\n\
-      \\bis_local\CAN\DC1 \SOH(\bR\aisLocal\SUB`\n\
-      \\DC1HeaderFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workflowNamespace__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_namespace"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowNamespace")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        workflowType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowType")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        workflowExecution__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_execution"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.WorkflowExecution)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowExecution")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        activityId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"activityId")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        activityType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"activityType")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        headerFields__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "header_fields"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Start'HeaderFieldsEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"headerFields")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        input__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "input"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"input")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        heartbeatDetails__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "heartbeat_details"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"heartbeatDetails")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        scheduledTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "scheduled_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'scheduledTime")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        currentAttemptScheduledTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_attempt_scheduled_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field
-                    @"maybe'currentAttemptScheduledTime")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        startedTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "started_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'startedTime")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        attempt__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "attempt"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"attempt")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        scheduleToCloseTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "schedule_to_close_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'scheduleToCloseTimeout")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        startToCloseTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "start_to_close_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'startToCloseTimeout")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        heartbeatTimeout__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "heartbeat_timeout"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'heartbeatTimeout")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        retryPolicy__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "retry_policy"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.RetryPolicy)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'retryPolicy")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        priority__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "priority"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Priority)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'priority")) ::
-              Data.ProtoLens.FieldDescriptor Start
-        isLocal__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "is_local"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"isLocal")) ::
-              Data.ProtoLens.FieldDescriptor Start
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, workflowNamespace__field_descriptor),
-           (Data.ProtoLens.Tag 2, workflowType__field_descriptor),
-           (Data.ProtoLens.Tag 3, workflowExecution__field_descriptor),
-           (Data.ProtoLens.Tag 4, activityId__field_descriptor),
-           (Data.ProtoLens.Tag 5, activityType__field_descriptor),
-           (Data.ProtoLens.Tag 6, headerFields__field_descriptor),
-           (Data.ProtoLens.Tag 7, input__field_descriptor),
-           (Data.ProtoLens.Tag 8, heartbeatDetails__field_descriptor),
-           (Data.ProtoLens.Tag 9, scheduledTime__field_descriptor),
-           (Data.ProtoLens.Tag 10, 
-            currentAttemptScheduledTime__field_descriptor),
-           (Data.ProtoLens.Tag 11, startedTime__field_descriptor),
-           (Data.ProtoLens.Tag 12, attempt__field_descriptor),
-           (Data.ProtoLens.Tag 13, scheduleToCloseTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 14, startToCloseTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 15, heartbeatTimeout__field_descriptor),
-           (Data.ProtoLens.Tag 16, retryPolicy__field_descriptor),
-           (Data.ProtoLens.Tag 18, priority__field_descriptor),
-           (Data.ProtoLens.Tag 17, isLocal__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Start'_unknownFields
-        (\ x__ y__ -> x__ {_Start'_unknownFields = y__})
-  defMessage
-    = Start'_constructor
-        {_Start'workflowNamespace = Data.ProtoLens.fieldDefault,
-         _Start'workflowType = Data.ProtoLens.fieldDefault,
-         _Start'workflowExecution = Prelude.Nothing,
-         _Start'activityId = Data.ProtoLens.fieldDefault,
-         _Start'activityType = Data.ProtoLens.fieldDefault,
-         _Start'headerFields = Data.Map.empty,
-         _Start'input = Data.Vector.Generic.empty,
-         _Start'heartbeatDetails = Data.Vector.Generic.empty,
-         _Start'scheduledTime = Prelude.Nothing,
-         _Start'currentAttemptScheduledTime = Prelude.Nothing,
-         _Start'startedTime = Prelude.Nothing,
-         _Start'attempt = Data.ProtoLens.fieldDefault,
-         _Start'scheduleToCloseTimeout = Prelude.Nothing,
-         _Start'startToCloseTimeout = Prelude.Nothing,
-         _Start'heartbeatTimeout = Prelude.Nothing,
-         _Start'retryPolicy = Prelude.Nothing,
-         _Start'priority = Prelude.Nothing,
-         _Start'isLocal = Data.ProtoLens.fieldDefault,
-         _Start'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Start
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.Payload
-             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Common.V1.Message.Payload
-                -> Data.ProtoLens.Encoding.Bytes.Parser Start
-        loop x mutable'heartbeatDetails mutable'input
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'heartbeatDetails <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                   (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                      mutable'heartbeatDetails)
-                      frozen'input <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                        (Data.ProtoLens.Encoding.Growing.unsafeFreeze mutable'input)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'heartbeatDetails")
-                              frozen'heartbeatDetails
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"vec'input") frozen'input x)))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_namespace"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowNamespace") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowType") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_execution"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowExecution") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "activity_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"activityId") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "activity_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityType") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        50
-                          -> do !(entry :: Start'HeaderFieldsEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                         (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                             Data.ProtoLens.Encoding.Bytes.isolate
-                                                                               (Prelude.fromIntegral
-                                                                                  len)
-                                                                               Data.ProtoLens.parseMessage)
-                                                                         "header_fields"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"headerFields")
-                                        (\ !t -> Data.Map.insert key value t) x)
-                                     mutable'heartbeatDetails mutable'input)
-                        58
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "input"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'input y)
-                                loop x mutable'heartbeatDetails v
-                        66
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "heartbeat_details"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'heartbeatDetails y)
-                                loop x v mutable'input
-                        74
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "scheduled_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"scheduledTime") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        82
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "current_attempt_scheduled_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentAttemptScheduledTime") y
-                                     x)
-                                  mutable'heartbeatDetails mutable'input
-                        90
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "started_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"startedTime") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        96
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "attempt"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"attempt") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        106
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "schedule_to_close_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"scheduleToCloseTimeout") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        114
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "start_to_close_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"startToCloseTimeout") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        122
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "heartbeat_timeout"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"heartbeatTimeout") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        130
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "retry_policy"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"retryPolicy") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        146
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "priority"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priority") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        136
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "is_local"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"isLocal") y x)
-                                  mutable'heartbeatDetails mutable'input
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'heartbeatDetails mutable'input
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'heartbeatDetails <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                            Data.ProtoLens.Encoding.Growing.new
-              mutable'input <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                 Data.ProtoLens.Encoding.Growing.new
-              loop
-                Data.ProtoLens.defMessage mutable'heartbeatDetails mutable'input)
-          "Start"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"workflowNamespace") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowType") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'workflowExecution") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"activityId") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view (Data.ProtoLens.Field.field @"activityType") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                  ((Prelude..)
-                                     (\ bs
-                                        -> (Data.Monoid.<>)
-                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                             (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                     Data.Text.Encoding.encodeUtf8 _v))
-                         ((Data.Monoid.<>)
-                            (Data.Monoid.mconcat
-                               (Prelude.map
-                                  (\ _v
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                          ((Prelude..)
-                                             (\ bs
-                                                -> (Data.Monoid.<>)
-                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                        (Prelude.fromIntegral
-                                                           (Data.ByteString.length bs)))
-                                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                             Data.ProtoLens.encodeMessage
-                                             (Lens.Family2.set
-                                                (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                                (Lens.Family2.set
-                                                   (Data.ProtoLens.Field.field @"value")
-                                                   (Prelude.snd _v)
-                                                   (Data.ProtoLens.defMessage ::
-                                                      Start'HeaderFieldsEntry)))))
-                                  (Data.Map.toList
-                                     (Lens.Family2.view
-                                        (Data.ProtoLens.Field.field @"headerFields") _x))))
-                            ((Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                                  (\ _v
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                          ((Prelude..)
-                                             (\ bs
-                                                -> (Data.Monoid.<>)
-                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                        (Prelude.fromIntegral
-                                                           (Data.ByteString.length bs)))
-                                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                             Data.ProtoLens.encodeMessage _v))
-                                  (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'input") _x))
-                               ((Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                                     (\ _v
-                                        -> (Data.Monoid.<>)
-                                             (Data.ProtoLens.Encoding.Bytes.putVarInt 66)
-                                             ((Prelude..)
-                                                (\ bs
-                                                   -> (Data.Monoid.<>)
-                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                           (Prelude.fromIntegral
-                                                              (Data.ByteString.length bs)))
-                                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                                Data.ProtoLens.encodeMessage _v))
-                                     (Lens.Family2.view
-                                        (Data.ProtoLens.Field.field @"vec'heartbeatDetails") _x))
-                                  ((Data.Monoid.<>)
-                                     (case
-                                          Lens.Family2.view
-                                            (Data.ProtoLens.Field.field @"maybe'scheduledTime") _x
-                                      of
-                                        Prelude.Nothing -> Data.Monoid.mempty
-                                        (Prelude.Just _v)
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt 74)
-                                               ((Prelude..)
-                                                  (\ bs
-                                                     -> (Data.Monoid.<>)
-                                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                             (Prelude.fromIntegral
-                                                                (Data.ByteString.length bs)))
-                                                          (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                             bs))
-                                                  Data.ProtoLens.encodeMessage _v))
-                                     ((Data.Monoid.<>)
-                                        (case
-                                             Lens.Family2.view
-                                               (Data.ProtoLens.Field.field
-                                                  @"maybe'currentAttemptScheduledTime")
-                                               _x
-                                         of
-                                           Prelude.Nothing -> Data.Monoid.mempty
-                                           (Prelude.Just _v)
-                                             -> (Data.Monoid.<>)
-                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 82)
-                                                  ((Prelude..)
-                                                     (\ bs
-                                                        -> (Data.Monoid.<>)
-                                                             (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                (Prelude.fromIntegral
-                                                                   (Data.ByteString.length bs)))
-                                                             (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                bs))
-                                                     Data.ProtoLens.encodeMessage _v))
-                                        ((Data.Monoid.<>)
-                                           (case
-                                                Lens.Family2.view
-                                                  (Data.ProtoLens.Field.field @"maybe'startedTime")
-                                                  _x
-                                            of
-                                              Prelude.Nothing -> Data.Monoid.mempty
-                                              (Prelude.Just _v)
-                                                -> (Data.Monoid.<>)
-                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 90)
-                                                     ((Prelude..)
-                                                        (\ bs
-                                                           -> (Data.Monoid.<>)
-                                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                   (Prelude.fromIntegral
-                                                                      (Data.ByteString.length bs)))
-                                                                (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                   bs))
-                                                        Data.ProtoLens.encodeMessage _v))
-                                           ((Data.Monoid.<>)
-                                              (let
-                                                 _v
-                                                   = Lens.Family2.view
-                                                       (Data.ProtoLens.Field.field @"attempt") _x
-                                               in
-                                                 if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                                     Data.Monoid.mempty
-                                                 else
-                                                     (Data.Monoid.<>)
-                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 96)
-                                                       ((Prelude..)
-                                                          Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                          Prelude.fromIntegral _v))
-                                              ((Data.Monoid.<>)
-                                                 (case
-                                                      Lens.Family2.view
-                                                        (Data.ProtoLens.Field.field
-                                                           @"maybe'scheduleToCloseTimeout")
-                                                        _x
-                                                  of
-                                                    Prelude.Nothing -> Data.Monoid.mempty
-                                                    (Prelude.Just _v)
-                                                      -> (Data.Monoid.<>)
-                                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                              106)
-                                                           ((Prelude..)
-                                                              (\ bs
-                                                                 -> (Data.Monoid.<>)
-                                                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                         (Prelude.fromIntegral
-                                                                            (Data.ByteString.length
-                                                                               bs)))
-                                                                      (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                         bs))
-                                                              Data.ProtoLens.encodeMessage _v))
-                                                 ((Data.Monoid.<>)
-                                                    (case
-                                                         Lens.Family2.view
-                                                           (Data.ProtoLens.Field.field
-                                                              @"maybe'startToCloseTimeout")
-                                                           _x
-                                                     of
-                                                       Prelude.Nothing -> Data.Monoid.mempty
-                                                       (Prelude.Just _v)
-                                                         -> (Data.Monoid.<>)
-                                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                 114)
-                                                              ((Prelude..)
-                                                                 (\ bs
-                                                                    -> (Data.Monoid.<>)
-                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            (Prelude.fromIntegral
-                                                                               (Data.ByteString.length
-                                                                                  bs)))
-                                                                         (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                            bs))
-                                                                 Data.ProtoLens.encodeMessage _v))
-                                                    ((Data.Monoid.<>)
-                                                       (case
-                                                            Lens.Family2.view
-                                                              (Data.ProtoLens.Field.field
-                                                                 @"maybe'heartbeatTimeout")
-                                                              _x
-                                                        of
-                                                          Prelude.Nothing -> Data.Monoid.mempty
-                                                          (Prelude.Just _v)
-                                                            -> (Data.Monoid.<>)
-                                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                    122)
-                                                                 ((Prelude..)
-                                                                    (\ bs
-                                                                       -> (Data.Monoid.<>)
-                                                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                               (Prelude.fromIntegral
-                                                                                  (Data.ByteString.length
-                                                                                     bs)))
-                                                                            (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                               bs))
-                                                                    Data.ProtoLens.encodeMessage
-                                                                    _v))
-                                                       ((Data.Monoid.<>)
-                                                          (case
-                                                               Lens.Family2.view
-                                                                 (Data.ProtoLens.Field.field
-                                                                    @"maybe'retryPolicy")
-                                                                 _x
-                                                           of
-                                                             Prelude.Nothing -> Data.Monoid.mempty
-                                                             (Prelude.Just _v)
-                                                               -> (Data.Monoid.<>)
-                                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                       130)
-                                                                    ((Prelude..)
-                                                                       (\ bs
-                                                                          -> (Data.Monoid.<>)
-                                                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                  (Prelude.fromIntegral
-                                                                                     (Data.ByteString.length
-                                                                                        bs)))
-                                                                               (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                  bs))
-                                                                       Data.ProtoLens.encodeMessage
-                                                                       _v))
-                                                          ((Data.Monoid.<>)
-                                                             (case
-                                                                  Lens.Family2.view
-                                                                    (Data.ProtoLens.Field.field
-                                                                       @"maybe'priority")
-                                                                    _x
-                                                              of
-                                                                Prelude.Nothing
-                                                                  -> Data.Monoid.mempty
-                                                                (Prelude.Just _v)
-                                                                  -> (Data.Monoid.<>)
-                                                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                          146)
-                                                                       ((Prelude..)
-                                                                          (\ bs
-                                                                             -> (Data.Monoid.<>)
-                                                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                                     (Prelude.fromIntegral
-                                                                                        (Data.ByteString.length
-                                                                                           bs)))
-                                                                                  (Data.ProtoLens.Encoding.Bytes.putBytes
-                                                                                     bs))
-                                                                          Data.ProtoLens.encodeMessage
-                                                                          _v))
-                                                             ((Data.Monoid.<>)
-                                                                (let
-                                                                   _v
-                                                                     = Lens.Family2.view
-                                                                         (Data.ProtoLens.Field.field
-                                                                            @"isLocal")
-                                                                         _x
-                                                                 in
-                                                                   if (Prelude.==)
-                                                                        _v
-                                                                        Data.ProtoLens.fieldDefault then
-                                                                       Data.Monoid.mempty
-                                                                   else
-                                                                       (Data.Monoid.<>)
-                                                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            136)
-                                                                         ((Prelude..)
-                                                                            Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                                            (\ b
-                                                                               -> if b then
-                                                                                      1
-                                                                                  else
-                                                                                      0)
-                                                                            _v))
-                                                                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                                                   (Lens.Family2.view
-                                                                      Data.ProtoLens.unknownFields
-                                                                      _x)))))))))))))))))))
-instance Control.DeepSeq.NFData Start where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Start'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Start'workflowNamespace x__)
-                (Control.DeepSeq.deepseq
-                   (_Start'workflowType x__)
-                   (Control.DeepSeq.deepseq
-                      (_Start'workflowExecution x__)
-                      (Control.DeepSeq.deepseq
-                         (_Start'activityId x__)
-                         (Control.DeepSeq.deepseq
-                            (_Start'activityType x__)
-                            (Control.DeepSeq.deepseq
-                               (_Start'headerFields x__)
-                               (Control.DeepSeq.deepseq
-                                  (_Start'input x__)
-                                  (Control.DeepSeq.deepseq
-                                     (_Start'heartbeatDetails x__)
-                                     (Control.DeepSeq.deepseq
-                                        (_Start'scheduledTime x__)
-                                        (Control.DeepSeq.deepseq
-                                           (_Start'currentAttemptScheduledTime x__)
-                                           (Control.DeepSeq.deepseq
-                                              (_Start'startedTime x__)
-                                              (Control.DeepSeq.deepseq
-                                                 (_Start'attempt x__)
-                                                 (Control.DeepSeq.deepseq
-                                                    (_Start'scheduleToCloseTimeout x__)
-                                                    (Control.DeepSeq.deepseq
-                                                       (_Start'startToCloseTimeout x__)
-                                                       (Control.DeepSeq.deepseq
-                                                          (_Start'heartbeatTimeout x__)
-                                                          (Control.DeepSeq.deepseq
-                                                             (_Start'retryPolicy x__)
-                                                             (Control.DeepSeq.deepseq
-                                                                (_Start'priority x__)
-                                                                (Control.DeepSeq.deepseq
-                                                                   (_Start'isLocal x__)
-                                                                   ()))))))))))))))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.key' @:: Lens' Start'HeaderFieldsEntry Data.Text.Text@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.value' @:: Lens' Start'HeaderFieldsEntry Proto.Temporal.Api.Common.V1.Message.Payload@
-         * 'Proto.Temporal.Sdk.Core.ActivityTask.ActivityTask_Fields.maybe'value' @:: Lens' Start'HeaderFieldsEntry (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data Start'HeaderFieldsEntry
-  = Start'HeaderFieldsEntry'_constructor {_Start'HeaderFieldsEntry'key :: !Data.Text.Text,
-                                          _Start'HeaderFieldsEntry'value :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
-                                          _Start'HeaderFieldsEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Start'HeaderFieldsEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Start'HeaderFieldsEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'HeaderFieldsEntry'key
-           (\ x__ y__ -> x__ {_Start'HeaderFieldsEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Start'HeaderFieldsEntry "value" Proto.Temporal.Api.Common.V1.Message.Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'HeaderFieldsEntry'value
-           (\ x__ y__ -> x__ {_Start'HeaderFieldsEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Start'HeaderFieldsEntry "maybe'value" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Start'HeaderFieldsEntry'value
-           (\ x__ y__ -> x__ {_Start'HeaderFieldsEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Start'HeaderFieldsEntry where
-  messageName _
-    = Data.Text.pack "coresdk.activity_task.Start.HeaderFieldsEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1HeaderFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor Start'HeaderFieldsEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor Start'HeaderFieldsEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Start'HeaderFieldsEntry'_unknownFields
-        (\ x__ y__ -> x__ {_Start'HeaderFieldsEntry'_unknownFields = y__})
-  defMessage
-    = Start'HeaderFieldsEntry'_constructor
-        {_Start'HeaderFieldsEntry'key = Data.ProtoLens.fieldDefault,
-         _Start'HeaderFieldsEntry'value = Prelude.Nothing,
-         _Start'HeaderFieldsEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Start'HeaderFieldsEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser Start'HeaderFieldsEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "HeaderFieldsEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Start'HeaderFieldsEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Start'HeaderFieldsEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Start'HeaderFieldsEntry'key x__)
-                (Control.DeepSeq.deepseq (_Start'HeaderFieldsEntry'value x__) ()))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \3temporal/sdk/core/activity_task/activity_task.proto\DC2\NAKcoresdk.activity_task\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB$temporal/api/common/v1/message.proto\SUB%temporal/sdk/core/common/common.proto\"\167\SOH\n\
-    \\fActivityTask\DC2\GS\n\
-    \\n\
-    \task_token\CAN\SOH \SOH(\fR\ttaskToken\DC24\n\
-    \\ENQstart\CAN\ETX \SOH(\v2\FS.coresdk.activity_task.StartH\NULR\ENQstart\DC27\n\
-    \\ACKcancel\CAN\EOT \SOH(\v2\GS.coresdk.activity_task.CancelH\NULR\ACKcancelB\t\n\
-    \\avariant\"\195\t\n\
-    \\ENQStart\DC2-\n\
-    \\DC2workflow_namespace\CAN\SOH \SOH(\tR\DC1workflowNamespace\DC2#\n\
-    \\rworkflow_type\CAN\STX \SOH(\tR\fworkflowType\DC2X\n\
-    \\DC2workflow_execution\CAN\ETX \SOH(\v2).temporal.api.common.v1.WorkflowExecutionR\DC1workflowExecution\DC2\US\n\
-    \\vactivity_id\CAN\EOT \SOH(\tR\n\
-    \activityId\DC2#\n\
-    \\ractivity_type\CAN\ENQ \SOH(\tR\factivityType\DC2S\n\
-    \\rheader_fields\CAN\ACK \ETX(\v2..coresdk.activity_task.Start.HeaderFieldsEntryR\fheaderFields\DC25\n\
-    \\ENQinput\CAN\a \ETX(\v2\US.temporal.api.common.v1.PayloadR\ENQinput\DC2L\n\
-    \\DC1heartbeat_details\CAN\b \ETX(\v2\US.temporal.api.common.v1.PayloadR\DLEheartbeatDetails\DC2A\n\
-    \\SOscheduled_time\CAN\t \SOH(\v2\SUB.google.protobuf.TimestampR\rscheduledTime\DC2_\n\
-    \\RScurrent_attempt_scheduled_time\CAN\n\
-    \ \SOH(\v2\SUB.google.protobuf.TimestampR\ESCcurrentAttemptScheduledTime\DC2=\n\
-    \\fstarted_time\CAN\v \SOH(\v2\SUB.google.protobuf.TimestampR\vstartedTime\DC2\CAN\n\
-    \\aattempt\CAN\f \SOH(\rR\aattempt\DC2T\n\
-    \\EMschedule_to_close_timeout\CAN\r \SOH(\v2\EM.google.protobuf.DurationR\SYNscheduleToCloseTimeout\DC2N\n\
-    \\SYNstart_to_close_timeout\CAN\SO \SOH(\v2\EM.google.protobuf.DurationR\DC3startToCloseTimeout\DC2F\n\
-    \\DC1heartbeat_timeout\CAN\SI \SOH(\v2\EM.google.protobuf.DurationR\DLEheartbeatTimeout\DC2F\n\
-    \\fretry_policy\CAN\DLE \SOH(\v2#.temporal.api.common.v1.RetryPolicyR\vretryPolicy\DC2<\n\
-    \\bpriority\CAN\DC2 \SOH(\v2 .temporal.api.common.v1.PriorityR\bpriority\DC2\EM\n\
-    \\bis_local\CAN\DC1 \SOH(\bR\aisLocal\SUB`\n\
-    \\DC1HeaderFieldsEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\155\SOH\n\
-    \\ACKCancel\DC2C\n\
-    \\ACKreason\CAN\SOH \SOH(\SO2+.coresdk.activity_task.ActivityCancelReasonR\ACKreason\DC2L\n\
-    \\adetails\CAN\STX \SOH(\v22.coresdk.activity_task.ActivityCancellationDetailsR\adetails\"\234\SOH\n\
-    \\ESCActivityCancellationDetails\DC2 \n\
-    \\fis_not_found\CAN\SOH \SOH(\bR\n\
-    \isNotFound\DC2!\n\
-    \\fis_cancelled\CAN\STX \SOH(\bR\visCancelled\DC2\ESC\n\
-    \\tis_paused\CAN\ETX \SOH(\bR\bisPaused\DC2 \n\
-    \\fis_timed_out\CAN\EOT \SOH(\bR\n\
-    \isTimedOut\DC2,\n\
-    \\DC2is_worker_shutdown\CAN\ENQ \SOH(\bR\DLEisWorkerShutdown\DC2\EM\n\
-    \\bis_reset\CAN\ACK \SOH(\bR\aisReset*o\n\
-    \\DC4ActivityCancelReason\DC2\r\n\
-    \\tNOT_FOUND\DLE\NUL\DC2\r\n\
-    \\tCANCELLED\DLE\SOH\DC2\r\n\
-    \\tTIMED_OUT\DLE\STX\DC2\DC3\n\
-    \\SIWORKER_SHUTDOWN\DLE\ETX\DC2\n\
-    \\n\
-    \\ACKPAUSED\DLE\EOT\DC2\t\n\
-    \\ENQRESET\DLE\ENQB2\234\STX/Temporalio::Internal::Bridge::Api::ActivityTaskJ\144\RS\n\
-    \\ACK\DC2\EOT\NUL\NULa\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \a\n\
-    \\SOH\STX\DC2\ETX\ENQ\NUL\RS\SUBW*\n\
-    \ Definitions of the different activity tasks returned from [crate::Core::poll_task].\n\
-    \\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NULH\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\ACK\NULH\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\b\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\t\NUL)\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\n\
-    \\NUL.\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\v\NUL/\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT\r\NUL\SYN\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\r\b\DC4\n\
-    \0\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\SI\EOT\EM\SUB# A unique identifier for this task\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\SI\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\SI\n\
-    \\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\SI\ETB\CAN\n\
-    \\f\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT\DLE\EOT\NAK\ENQ\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\DLE\n\
-    \\DC1\n\
-    \(\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC2\b\CAN\SUB\ESC Start activity execution.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC2\b\r\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC2\SO\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC2\SYN\ETB\n\
-    \4\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC4\b\SUB\SUB' Attempt to cancel activity execution.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\DC4\b\SO\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC4\SI\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC4\CAN\EM\n\
-    \)\n\
-    \\STX\EOT\SOH\DC2\EOT\EM\NULA\SOH\SUB\GS Begin executing an activity\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\EM\b\r\n\
-    \2\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ESC\EOT\"\SUB% The namespace the workflow lives in\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\ESC\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ESC\v\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ESC !\n\
-    \>\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\GS\EOT\GS\SUB1 The workflow's type name or function identifier\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\GS\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\GS\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\GS\ESC\FS\n\
-    \C\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX\US\EOTD\SUB6 The workflow execution which requested this activity\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\US\EOT,\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\US-?\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\USBC\n\
-    \ \n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX!\EOT\ESC\SUB\DC3 The activity's ID\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ENQ\DC2\ETX!\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX!\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX!\EM\SUB\n\
-    \>\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETX#\EOT\GS\SUB1 The activity's type name or function identifier\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ENQ\DC2\ETX#\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX#\v\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX#\ESC\FS\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX$\EOTB\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ACK\DC2\ETX$\EOT/\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX$0=\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX$@A\n\
-    \(\n\
-    \\EOT\EOT\SOH\STX\ACK\DC2\ETX&\EOT6\SUB\ESC Arguments to the activity\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\EOT\DC2\ETX&\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETX&\r+\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETX&,1\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETX&45\n\
-    \^\n\
-    \\EOT\EOT\SOH\STX\a\DC2\ETX(\EOTB\SUBQ The last details that were recorded by a heartbeat when this task was generated\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\a\EOT\DC2\ETX(\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\a\ACK\DC2\ETX(\r+\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\a\SOH\DC2\ETX(,=\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\a\ETX\DC2\ETX(@A\n\
-    \2\n\
-    \\EOT\EOT\SOH\STX\b\DC2\ETX*\EOT1\SUB% When the task was *first* scheduled\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\b\ACK\DC2\ETX*\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\b\SOH\DC2\ETX*\RS,\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\b\ETX\DC2\ETX*/0\n\
-    \B\n\
-    \\EOT\EOT\SOH\STX\t\DC2\ETX,\EOTB\SUB5 When this current attempt at the task was scheduled\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\t\ACK\DC2\ETX,\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\t\SOH\DC2\ETX,\RS<\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\t\ETX\DC2\ETX,?A\n\
-    \_\n\
-    \\EOT\EOT\SOH\STX\n\
-    \\DC2\ETX.\EOT0\SUBR When this attempt was started, which is to say when core received it by polling.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\n\
-    \\ACK\DC2\ETX.\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\n\
-    \\SOH\DC2\ETX.\RS*\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\n\
-    \\ETX\DC2\ETX.-/\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\v\DC2\ETX/\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\v\ENQ\DC2\ETX/\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\v\SOH\DC2\ETX/\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\v\ETX\DC2\ETX/\NAK\ETB\n\
-    \A\n\
-    \\EOT\EOT\SOH\STX\f\DC2\ETX2\EOT<\SUB4 Timeout from the first schedule time to completion\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\f\ACK\DC2\ETX2\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\f\SOH\DC2\ETX2\GS6\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\f\ETX\DC2\ETX29;\n\
-    \G\n\
-    \\EOT\EOT\SOH\STX\r\DC2\ETX4\EOT9\SUB: Timeout from starting an attempt to reporting its result\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\r\ACK\DC2\ETX4\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\r\SOH\DC2\ETX4\GS3\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\r\ETX\DC2\ETX468\n\
-    \G\n\
-    \\EOT\EOT\SOH\STX\SO\DC2\ETX6\EOT4\SUB: If set a heartbeat must be reported within this interval\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SO\ACK\DC2\ETX6\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SO\SOH\DC2\ETX6\GS.\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SO\ETX\DC2\ETX613\n\
-    \\134\STX\n\
-    \\EOT\EOT\SOH\STX\SI\DC2\ETX:\EOT9\SUB\248\SOH This is an actual retry policy the service uses. It can be different from the one provided\n\
-    \ (or not) during activity scheduling as the service can override the provided one in case its\n\
-    \ values are not specified or exceed configured system limits.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SI\ACK\DC2\ETX:\EOT&\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SI\SOH\DC2\ETX:'3\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SI\ETX\DC2\ETX:68\n\
-    \j\n\
-    \\EOT\EOT\SOH\STX\DLE\DC2\ETX<\EOT2\SUB] Priority of this activity. Local activities will always have this field set to the default.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\DLE\ACK\DC2\ETX<\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\DLE\SOH\DC2\ETX<$,\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\DLE\ETX\DC2\ETX</1\n\
-    \s\n\
-    \\EOT\EOT\SOH\STX\DC1\DC2\ETX@\EOT\ETB\SUBf Set to true if this is a local activity. Note that heartbeating does not apply to local\n\
-    \ activities.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\DC1\ENQ\DC2\ETX@\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\DC1\SOH\DC2\ETX@\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\DC1\ETX\DC2\ETX@\DC4\SYN\n\
-    \2\n\
-    \\STX\EOT\STX\DC2\EOTD\NULI\SOH\SUB& Attempt to cancel a running activity\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXD\b\SO\n\
-    \*\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXF\EOT$\SUB\GS Primary cancellation reason\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXF\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXF\EM\US\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXF\"#\n\
-    \P\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXH\EOT,\SUBC Activity cancellation details, surfaces all cancellation reasons.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXH\EOT\US\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXH '\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXH*+\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ETX\DC2\EOTK\NULR\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETXK\b#\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXL\EOT\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXL\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXL\t\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXL\CAN\EM\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXM\EOT\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXM\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXM\t\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXM\CAN\EM\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETXN\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ENQ\DC2\ETXN\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXN\t\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXN\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\ETX\DC2\ETXO\EOT\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ENQ\DC2\ETXO\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\SOH\DC2\ETXO\t\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ETX\ETX\DC2\ETXO\CAN\EM\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\EOT\DC2\ETXP\EOT \n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ENQ\DC2\ETXP\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\SOH\DC2\ETXP\t\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\EOT\ETX\DC2\ETXP\RS\US\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\ENQ\DC2\ETXQ\EOT\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ENQ\ENQ\DC2\ETXQ\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ENQ\SOH\DC2\ETXQ\t\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\ENQ\ETX\DC2\ETXQ\DC4\NAK\n\
-    \\n\
-    \\n\
-    \\STX\ENQ\NUL\DC2\EOTT\NULa\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\ENQ\NUL\SOH\DC2\ETXT\ENQ\EM\n\
-    \[\n\
-    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXV\EOT\DC2\SUBN The activity no longer exists according to server (may be already completed)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXV\EOT\r\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXV\DLE\DC1\n\
-    \0\n\
-    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXX\EOT\DC2\SUB# Activity was explicitly cancelled\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXX\EOT\r\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXX\DLE\DC1\n\
-    \!\n\
-    \\EOT\ENQ\NUL\STX\STX\DC2\ETXZ\EOT\DC2\SUB\DC4 Activity timed out\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXZ\EOT\r\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXZ\DLE\DC1\n\
-    \I\n\
-    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX\\\EOT\CAN\SUB< Core is shutting down and the graceful timeout has elapsed\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX\\\EOT\DC3\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX\\\SYN\ETB\n\
-    \\"\n\
-    \\EOT\ENQ\NUL\STX\EOT\DC2\ETX^\EOT\SI\SUB\NAK Activity was paused\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\EOT\SOH\DC2\ETX^\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\EOT\STX\DC2\ETX^\r\SO\n\
-    \!\n\
-    \\EOT\ENQ\NUL\STX\ENQ\DC2\ETX`\EOT\SO\SUB\DC4 Activity was reset\n\
-    \\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\ENQ\SOH\DC2\ETX`\EOT\t\n\
-    \\f\n\
-    \\ENQ\ENQ\NUL\STX\ENQ\STX\DC2\ETX`\f\rb\ACKproto3"
+  = ActivityTask'Variant'Start !Start
+  | ActivityTask'Variant'Cancel !Cancel
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON ActivityTask'Variant where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON ActivityTask'Variant where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable ActivityTask'Variant where
+  hashWithSalt salt (ActivityTask'Variant'Start v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityTask'Variant'Cancel v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultActivityTask :: ActivityTask
+defaultActivityTask = ActivityTask
+  { taskToken = Nothing
+  , variant = Nothing
+  , activityTaskUnknownFields = []
+  }
+
+instance MessageEncode ActivityTask where
+  buildMessage msg =
+    (maybe mempty (\v -> archBytes 10 v) msg.taskToken)
+    <> (case msg.variant of
+      Nothing -> mempty
+      Just (ActivityTask'Variant'Start v) -> (let sz = messageSize v in archSubmessage 26 sz (buildMessage v))
+      Just (ActivityTask'Variant'Cancel v) -> (let sz = messageSize v in archSubmessage 34 sz (buildMessage v)))
+    <> encodeUnknownFields msg.activityTaskUnknownFields
+
+instance MessageSize ActivityTask where
+  messageSize msg =
+    (maybe 0 (\v -> archBytesSize v) msg.taskToken)
+    + (case msg.variant of { Nothing -> 0; Just (ActivityTask'Variant'Start v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityTask'Variant'Cancel v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.activityTaskUnknownFields
+
+instance MessageDecode ActivityTask where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (ActivityTask {taskToken = acc_0, variant = acc_1, activityTaskUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBytes
+            loop (Just v) acc_1 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just (ActivityTask'Variant'Start v)) acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just (ActivityTask'Variant'Cancel v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityTask where
+  protoMessageName _ = "coresdk.activity_task.ActivityTask"
+  protoPackageName _ = "coresdk.activity_task"
+  protoDefaultValue = defaultActivityTask
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "task_token"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityTask) -> m.taskToken
+        , fdSet = \v (m :: ActivityTask) -> (m { taskToken = v } :: ActivityTask)
+        }), (3, SomeField FieldDescriptor
+        { fdName = "variant"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "variant"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityTask) -> m.variant
+        , fdSet = \v (m :: ActivityTask) -> (m { variant = v } :: ActivityTask)
+        })
+    ]
+
+instance IsMessage ActivityTask
+
+instance Aeson.ToJSON ActivityTask where
+  toJSON msg = jsonObject
+      [ "taskToken" .=: (fmap protoBytesToJSON msg.taskToken)
+      , "variant" .=: msg.variant
+      ]
+
+instance Aeson.FromJSON ActivityTask where
+  parseJSON = Aeson.withObject "ActivityTask" $ \obj -> do
+    fld_taskToken <- parseBytesFieldMaybe obj "taskToken"
+    fld_variant <- parseFieldMaybe obj "variant"
+    pure (defaultActivityTask
+      { taskToken = fld_taskToken
+      , variant = maybe (defaultActivityTask.variant) Prelude.id fld_variant
+      , activityTaskUnknownFields = []
+      } :: ActivityTask)
+
+instance Hashable ActivityTask where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.taskToken) msg.variant
+
+instance Proto.Extension.HasExtensions ActivityTask where
+  messageUnknownFields msg = msg.activityTaskUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityTaskUnknownFields = ufs }
+
+instance Semigroup ActivityTask where
+  a <> b = ActivityTask
+    { taskToken = case b.taskToken of { Nothing -> a.taskToken; x -> x }
+    , variant = case b.variant of { Nothing -> a.variant; x -> x }
+    , activityTaskUnknownFields = a.activityTaskUnknownFields <> b.activityTaskUnknownFields
+    }
+
+instance Monoid ActivityTask where
+  mempty = defaultActivityTask
+
+data Start = Start
+  { workflowNamespace :: !(Maybe Text)
+  , workflowType :: !(Maybe Text)
+  , workflowExecution :: !(Maybe TE_Common_V1_Message.WorkflowExecution)
+  , activityId :: !(Maybe Text)
+  , activityType :: !(Maybe Text)
+  , headerFields :: !(V.Vector Start'HeaderFieldsEntry)
+  , input :: !(V.Vector TE_Common_V1_Message.Payload)
+  , heartbeatDetails :: !(V.Vector TE_Common_V1_Message.Payload)
+  , scheduledTime :: !(Maybe PB_Timestamp.Timestamp)
+  , currentAttemptScheduledTime :: !(Maybe PB_Timestamp.Timestamp)
+  , startedTime :: !(Maybe PB_Timestamp.Timestamp)
+  , attempt :: !(Maybe Word32)
+  , scheduleToCloseTimeout :: !(Maybe PB_Duration.Duration)
+  , startToCloseTimeout :: !(Maybe PB_Duration.Duration)
+  , heartbeatTimeout :: !(Maybe PB_Duration.Duration)
+  , retryPolicy :: !(Maybe TE_Common_V1_Message.RetryPolicy)
+  , priority :: !(Maybe TE_Common_V1_Message.Priority)
+  , isLocal :: !(Maybe Bool)
+  , startUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Start'HeaderFieldsEntry = Start'HeaderFieldsEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe TE_Common_V1_Message.Payload)
+  , startHeaderFieldsEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultStart'HeaderFieldsEntry :: Start'HeaderFieldsEntry
+defaultStart'HeaderFieldsEntry = Start'HeaderFieldsEntry
+  { key = Nothing
+  , value = Nothing
+  , startHeaderFieldsEntryUnknownFields = []
+  }
+
+instance MessageEncode Start'HeaderFieldsEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.startHeaderFieldsEntryUnknownFields
+
+instance MessageSize Start'HeaderFieldsEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.startHeaderFieldsEntryUnknownFields
+
+instance MessageDecode Start'HeaderFieldsEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Start'HeaderFieldsEntry {key = acc_0, value = acc_1, startHeaderFieldsEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Start'HeaderFieldsEntry where
+  protoMessageName _ = "coresdk.activity_task.Start.HeaderFieldsEntry"
+  protoPackageName _ = "coresdk.activity_task"
+  protoDefaultValue = defaultStart'HeaderFieldsEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start'HeaderFieldsEntry) -> m.key
+        , fdSet = \v (m :: Start'HeaderFieldsEntry) -> (m { key = v } :: Start'HeaderFieldsEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start'HeaderFieldsEntry) -> m.value
+        , fdSet = \v (m :: Start'HeaderFieldsEntry) -> (m { value = v } :: Start'HeaderFieldsEntry)
+        })
+    ]
+
+instance IsMessage Start'HeaderFieldsEntry
+
+instance Aeson.ToJSON Start'HeaderFieldsEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON Start'HeaderFieldsEntry where
+  parseJSON = Aeson.withObject "Start'HeaderFieldsEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultStart'HeaderFieldsEntry
+      { key = maybe (defaultStart'HeaderFieldsEntry.key) Prelude.id fld_key
+      , value = maybe (defaultStart'HeaderFieldsEntry.value) Prelude.id fld_value
+      , startHeaderFieldsEntryUnknownFields = []
+      } :: Start'HeaderFieldsEntry)
+
+instance Hashable Start'HeaderFieldsEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions Start'HeaderFieldsEntry where
+  messageUnknownFields msg = msg.startHeaderFieldsEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { startHeaderFieldsEntryUnknownFields = ufs }
+
+instance Semigroup Start'HeaderFieldsEntry where
+  a <> b = Start'HeaderFieldsEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , startHeaderFieldsEntryUnknownFields = a.startHeaderFieldsEntryUnknownFields <> b.startHeaderFieldsEntryUnknownFields
+    }
+
+instance Monoid Start'HeaderFieldsEntry where
+  mempty = defaultStart'HeaderFieldsEntry
+
+defaultStart :: Start
+defaultStart = Start
+  { workflowNamespace = Nothing
+  , workflowType = Nothing
+  , workflowExecution = Nothing
+  , activityId = Nothing
+  , activityType = Nothing
+  , headerFields = V.empty
+  , input = V.empty
+  , heartbeatDetails = V.empty
+  , scheduledTime = Nothing
+  , currentAttemptScheduledTime = Nothing
+  , startedTime = Nothing
+  , attempt = Nothing
+  , scheduleToCloseTimeout = Nothing
+  , startToCloseTimeout = Nothing
+  , heartbeatTimeout = Nothing
+  , retryPolicy = Nothing
+  , priority = Nothing
+  , isLocal = Nothing
+  , startUnknownFields = []
+  }
+
+instance MessageEncode Start where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.workflowNamespace)
+    <> (maybe mempty (\v -> archString 18 v) msg.workflowType)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.workflowExecution)
+    <> (maybe mempty (\v -> archString 34 v) msg.activityId)
+    <> (maybe mempty (\v -> archString 42 v) msg.activityType)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 50 sz (buildMessage v)) mempty msg.headerFields
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 58 sz (buildMessage v)) mempty msg.input
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 66 sz (buildMessage v)) mempty msg.heartbeatDetails
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 74 sz (buildMessage v)) msg.scheduledTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 82 sz (buildMessage v)) msg.currentAttemptScheduledTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 90 sz (buildMessage v)) msg.startedTime)
+    <> (maybe mempty (\v -> archVarint 96 (fromIntegral v)) msg.attempt)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 106 sz (buildMessage v)) msg.scheduleToCloseTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 114 sz (buildMessage v)) msg.startToCloseTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 122 sz (buildMessage v)) msg.heartbeatTimeout)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 130 sz (buildMessage v)) msg.retryPolicy)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 146 sz (buildMessage v)) msg.priority)
+    <> (maybe mempty (\v -> archBool 136 v) msg.isLocal)
+    <> encodeUnknownFields msg.startUnknownFields
+
+instance MessageSize Start where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.workflowNamespace)
+    + (maybe 0 (\v -> archStringSize v) msg.workflowType)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.workflowExecution)
+    + (maybe 0 (\v -> archStringSize v) msg.activityId)
+    + (maybe 0 (\v -> archStringSize v) msg.activityType)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.headerFields)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.input)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.heartbeatDetails)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.scheduledTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.currentAttemptScheduledTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.startedTime)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.attempt)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.scheduleToCloseTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.startToCloseTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.heartbeatTimeout)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.retryPolicy)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.priority)
+    + (maybe 0 (\v -> archBoolSize) msg.isLocal)
+    + unknownFieldsSize msg.startUnknownFields
+
+instance MessageDecode Start where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing V.empty V.empty V.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_ = withTagM
+        (pure (Start {workflowNamespace = acc_0, workflowType = acc_1, workflowExecution = acc_2, activityId = acc_3, activityType = acc_4, headerFields = acc_5, input = acc_6, heartbeatDetails = acc_7, scheduledTime = acc_8, currentAttemptScheduledTime = acc_9, startedTime = acc_10, attempt = acc_11, scheduleToCloseTimeout = acc_12, startToCloseTimeout = acc_13, heartbeatTimeout = acc_14, retryPolicy = acc_15, priority = acc_16, isLocal = acc_17, startUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          5 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          6 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (acc_5 <> V.singleton v) acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          7 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (acc_6 <> V.singleton v) acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          8 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (acc_7 <> V.singleton v) acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          9 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 (Just v) acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          10 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 (Just v) acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          11 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 (Just v) acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          12 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 (Just v) acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          13 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 (Just v) acc_13 acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          14 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 (Just v) acc_14 acc_15 acc_16 acc_17 acc_unknown_
+          15 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 (Just v) acc_15 acc_16 acc_17 acc_unknown_
+          16 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 (Just v) acc_16 acc_17 acc_unknown_
+          18 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 (Just v) acc_17 acc_unknown_
+          17 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_8 acc_9 acc_10 acc_11 acc_12 acc_13 acc_14 acc_15 acc_16 acc_17 (uf : acc_unknown_))
+
+instance ProtoMessage Start where
+  protoMessageName _ = "coresdk.activity_task.Start"
+  protoPackageName _ = "coresdk.activity_task"
+  protoDefaultValue = defaultStart
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "workflow_namespace"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.workflowNamespace
+        , fdSet = \v (m :: Start) -> (m { workflowNamespace = v } :: Start)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "workflow_type"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.workflowType
+        , fdSet = \v (m :: Start) -> (m { workflowType = v } :: Start)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "workflow_execution"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.common.v1.WorkflowExecution"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.workflowExecution
+        , fdSet = \v (m :: Start) -> (m { workflowExecution = v } :: Start)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "activity_id"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.activityId
+        , fdSet = \v (m :: Start) -> (m { activityId = v } :: Start)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "activity_type"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.activityType
+        , fdSet = \v (m :: Start) -> (m { activityType = v } :: Start)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "header_fields"
+        , fdNumber = 6
+        , fdTypeDesc = MessageType "coresdk.activity_task.Start.HeaderFieldsEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Start) -> m.headerFields
+        , fdSet = \v (m :: Start) -> (m { headerFields = v } :: Start)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "input"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Start) -> m.input
+        , fdSet = \v (m :: Start) -> (m { input = v } :: Start)
+        })
+    , (8, SomeField FieldDescriptor
+        { fdName = "heartbeat_details"
+        , fdNumber = 8
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Start) -> m.heartbeatDetails
+        , fdSet = \v (m :: Start) -> (m { heartbeatDetails = v } :: Start)
+        })
+    , (9, SomeField FieldDescriptor
+        { fdName = "scheduled_time"
+        , fdNumber = 9
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.scheduledTime
+        , fdSet = \v (m :: Start) -> (m { scheduledTime = v } :: Start)
+        })
+    , (10, SomeField FieldDescriptor
+        { fdName = "current_attempt_scheduled_time"
+        , fdNumber = 10
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.currentAttemptScheduledTime
+        , fdSet = \v (m :: Start) -> (m { currentAttemptScheduledTime = v } :: Start)
+        })
+    , (11, SomeField FieldDescriptor
+        { fdName = "started_time"
+        , fdNumber = 11
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.startedTime
+        , fdSet = \v (m :: Start) -> (m { startedTime = v } :: Start)
+        })
+    , (12, SomeField FieldDescriptor
+        { fdName = "attempt"
+        , fdNumber = 12
+        , fdTypeDesc = ScalarType UInt32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.attempt
+        , fdSet = \v (m :: Start) -> (m { attempt = v } :: Start)
+        })
+    , (13, SomeField FieldDescriptor
+        { fdName = "schedule_to_close_timeout"
+        , fdNumber = 13
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.scheduleToCloseTimeout
+        , fdSet = \v (m :: Start) -> (m { scheduleToCloseTimeout = v } :: Start)
+        })
+    , (14, SomeField FieldDescriptor
+        { fdName = "start_to_close_timeout"
+        , fdNumber = 14
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.startToCloseTimeout
+        , fdSet = \v (m :: Start) -> (m { startToCloseTimeout = v } :: Start)
+        })
+    , (15, SomeField FieldDescriptor
+        { fdName = "heartbeat_timeout"
+        , fdNumber = 15
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.heartbeatTimeout
+        , fdSet = \v (m :: Start) -> (m { heartbeatTimeout = v } :: Start)
+        })
+    , (16, SomeField FieldDescriptor
+        { fdName = "retry_policy"
+        , fdNumber = 16
+        , fdTypeDesc = MessageType "temporal.api.common.v1.RetryPolicy"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.retryPolicy
+        , fdSet = \v (m :: Start) -> (m { retryPolicy = v } :: Start)
+        })
+    , (18, SomeField FieldDescriptor
+        { fdName = "priority"
+        , fdNumber = 18
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Priority"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.priority
+        , fdSet = \v (m :: Start) -> (m { priority = v } :: Start)
+        })
+    , (17, SomeField FieldDescriptor
+        { fdName = "is_local"
+        , fdNumber = 17
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Start) -> m.isLocal
+        , fdSet = \v (m :: Start) -> (m { isLocal = v } :: Start)
+        })
+    ]
+
+instance IsMessage Start
+
+instance Aeson.ToJSON Start where
+  toJSON msg = jsonObject
+      [ "workflowNamespace" .=: msg.workflowNamespace
+      , "workflowType" .=: msg.workflowType
+      , "workflowExecution" .=: msg.workflowExecution
+      , "activityId" .=: msg.activityId
+      , "activityType" .=: msg.activityType
+      , "headerFields" .=: msg.headerFields
+      , "input" .=: msg.input
+      , "heartbeatDetails" .=: msg.heartbeatDetails
+      , "scheduledTime" .=: msg.scheduledTime
+      , "currentAttemptScheduledTime" .=: msg.currentAttemptScheduledTime
+      , "startedTime" .=: msg.startedTime
+      , "attempt" .=: msg.attempt
+      , "scheduleToCloseTimeout" .=: msg.scheduleToCloseTimeout
+      , "startToCloseTimeout" .=: msg.startToCloseTimeout
+      , "heartbeatTimeout" .=: msg.heartbeatTimeout
+      , "retryPolicy" .=: msg.retryPolicy
+      , "priority" .=: msg.priority
+      , "isLocal" .=: msg.isLocal
+      ]
+
+instance Aeson.FromJSON Start where
+  parseJSON = Aeson.withObject "Start" $ \obj -> do
+    fld_workflowNamespace <- parseFieldMaybe obj "workflowNamespace"
+    fld_workflowType <- parseFieldMaybe obj "workflowType"
+    fld_workflowExecution <- parseFieldMaybe obj "workflowExecution"
+    fld_activityId <- parseFieldMaybe obj "activityId"
+    fld_activityType <- parseFieldMaybe obj "activityType"
+    fld_headerFields <- parseFieldMaybe obj "headerFields"
+    fld_input <- parseFieldMaybe obj "input"
+    fld_heartbeatDetails <- parseFieldMaybe obj "heartbeatDetails"
+    fld_scheduledTime <- parseFieldMaybe obj "scheduledTime"
+    fld_currentAttemptScheduledTime <- parseFieldMaybe obj "currentAttemptScheduledTime"
+    fld_startedTime <- parseFieldMaybe obj "startedTime"
+    fld_attempt <- parseFieldMaybe obj "attempt"
+    fld_scheduleToCloseTimeout <- parseFieldMaybe obj "scheduleToCloseTimeout"
+    fld_startToCloseTimeout <- parseFieldMaybe obj "startToCloseTimeout"
+    fld_heartbeatTimeout <- parseFieldMaybe obj "heartbeatTimeout"
+    fld_retryPolicy <- parseFieldMaybe obj "retryPolicy"
+    fld_priority <- parseFieldMaybe obj "priority"
+    fld_isLocal <- parseFieldMaybe obj "isLocal"
+    pure (defaultStart
+      { workflowNamespace = maybe (defaultStart.workflowNamespace) Prelude.id fld_workflowNamespace
+      , workflowType = maybe (defaultStart.workflowType) Prelude.id fld_workflowType
+      , workflowExecution = maybe (defaultStart.workflowExecution) Prelude.id fld_workflowExecution
+      , activityId = maybe (defaultStart.activityId) Prelude.id fld_activityId
+      , activityType = maybe (defaultStart.activityType) Prelude.id fld_activityType
+      , headerFields = maybe (defaultStart.headerFields) Prelude.id fld_headerFields
+      , input = maybe (defaultStart.input) Prelude.id fld_input
+      , heartbeatDetails = maybe (defaultStart.heartbeatDetails) Prelude.id fld_heartbeatDetails
+      , scheduledTime = maybe (defaultStart.scheduledTime) Prelude.id fld_scheduledTime
+      , currentAttemptScheduledTime = maybe (defaultStart.currentAttemptScheduledTime) Prelude.id fld_currentAttemptScheduledTime
+      , startedTime = maybe (defaultStart.startedTime) Prelude.id fld_startedTime
+      , attempt = maybe (defaultStart.attempt) Prelude.id fld_attempt
+      , scheduleToCloseTimeout = maybe (defaultStart.scheduleToCloseTimeout) Prelude.id fld_scheduleToCloseTimeout
+      , startToCloseTimeout = maybe (defaultStart.startToCloseTimeout) Prelude.id fld_startToCloseTimeout
+      , heartbeatTimeout = maybe (defaultStart.heartbeatTimeout) Prelude.id fld_heartbeatTimeout
+      , retryPolicy = maybe (defaultStart.retryPolicy) Prelude.id fld_retryPolicy
+      , priority = maybe (defaultStart.priority) Prelude.id fld_priority
+      , isLocal = maybe (defaultStart.isLocal) Prelude.id fld_isLocal
+      , startUnknownFields = []
+      } :: Start)
+
+instance Hashable Start where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (V.foldl' hashWithSalt (V.foldl' hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.workflowNamespace) msg.workflowType) msg.workflowExecution) msg.activityId) msg.activityType) msg.headerFields) msg.input) msg.heartbeatDetails) msg.scheduledTime) msg.currentAttemptScheduledTime) msg.startedTime) msg.attempt) msg.scheduleToCloseTimeout) msg.startToCloseTimeout) msg.heartbeatTimeout) msg.retryPolicy) msg.priority) msg.isLocal
+
+instance Proto.Extension.HasExtensions Start where
+  messageUnknownFields msg = msg.startUnknownFields
+  setMessageUnknownFields !ufs msg = msg { startUnknownFields = ufs }
+
+instance Semigroup Start where
+  a <> b = Start
+    { workflowNamespace = case b.workflowNamespace of { Nothing -> a.workflowNamespace; x -> x }
+    , workflowType = case b.workflowType of { Nothing -> a.workflowType; x -> x }
+    , workflowExecution = case b.workflowExecution of { Nothing -> a.workflowExecution; x -> x }
+    , activityId = case b.activityId of { Nothing -> a.activityId; x -> x }
+    , activityType = case b.activityType of { Nothing -> a.activityType; x -> x }
+    , headerFields = a.headerFields <> b.headerFields
+    , input = a.input <> b.input
+    , heartbeatDetails = a.heartbeatDetails <> b.heartbeatDetails
+    , scheduledTime = case b.scheduledTime of { Nothing -> a.scheduledTime; x -> x }
+    , currentAttemptScheduledTime = case b.currentAttemptScheduledTime of { Nothing -> a.currentAttemptScheduledTime; x -> x }
+    , startedTime = case b.startedTime of { Nothing -> a.startedTime; x -> x }
+    , attempt = case b.attempt of { Nothing -> a.attempt; x -> x }
+    , scheduleToCloseTimeout = case b.scheduleToCloseTimeout of { Nothing -> a.scheduleToCloseTimeout; x -> x }
+    , startToCloseTimeout = case b.startToCloseTimeout of { Nothing -> a.startToCloseTimeout; x -> x }
+    , heartbeatTimeout = case b.heartbeatTimeout of { Nothing -> a.heartbeatTimeout; x -> x }
+    , retryPolicy = case b.retryPolicy of { Nothing -> a.retryPolicy; x -> x }
+    , priority = case b.priority of { Nothing -> a.priority; x -> x }
+    , isLocal = case b.isLocal of { Nothing -> a.isLocal; x -> x }
+    , startUnknownFields = a.startUnknownFields <> b.startUnknownFields
+    }
+
+instance Monoid Start where
+  mempty = defaultStart
+
+data Cancel = Cancel
+  { reason :: !(Maybe ActivityCancelReason)
+  , details :: !(Maybe ActivityCancellationDetails)
+  , cancelUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultCancel :: Cancel
+defaultCancel = Cancel
+  { reason = Nothing
+  , details = Nothing
+  , cancelUnknownFields = []
+  }
+
+instance MessageEncode Cancel where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral (fromEnum v))) msg.reason)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.details)
+    <> encodeUnknownFields msg.cancelUnknownFields
+
+instance MessageSize Cancel where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.reason)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.details)
+    + unknownFieldsSize msg.cancelUnknownFields
+
+instance MessageDecode Cancel where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Cancel {reason = acc_0, details = acc_1, cancelUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldEnum
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Cancel where
+  protoMessageName _ = "coresdk.activity_task.Cancel"
+  protoPackageName _ = "coresdk.activity_task"
+  protoDefaultValue = defaultCancel
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "reason"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "coresdk.activity_task.ActivityCancelReason"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Cancel) -> m.reason
+        , fdSet = \v (m :: Cancel) -> (m { reason = v } :: Cancel)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "details"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "coresdk.activity_task.ActivityCancellationDetails"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Cancel) -> m.details
+        , fdSet = \v (m :: Cancel) -> (m { details = v } :: Cancel)
+        })
+    ]
+
+instance IsMessage Cancel
+
+instance Aeson.ToJSON Cancel where
+  toJSON msg = jsonObject
+      [ "reason" .=: msg.reason
+      , "details" .=: msg.details
+      ]
+
+instance Aeson.FromJSON Cancel where
+  parseJSON = Aeson.withObject "Cancel" $ \obj -> do
+    fld_reason <- parseFieldMaybe obj "reason"
+    fld_details <- parseFieldMaybe obj "details"
+    pure (defaultCancel
+      { reason = maybe (defaultCancel.reason) Prelude.id fld_reason
+      , details = maybe (defaultCancel.details) Prelude.id fld_details
+      , cancelUnknownFields = []
+      } :: Cancel)
+
+instance Hashable Cancel where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.reason) msg.details
+
+instance Proto.Extension.HasExtensions Cancel where
+  messageUnknownFields msg = msg.cancelUnknownFields
+  setMessageUnknownFields !ufs msg = msg { cancelUnknownFields = ufs }
+
+instance Semigroup Cancel where
+  a <> b = Cancel
+    { reason = case b.reason of { Nothing -> a.reason; x -> x }
+    , details = case b.details of { Nothing -> a.details; x -> x }
+    , cancelUnknownFields = a.cancelUnknownFields <> b.cancelUnknownFields
+    }
+
+instance Monoid Cancel where
+  mempty = defaultCancel
+
+data ActivityCancellationDetails = ActivityCancellationDetails
+  { isNotFound :: !(Maybe Bool)
+  , isCancelled :: !(Maybe Bool)
+  , isPaused :: !(Maybe Bool)
+  , isTimedOut :: !(Maybe Bool)
+  , isWorkerShutdown :: !(Maybe Bool)
+  , isReset :: !(Maybe Bool)
+  , activityCancellationDetailsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultActivityCancellationDetails :: ActivityCancellationDetails
+defaultActivityCancellationDetails = ActivityCancellationDetails
+  { isNotFound = Nothing
+  , isCancelled = Nothing
+  , isPaused = Nothing
+  , isTimedOut = Nothing
+  , isWorkerShutdown = Nothing
+  , isReset = Nothing
+  , activityCancellationDetailsUnknownFields = []
+  }
+
+instance MessageEncode ActivityCancellationDetails where
+  buildMessage msg =
+    (maybe mempty (\v -> archBool 8 v) msg.isNotFound)
+    <> (maybe mempty (\v -> archBool 16 v) msg.isCancelled)
+    <> (maybe mempty (\v -> archBool 24 v) msg.isPaused)
+    <> (maybe mempty (\v -> archBool 32 v) msg.isTimedOut)
+    <> (maybe mempty (\v -> archBool 40 v) msg.isWorkerShutdown)
+    <> (maybe mempty (\v -> archBool 48 v) msg.isReset)
+    <> encodeUnknownFields msg.activityCancellationDetailsUnknownFields
+
+instance MessageSize ActivityCancellationDetails where
+  messageSize msg =
+    (maybe 0 (\v -> archBoolSize) msg.isNotFound)
+    + (maybe 0 (\v -> archBoolSize) msg.isCancelled)
+    + (maybe 0 (\v -> archBoolSize) msg.isPaused)
+    + (maybe 0 (\v -> archBoolSize) msg.isTimedOut)
+    + (maybe 0 (\v -> archBoolSize) msg.isWorkerShutdown)
+    + (maybe 0 (\v -> archBoolSize) msg.isReset)
+    + unknownFieldsSize msg.activityCancellationDetailsUnknownFields
+
+instance MessageDecode ActivityCancellationDetails where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_unknown_ = withTagM
+        (pure (ActivityCancellationDetails {isNotFound = acc_0, isCancelled = acc_1, isPaused = acc_2, isTimedOut = acc_3, isWorkerShutdown = acc_4, isReset = acc_5, activityCancellationDetailsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBool
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_unknown_
+          2 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_unknown_
+          4 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_unknown_
+          5 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_unknown_
+          6 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityCancellationDetails where
+  protoMessageName _ = "coresdk.activity_task.ActivityCancellationDetails"
+  protoPackageName _ = "coresdk.activity_task"
+  protoDefaultValue = defaultActivityCancellationDetails
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "is_not_found"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityCancellationDetails) -> m.isNotFound
+        , fdSet = \v (m :: ActivityCancellationDetails) -> (m { isNotFound = v } :: ActivityCancellationDetails)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "is_cancelled"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityCancellationDetails) -> m.isCancelled
+        , fdSet = \v (m :: ActivityCancellationDetails) -> (m { isCancelled = v } :: ActivityCancellationDetails)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "is_paused"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityCancellationDetails) -> m.isPaused
+        , fdSet = \v (m :: ActivityCancellationDetails) -> (m { isPaused = v } :: ActivityCancellationDetails)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "is_timed_out"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityCancellationDetails) -> m.isTimedOut
+        , fdSet = \v (m :: ActivityCancellationDetails) -> (m { isTimedOut = v } :: ActivityCancellationDetails)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "is_worker_shutdown"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityCancellationDetails) -> m.isWorkerShutdown
+        , fdSet = \v (m :: ActivityCancellationDetails) -> (m { isWorkerShutdown = v } :: ActivityCancellationDetails)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "is_reset"
+        , fdNumber = 6
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityCancellationDetails) -> m.isReset
+        , fdSet = \v (m :: ActivityCancellationDetails) -> (m { isReset = v } :: ActivityCancellationDetails)
+        })
+    ]
+
+instance IsMessage ActivityCancellationDetails
+
+instance Aeson.ToJSON ActivityCancellationDetails where
+  toJSON msg = jsonObject
+      [ "isNotFound" .=: msg.isNotFound
+      , "isCancelled" .=: msg.isCancelled
+      , "isPaused" .=: msg.isPaused
+      , "isTimedOut" .=: msg.isTimedOut
+      , "isWorkerShutdown" .=: msg.isWorkerShutdown
+      , "isReset" .=: msg.isReset
+      ]
+
+instance Aeson.FromJSON ActivityCancellationDetails where
+  parseJSON = Aeson.withObject "ActivityCancellationDetails" $ \obj -> do
+    fld_isNotFound <- parseFieldMaybe obj "isNotFound"
+    fld_isCancelled <- parseFieldMaybe obj "isCancelled"
+    fld_isPaused <- parseFieldMaybe obj "isPaused"
+    fld_isTimedOut <- parseFieldMaybe obj "isTimedOut"
+    fld_isWorkerShutdown <- parseFieldMaybe obj "isWorkerShutdown"
+    fld_isReset <- parseFieldMaybe obj "isReset"
+    pure (defaultActivityCancellationDetails
+      { isNotFound = maybe (defaultActivityCancellationDetails.isNotFound) Prelude.id fld_isNotFound
+      , isCancelled = maybe (defaultActivityCancellationDetails.isCancelled) Prelude.id fld_isCancelled
+      , isPaused = maybe (defaultActivityCancellationDetails.isPaused) Prelude.id fld_isPaused
+      , isTimedOut = maybe (defaultActivityCancellationDetails.isTimedOut) Prelude.id fld_isTimedOut
+      , isWorkerShutdown = maybe (defaultActivityCancellationDetails.isWorkerShutdown) Prelude.id fld_isWorkerShutdown
+      , isReset = maybe (defaultActivityCancellationDetails.isReset) Prelude.id fld_isReset
+      , activityCancellationDetailsUnknownFields = []
+      } :: ActivityCancellationDetails)
+
+instance Hashable ActivityCancellationDetails where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.isNotFound) msg.isCancelled) msg.isPaused) msg.isTimedOut) msg.isWorkerShutdown) msg.isReset
+
+instance Proto.Extension.HasExtensions ActivityCancellationDetails where
+  messageUnknownFields msg = msg.activityCancellationDetailsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityCancellationDetailsUnknownFields = ufs }
+
+instance Semigroup ActivityCancellationDetails where
+  a <> b = ActivityCancellationDetails
+    { isNotFound = case b.isNotFound of { Nothing -> a.isNotFound; x -> x }
+    , isCancelled = case b.isCancelled of { Nothing -> a.isCancelled; x -> x }
+    , isPaused = case b.isPaused of { Nothing -> a.isPaused; x -> x }
+    , isTimedOut = case b.isTimedOut of { Nothing -> a.isTimedOut; x -> x }
+    , isWorkerShutdown = case b.isWorkerShutdown of { Nothing -> a.isWorkerShutdown; x -> x }
+    , isReset = case b.isReset of { Nothing -> a.isReset; x -> x }
+    , activityCancellationDetailsUnknownFields = a.activityCancellationDetailsUnknownFields <> b.activityCancellationDetailsUnknownFields
+    }
+
+instance Monoid ActivityCancellationDetails where
+  mempty = defaultActivityCancellationDetails
+
+data ActivityCancelReason
+  = ActivityCancelReason'NotFound
+  | ActivityCancelReason'Cancelled
+  | ActivityCancelReason'TimedOut
+  | ActivityCancelReason'WorkerShutdown
+  | ActivityCancelReason'Paused
+  | ActivityCancelReason'Reset
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumActivityCancelReason :: ActivityCancelReason -> Int
+toProtoEnumActivityCancelReason ActivityCancelReason'NotFound = 0
+toProtoEnumActivityCancelReason ActivityCancelReason'Cancelled = 1
+toProtoEnumActivityCancelReason ActivityCancelReason'TimedOut = 2
+toProtoEnumActivityCancelReason ActivityCancelReason'WorkerShutdown = 3
+toProtoEnumActivityCancelReason ActivityCancelReason'Paused = 4
+toProtoEnumActivityCancelReason ActivityCancelReason'Reset = 5
+
+fromProtoEnumActivityCancelReason :: Int -> Maybe ActivityCancelReason
+fromProtoEnumActivityCancelReason 0 = Just ActivityCancelReason'NotFound
+fromProtoEnumActivityCancelReason 1 = Just ActivityCancelReason'Cancelled
+fromProtoEnumActivityCancelReason 2 = Just ActivityCancelReason'TimedOut
+fromProtoEnumActivityCancelReason 3 = Just ActivityCancelReason'WorkerShutdown
+fromProtoEnumActivityCancelReason 4 = Just ActivityCancelReason'Paused
+fromProtoEnumActivityCancelReason 5 = Just ActivityCancelReason'Reset
+fromProtoEnumActivityCancelReason _ = Nothing
+
+instance MessageEncode ActivityCancelReason where
+  buildMessage _ = mempty
+instance MessageSize ActivityCancelReason where
+  messageSize _ = 0
+instance MessageDecode ActivityCancelReason where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON ActivityCancelReason where
+  toJSON ActivityCancelReason'NotFound = Aeson.String "NOT_FOUND"
+  toJSON ActivityCancelReason'Cancelled = Aeson.String "CANCELLED"
+  toJSON ActivityCancelReason'TimedOut = Aeson.String "TIMED_OUT"
+  toJSON ActivityCancelReason'WorkerShutdown = Aeson.String "WORKER_SHUTDOWN"
+  toJSON ActivityCancelReason'Paused = Aeson.String "PAUSED"
+  toJSON ActivityCancelReason'Reset = Aeson.String "RESET"
+
+instance Aeson.FromJSON ActivityCancelReason where
+  parseJSON = \case
+    Aeson.String "NOT_FOUND" -> pure ActivityCancelReason'NotFound
+    Aeson.String "CANCELLED" -> pure ActivityCancelReason'Cancelled
+    Aeson.String "TIMED_OUT" -> pure ActivityCancelReason'TimedOut
+    Aeson.String "WORKER_SHUTDOWN" -> pure ActivityCancelReason'WorkerShutdown
+    Aeson.String "PAUSED" -> pure ActivityCancelReason'Paused
+    Aeson.String "RESET" -> pure ActivityCancelReason'Reset
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for ActivityCancelReason"
+
+instance Hashable ActivityCancelReason where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumActivityCancelReason x)

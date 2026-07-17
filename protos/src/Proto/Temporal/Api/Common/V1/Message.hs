@@ -1,6424 +1,3148 @@
-{- This file was auto-generated from temporal/api/common/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Common.V1.Message (
-        ActivityType(), Callback(), Callback'Variant(..), _Callback'Nexus',
-        _Callback'Internal', Callback'Internal(), Callback'Nexus(),
-        Callback'Nexus'HeaderEntry(), DataBlob(), Header(),
-        Header'FieldsEntry(), Link(), Link'Variant(..),
-        _Link'WorkflowEvent', _Link'BatchJob', Link'BatchJob(),
-        Link'WorkflowEvent(), Link'WorkflowEvent'Reference(..),
-        _Link'WorkflowEvent'EventRef, _Link'WorkflowEvent'RequestIdRef,
-        Link'WorkflowEvent'EventReference(),
-        Link'WorkflowEvent'RequestIdReference(), Memo(),
-        Memo'FieldsEntry(), MeteringMetadata(), Payload(),
-        Payload'MetadataEntry(), Payloads(), Priority(), ResetOptions(),
-        ResetOptions'Target(..), _ResetOptions'FirstWorkflowTask,
-        _ResetOptions'LastWorkflowTask, _ResetOptions'WorkflowTaskId,
-        _ResetOptions'BuildId, RetryPolicy(), SearchAttributes(),
-        SearchAttributes'IndexedFieldsEntry(), WorkerSelector(),
-        WorkerSelector'Selector(..), _WorkerSelector'WorkerInstanceKey,
-        WorkerVersionCapabilities(), WorkerVersionStamp(),
-        WorkflowExecution(), WorkflowType()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Empty
-import qualified Proto.Temporal.Api.Enums.V1.Common
-import qualified Proto.Temporal.Api.Enums.V1.EventType
-import qualified Proto.Temporal.Api.Enums.V1.Reset
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.name' @:: Lens' ActivityType Data.Text.Text@ -}
-data ActivityType
-  = ActivityType'_constructor {_ActivityType'name :: !Data.Text.Text,
-                               _ActivityType'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityType where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField ActivityType "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityType'name (\ x__ y__ -> x__ {_ActivityType'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message ActivityType where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.ActivityType"
-  packedMessageDescriptor _
-    = "\n\
-      \\fActivityType\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor ActivityType
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, name__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityType'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityType'_unknownFields = y__})
-  defMessage
-    = ActivityType'_constructor
-        {_ActivityType'name = Data.ProtoLens.fieldDefault,
-         _ActivityType'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityType -> Data.ProtoLens.Encoding.Bytes.Parser ActivityType
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityType"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData ActivityType where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityType'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_ActivityType'name x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.links' @:: Lens' Callback [Link]@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.vec'links' @:: Lens' Callback (Data.Vector.Vector Link)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'variant' @:: Lens' Callback (Prelude.Maybe Callback'Variant)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'nexus' @:: Lens' Callback (Prelude.Maybe Callback'Nexus)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.nexus' @:: Lens' Callback Callback'Nexus@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'internal' @:: Lens' Callback (Prelude.Maybe Callback'Internal)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.internal' @:: Lens' Callback Callback'Internal@ -}
-data Callback
-  = Callback'_constructor {_Callback'links :: !(Data.Vector.Vector Link),
-                           _Callback'variant :: !(Prelude.Maybe Callback'Variant),
-                           _Callback'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Callback where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-data Callback'Variant
-  = Callback'Nexus' !Callback'Nexus |
-    Callback'Internal' !Callback'Internal
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField Callback "links" [Link] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'links (\ x__ y__ -> x__ {_Callback'links = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Callback "vec'links" (Data.Vector.Vector Link) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'links (\ x__ y__ -> x__ {_Callback'links = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Callback "maybe'variant" (Prelude.Maybe Callback'Variant) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Callback "maybe'nexus" (Prelude.Maybe Callback'Nexus) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Callback'Nexus' x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Callback'Nexus' y__))
-instance Data.ProtoLens.Field.HasField Callback "nexus" Callback'Nexus where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Callback'Nexus' x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Callback'Nexus' y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField Callback "maybe'internal" (Prelude.Maybe Callback'Internal) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Callback'Internal' x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Callback'Internal' y__))
-instance Data.ProtoLens.Field.HasField Callback "internal" Callback'Internal where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'variant (\ x__ y__ -> x__ {_Callback'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Callback'Internal' x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Callback'Internal' y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message Callback where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Callback"
-  packedMessageDescriptor _
-    = "\n\
-      \\bCallback\DC2>\n\
-      \\ENQnexus\CAN\STX \SOH(\v2&.temporal.api.common.v1.Callback.NexusH\NULR\ENQnexus\DC2G\n\
-      \\binternal\CAN\ETX \SOH(\v2).temporal.api.common.v1.Callback.InternalH\NULR\binternal\DC22\n\
-      \\ENQlinks\CANd \ETX(\v2\FS.temporal.api.common.v1.LinkR\ENQlinks\SUB\160\SOH\n\
-      \\ENQNexus\DC2\DLE\n\
-      \\ETXurl\CAN\SOH \SOH(\tR\ETXurl\DC2J\n\
-      \\ACKheader\CAN\STX \ETX(\v22.temporal.api.common.v1.Callback.Nexus.HeaderEntryR\ACKheader\SUB9\n\
-      \\vHeaderEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\RS\n\
-      \\bInternal\DC2\DC2\n\
-      \\EOTdata\CAN\SOH \SOH(\fR\EOTdataB\t\n\
-      \\avariantJ\EOT\b\SOH\DLE\STX"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        links__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "links"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Link)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"links")) ::
-              Data.ProtoLens.FieldDescriptor Callback
-        nexus__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "nexus"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Callback'Nexus)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'nexus")) ::
-              Data.ProtoLens.FieldDescriptor Callback
-        internal__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "internal"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Callback'Internal)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'internal")) ::
-              Data.ProtoLens.FieldDescriptor Callback
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 100, links__field_descriptor),
-           (Data.ProtoLens.Tag 2, nexus__field_descriptor),
-           (Data.ProtoLens.Tag 3, internal__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Callback'_unknownFields
-        (\ x__ y__ -> x__ {_Callback'_unknownFields = y__})
-  defMessage
-    = Callback'_constructor
-        {_Callback'links = Data.Vector.Generic.empty,
-         _Callback'variant = Prelude.Nothing, _Callback'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Callback
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Link
-             -> Data.ProtoLens.Encoding.Bytes.Parser Callback
-        loop x mutable'links
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'links <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                        (Data.ProtoLens.Encoding.Growing.unsafeFreeze mutable'links)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'links") frozen'links x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        802
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "links"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'links y)
-                                loop x v
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "nexus"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"nexus") y x)
-                                  mutable'links
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "internal"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"internal") y x)
-                                  mutable'links
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'links
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'links <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                 Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'links)
-          "Callback"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                (\ _v
-                   -> (Data.Monoid.<>)
-                        (Data.ProtoLens.Encoding.Bytes.putVarInt 802)
-                        ((Prelude..)
-                           (\ bs
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage _v))
-                (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'links") _x))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'variant") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just (Callback'Nexus' v))
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage v)
-                   (Prelude.Just (Callback'Internal' v))
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Callback where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Callback'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Callback'links x__)
-                (Control.DeepSeq.deepseq (_Callback'variant x__) ()))
-instance Control.DeepSeq.NFData Callback'Variant where
-  rnf (Callback'Nexus' x__) = Control.DeepSeq.rnf x__
-  rnf (Callback'Internal' x__) = Control.DeepSeq.rnf x__
-_Callback'Nexus' ::
-  Data.ProtoLens.Prism.Prism' Callback'Variant Callback'Nexus
-_Callback'Nexus'
-  = Data.ProtoLens.Prism.prism'
-      Callback'Nexus'
-      (\ p__
-         -> case p__ of
-              (Callback'Nexus' p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_Callback'Internal' ::
-  Data.ProtoLens.Prism.Prism' Callback'Variant Callback'Internal
-_Callback'Internal'
-  = Data.ProtoLens.Prism.prism'
-      Callback'Internal'
-      (\ p__
-         -> case p__ of
-              (Callback'Internal' p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.data'' @:: Lens' Callback'Internal Data.ByteString.ByteString@ -}
-data Callback'Internal
-  = Callback'Internal'_constructor {_Callback'Internal'data' :: !Data.ByteString.ByteString,
-                                    _Callback'Internal'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Callback'Internal where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Callback'Internal "data'" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'Internal'data'
-           (\ x__ y__ -> x__ {_Callback'Internal'data' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Callback'Internal where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Callback.Internal"
-  packedMessageDescriptor _
-    = "\n\
-      \\bInternal\DC2\DC2\n\
-      \\EOTdata\CAN\SOH \SOH(\fR\EOTdata"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        data'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "data"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"data'")) ::
-              Data.ProtoLens.FieldDescriptor Callback'Internal
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, data'__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Callback'Internal'_unknownFields
-        (\ x__ y__ -> x__ {_Callback'Internal'_unknownFields = y__})
-  defMessage
-    = Callback'Internal'_constructor
-        {_Callback'Internal'data' = Data.ProtoLens.fieldDefault,
-         _Callback'Internal'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Callback'Internal
-          -> Data.ProtoLens.Encoding.Bytes.Parser Callback'Internal
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "data"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"data'") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Internal"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"data'") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((\ bs
-                          -> (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
-                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Callback'Internal where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Callback'Internal'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Callback'Internal'data' x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.url' @:: Lens' Callback'Nexus Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.header' @:: Lens' Callback'Nexus (Data.Map.Map Data.Text.Text Data.Text.Text)@ -}
-data Callback'Nexus
-  = Callback'Nexus'_constructor {_Callback'Nexus'url :: !Data.Text.Text,
-                                 _Callback'Nexus'header :: !(Data.Map.Map Data.Text.Text Data.Text.Text),
-                                 _Callback'Nexus'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Callback'Nexus where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Callback'Nexus "url" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'Nexus'url (\ x__ y__ -> x__ {_Callback'Nexus'url = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Callback'Nexus "header" (Data.Map.Map Data.Text.Text Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'Nexus'header
-           (\ x__ y__ -> x__ {_Callback'Nexus'header = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Callback'Nexus where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Callback.Nexus"
-  packedMessageDescriptor _
-    = "\n\
-      \\ENQNexus\DC2\DLE\n\
-      \\ETXurl\CAN\SOH \SOH(\tR\ETXurl\DC2J\n\
-      \\ACKheader\CAN\STX \ETX(\v22.temporal.api.common.v1.Callback.Nexus.HeaderEntryR\ACKheader\SUB9\n\
-      \\vHeaderEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        url__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "url"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"url")) ::
-              Data.ProtoLens.FieldDescriptor Callback'Nexus
-        header__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "header"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Callback'Nexus'HeaderEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"header")) ::
-              Data.ProtoLens.FieldDescriptor Callback'Nexus
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, url__field_descriptor),
-           (Data.ProtoLens.Tag 2, header__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Callback'Nexus'_unknownFields
-        (\ x__ y__ -> x__ {_Callback'Nexus'_unknownFields = y__})
-  defMessage
-    = Callback'Nexus'_constructor
-        {_Callback'Nexus'url = Data.ProtoLens.fieldDefault,
-         _Callback'Nexus'header = Data.Map.empty,
-         _Callback'Nexus'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Callback'Nexus
-          -> Data.ProtoLens.Encoding.Bytes.Parser Callback'Nexus
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "url"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"url") y x)
-                        18
-                          -> do !(entry :: Callback'Nexus'HeaderEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                            (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                  (Prelude.fromIntegral
-                                                                                     len)
-                                                                                  Data.ProtoLens.parseMessage)
-                                                                            "header"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"header")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Nexus"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"url") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (Data.Monoid.mconcat
-                   (Prelude.map
-                      (\ _v
-                         -> (Data.Monoid.<>)
-                              (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                              ((Prelude..)
-                                 (\ bs
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                 Data.ProtoLens.encodeMessage
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                    (Lens.Family2.set
-                                       (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                       (Data.ProtoLens.defMessage :: Callback'Nexus'HeaderEntry)))))
-                      (Data.Map.toList
-                         (Lens.Family2.view (Data.ProtoLens.Field.field @"header") _x))))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Callback'Nexus where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Callback'Nexus'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Callback'Nexus'url x__)
-                (Control.DeepSeq.deepseq (_Callback'Nexus'header x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.key' @:: Lens' Callback'Nexus'HeaderEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.value' @:: Lens' Callback'Nexus'HeaderEntry Data.Text.Text@ -}
-data Callback'Nexus'HeaderEntry
-  = Callback'Nexus'HeaderEntry'_constructor {_Callback'Nexus'HeaderEntry'key :: !Data.Text.Text,
-                                             _Callback'Nexus'HeaderEntry'value :: !Data.Text.Text,
-                                             _Callback'Nexus'HeaderEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Callback'Nexus'HeaderEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Callback'Nexus'HeaderEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'Nexus'HeaderEntry'key
-           (\ x__ y__ -> x__ {_Callback'Nexus'HeaderEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Callback'Nexus'HeaderEntry "value" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Callback'Nexus'HeaderEntry'value
-           (\ x__ y__ -> x__ {_Callback'Nexus'HeaderEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Callback'Nexus'HeaderEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.common.v1.Callback.Nexus.HeaderEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\vHeaderEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor Callback'Nexus'HeaderEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"value")) ::
-              Data.ProtoLens.FieldDescriptor Callback'Nexus'HeaderEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Callback'Nexus'HeaderEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_Callback'Nexus'HeaderEntry'_unknownFields = y__})
-  defMessage
-    = Callback'Nexus'HeaderEntry'_constructor
-        {_Callback'Nexus'HeaderEntry'key = Data.ProtoLens.fieldDefault,
-         _Callback'Nexus'HeaderEntry'value = Data.ProtoLens.fieldDefault,
-         _Callback'Nexus'HeaderEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Callback'Nexus'HeaderEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser Callback'Nexus'HeaderEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "HeaderEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"value") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Callback'Nexus'HeaderEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Callback'Nexus'HeaderEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Callback'Nexus'HeaderEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_Callback'Nexus'HeaderEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.encodingType' @:: Lens' DataBlob Proto.Temporal.Api.Enums.V1.Common.EncodingType@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.data'' @:: Lens' DataBlob Data.ByteString.ByteString@ -}
-data DataBlob
-  = DataBlob'_constructor {_DataBlob'encodingType :: !Proto.Temporal.Api.Enums.V1.Common.EncodingType,
-                           _DataBlob'data' :: !Data.ByteString.ByteString,
-                           _DataBlob'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show DataBlob where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField DataBlob "encodingType" Proto.Temporal.Api.Enums.V1.Common.EncodingType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DataBlob'encodingType
-           (\ x__ y__ -> x__ {_DataBlob'encodingType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DataBlob "data'" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DataBlob'data' (\ x__ y__ -> x__ {_DataBlob'data' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message DataBlob where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.DataBlob"
-  packedMessageDescriptor _
-    = "\n\
-      \\bDataBlob\DC2H\n\
-      \\rencoding_type\CAN\SOH \SOH(\SO2#.temporal.api.enums.v1.EncodingTypeR\fencodingType\DC2\DC2\n\
-      \\EOTdata\CAN\STX \SOH(\fR\EOTdata"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        encodingType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "encoding_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Common.EncodingType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"encodingType")) ::
-              Data.ProtoLens.FieldDescriptor DataBlob
-        data'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "data"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"data'")) ::
-              Data.ProtoLens.FieldDescriptor DataBlob
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, encodingType__field_descriptor),
-           (Data.ProtoLens.Tag 2, data'__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _DataBlob'_unknownFields
-        (\ x__ y__ -> x__ {_DataBlob'_unknownFields = y__})
-  defMessage
-    = DataBlob'_constructor
-        {_DataBlob'encodingType = Data.ProtoLens.fieldDefault,
-         _DataBlob'data' = Data.ProtoLens.fieldDefault,
-         _DataBlob'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: DataBlob -> Data.ProtoLens.Encoding.Bytes.Parser DataBlob
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "encoding_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"encodingType") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "data"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"data'") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "DataBlob"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"encodingType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                         Prelude.fromEnum _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"data'") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData DataBlob where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_DataBlob'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_DataBlob'encodingType x__)
-                (Control.DeepSeq.deepseq (_DataBlob'data' x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.fields' @:: Lens' Header (Data.Map.Map Data.Text.Text Payload)@ -}
-data Header
-  = Header'_constructor {_Header'fields :: !(Data.Map.Map Data.Text.Text Payload),
-                         _Header'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Header where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Header "fields" (Data.Map.Map Data.Text.Text Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Header'fields (\ x__ y__ -> x__ {_Header'fields = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Header where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Header"
-  packedMessageDescriptor _
-    = "\n\
-      \\ACKHeader\DC2B\n\
-      \\ACKfields\CAN\SOH \ETX(\v2*.temporal.api.common.v1.Header.FieldsEntryR\ACKfields\SUBZ\n\
-      \\vFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        fields__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "fields"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Header'FieldsEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"fields")) ::
-              Data.ProtoLens.FieldDescriptor Header
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, fields__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Header'_unknownFields
-        (\ x__ y__ -> x__ {_Header'_unknownFields = y__})
-  defMessage
-    = Header'_constructor
-        {_Header'fields = Data.Map.empty, _Header'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Header -> Data.ProtoLens.Encoding.Bytes.Parser Header
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: Header'FieldsEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                    (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                        Data.ProtoLens.Encoding.Bytes.isolate
-                                                                          (Prelude.fromIntegral len)
-                                                                          Data.ProtoLens.parseMessage)
-                                                                    "fields"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"fields")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Header"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage :: Header'FieldsEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"fields") _x))))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Header where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Header'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Header'fields x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.key' @:: Lens' Header'FieldsEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.value' @:: Lens' Header'FieldsEntry Payload@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'value' @:: Lens' Header'FieldsEntry (Prelude.Maybe Payload)@ -}
-data Header'FieldsEntry
-  = Header'FieldsEntry'_constructor {_Header'FieldsEntry'key :: !Data.Text.Text,
-                                     _Header'FieldsEntry'value :: !(Prelude.Maybe Payload),
-                                     _Header'FieldsEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Header'FieldsEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Header'FieldsEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Header'FieldsEntry'key
-           (\ x__ y__ -> x__ {_Header'FieldsEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Header'FieldsEntry "value" Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Header'FieldsEntry'value
-           (\ x__ y__ -> x__ {_Header'FieldsEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Header'FieldsEntry "maybe'value" (Prelude.Maybe Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Header'FieldsEntry'value
-           (\ x__ y__ -> x__ {_Header'FieldsEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Header'FieldsEntry where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Header.FieldsEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\vFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor Header'FieldsEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor Header'FieldsEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Header'FieldsEntry'_unknownFields
-        (\ x__ y__ -> x__ {_Header'FieldsEntry'_unknownFields = y__})
-  defMessage
-    = Header'FieldsEntry'_constructor
-        {_Header'FieldsEntry'key = Data.ProtoLens.fieldDefault,
-         _Header'FieldsEntry'value = Prelude.Nothing,
-         _Header'FieldsEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Header'FieldsEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser Header'FieldsEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "FieldsEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Header'FieldsEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Header'FieldsEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Header'FieldsEntry'key x__)
-                (Control.DeepSeq.deepseq (_Header'FieldsEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'variant' @:: Lens' Link (Prelude.Maybe Link'Variant)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'workflowEvent' @:: Lens' Link (Prelude.Maybe Link'WorkflowEvent)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowEvent' @:: Lens' Link Link'WorkflowEvent@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'batchJob' @:: Lens' Link (Prelude.Maybe Link'BatchJob)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.batchJob' @:: Lens' Link Link'BatchJob@ -}
-data Link
-  = Link'_constructor {_Link'variant :: !(Prelude.Maybe Link'Variant),
-                       _Link'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Link where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-data Link'Variant
-  = Link'WorkflowEvent' !Link'WorkflowEvent |
-    Link'BatchJob' !Link'BatchJob
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField Link "maybe'variant" (Prelude.Maybe Link'Variant) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link "maybe'workflowEvent" (Prelude.Maybe Link'WorkflowEvent) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Link'WorkflowEvent' x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Link'WorkflowEvent' y__))
-instance Data.ProtoLens.Field.HasField Link "workflowEvent" Link'WorkflowEvent where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Link'WorkflowEvent' x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Link'WorkflowEvent' y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField Link "maybe'batchJob" (Prelude.Maybe Link'BatchJob) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Link'BatchJob' x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Link'BatchJob' y__))
-instance Data.ProtoLens.Field.HasField Link "batchJob" Link'BatchJob where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'variant (\ x__ y__ -> x__ {_Link'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Link'BatchJob' x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Link'BatchJob' y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message Link where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Link"
-  packedMessageDescriptor _
-    = "\n\
-      \\EOTLink\DC2S\n\
-      \\SOworkflow_event\CAN\SOH \SOH(\v2*.temporal.api.common.v1.Link.WorkflowEventH\NULR\rworkflowEvent\DC2D\n\
-      \\tbatch_job\CAN\STX \SOH(\v2%.temporal.api.common.v1.Link.BatchJobH\NULR\bbatchJob\SUB\151\EOT\n\
-      \\rWorkflowEvent\DC2\FS\n\
-      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
-      \\vworkflow_id\CAN\STX \SOH(\tR\n\
-      \workflowId\DC2\NAK\n\
-      \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2X\n\
-      \\tevent_ref\CANd \SOH(\v29.temporal.api.common.v1.Link.WorkflowEvent.EventReferenceH\NULR\beventRef\DC2e\n\
-      \\SOrequest_id_ref\CANe \SOH(\v2=.temporal.api.common.v1.Link.WorkflowEvent.RequestIdReferenceH\NULR\frequestIdRef\SUBl\n\
-      \\SOEventReference\DC2\EM\n\
-      \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
-      \\n\
-      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventType\SUBt\n\
-      \\DC2RequestIdReference\DC2\GS\n\
-      \\n\
-      \request_id\CAN\SOH \SOH(\tR\trequestId\DC2?\n\
-      \\n\
-      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventTypeB\v\n\
-      \\treference\SUB!\n\
-      \\bBatchJob\DC2\NAK\n\
-      \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobIdB\t\n\
-      \\avariant"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workflowEvent__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_event"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Link'WorkflowEvent)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowEvent")) ::
-              Data.ProtoLens.FieldDescriptor Link
-        batchJob__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "batch_job"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Link'BatchJob)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'batchJob")) ::
-              Data.ProtoLens.FieldDescriptor Link
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, workflowEvent__field_descriptor),
-           (Data.ProtoLens.Tag 2, batchJob__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Link'_unknownFields
-        (\ x__ y__ -> x__ {_Link'_unknownFields = y__})
-  defMessage
-    = Link'_constructor
-        {_Link'variant = Prelude.Nothing, _Link'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Link -> Data.ProtoLens.Encoding.Bytes.Parser Link
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_event"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowEvent") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "batch_job"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"batchJob") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Link"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'variant") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just (Link'WorkflowEvent' v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (Link'BatchJob' v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Link where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Link'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Link'variant x__) ())
-instance Control.DeepSeq.NFData Link'Variant where
-  rnf (Link'WorkflowEvent' x__) = Control.DeepSeq.rnf x__
-  rnf (Link'BatchJob' x__) = Control.DeepSeq.rnf x__
-_Link'WorkflowEvent' ::
-  Data.ProtoLens.Prism.Prism' Link'Variant Link'WorkflowEvent
-_Link'WorkflowEvent'
-  = Data.ProtoLens.Prism.prism'
-      Link'WorkflowEvent'
-      (\ p__
-         -> case p__ of
-              (Link'WorkflowEvent' p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_Link'BatchJob' ::
-  Data.ProtoLens.Prism.Prism' Link'Variant Link'BatchJob
-_Link'BatchJob'
-  = Data.ProtoLens.Prism.prism'
-      Link'BatchJob'
-      (\ p__
-         -> case p__ of
-              (Link'BatchJob' p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.jobId' @:: Lens' Link'BatchJob Data.Text.Text@ -}
-data Link'BatchJob
-  = Link'BatchJob'_constructor {_Link'BatchJob'jobId :: !Data.Text.Text,
-                                _Link'BatchJob'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Link'BatchJob where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Link'BatchJob "jobId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'BatchJob'jobId
-           (\ x__ y__ -> x__ {_Link'BatchJob'jobId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Link'BatchJob where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Link.BatchJob"
-  packedMessageDescriptor _
-    = "\n\
-      \\bBatchJob\DC2\NAK\n\
-      \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobId"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        jobId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "job_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"jobId")) ::
-              Data.ProtoLens.FieldDescriptor Link'BatchJob
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, jobId__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Link'BatchJob'_unknownFields
-        (\ x__ y__ -> x__ {_Link'BatchJob'_unknownFields = y__})
-  defMessage
-    = Link'BatchJob'_constructor
-        {_Link'BatchJob'jobId = Data.ProtoLens.fieldDefault,
-         _Link'BatchJob'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Link'BatchJob -> Data.ProtoLens.Encoding.Bytes.Parser Link'BatchJob
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "job_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"jobId") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BatchJob"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"jobId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Link'BatchJob where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Link'BatchJob'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Link'BatchJob'jobId x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.namespace' @:: Lens' Link'WorkflowEvent Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowId' @:: Lens' Link'WorkflowEvent Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.runId' @:: Lens' Link'WorkflowEvent Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'reference' @:: Lens' Link'WorkflowEvent (Prelude.Maybe Link'WorkflowEvent'Reference)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'eventRef' @:: Lens' Link'WorkflowEvent (Prelude.Maybe Link'WorkflowEvent'EventReference)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventRef' @:: Lens' Link'WorkflowEvent Link'WorkflowEvent'EventReference@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'requestIdRef' @:: Lens' Link'WorkflowEvent (Prelude.Maybe Link'WorkflowEvent'RequestIdReference)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.requestIdRef' @:: Lens' Link'WorkflowEvent Link'WorkflowEvent'RequestIdReference@ -}
-data Link'WorkflowEvent
-  = Link'WorkflowEvent'_constructor {_Link'WorkflowEvent'namespace :: !Data.Text.Text,
-                                     _Link'WorkflowEvent'workflowId :: !Data.Text.Text,
-                                     _Link'WorkflowEvent'runId :: !Data.Text.Text,
-                                     _Link'WorkflowEvent'reference :: !(Prelude.Maybe Link'WorkflowEvent'Reference),
-                                     _Link'WorkflowEvent'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Link'WorkflowEvent where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-data Link'WorkflowEvent'Reference
-  = Link'WorkflowEvent'EventRef !Link'WorkflowEvent'EventReference |
-    Link'WorkflowEvent'RequestIdRef !Link'WorkflowEvent'RequestIdReference
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "namespace" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'namespace
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'namespace = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "workflowId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'workflowId
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'workflowId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "runId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'runId
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'runId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "maybe'reference" (Prelude.Maybe Link'WorkflowEvent'Reference) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'reference
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "maybe'eventRef" (Prelude.Maybe Link'WorkflowEvent'EventReference) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'reference
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Link'WorkflowEvent'EventRef x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Link'WorkflowEvent'EventRef y__))
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "eventRef" Link'WorkflowEvent'EventReference where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'reference
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Link'WorkflowEvent'EventRef x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Link'WorkflowEvent'EventRef y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "maybe'requestIdRef" (Prelude.Maybe Link'WorkflowEvent'RequestIdReference) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'reference
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Link'WorkflowEvent'RequestIdRef x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Link'WorkflowEvent'RequestIdRef y__))
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent "requestIdRef" Link'WorkflowEvent'RequestIdReference where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'reference
-           (\ x__ y__ -> x__ {_Link'WorkflowEvent'reference = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Link'WorkflowEvent'RequestIdRef x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Link'WorkflowEvent'RequestIdRef y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message Link'WorkflowEvent where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Link.WorkflowEvent"
-  packedMessageDescriptor _
-    = "\n\
-      \\rWorkflowEvent\DC2\FS\n\
-      \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
-      \\vworkflow_id\CAN\STX \SOH(\tR\n\
-      \workflowId\DC2\NAK\n\
-      \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2X\n\
-      \\tevent_ref\CANd \SOH(\v29.temporal.api.common.v1.Link.WorkflowEvent.EventReferenceH\NULR\beventRef\DC2e\n\
-      \\SOrequest_id_ref\CANe \SOH(\v2=.temporal.api.common.v1.Link.WorkflowEvent.RequestIdReferenceH\NULR\frequestIdRef\SUBl\n\
-      \\SOEventReference\DC2\EM\n\
-      \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
-      \\n\
-      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventType\SUBt\n\
-      \\DC2RequestIdReference\DC2\GS\n\
-      \\n\
-      \request_id\CAN\SOH \SOH(\tR\trequestId\DC2?\n\
-      \\n\
-      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventTypeB\v\n\
-      \\treference"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        namespace__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "namespace"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"namespace")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
-        workflowId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowId")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
-        runId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "run_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"runId")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
-        eventRef__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "event_ref"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Link'WorkflowEvent'EventReference)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'eventRef")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
-        requestIdRef__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "request_id_ref"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Link'WorkflowEvent'RequestIdReference)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'requestIdRef")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, namespace__field_descriptor),
-           (Data.ProtoLens.Tag 2, workflowId__field_descriptor),
-           (Data.ProtoLens.Tag 3, runId__field_descriptor),
-           (Data.ProtoLens.Tag 100, eventRef__field_descriptor),
-           (Data.ProtoLens.Tag 101, requestIdRef__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Link'WorkflowEvent'_unknownFields
-        (\ x__ y__ -> x__ {_Link'WorkflowEvent'_unknownFields = y__})
-  defMessage
-    = Link'WorkflowEvent'_constructor
-        {_Link'WorkflowEvent'namespace = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'workflowId = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'runId = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'reference = Prelude.Nothing,
-         _Link'WorkflowEvent'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Link'WorkflowEvent
-          -> Data.ProtoLens.Encoding.Bytes.Parser Link'WorkflowEvent
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "namespace"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"namespace") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "run_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"runId") y x)
-                        802
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "event_ref"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"eventRef") y x)
-                        810
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "request_id_ref"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"requestIdRef") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowEvent"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"namespace") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowId") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"runId") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'reference") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just (Link'WorkflowEvent'EventRef v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 802)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage v)
-                         (Prelude.Just (Link'WorkflowEvent'RequestIdRef v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 810)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData Link'WorkflowEvent where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Link'WorkflowEvent'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Link'WorkflowEvent'namespace x__)
-                (Control.DeepSeq.deepseq
-                   (_Link'WorkflowEvent'workflowId x__)
-                   (Control.DeepSeq.deepseq
-                      (_Link'WorkflowEvent'runId x__)
-                      (Control.DeepSeq.deepseq (_Link'WorkflowEvent'reference x__) ()))))
-instance Control.DeepSeq.NFData Link'WorkflowEvent'Reference where
-  rnf (Link'WorkflowEvent'EventRef x__) = Control.DeepSeq.rnf x__
-  rnf (Link'WorkflowEvent'RequestIdRef x__) = Control.DeepSeq.rnf x__
-_Link'WorkflowEvent'EventRef ::
-  Data.ProtoLens.Prism.Prism' Link'WorkflowEvent'Reference Link'WorkflowEvent'EventReference
-_Link'WorkflowEvent'EventRef
-  = Data.ProtoLens.Prism.prism'
-      Link'WorkflowEvent'EventRef
-      (\ p__
-         -> case p__ of
-              (Link'WorkflowEvent'EventRef p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_Link'WorkflowEvent'RequestIdRef ::
-  Data.ProtoLens.Prism.Prism' Link'WorkflowEvent'Reference Link'WorkflowEvent'RequestIdReference
-_Link'WorkflowEvent'RequestIdRef
-  = Data.ProtoLens.Prism.prism'
-      Link'WorkflowEvent'RequestIdRef
-      (\ p__
-         -> case p__ of
-              (Link'WorkflowEvent'RequestIdRef p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventId' @:: Lens' Link'WorkflowEvent'EventReference Data.Int.Int64@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventType' @:: Lens' Link'WorkflowEvent'EventReference Proto.Temporal.Api.Enums.V1.EventType.EventType@ -}
-data Link'WorkflowEvent'EventReference
-  = Link'WorkflowEvent'EventReference'_constructor {_Link'WorkflowEvent'EventReference'eventId :: !Data.Int.Int64,
-                                                    _Link'WorkflowEvent'EventReference'eventType :: !Proto.Temporal.Api.Enums.V1.EventType.EventType,
-                                                    _Link'WorkflowEvent'EventReference'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Link'WorkflowEvent'EventReference where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent'EventReference "eventId" Data.Int.Int64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'EventReference'eventId
-           (\ x__ y__
-              -> x__ {_Link'WorkflowEvent'EventReference'eventId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent'EventReference "eventType" Proto.Temporal.Api.Enums.V1.EventType.EventType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'EventReference'eventType
-           (\ x__ y__
-              -> x__ {_Link'WorkflowEvent'EventReference'eventType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Link'WorkflowEvent'EventReference where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.common.v1.Link.WorkflowEvent.EventReference"
-  packedMessageDescriptor _
-    = "\n\
-      \\SOEventReference\DC2\EM\n\
-      \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
-      \\n\
-      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventType"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        eventId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "event_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"eventId")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent'EventReference
-        eventType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "event_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.EventType.EventType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"eventType")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent'EventReference
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, eventId__field_descriptor),
-           (Data.ProtoLens.Tag 2, eventType__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Link'WorkflowEvent'EventReference'_unknownFields
-        (\ x__ y__
-           -> x__ {_Link'WorkflowEvent'EventReference'_unknownFields = y__})
-  defMessage
-    = Link'WorkflowEvent'EventReference'_constructor
-        {_Link'WorkflowEvent'EventReference'eventId = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'EventReference'eventType = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'EventReference'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Link'WorkflowEvent'EventReference
-          -> Data.ProtoLens.Encoding.Bytes.Parser Link'WorkflowEvent'EventReference
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "event_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"eventId") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "event_type"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"eventType") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "EventReference"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"eventId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"eventType") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Link'WorkflowEvent'EventReference where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Link'WorkflowEvent'EventReference'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Link'WorkflowEvent'EventReference'eventId x__)
-                (Control.DeepSeq.deepseq
-                   (_Link'WorkflowEvent'EventReference'eventType x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.requestId' @:: Lens' Link'WorkflowEvent'RequestIdReference Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.eventType' @:: Lens' Link'WorkflowEvent'RequestIdReference Proto.Temporal.Api.Enums.V1.EventType.EventType@ -}
-data Link'WorkflowEvent'RequestIdReference
-  = Link'WorkflowEvent'RequestIdReference'_constructor {_Link'WorkflowEvent'RequestIdReference'requestId :: !Data.Text.Text,
-                                                        _Link'WorkflowEvent'RequestIdReference'eventType :: !Proto.Temporal.Api.Enums.V1.EventType.EventType,
-                                                        _Link'WorkflowEvent'RequestIdReference'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Link'WorkflowEvent'RequestIdReference where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent'RequestIdReference "requestId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'RequestIdReference'requestId
-           (\ x__ y__
-              -> x__ {_Link'WorkflowEvent'RequestIdReference'requestId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Link'WorkflowEvent'RequestIdReference "eventType" Proto.Temporal.Api.Enums.V1.EventType.EventType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Link'WorkflowEvent'RequestIdReference'eventType
-           (\ x__ y__
-              -> x__ {_Link'WorkflowEvent'RequestIdReference'eventType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Link'WorkflowEvent'RequestIdReference where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.common.v1.Link.WorkflowEvent.RequestIdReference"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2RequestIdReference\DC2\GS\n\
-      \\n\
-      \request_id\CAN\SOH \SOH(\tR\trequestId\DC2?\n\
-      \\n\
-      \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventType"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        requestId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "request_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"requestId")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent'RequestIdReference
-        eventType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "event_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.EventType.EventType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"eventType")) ::
-              Data.ProtoLens.FieldDescriptor Link'WorkflowEvent'RequestIdReference
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, requestId__field_descriptor),
-           (Data.ProtoLens.Tag 2, eventType__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Link'WorkflowEvent'RequestIdReference'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_Link'WorkflowEvent'RequestIdReference'_unknownFields = y__})
-  defMessage
-    = Link'WorkflowEvent'RequestIdReference'_constructor
-        {_Link'WorkflowEvent'RequestIdReference'requestId = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'RequestIdReference'eventType = Data.ProtoLens.fieldDefault,
-         _Link'WorkflowEvent'RequestIdReference'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Link'WorkflowEvent'RequestIdReference
-          -> Data.ProtoLens.Encoding.Bytes.Parser Link'WorkflowEvent'RequestIdReference
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "request_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"requestId") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "event_type"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"eventType") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "RequestIdReference"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"requestId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"eventType") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Link'WorkflowEvent'RequestIdReference where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Link'WorkflowEvent'RequestIdReference'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Link'WorkflowEvent'RequestIdReference'requestId x__)
-                (Control.DeepSeq.deepseq
-                   (_Link'WorkflowEvent'RequestIdReference'eventType x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.fields' @:: Lens' Memo (Data.Map.Map Data.Text.Text Payload)@ -}
-data Memo
-  = Memo'_constructor {_Memo'fields :: !(Data.Map.Map Data.Text.Text Payload),
-                       _Memo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Memo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Memo "fields" (Data.Map.Map Data.Text.Text Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Memo'fields (\ x__ y__ -> x__ {_Memo'fields = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Memo where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Memo"
-  packedMessageDescriptor _
-    = "\n\
-      \\EOTMemo\DC2@\n\
-      \\ACKfields\CAN\SOH \ETX(\v2(.temporal.api.common.v1.Memo.FieldsEntryR\ACKfields\SUBZ\n\
-      \\vFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        fields__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "fields"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Memo'FieldsEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"fields")) ::
-              Data.ProtoLens.FieldDescriptor Memo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, fields__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Memo'_unknownFields
-        (\ x__ y__ -> x__ {_Memo'_unknownFields = y__})
-  defMessage
-    = Memo'_constructor
-        {_Memo'fields = Data.Map.empty, _Memo'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Memo -> Data.ProtoLens.Encoding.Bytes.Parser Memo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: Memo'FieldsEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                  (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                      Data.ProtoLens.Encoding.Bytes.isolate
-                                                                        (Prelude.fromIntegral len)
-                                                                        Data.ProtoLens.parseMessage)
-                                                                  "fields"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"fields")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Memo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage :: Memo'FieldsEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"fields") _x))))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Memo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Memo'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Memo'fields x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.key' @:: Lens' Memo'FieldsEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.value' @:: Lens' Memo'FieldsEntry Payload@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'value' @:: Lens' Memo'FieldsEntry (Prelude.Maybe Payload)@ -}
-data Memo'FieldsEntry
-  = Memo'FieldsEntry'_constructor {_Memo'FieldsEntry'key :: !Data.Text.Text,
-                                   _Memo'FieldsEntry'value :: !(Prelude.Maybe Payload),
-                                   _Memo'FieldsEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Memo'FieldsEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Memo'FieldsEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Memo'FieldsEntry'key
-           (\ x__ y__ -> x__ {_Memo'FieldsEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Memo'FieldsEntry "value" Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Memo'FieldsEntry'value
-           (\ x__ y__ -> x__ {_Memo'FieldsEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Memo'FieldsEntry "maybe'value" (Prelude.Maybe Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Memo'FieldsEntry'value
-           (\ x__ y__ -> x__ {_Memo'FieldsEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Memo'FieldsEntry where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Memo.FieldsEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\vFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor Memo'FieldsEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor Memo'FieldsEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Memo'FieldsEntry'_unknownFields
-        (\ x__ y__ -> x__ {_Memo'FieldsEntry'_unknownFields = y__})
-  defMessage
-    = Memo'FieldsEntry'_constructor
-        {_Memo'FieldsEntry'key = Data.ProtoLens.fieldDefault,
-         _Memo'FieldsEntry'value = Prelude.Nothing,
-         _Memo'FieldsEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Memo'FieldsEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser Memo'FieldsEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "FieldsEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Memo'FieldsEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Memo'FieldsEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Memo'FieldsEntry'key x__)
-                (Control.DeepSeq.deepseq (_Memo'FieldsEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.nonfirstLocalActivityExecutionAttempts' @:: Lens' MeteringMetadata Data.Word.Word32@ -}
-data MeteringMetadata
-  = MeteringMetadata'_constructor {_MeteringMetadata'nonfirstLocalActivityExecutionAttempts :: !Data.Word.Word32,
-                                   _MeteringMetadata'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show MeteringMetadata where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField MeteringMetadata "nonfirstLocalActivityExecutionAttempts" Data.Word.Word32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _MeteringMetadata'nonfirstLocalActivityExecutionAttempts
-           (\ x__ y__
-              -> x__
-                   {_MeteringMetadata'nonfirstLocalActivityExecutionAttempts = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message MeteringMetadata where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.MeteringMetadata"
-  packedMessageDescriptor _
-    = "\n\
-      \\DLEMeteringMetadata\DC2Z\n\
-      \*nonfirst_local_activity_execution_attempts\CAN\r \SOH(\rR&nonfirstLocalActivityExecutionAttempts"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        nonfirstLocalActivityExecutionAttempts__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "nonfirst_local_activity_execution_attempts"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field
-                    @"nonfirstLocalActivityExecutionAttempts")) ::
-              Data.ProtoLens.FieldDescriptor MeteringMetadata
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 13, 
-            nonfirstLocalActivityExecutionAttempts__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _MeteringMetadata'_unknownFields
-        (\ x__ y__ -> x__ {_MeteringMetadata'_unknownFields = y__})
-  defMessage
-    = MeteringMetadata'_constructor
-        {_MeteringMetadata'nonfirstLocalActivityExecutionAttempts = Data.ProtoLens.fieldDefault,
-         _MeteringMetadata'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          MeteringMetadata
-          -> Data.ProtoLens.Encoding.Bytes.Parser MeteringMetadata
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        104
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "nonfirst_local_activity_execution_attempts"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field
-                                        @"nonfirstLocalActivityExecutionAttempts")
-                                     y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "MeteringMetadata"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field
-                         @"nonfirstLocalActivityExecutionAttempts")
-                      _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 104)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData MeteringMetadata where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_MeteringMetadata'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_MeteringMetadata'nonfirstLocalActivityExecutionAttempts x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.metadata' @:: Lens' Payload (Data.Map.Map Data.Text.Text Data.ByteString.ByteString)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.data'' @:: Lens' Payload Data.ByteString.ByteString@ -}
-data Payload
-  = Payload'_constructor {_Payload'metadata :: !(Data.Map.Map Data.Text.Text Data.ByteString.ByteString),
-                          _Payload'data' :: !Data.ByteString.ByteString,
-                          _Payload'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Payload where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Payload "metadata" (Data.Map.Map Data.Text.Text Data.ByteString.ByteString) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Payload'metadata (\ x__ y__ -> x__ {_Payload'metadata = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Payload "data'" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Payload'data' (\ x__ y__ -> x__ {_Payload'data' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Payload where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Payload"
-  packedMessageDescriptor _
-    = "\n\
-      \\aPayload\DC2I\n\
-      \\bmetadata\CAN\SOH \ETX(\v2-.temporal.api.common.v1.Payload.MetadataEntryR\bmetadata\DC2\DC2\n\
-      \\EOTdata\CAN\STX \SOH(\fR\EOTdata\SUB;\n\
-      \\rMetadataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\fR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        metadata__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "metadata"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Payload'MetadataEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"metadata")) ::
-              Data.ProtoLens.FieldDescriptor Payload
-        data'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "data"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"data'")) ::
-              Data.ProtoLens.FieldDescriptor Payload
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, metadata__field_descriptor),
-           (Data.ProtoLens.Tag 2, data'__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Payload'_unknownFields
-        (\ x__ y__ -> x__ {_Payload'_unknownFields = y__})
-  defMessage
-    = Payload'_constructor
-        {_Payload'metadata = Data.Map.empty,
-         _Payload'data' = Data.ProtoLens.fieldDefault,
-         _Payload'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Payload -> Data.ProtoLens.Encoding.Bytes.Parser Payload
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: Payload'MetadataEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                                                             (Prelude.fromIntegral
-                                                                                len)
-                                                                             Data.ProtoLens.parseMessage)
-                                                                       "metadata"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"metadata")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "data"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"data'") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Payload"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage :: Payload'MetadataEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"metadata") _x))))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"data'") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Payload where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Payload'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Payload'metadata x__)
-                (Control.DeepSeq.deepseq (_Payload'data' x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.key' @:: Lens' Payload'MetadataEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.value' @:: Lens' Payload'MetadataEntry Data.ByteString.ByteString@ -}
-data Payload'MetadataEntry
-  = Payload'MetadataEntry'_constructor {_Payload'MetadataEntry'key :: !Data.Text.Text,
-                                        _Payload'MetadataEntry'value :: !Data.ByteString.ByteString,
-                                        _Payload'MetadataEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Payload'MetadataEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Payload'MetadataEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Payload'MetadataEntry'key
-           (\ x__ y__ -> x__ {_Payload'MetadataEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Payload'MetadataEntry "value" Data.ByteString.ByteString where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Payload'MetadataEntry'value
-           (\ x__ y__ -> x__ {_Payload'MetadataEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Payload'MetadataEntry where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.Payload.MetadataEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\rMetadataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\fR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor Payload'MetadataEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"value")) ::
-              Data.ProtoLens.FieldDescriptor Payload'MetadataEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Payload'MetadataEntry'_unknownFields
-        (\ x__ y__ -> x__ {_Payload'MetadataEntry'_unknownFields = y__})
-  defMessage
-    = Payload'MetadataEntry'_constructor
-        {_Payload'MetadataEntry'key = Data.ProtoLens.fieldDefault,
-         _Payload'MetadataEntry'value = Data.ProtoLens.fieldDefault,
-         _Payload'MetadataEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Payload'MetadataEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser Payload'MetadataEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getBytes
-                                             (Prelude.fromIntegral len))
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "MetadataEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"value") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData Payload'MetadataEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Payload'MetadataEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Payload'MetadataEntry'key x__)
-                (Control.DeepSeq.deepseq (_Payload'MetadataEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.payloads' @:: Lens' Payloads [Payload]@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.vec'payloads' @:: Lens' Payloads (Data.Vector.Vector Payload)@ -}
-data Payloads
-  = Payloads'_constructor {_Payloads'payloads :: !(Data.Vector.Vector Payload),
-                           _Payloads'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Payloads where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Payloads "payloads" [Payload] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Payloads'payloads (\ x__ y__ -> x__ {_Payloads'payloads = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Payloads "vec'payloads" (Data.Vector.Vector Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Payloads'payloads (\ x__ y__ -> x__ {_Payloads'payloads = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Payloads where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Payloads"
-  packedMessageDescriptor _
-    = "\n\
-      \\bPayloads\DC2;\n\
-      \\bpayloads\CAN\SOH \ETX(\v2\US.temporal.api.common.v1.PayloadR\bpayloads"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        payloads__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "payloads"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Payload)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"payloads")) ::
-              Data.ProtoLens.FieldDescriptor Payloads
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, payloads__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Payloads'_unknownFields
-        (\ x__ y__ -> x__ {_Payloads'_unknownFields = y__})
-  defMessage
-    = Payloads'_constructor
-        {_Payloads'payloads = Data.Vector.Generic.empty,
-         _Payloads'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Payloads
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Payload
-             -> Data.ProtoLens.Encoding.Bytes.Parser Payloads
-        loop x mutable'payloads
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'payloads <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                           (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                              mutable'payloads)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'payloads") frozen'payloads x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "payloads"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'payloads y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'payloads
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'payloads <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                    Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'payloads)
-          "Payloads"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                (\ _v
-                   -> (Data.Monoid.<>)
-                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                        ((Prelude..)
-                           (\ bs
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage _v))
-                (Lens.Family2.view
-                   (Data.ProtoLens.Field.field @"vec'payloads") _x))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Payloads where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Payloads'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Payloads'payloads x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.priorityKey' @:: Lens' Priority Data.Int.Int32@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.fairnessKey' @:: Lens' Priority Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.fairnessWeight' @:: Lens' Priority Prelude.Float@ -}
-data Priority
-  = Priority'_constructor {_Priority'priorityKey :: !Data.Int.Int32,
-                           _Priority'fairnessKey :: !Data.Text.Text,
-                           _Priority'fairnessWeight :: !Prelude.Float,
-                           _Priority'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Priority where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Priority "priorityKey" Data.Int.Int32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Priority'priorityKey
-           (\ x__ y__ -> x__ {_Priority'priorityKey = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Priority "fairnessKey" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Priority'fairnessKey
-           (\ x__ y__ -> x__ {_Priority'fairnessKey = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Priority "fairnessWeight" Prelude.Float where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Priority'fairnessWeight
-           (\ x__ y__ -> x__ {_Priority'fairnessWeight = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Priority where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.Priority"
-  packedMessageDescriptor _
-    = "\n\
-      \\bPriority\DC2!\n\
-      \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKey\DC2!\n\
-      \\ffairness_key\CAN\STX \SOH(\tR\vfairnessKey\DC2'\n\
-      \\SIfairness_weight\CAN\ETX \SOH(\STXR\SOfairnessWeight"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        priorityKey__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "priority_key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"priorityKey")) ::
-              Data.ProtoLens.FieldDescriptor Priority
-        fairnessKey__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "fairness_key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"fairnessKey")) ::
-              Data.ProtoLens.FieldDescriptor Priority
-        fairnessWeight__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "fairness_weight"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.FloatField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Float)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"fairnessWeight")) ::
-              Data.ProtoLens.FieldDescriptor Priority
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, priorityKey__field_descriptor),
-           (Data.ProtoLens.Tag 2, fairnessKey__field_descriptor),
-           (Data.ProtoLens.Tag 3, fairnessWeight__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Priority'_unknownFields
-        (\ x__ y__ -> x__ {_Priority'_unknownFields = y__})
-  defMessage
-    = Priority'_constructor
-        {_Priority'priorityKey = Data.ProtoLens.fieldDefault,
-         _Priority'fairnessKey = Data.ProtoLens.fieldDefault,
-         _Priority'fairnessWeight = Data.ProtoLens.fieldDefault,
-         _Priority'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Priority -> Data.ProtoLens.Encoding.Bytes.Parser Priority
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "priority_key"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"priorityKey") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "fairness_key"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"fairnessKey") y x)
-                        29
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Data.ProtoLens.Encoding.Bytes.wordToFloat
-                                          Data.ProtoLens.Encoding.Bytes.getFixed32)
-                                       "fairness_weight"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"fairnessWeight") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Priority"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"priorityKey") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"fairnessKey") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"fairnessWeight") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 29)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putFixed32
-                               Data.ProtoLens.Encoding.Bytes.floatToWord _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData Priority where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Priority'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Priority'priorityKey x__)
-                (Control.DeepSeq.deepseq
-                   (_Priority'fairnessKey x__)
-                   (Control.DeepSeq.deepseq (_Priority'fairnessWeight x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.resetReapplyType' @:: Lens' ResetOptions Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.currentRunOnly' @:: Lens' ResetOptions Prelude.Bool@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.resetReapplyExcludeTypes' @:: Lens' ResetOptions [Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType]@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.vec'resetReapplyExcludeTypes' @:: Lens' ResetOptions (Data.Vector.Vector Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'target' @:: Lens' ResetOptions (Prelude.Maybe ResetOptions'Target)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'firstWorkflowTask' @:: Lens' ResetOptions (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.firstWorkflowTask' @:: Lens' ResetOptions Proto.Google.Protobuf.Empty.Empty@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'lastWorkflowTask' @:: Lens' ResetOptions (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.lastWorkflowTask' @:: Lens' ResetOptions Proto.Google.Protobuf.Empty.Empty@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'workflowTaskId' @:: Lens' ResetOptions (Prelude.Maybe Data.Int.Int64)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowTaskId' @:: Lens' ResetOptions Data.Int.Int64@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'buildId' @:: Lens' ResetOptions (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' ResetOptions Data.Text.Text@ -}
-data ResetOptions
-  = ResetOptions'_constructor {_ResetOptions'resetReapplyType :: !Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType,
-                               _ResetOptions'currentRunOnly :: !Prelude.Bool,
-                               _ResetOptions'resetReapplyExcludeTypes :: !(Data.Vector.Vector Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType),
-                               _ResetOptions'target :: !(Prelude.Maybe ResetOptions'Target),
-                               _ResetOptions'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ResetOptions where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.common.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Common.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.Empty as PB_Empty
+import qualified Proto.Temporal.Api.Enums.V1.Common as TE_Enums_V1_Common
+import qualified Proto.Temporal.Api.Enums.V1.EventType as TE_Enums_V1_EventType
+import qualified Proto.Temporal.Api.Enums.V1.Reset as TE_Enums_V1_Reset
+
+genericArchVarint :: Int -> Word64 -> B.Builder
+genericArchVarint fieldNumber value = putTag fieldNumber WireVarint <> putVarint value
+genericArchSVarint32 :: Int -> Int32 -> B.Builder
+genericArchSVarint32 fieldNumber value = putTag fieldNumber WireVarint <> putSVarint32 value
+genericArchSVarint64 :: Int -> Int64 -> B.Builder
+genericArchSVarint64 fieldNumber value = putTag fieldNumber WireVarint <> putSVarint64 value
+genericArchFixed32 :: Int -> Word32 -> B.Builder
+genericArchFixed32 fieldNumber value = putTag fieldNumber Wire32Bit <> putFixed32 value
+genericArchFixed64 :: Int -> Word64 -> B.Builder
+genericArchFixed64 fieldNumber value = putTag fieldNumber Wire64Bit <> putFixed64 value
+genericArchFloat :: Int -> Float -> B.Builder
+genericArchFloat fieldNumber value = putTag fieldNumber Wire32Bit <> putFloat value
+genericArchDouble :: Int -> Double -> B.Builder
+genericArchDouble fieldNumber value = putTag fieldNumber Wire64Bit <> putDouble value
+genericArchBool :: Int -> Bool -> B.Builder
+genericArchBool fieldNumber value = putTag fieldNumber WireVarint <> putVarint (if value then 1 else 0)
+genericArchString :: Int -> Text -> B.Builder
+genericArchString fieldNumber value = putTag fieldNumber WireLengthDelimited <> putText value
+genericArchBytes :: Int -> ByteString -> B.Builder
+genericArchBytes fieldNumber value = putTag fieldNumber WireLengthDelimited <> putByteString value
+genericArchSubmessage :: Int -> Int -> B.Builder -> B.Builder
+genericArchSubmessage fieldNumber size body = putTag fieldNumber WireLengthDelimited <> putVarint (fromIntegral size) <> body
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x16\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1b\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x65\x6d\x70\x74\x79\x2e\x70\x72\x6f\x74\x6f\x1a\x22\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x65\x76\x65\x6e\x74\x5f\x74\x79\x70\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x21\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x72\x65\x73\x65\x74\x2e\x70\x72\x6f\x74\x6f\x22\x53\x0a\x08\x44\x61\x74\x61\x42\x6c\x6f\x62\x12\x39\x0a\x0d\x65\x6e\x63\x6f\x64\x69\x6e\x67\x5f\x74\x79\x70\x65\x18\x01\x20\x01\x28\x0b\x32\x22\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x45\x6e\x63\x6f\x64\x69\x6e\x67\x54\x79\x70\x65\x12\x0c\x0a\x04\x64\x61\x74\x61\x18\x02\x20\x01\x28\x0c\x22\x3c\x0a\x08\x50\x61\x79\x6c\x6f\x61\x64\x73\x12\x30\x0a\x08\x70\x61\x79\x6c\x6f\x61\x64\x73\x18\x01\x20\x03\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x84\x01\x0a\x07\x50\x61\x79\x6c\x6f\x61\x64\x12\x3e\x0a\x08\x6d\x65\x74\x61\x64\x61\x74\x61\x18\x01\x20\x03\x28\x0b\x32\x2c\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x2e\x4d\x65\x74\x61\x64\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x0c\x0a\x04\x64\x61\x74\x61\x18\x02\x20\x01\x28\x0c\x1a\x2b\x0a\x0d\x4d\x65\x74\x61\x64\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x0d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0c\x22\xb8\x01\x0a\x10\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x12\x52\x0a\x0e\x69\x6e\x64\x65\x78\x65\x64\x5f\x66\x69\x65\x6c\x64\x73\x18\x01\x20\x03\x28\x0b\x32\x3a\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x73\x2e\x49\x6e\x64\x65\x78\x65\x64\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x1a\x50\x0a\x12\x49\x6e\x64\x65\x78\x65\x64\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x8a\x01\x0a\x04\x4d\x65\x6d\x6f\x12\x37\x0a\x06\x66\x69\x65\x6c\x64\x73\x18\x01\x20\x03\x28\x0b\x32\x27\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x4d\x65\x6d\x6f\x2e\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x1a\x49\x0a\x0b\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x8e\x01\x0a\x06\x48\x65\x61\x64\x65\x72\x12\x39\x0a\x06\x66\x69\x65\x6c\x64\x73\x18\x01\x20\x03\x28\x0b\x32\x29\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x48\x65\x61\x64\x65\x72\x2e\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x1a\x49\x0a\x0b\x46\x69\x65\x6c\x64\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x2d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x38\x0a\x11\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x12\x13\x0a\x0b\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x12\x0e\x0a\x06\x72\x75\x6e\x5f\x69\x64\x18\x02\x20\x01\x28\x09\x22\x1c\x0a\x0c\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x54\x79\x70\x65\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x22\x1c\x0a\x0c\x41\x63\x74\x69\x76\x69\x74\x79\x54\x79\x70\x65\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x22\xcf\x01\x0a\x0b\x52\x65\x74\x72\x79\x50\x6f\x6c\x69\x63\x79\x12\x32\x0a\x10\x69\x6e\x69\x74\x69\x61\x6c\x5f\x69\x6e\x74\x65\x72\x76\x61\x6c\x18\x01\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x1b\x0a\x13\x62\x61\x63\x6b\x6f\x66\x66\x5f\x63\x6f\x65\x66\x66\x69\x63\x69\x65\x6e\x74\x18\x02\x20\x01\x28\x01\x12\x32\x0a\x10\x6d\x61\x78\x69\x6d\x75\x6d\x5f\x69\x6e\x74\x65\x72\x76\x61\x6c\x18\x03\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x18\x0a\x10\x6d\x61\x78\x69\x6d\x75\x6d\x5f\x61\x74\x74\x65\x6d\x70\x74\x73\x18\x04\x20\x01\x28\x05\x12\x21\x0a\x19\x6e\x6f\x6e\x5f\x72\x65\x74\x72\x79\x61\x62\x6c\x65\x5f\x65\x72\x72\x6f\x72\x5f\x74\x79\x70\x65\x73\x18\x05\x20\x03\x28\x09\x22\x46\x0a\x10\x4d\x65\x74\x65\x72\x69\x6e\x67\x4d\x65\x74\x61\x64\x61\x74\x61\x12\x32\x0a\x2a\x6e\x6f\x6e\x66\x69\x72\x73\x74\x5f\x6c\x6f\x63\x61\x6c\x5f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x65\x78\x65\x63\x75\x74\x69\x6f\x6e\x5f\x61\x74\x74\x65\x6d\x70\x74\x73\x18\x0d\x20\x01\x28\x0d\x22\x3e\x0a\x12\x57\x6f\x72\x6b\x65\x72\x56\x65\x72\x73\x69\x6f\x6e\x53\x74\x61\x6d\x70\x12\x10\x0a\x08\x62\x75\x69\x6c\x64\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x12\x16\x0a\x0e\x75\x73\x65\x5f\x76\x65\x72\x73\x69\x6f\x6e\x69\x6e\x67\x18\x03\x20\x01\x28\x08\x22\x65\x0a\x19\x57\x6f\x72\x6b\x65\x72\x56\x65\x72\x73\x69\x6f\x6e\x43\x61\x70\x61\x62\x69\x6c\x69\x74\x69\x65\x73\x12\x10\x0a\x08\x62\x75\x69\x6c\x64\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x12\x16\x0a\x0e\x75\x73\x65\x5f\x76\x65\x72\x73\x69\x6f\x6e\x69\x6e\x67\x18\x02\x20\x01\x28\x08\x12\x1e\x0a\x16\x64\x65\x70\x6c\x6f\x79\x6d\x65\x6e\x74\x5f\x73\x65\x72\x69\x65\x73\x5f\x6e\x61\x6d\x65\x18\x04\x20\x01\x28\x09\x22\xdd\x02\x0a\x0c\x52\x65\x73\x65\x74\x4f\x70\x74\x69\x6f\x6e\x73\x12\x42\x0a\x12\x72\x65\x73\x65\x74\x5f\x72\x65\x61\x70\x70\x6c\x79\x5f\x74\x79\x70\x65\x18\x0a\x20\x01\x28\x0b\x32\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x52\x65\x73\x65\x74\x52\x65\x61\x70\x70\x6c\x79\x54\x79\x70\x65\x12\x18\x0a\x10\x63\x75\x72\x72\x65\x6e\x74\x5f\x72\x75\x6e\x5f\x6f\x6e\x6c\x79\x18\x0b\x20\x01\x28\x08\x12\x52\x0a\x1b\x72\x65\x73\x65\x74\x5f\x72\x65\x61\x70\x70\x6c\x79\x5f\x65\x78\x63\x6c\x75\x64\x65\x5f\x74\x79\x70\x65\x73\x18\x0c\x20\x03\x28\x0b\x32\x2d\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x52\x65\x73\x65\x74\x52\x65\x61\x70\x70\x6c\x79\x45\x78\x63\x6c\x75\x64\x65\x54\x79\x70\x65\x12\x32\x0a\x13\x66\x69\x72\x73\x74\x5f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x74\x61\x73\x6b\x18\x01\x20\x01\x28\x0b\x32\x15\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x45\x6d\x70\x74\x79\x12\x31\x0a\x12\x6c\x61\x73\x74\x5f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x74\x61\x73\x6b\x18\x02\x20\x01\x28\x0b\x32\x15\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x45\x6d\x70\x74\x79\x12\x18\x0a\x10\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x74\x61\x73\x6b\x5f\x69\x64\x18\x03\x20\x01\x28\x03\x12\x10\x0a\x08\x62\x75\x69\x6c\x64\x5f\x69\x64\x18\x04\x20\x01\x28\x09\x42\x08\x0a\x06\x74\x61\x72\x67\x65\x74\x22\xd2\x02\x0a\x08\x43\x61\x6c\x6c\x62\x61\x63\x6b\x12\x2a\x0a\x05\x6c\x69\x6e\x6b\x73\x18\x64\x20\x03\x28\x0b\x32\x1b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x4c\x69\x6e\x6b\x12\x34\x0a\x05\x6e\x65\x78\x75\x73\x18\x02\x20\x01\x28\x0b\x32\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x43\x61\x6c\x6c\x62\x61\x63\x6b\x2e\x4e\x65\x78\x75\x73\x12\x3a\x0a\x08\x69\x6e\x74\x65\x72\x6e\x61\x6c\x18\x03\x20\x01\x28\x0b\x32\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x43\x61\x6c\x6c\x62\x61\x63\x6b\x2e\x49\x6e\x74\x65\x72\x6e\x61\x6c\x1a\x82\x01\x0a\x05\x4e\x65\x78\x75\x73\x12\x0b\x0a\x03\x75\x72\x6c\x18\x01\x20\x01\x28\x09\x12\x41\x0a\x06\x68\x65\x61\x64\x65\x72\x18\x02\x20\x03\x28\x0b\x32\x31\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x43\x61\x6c\x6c\x62\x61\x63\x6b\x2e\x4e\x65\x78\x75\x73\x2e\x48\x65\x61\x64\x65\x72\x45\x6e\x74\x72\x79\x1a\x29\x0a\x0b\x48\x65\x61\x64\x65\x72\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x0d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x09\x1a\x18\x0a\x08\x49\x6e\x74\x65\x72\x6e\x61\x6c\x12\x0c\x0a\x04\x64\x61\x74\x61\x18\x01\x20\x01\x28\x0c\x42\x09\x0a\x07\x76\x61\x72\x69\x61\x6e\x74\x22\xdb\x04\x0a\x04\x4c\x69\x6e\x6b\x12\x41\x0a\x0e\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x65\x76\x65\x6e\x74\x18\x01\x20\x01\x28\x0b\x32\x29\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x4c\x69\x6e\x6b\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x76\x65\x6e\x74\x12\x37\x0a\x09\x62\x61\x74\x63\x68\x5f\x6a\x6f\x62\x18\x02\x20\x01\x28\x0b\x32\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x4c\x69\x6e\x6b\x2e\x42\x61\x74\x63\x68\x4a\x6f\x62\x1a\xaf\x03\x0a\x0d\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x76\x65\x6e\x74\x12\x11\x0a\x09\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x18\x01\x20\x01\x28\x09\x12\x13\x0a\x0b\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x69\x64\x18\x02\x20\x01\x28\x09\x12\x0e\x0a\x06\x72\x75\x6e\x5f\x69\x64\x18\x03\x20\x01\x28\x09\x12\x4b\x0a\x09\x65\x76\x65\x6e\x74\x5f\x72\x65\x66\x18\x64\x20\x01\x28\x0b\x32\x38\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x4c\x69\x6e\x6b\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x76\x65\x6e\x74\x2e\x45\x76\x65\x6e\x74\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x12\x54\x0a\x0e\x72\x65\x71\x75\x65\x73\x74\x5f\x69\x64\x5f\x72\x65\x66\x18\x65\x20\x01\x28\x0b\x32\x3c\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x4c\x69\x6e\x6b\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x45\x76\x65\x6e\x74\x2e\x52\x65\x71\x75\x65\x73\x74\x49\x64\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x1a\x57\x0a\x0e\x45\x76\x65\x6e\x74\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x12\x10\x0a\x08\x65\x76\x65\x6e\x74\x5f\x69\x64\x18\x01\x20\x01\x28\x03\x12\x33\x0a\x0a\x65\x76\x65\x6e\x74\x5f\x74\x79\x70\x65\x18\x02\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x45\x76\x65\x6e\x74\x54\x79\x70\x65\x1a\x5d\x0a\x12\x52\x65\x71\x75\x65\x73\x74\x49\x64\x52\x65\x66\x65\x72\x65\x6e\x63\x65\x12\x12\x0a\x0a\x72\x65\x71\x75\x65\x73\x74\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x12\x33\x0a\x0a\x65\x76\x65\x6e\x74\x5f\x74\x79\x70\x65\x18\x02\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x45\x76\x65\x6e\x74\x54\x79\x70\x65\x42\x0b\x0a\x09\x72\x65\x66\x65\x72\x65\x6e\x63\x65\x1a\x1a\x0a\x08\x42\x61\x74\x63\x68\x4a\x6f\x62\x12\x0e\x0a\x06\x6a\x6f\x62\x5f\x69\x64\x18\x01\x20\x01\x28\x09\x42\x09\x0a\x07\x76\x61\x72\x69\x61\x6e\x74\x22\x4f\x0a\x08\x50\x72\x69\x6f\x72\x69\x74\x79\x12\x14\x0a\x0c\x70\x72\x69\x6f\x72\x69\x74\x79\x5f\x6b\x65\x79\x18\x01\x20\x01\x28\x05\x12\x14\x0a\x0c\x66\x61\x69\x72\x6e\x65\x73\x73\x5f\x6b\x65\x79\x18\x02\x20\x01\x28\x09\x12\x17\x0a\x0f\x66\x61\x69\x72\x6e\x65\x73\x73\x5f\x77\x65\x69\x67\x68\x74\x18\x03\x20\x01\x28\x02\x22\x39\x0a\x0e\x57\x6f\x72\x6b\x65\x72\x53\x65\x6c\x65\x63\x74\x6f\x72\x12\x1b\x0a\x13\x77\x6f\x72\x6b\x65\x72\x5f\x69\x6e\x73\x74\x61\x6e\x63\x65\x5f\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x42\x0a\x0a\x08\x73\x65\x6c\x65\x63\x74\x6f\x72\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data DataBlob = DataBlob
+  { encodingType :: !(Maybe TE_Enums_V1_Common.EncodingType)
+  , data' :: !(Maybe ByteString)
+  , dataBlobUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultDataBlob :: DataBlob
+defaultDataBlob = DataBlob
+  { encodingType = Nothing
+  , data' = Nothing
+  , dataBlobUnknownFields = []
+  }
+
+instance MessageEncode DataBlob where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral (fromEnum v))) msg.encodingType)
+    <> (maybe mempty (\v -> archBytes 18 v) msg.data')
+    <> encodeUnknownFields msg.dataBlobUnknownFields
+
+instance MessageSize DataBlob where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.encodingType)
+    + (maybe 0 (\v -> archBytesSize v) msg.data')
+    + unknownFieldsSize msg.dataBlobUnknownFields
+
+instance MessageDecode DataBlob where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (DataBlob {encodingType = acc_0, data' = acc_1, dataBlobUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldEnum
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldBytes
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage DataBlob where
+  protoMessageName _ = "temporal.api.common.v1.DataBlob"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultDataBlob
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "encoding_type"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.EncodingType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DataBlob) -> m.encodingType
+        , fdSet = \v (m :: DataBlob) -> (m { encodingType = v } :: DataBlob)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "data"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DataBlob) -> m.data'
+        , fdSet = \v (m :: DataBlob) -> (m { data' = v } :: DataBlob)
+        })
+    ]
+
+instance IsMessage DataBlob
+
+instance Aeson.ToJSON DataBlob where
+  toJSON msg = jsonObject
+      [ "encodingType" .=: msg.encodingType
+      , "data" .=: (fmap protoBytesToJSON msg.data')
+      ]
+
+instance Aeson.FromJSON DataBlob where
+  parseJSON = Aeson.withObject "DataBlob" $ \obj -> do
+    fld_encodingType <- parseFieldMaybe obj "encodingType"
+    fld_data' <- parseBytesFieldMaybe obj "data"
+    pure (defaultDataBlob
+      { encodingType = maybe (defaultDataBlob.encodingType) Prelude.id fld_encodingType
+      , data' = fld_data'
+      , dataBlobUnknownFields = []
+      } :: DataBlob)
+
+instance Hashable DataBlob where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.encodingType) msg.data'
+
+instance Proto.Extension.HasExtensions DataBlob where
+  messageUnknownFields msg = msg.dataBlobUnknownFields
+  setMessageUnknownFields !ufs msg = msg { dataBlobUnknownFields = ufs }
+
+instance Semigroup DataBlob where
+  a <> b = DataBlob
+    { encodingType = case b.encodingType of { Nothing -> a.encodingType; x -> x }
+    , data' = case b.data' of { Nothing -> a.data'; x -> x }
+    , dataBlobUnknownFields = a.dataBlobUnknownFields <> b.dataBlobUnknownFields
+    }
+
+instance Monoid DataBlob where
+  mempty = defaultDataBlob
+
+data Payloads = Payloads
+  { payloads :: !(V.Vector Payload)
+  , payloadsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultPayloads :: Payloads
+defaultPayloads = Payloads
+  { payloads = V.empty
+  , payloadsUnknownFields = []
+  }
+
+instance MessageEncode Payloads where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.payloads
+    <> encodeUnknownFields msg.payloadsUnknownFields
+
+instance MessageSize Payloads where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.payloads)
+    + unknownFieldsSize msg.payloadsUnknownFields
+
+instance MessageDecode Payloads where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Payloads {payloads = acc_0, payloadsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Payloads where
+  protoMessageName _ = "temporal.api.common.v1.Payloads"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultPayloads
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "payloads"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Payloads) -> m.payloads
+        , fdSet = \v (m :: Payloads) -> (m { payloads = v } :: Payloads)
+        })
+    ]
+
+instance IsMessage Payloads
+
+instance Aeson.ToJSON Payloads where
+  toJSON msg = jsonObject
+      [ "payloads" .=: msg.payloads
+
+      ]
+
+instance Aeson.FromJSON Payloads where
+  parseJSON = Aeson.withObject "Payloads" $ \obj -> do
+    fld_payloads <- parseFieldMaybe obj "payloads"
+    pure (defaultPayloads
+      { payloads = maybe (defaultPayloads.payloads) Prelude.id fld_payloads
+      , payloadsUnknownFields = []
+      } :: Payloads)
+
+instance Hashable Payloads where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.payloads
+
+instance Proto.Extension.HasExtensions Payloads where
+  messageUnknownFields msg = msg.payloadsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { payloadsUnknownFields = ufs }
+
+instance Semigroup Payloads where
+  a <> b = Payloads
+    { payloads = a.payloads <> b.payloads
+    , payloadsUnknownFields = a.payloadsUnknownFields <> b.payloadsUnknownFields
+    }
+
+instance Monoid Payloads where
+  mempty = defaultPayloads
+
+data Payload = Payload
+  { metadata :: !(V.Vector Payload'MetadataEntry)
+  , data' :: !(Maybe ByteString)
+  , payloadUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Payload'MetadataEntry = Payload'MetadataEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe ByteString)
+  , payloadMetadataEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultPayload'MetadataEntry :: Payload'MetadataEntry
+defaultPayload'MetadataEntry = Payload'MetadataEntry
+  { key = Nothing
+  , value = Nothing
+  , payloadMetadataEntryUnknownFields = []
+  }
+
+instance MessageEncode Payload'MetadataEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> archBytes 18 v) msg.value)
+    <> encodeUnknownFields msg.payloadMetadataEntryUnknownFields
+
+instance MessageSize Payload'MetadataEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archBytesSize v) msg.value)
+    + unknownFieldsSize msg.payloadMetadataEntryUnknownFields
+
+instance MessageDecode Payload'MetadataEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Payload'MetadataEntry {key = acc_0, value = acc_1, payloadMetadataEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldBytes
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Payload'MetadataEntry where
+  protoMessageName _ = "temporal.api.common.v1.Payload.MetadataEntry"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultPayload'MetadataEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Payload'MetadataEntry) -> m.key
+        , fdSet = \v (m :: Payload'MetadataEntry) -> (m { key = v } :: Payload'MetadataEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Payload'MetadataEntry) -> m.value
+        , fdSet = \v (m :: Payload'MetadataEntry) -> (m { value = v } :: Payload'MetadataEntry)
+        })
+    ]
+
+instance IsMessage Payload'MetadataEntry
+
+instance Aeson.ToJSON Payload'MetadataEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: (fmap protoBytesToJSON msg.value)
+      ]
+
+instance Aeson.FromJSON Payload'MetadataEntry where
+  parseJSON = Aeson.withObject "Payload'MetadataEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseBytesFieldMaybe obj "value"
+    pure (defaultPayload'MetadataEntry
+      { key = maybe (defaultPayload'MetadataEntry.key) Prelude.id fld_key
+      , value = fld_value
+      , payloadMetadataEntryUnknownFields = []
+      } :: Payload'MetadataEntry)
+
+instance Hashable Payload'MetadataEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions Payload'MetadataEntry where
+  messageUnknownFields msg = msg.payloadMetadataEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { payloadMetadataEntryUnknownFields = ufs }
+
+instance Semigroup Payload'MetadataEntry where
+  a <> b = Payload'MetadataEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , payloadMetadataEntryUnknownFields = a.payloadMetadataEntryUnknownFields <> b.payloadMetadataEntryUnknownFields
+    }
+
+instance Monoid Payload'MetadataEntry where
+  mempty = defaultPayload'MetadataEntry
+
+defaultPayload :: Payload
+defaultPayload = Payload
+  { metadata = V.empty
+  , data' = Nothing
+  , payloadUnknownFields = []
+  }
+
+instance MessageEncode Payload where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.metadata
+    <> (maybe mempty (\v -> archBytes 18 v) msg.data')
+    <> encodeUnknownFields msg.payloadUnknownFields
+
+instance MessageSize Payload where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.metadata)
+    + (maybe 0 (\v -> archBytesSize v) msg.data')
+    + unknownFieldsSize msg.payloadUnknownFields
+
+instance MessageDecode Payload where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Payload {metadata = acc_0, data' = acc_1, payloadUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldBytes
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Payload where
+  protoMessageName _ = "temporal.api.common.v1.Payload"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultPayload
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "metadata"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload.MetadataEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Payload) -> m.metadata
+        , fdSet = \v (m :: Payload) -> (m { metadata = v } :: Payload)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "data"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Payload) -> m.data'
+        , fdSet = \v (m :: Payload) -> (m { data' = v } :: Payload)
+        })
+    ]
+
+instance IsMessage Payload
+
+instance Aeson.ToJSON Payload where
+  toJSON msg = jsonObject
+      [ "metadata" .=: msg.metadata
+      , "data" .=: (fmap protoBytesToJSON msg.data')
+      ]
+
+instance Aeson.FromJSON Payload where
+  parseJSON = Aeson.withObject "Payload" $ \obj -> do
+    fld_metadata <- parseFieldMaybe obj "metadata"
+    fld_data' <- parseBytesFieldMaybe obj "data"
+    pure (defaultPayload
+      { metadata = maybe (defaultPayload.metadata) Prelude.id fld_metadata
+      , data' = fld_data'
+      , payloadUnknownFields = []
+      } :: Payload)
+
+instance Hashable Payload where
+  hashWithSalt salt msg = hashWithSalt (V.foldl' hashWithSalt (salt) msg.metadata) msg.data'
+
+instance Proto.Extension.HasExtensions Payload where
+  messageUnknownFields msg = msg.payloadUnknownFields
+  setMessageUnknownFields !ufs msg = msg { payloadUnknownFields = ufs }
+
+instance Semigroup Payload where
+  a <> b = Payload
+    { metadata = a.metadata <> b.metadata
+    , data' = case b.data' of { Nothing -> a.data'; x -> x }
+    , payloadUnknownFields = a.payloadUnknownFields <> b.payloadUnknownFields
+    }
+
+instance Monoid Payload where
+  mempty = defaultPayload
+
+data SearchAttributes = SearchAttributes
+  { indexedFields :: !(V.Vector SearchAttributes'IndexedFieldsEntry)
+  , searchAttributesUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data SearchAttributes'IndexedFieldsEntry = SearchAttributes'IndexedFieldsEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Payload)
+  , searchAttributesIndexedFieldsEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultSearchAttributes'IndexedFieldsEntry :: SearchAttributes'IndexedFieldsEntry
+defaultSearchAttributes'IndexedFieldsEntry = SearchAttributes'IndexedFieldsEntry
+  { key = Nothing
+  , value = Nothing
+  , searchAttributesIndexedFieldsEntryUnknownFields = []
+  }
+
+instance MessageEncode SearchAttributes'IndexedFieldsEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.searchAttributesIndexedFieldsEntryUnknownFields
+
+instance MessageSize SearchAttributes'IndexedFieldsEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.searchAttributesIndexedFieldsEntryUnknownFields
+
+instance MessageDecode SearchAttributes'IndexedFieldsEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (SearchAttributes'IndexedFieldsEntry {key = acc_0, value = acc_1, searchAttributesIndexedFieldsEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage SearchAttributes'IndexedFieldsEntry where
+  protoMessageName _ = "temporal.api.common.v1.SearchAttributes.IndexedFieldsEntry"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultSearchAttributes'IndexedFieldsEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: SearchAttributes'IndexedFieldsEntry) -> m.key
+        , fdSet = \v (m :: SearchAttributes'IndexedFieldsEntry) -> (m { key = v } :: SearchAttributes'IndexedFieldsEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: SearchAttributes'IndexedFieldsEntry) -> m.value
+        , fdSet = \v (m :: SearchAttributes'IndexedFieldsEntry) -> (m { value = v } :: SearchAttributes'IndexedFieldsEntry)
+        })
+    ]
+
+instance IsMessage SearchAttributes'IndexedFieldsEntry
+
+instance Aeson.ToJSON SearchAttributes'IndexedFieldsEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON SearchAttributes'IndexedFieldsEntry where
+  parseJSON = Aeson.withObject "SearchAttributes'IndexedFieldsEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultSearchAttributes'IndexedFieldsEntry
+      { key = maybe (defaultSearchAttributes'IndexedFieldsEntry.key) Prelude.id fld_key
+      , value = maybe (defaultSearchAttributes'IndexedFieldsEntry.value) Prelude.id fld_value
+      , searchAttributesIndexedFieldsEntryUnknownFields = []
+      } :: SearchAttributes'IndexedFieldsEntry)
+
+instance Hashable SearchAttributes'IndexedFieldsEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions SearchAttributes'IndexedFieldsEntry where
+  messageUnknownFields msg = msg.searchAttributesIndexedFieldsEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { searchAttributesIndexedFieldsEntryUnknownFields = ufs }
+
+instance Semigroup SearchAttributes'IndexedFieldsEntry where
+  a <> b = SearchAttributes'IndexedFieldsEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , searchAttributesIndexedFieldsEntryUnknownFields = a.searchAttributesIndexedFieldsEntryUnknownFields <> b.searchAttributesIndexedFieldsEntryUnknownFields
+    }
+
+instance Monoid SearchAttributes'IndexedFieldsEntry where
+  mempty = defaultSearchAttributes'IndexedFieldsEntry
+
+defaultSearchAttributes :: SearchAttributes
+defaultSearchAttributes = SearchAttributes
+  { indexedFields = V.empty
+  , searchAttributesUnknownFields = []
+  }
+
+instance MessageEncode SearchAttributes where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.indexedFields
+    <> encodeUnknownFields msg.searchAttributesUnknownFields
+
+instance MessageSize SearchAttributes where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.indexedFields)
+    + unknownFieldsSize msg.searchAttributesUnknownFields
+
+instance MessageDecode SearchAttributes where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (SearchAttributes {indexedFields = acc_0, searchAttributesUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage SearchAttributes where
+  protoMessageName _ = "temporal.api.common.v1.SearchAttributes"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultSearchAttributes
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "indexed_fields"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.SearchAttributes.IndexedFieldsEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: SearchAttributes) -> m.indexedFields
+        , fdSet = \v (m :: SearchAttributes) -> (m { indexedFields = v } :: SearchAttributes)
+        })
+    ]
+
+instance IsMessage SearchAttributes
+
+instance Aeson.ToJSON SearchAttributes where
+  toJSON msg = jsonObject
+      [ "indexedFields" .=: msg.indexedFields
+
+      ]
+
+instance Aeson.FromJSON SearchAttributes where
+  parseJSON = Aeson.withObject "SearchAttributes" $ \obj -> do
+    fld_indexedFields <- parseFieldMaybe obj "indexedFields"
+    pure (defaultSearchAttributes
+      { indexedFields = maybe (defaultSearchAttributes.indexedFields) Prelude.id fld_indexedFields
+      , searchAttributesUnknownFields = []
+      } :: SearchAttributes)
+
+instance Hashable SearchAttributes where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.indexedFields
+
+instance Proto.Extension.HasExtensions SearchAttributes where
+  messageUnknownFields msg = msg.searchAttributesUnknownFields
+  setMessageUnknownFields !ufs msg = msg { searchAttributesUnknownFields = ufs }
+
+instance Semigroup SearchAttributes where
+  a <> b = SearchAttributes
+    { indexedFields = a.indexedFields <> b.indexedFields
+    , searchAttributesUnknownFields = a.searchAttributesUnknownFields <> b.searchAttributesUnknownFields
+    }
+
+instance Monoid SearchAttributes where
+  mempty = defaultSearchAttributes
+
+data Memo = Memo
+  { fields :: !(V.Vector Memo'FieldsEntry)
+  , memoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Memo'FieldsEntry = Memo'FieldsEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Payload)
+  , memoFieldsEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultMemo'FieldsEntry :: Memo'FieldsEntry
+defaultMemo'FieldsEntry = Memo'FieldsEntry
+  { key = Nothing
+  , value = Nothing
+  , memoFieldsEntryUnknownFields = []
+  }
+
+instance MessageEncode Memo'FieldsEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.memoFieldsEntryUnknownFields
+
+instance MessageSize Memo'FieldsEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.memoFieldsEntryUnknownFields
+
+instance MessageDecode Memo'FieldsEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Memo'FieldsEntry {key = acc_0, value = acc_1, memoFieldsEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Memo'FieldsEntry where
+  protoMessageName _ = "temporal.api.common.v1.Memo.FieldsEntry"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultMemo'FieldsEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Memo'FieldsEntry) -> m.key
+        , fdSet = \v (m :: Memo'FieldsEntry) -> (m { key = v } :: Memo'FieldsEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Memo'FieldsEntry) -> m.value
+        , fdSet = \v (m :: Memo'FieldsEntry) -> (m { value = v } :: Memo'FieldsEntry)
+        })
+    ]
+
+instance IsMessage Memo'FieldsEntry
+
+instance Aeson.ToJSON Memo'FieldsEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON Memo'FieldsEntry where
+  parseJSON = Aeson.withObject "Memo'FieldsEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultMemo'FieldsEntry
+      { key = maybe (defaultMemo'FieldsEntry.key) Prelude.id fld_key
+      , value = maybe (defaultMemo'FieldsEntry.value) Prelude.id fld_value
+      , memoFieldsEntryUnknownFields = []
+      } :: Memo'FieldsEntry)
+
+instance Hashable Memo'FieldsEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions Memo'FieldsEntry where
+  messageUnknownFields msg = msg.memoFieldsEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { memoFieldsEntryUnknownFields = ufs }
+
+instance Semigroup Memo'FieldsEntry where
+  a <> b = Memo'FieldsEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , memoFieldsEntryUnknownFields = a.memoFieldsEntryUnknownFields <> b.memoFieldsEntryUnknownFields
+    }
+
+instance Monoid Memo'FieldsEntry where
+  mempty = defaultMemo'FieldsEntry
+
+defaultMemo :: Memo
+defaultMemo = Memo
+  { fields = V.empty
+  , memoUnknownFields = []
+  }
+
+instance MessageEncode Memo where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.fields
+    <> encodeUnknownFields msg.memoUnknownFields
+
+instance MessageSize Memo where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.fields)
+    + unknownFieldsSize msg.memoUnknownFields
+
+instance MessageDecode Memo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Memo {fields = acc_0, memoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Memo where
+  protoMessageName _ = "temporal.api.common.v1.Memo"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultMemo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "fields"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Memo.FieldsEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Memo) -> m.fields
+        , fdSet = \v (m :: Memo) -> (m { fields = v } :: Memo)
+        })
+    ]
+
+instance IsMessage Memo
+
+instance Aeson.ToJSON Memo where
+  toJSON msg = jsonObject
+      [ "fields" .=: msg.fields
+
+      ]
+
+instance Aeson.FromJSON Memo where
+  parseJSON = Aeson.withObject "Memo" $ \obj -> do
+    fld_fields <- parseFieldMaybe obj "fields"
+    pure (defaultMemo
+      { fields = maybe (defaultMemo.fields) Prelude.id fld_fields
+      , memoUnknownFields = []
+      } :: Memo)
+
+instance Hashable Memo where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.fields
+
+instance Proto.Extension.HasExtensions Memo where
+  messageUnknownFields msg = msg.memoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { memoUnknownFields = ufs }
+
+instance Semigroup Memo where
+  a <> b = Memo
+    { fields = a.fields <> b.fields
+    , memoUnknownFields = a.memoUnknownFields <> b.memoUnknownFields
+    }
+
+instance Monoid Memo where
+  mempty = defaultMemo
+
+data Header = Header
+  { fields :: !(V.Vector Header'FieldsEntry)
+  , headerUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Header'FieldsEntry = Header'FieldsEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Payload)
+  , headerFieldsEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultHeader'FieldsEntry :: Header'FieldsEntry
+defaultHeader'FieldsEntry = Header'FieldsEntry
+  { key = Nothing
+  , value = Nothing
+  , headerFieldsEntryUnknownFields = []
+  }
+
+instance MessageEncode Header'FieldsEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.headerFieldsEntryUnknownFields
+
+instance MessageSize Header'FieldsEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.headerFieldsEntryUnknownFields
+
+instance MessageDecode Header'FieldsEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Header'FieldsEntry {key = acc_0, value = acc_1, headerFieldsEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Header'FieldsEntry where
+  protoMessageName _ = "temporal.api.common.v1.Header.FieldsEntry"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultHeader'FieldsEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Header'FieldsEntry) -> m.key
+        , fdSet = \v (m :: Header'FieldsEntry) -> (m { key = v } :: Header'FieldsEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Header'FieldsEntry) -> m.value
+        , fdSet = \v (m :: Header'FieldsEntry) -> (m { value = v } :: Header'FieldsEntry)
+        })
+    ]
+
+instance IsMessage Header'FieldsEntry
+
+instance Aeson.ToJSON Header'FieldsEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON Header'FieldsEntry where
+  parseJSON = Aeson.withObject "Header'FieldsEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultHeader'FieldsEntry
+      { key = maybe (defaultHeader'FieldsEntry.key) Prelude.id fld_key
+      , value = maybe (defaultHeader'FieldsEntry.value) Prelude.id fld_value
+      , headerFieldsEntryUnknownFields = []
+      } :: Header'FieldsEntry)
+
+instance Hashable Header'FieldsEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions Header'FieldsEntry where
+  messageUnknownFields msg = msg.headerFieldsEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { headerFieldsEntryUnknownFields = ufs }
+
+instance Semigroup Header'FieldsEntry where
+  a <> b = Header'FieldsEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , headerFieldsEntryUnknownFields = a.headerFieldsEntryUnknownFields <> b.headerFieldsEntryUnknownFields
+    }
+
+instance Monoid Header'FieldsEntry where
+  mempty = defaultHeader'FieldsEntry
+
+defaultHeader :: Header
+defaultHeader = Header
+  { fields = V.empty
+  , headerUnknownFields = []
+  }
+
+instance MessageEncode Header where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.fields
+    <> encodeUnknownFields msg.headerUnknownFields
+
+instance MessageSize Header where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.fields)
+    + unknownFieldsSize msg.headerUnknownFields
+
+instance MessageDecode Header where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Header {fields = acc_0, headerUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Header where
+  protoMessageName _ = "temporal.api.common.v1.Header"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultHeader
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "fields"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Header.FieldsEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Header) -> m.fields
+        , fdSet = \v (m :: Header) -> (m { fields = v } :: Header)
+        })
+    ]
+
+instance IsMessage Header
+
+instance Aeson.ToJSON Header where
+  toJSON msg = jsonObject
+      [ "fields" .=: msg.fields
+
+      ]
+
+instance Aeson.FromJSON Header where
+  parseJSON = Aeson.withObject "Header" $ \obj -> do
+    fld_fields <- parseFieldMaybe obj "fields"
+    pure (defaultHeader
+      { fields = maybe (defaultHeader.fields) Prelude.id fld_fields
+      , headerUnknownFields = []
+      } :: Header)
+
+instance Hashable Header where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.fields
+
+instance Proto.Extension.HasExtensions Header where
+  messageUnknownFields msg = msg.headerUnknownFields
+  setMessageUnknownFields !ufs msg = msg { headerUnknownFields = ufs }
+
+instance Semigroup Header where
+  a <> b = Header
+    { fields = a.fields <> b.fields
+    , headerUnknownFields = a.headerUnknownFields <> b.headerUnknownFields
+    }
+
+instance Monoid Header where
+  mempty = defaultHeader
+
+data WorkflowExecution = WorkflowExecution
+  { workflowId :: !(Maybe Text)
+  , runId :: !(Maybe Text)
+  , workflowExecutionUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowExecution :: WorkflowExecution
+defaultWorkflowExecution = WorkflowExecution
+  { workflowId = Nothing
+  , runId = Nothing
+  , workflowExecutionUnknownFields = []
+  }
+
+instance MessageEncode WorkflowExecution where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.workflowId)
+    <> (maybe mempty (\v -> archString 18 v) msg.runId)
+    <> encodeUnknownFields msg.workflowExecutionUnknownFields
+
+instance MessageSize WorkflowExecution where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.workflowId)
+    + (maybe 0 (\v -> archStringSize v) msg.runId)
+    + unknownFieldsSize msg.workflowExecutionUnknownFields
+
+instance MessageDecode WorkflowExecution where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (WorkflowExecution {workflowId = acc_0, runId = acc_1, workflowExecutionUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowExecution where
+  protoMessageName _ = "temporal.api.common.v1.WorkflowExecution"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultWorkflowExecution
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "workflow_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowExecution) -> m.workflowId
+        , fdSet = \v (m :: WorkflowExecution) -> (m { workflowId = v } :: WorkflowExecution)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "run_id"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowExecution) -> m.runId
+        , fdSet = \v (m :: WorkflowExecution) -> (m { runId = v } :: WorkflowExecution)
+        })
+    ]
+
+instance IsMessage WorkflowExecution
+
+instance Aeson.ToJSON WorkflowExecution where
+  toJSON msg = jsonObject
+      [ "workflowId" .=: msg.workflowId
+      , "runId" .=: msg.runId
+      ]
+
+instance Aeson.FromJSON WorkflowExecution where
+  parseJSON = Aeson.withObject "WorkflowExecution" $ \obj -> do
+    fld_workflowId <- parseFieldMaybe obj "workflowId"
+    fld_runId <- parseFieldMaybe obj "runId"
+    pure (defaultWorkflowExecution
+      { workflowId = maybe (defaultWorkflowExecution.workflowId) Prelude.id fld_workflowId
+      , runId = maybe (defaultWorkflowExecution.runId) Prelude.id fld_runId
+      , workflowExecutionUnknownFields = []
+      } :: WorkflowExecution)
+
+instance Hashable WorkflowExecution where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.workflowId) msg.runId
+
+instance Proto.Extension.HasExtensions WorkflowExecution where
+  messageUnknownFields msg = msg.workflowExecutionUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowExecutionUnknownFields = ufs }
+
+instance Semigroup WorkflowExecution where
+  a <> b = WorkflowExecution
+    { workflowId = case b.workflowId of { Nothing -> a.workflowId; x -> x }
+    , runId = case b.runId of { Nothing -> a.runId; x -> x }
+    , workflowExecutionUnknownFields = a.workflowExecutionUnknownFields <> b.workflowExecutionUnknownFields
+    }
+
+instance Monoid WorkflowExecution where
+  mempty = defaultWorkflowExecution
+
+data WorkflowType = WorkflowType
+  { name :: !(Maybe Text)
+  , workflowTypeUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowType :: WorkflowType
+defaultWorkflowType = WorkflowType
+  { name = Nothing
+  , workflowTypeUnknownFields = []
+  }
+
+instance MessageEncode WorkflowType where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> encodeUnknownFields msg.workflowTypeUnknownFields
+
+instance MessageSize WorkflowType where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + unknownFieldsSize msg.workflowTypeUnknownFields
+
+instance MessageDecode WorkflowType where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (WorkflowType {name = acc_0, workflowTypeUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowType where
+  protoMessageName _ = "temporal.api.common.v1.WorkflowType"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultWorkflowType
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowType) -> m.name
+        , fdSet = \v (m :: WorkflowType) -> (m { name = v } :: WorkflowType)
+        })
+    ]
+
+instance IsMessage WorkflowType
+
+instance Aeson.ToJSON WorkflowType where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+
+      ]
+
+instance Aeson.FromJSON WorkflowType where
+  parseJSON = Aeson.withObject "WorkflowType" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    pure (defaultWorkflowType
+      { name = maybe (defaultWorkflowType.name) Prelude.id fld_name
+      , workflowTypeUnknownFields = []
+      } :: WorkflowType)
+
+instance Hashable WorkflowType where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.name
+
+instance Proto.Extension.HasExtensions WorkflowType where
+  messageUnknownFields msg = msg.workflowTypeUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowTypeUnknownFields = ufs }
+
+instance Semigroup WorkflowType where
+  a <> b = WorkflowType
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , workflowTypeUnknownFields = a.workflowTypeUnknownFields <> b.workflowTypeUnknownFields
+    }
+
+instance Monoid WorkflowType where
+  mempty = defaultWorkflowType
+
+data ActivityType = ActivityType
+  { name :: !(Maybe Text)
+  , activityTypeUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultActivityType :: ActivityType
+defaultActivityType = ActivityType
+  { name = Nothing
+  , activityTypeUnknownFields = []
+  }
+
+instance MessageEncode ActivityType where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> encodeUnknownFields msg.activityTypeUnknownFields
+
+instance MessageSize ActivityType where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + unknownFieldsSize msg.activityTypeUnknownFields
+
+instance MessageDecode ActivityType where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (ActivityType {name = acc_0, activityTypeUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityType where
+  protoMessageName _ = "temporal.api.common.v1.ActivityType"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultActivityType
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityType) -> m.name
+        , fdSet = \v (m :: ActivityType) -> (m { name = v } :: ActivityType)
+        })
+    ]
+
+instance IsMessage ActivityType
+
+instance Aeson.ToJSON ActivityType where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+
+      ]
+
+instance Aeson.FromJSON ActivityType where
+  parseJSON = Aeson.withObject "ActivityType" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    pure (defaultActivityType
+      { name = maybe (defaultActivityType.name) Prelude.id fld_name
+      , activityTypeUnknownFields = []
+      } :: ActivityType)
+
+instance Hashable ActivityType where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.name
+
+instance Proto.Extension.HasExtensions ActivityType where
+  messageUnknownFields msg = msg.activityTypeUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityTypeUnknownFields = ufs }
+
+instance Semigroup ActivityType where
+  a <> b = ActivityType
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , activityTypeUnknownFields = a.activityTypeUnknownFields <> b.activityTypeUnknownFields
+    }
+
+instance Monoid ActivityType where
+  mempty = defaultActivityType
+
+data RetryPolicy = RetryPolicy
+  { initialInterval :: !(Maybe PB_Duration.Duration)
+  , backoffCoefficient :: !(Maybe Double)
+  , maximumInterval :: !(Maybe PB_Duration.Duration)
+  , maximumAttempts :: !(Maybe Int32)
+  , nonRetryableErrorTypes :: !(V.Vector Text)
+  , retryPolicyUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultRetryPolicy :: RetryPolicy
+defaultRetryPolicy = RetryPolicy
+  { initialInterval = Nothing
+  , backoffCoefficient = Nothing
+  , maximumInterval = Nothing
+  , maximumAttempts = Nothing
+  , nonRetryableErrorTypes = V.empty
+  , retryPolicyUnknownFields = []
+  }
+
+instance MessageEncode RetryPolicy where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.initialInterval)
+    <> (maybe mempty (\v -> archDouble 17 v) msg.backoffCoefficient)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.maximumInterval)
+    <> (maybe mempty (\v -> archVarint 32 (fromIntegral v)) msg.maximumAttempts)
+    <> V.foldl' (\acc v -> acc <> archString 42 v) mempty msg.nonRetryableErrorTypes
+    <> encodeUnknownFields msg.retryPolicyUnknownFields
+
+instance MessageSize RetryPolicy where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.initialInterval)
+    + (maybe 0 (\v -> archFixed64Size) msg.backoffCoefficient)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.maximumInterval)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.maximumAttempts)
+    + (V.foldl' (\acc v -> acc + fieldTextSize 5 v) 0 msg.nonRetryableErrorTypes)
+    + unknownFieldsSize msg.retryPolicyUnknownFields
+
+instance MessageDecode RetryPolicy where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing V.empty []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (RetryPolicy {initialInterval = acc_0, backoffCoefficient = acc_1, maximumInterval = acc_2, maximumAttempts = acc_3, nonRetryableErrorTypes = acc_4, retryPolicyUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldDouble
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 (acc_4 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage RetryPolicy where
+  protoMessageName _ = "temporal.api.common.v1.RetryPolicy"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultRetryPolicy
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "initial_interval"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RetryPolicy) -> m.initialInterval
+        , fdSet = \v (m :: RetryPolicy) -> (m { initialInterval = v } :: RetryPolicy)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "backoff_coefficient"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType DoubleField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RetryPolicy) -> m.backoffCoefficient
+        , fdSet = \v (m :: RetryPolicy) -> (m { backoffCoefficient = v } :: RetryPolicy)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "maximum_interval"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RetryPolicy) -> m.maximumInterval
+        , fdSet = \v (m :: RetryPolicy) -> (m { maximumInterval = v } :: RetryPolicy)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "maximum_attempts"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType Int32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: RetryPolicy) -> m.maximumAttempts
+        , fdSet = \v (m :: RetryPolicy) -> (m { maximumAttempts = v } :: RetryPolicy)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "non_retryable_error_types"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: RetryPolicy) -> m.nonRetryableErrorTypes
+        , fdSet = \v (m :: RetryPolicy) -> (m { nonRetryableErrorTypes = v } :: RetryPolicy)
+        })
+    ]
+
+instance IsMessage RetryPolicy
+
+instance Aeson.ToJSON RetryPolicy where
+  toJSON msg = jsonObject
+      [ "initialInterval" .=: msg.initialInterval
+      , "backoffCoefficient" .=: msg.backoffCoefficient
+      , "maximumInterval" .=: msg.maximumInterval
+      , "maximumAttempts" .=: msg.maximumAttempts
+      , "nonRetryableErrorTypes" .=: msg.nonRetryableErrorTypes
+      ]
+
+instance Aeson.FromJSON RetryPolicy where
+  parseJSON = Aeson.withObject "RetryPolicy" $ \obj -> do
+    fld_initialInterval <- parseFieldMaybe obj "initialInterval"
+    fld_backoffCoefficient <- parseFieldMaybe obj "backoffCoefficient"
+    fld_maximumInterval <- parseFieldMaybe obj "maximumInterval"
+    fld_maximumAttempts <- parseFieldMaybe obj "maximumAttempts"
+    fld_nonRetryableErrorTypes <- parseFieldMaybe obj "nonRetryableErrorTypes"
+    pure (defaultRetryPolicy
+      { initialInterval = maybe (defaultRetryPolicy.initialInterval) Prelude.id fld_initialInterval
+      , backoffCoefficient = maybe (defaultRetryPolicy.backoffCoefficient) Prelude.id fld_backoffCoefficient
+      , maximumInterval = maybe (defaultRetryPolicy.maximumInterval) Prelude.id fld_maximumInterval
+      , maximumAttempts = maybe (defaultRetryPolicy.maximumAttempts) Prelude.id fld_maximumAttempts
+      , nonRetryableErrorTypes = maybe (defaultRetryPolicy.nonRetryableErrorTypes) Prelude.id fld_nonRetryableErrorTypes
+      , retryPolicyUnknownFields = []
+      } :: RetryPolicy)
+
+instance Hashable RetryPolicy where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.initialInterval) msg.backoffCoefficient) msg.maximumInterval) msg.maximumAttempts) msg.nonRetryableErrorTypes
+
+instance Proto.Extension.HasExtensions RetryPolicy where
+  messageUnknownFields msg = msg.retryPolicyUnknownFields
+  setMessageUnknownFields !ufs msg = msg { retryPolicyUnknownFields = ufs }
+
+instance Semigroup RetryPolicy where
+  a <> b = RetryPolicy
+    { initialInterval = case b.initialInterval of { Nothing -> a.initialInterval; x -> x }
+    , backoffCoefficient = case b.backoffCoefficient of { Nothing -> a.backoffCoefficient; x -> x }
+    , maximumInterval = case b.maximumInterval of { Nothing -> a.maximumInterval; x -> x }
+    , maximumAttempts = case b.maximumAttempts of { Nothing -> a.maximumAttempts; x -> x }
+    , nonRetryableErrorTypes = a.nonRetryableErrorTypes <> b.nonRetryableErrorTypes
+    , retryPolicyUnknownFields = a.retryPolicyUnknownFields <> b.retryPolicyUnknownFields
+    }
+
+instance Monoid RetryPolicy where
+  mempty = defaultRetryPolicy
+
+data MeteringMetadata = MeteringMetadata
+  { nonfirstLocalActivityExecutionAttempts :: !(Maybe Word32)
+  , meteringMetadataUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultMeteringMetadata :: MeteringMetadata
+defaultMeteringMetadata = MeteringMetadata
+  { nonfirstLocalActivityExecutionAttempts = Nothing
+  , meteringMetadataUnknownFields = []
+  }
+
+instance MessageEncode MeteringMetadata where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 104 (fromIntegral v)) msg.nonfirstLocalActivityExecutionAttempts)
+    <> encodeUnknownFields msg.meteringMetadataUnknownFields
+
+instance MessageSize MeteringMetadata where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.nonfirstLocalActivityExecutionAttempts)
+    + unknownFieldsSize msg.meteringMetadataUnknownFields
+
+instance MessageDecode MeteringMetadata where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (MeteringMetadata {nonfirstLocalActivityExecutionAttempts = acc_0, meteringMetadataUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          13 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage MeteringMetadata where
+  protoMessageName _ = "temporal.api.common.v1.MeteringMetadata"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultMeteringMetadata
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (13, SomeField FieldDescriptor
+        { fdName = "nonfirst_local_activity_execution_attempts"
+        , fdNumber = 13
+        , fdTypeDesc = ScalarType UInt32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: MeteringMetadata) -> m.nonfirstLocalActivityExecutionAttempts
+        , fdSet = \v (m :: MeteringMetadata) -> (m { nonfirstLocalActivityExecutionAttempts = v } :: MeteringMetadata)
+        })
+    ]
+
+instance IsMessage MeteringMetadata
+
+instance Aeson.ToJSON MeteringMetadata where
+  toJSON msg = jsonObject
+      [ "nonfirstLocalActivityExecutionAttempts" .=: msg.nonfirstLocalActivityExecutionAttempts
+
+      ]
+
+instance Aeson.FromJSON MeteringMetadata where
+  parseJSON = Aeson.withObject "MeteringMetadata" $ \obj -> do
+    fld_nonfirstLocalActivityExecutionAttempts <- parseFieldMaybe obj "nonfirstLocalActivityExecutionAttempts"
+    pure (defaultMeteringMetadata
+      { nonfirstLocalActivityExecutionAttempts = maybe (defaultMeteringMetadata.nonfirstLocalActivityExecutionAttempts) Prelude.id fld_nonfirstLocalActivityExecutionAttempts
+      , meteringMetadataUnknownFields = []
+      } :: MeteringMetadata)
+
+instance Hashable MeteringMetadata where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.nonfirstLocalActivityExecutionAttempts
+
+instance Proto.Extension.HasExtensions MeteringMetadata where
+  messageUnknownFields msg = msg.meteringMetadataUnknownFields
+  setMessageUnknownFields !ufs msg = msg { meteringMetadataUnknownFields = ufs }
+
+instance Semigroup MeteringMetadata where
+  a <> b = MeteringMetadata
+    { nonfirstLocalActivityExecutionAttempts = case b.nonfirstLocalActivityExecutionAttempts of { Nothing -> a.nonfirstLocalActivityExecutionAttempts; x -> x }
+    , meteringMetadataUnknownFields = a.meteringMetadataUnknownFields <> b.meteringMetadataUnknownFields
+    }
+
+instance Monoid MeteringMetadata where
+  mempty = defaultMeteringMetadata
+
+data WorkerVersionStamp = WorkerVersionStamp
+  { buildId :: !(Maybe Text)
+  , useVersioning :: !(Maybe Bool)
+  , workerVersionStampUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkerVersionStamp :: WorkerVersionStamp
+defaultWorkerVersionStamp = WorkerVersionStamp
+  { buildId = Nothing
+  , useVersioning = Nothing
+  , workerVersionStampUnknownFields = []
+  }
+
+instance MessageEncode WorkerVersionStamp where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.buildId)
+    <> (maybe mempty (\v -> archBool 24 v) msg.useVersioning)
+    <> encodeUnknownFields msg.workerVersionStampUnknownFields
+
+instance MessageSize WorkerVersionStamp where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.buildId)
+    + (maybe 0 (\v -> archBoolSize) msg.useVersioning)
+    + unknownFieldsSize msg.workerVersionStampUnknownFields
+
+instance MessageDecode WorkerVersionStamp where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (WorkerVersionStamp {buildId = acc_0, useVersioning = acc_1, workerVersionStampUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerVersionStamp where
+  protoMessageName _ = "temporal.api.common.v1.WorkerVersionStamp"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultWorkerVersionStamp
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "build_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerVersionStamp) -> m.buildId
+        , fdSet = \v (m :: WorkerVersionStamp) -> (m { buildId = v } :: WorkerVersionStamp)
+        }), (3, SomeField FieldDescriptor
+        { fdName = "use_versioning"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerVersionStamp) -> m.useVersioning
+        , fdSet = \v (m :: WorkerVersionStamp) -> (m { useVersioning = v } :: WorkerVersionStamp)
+        })
+    ]
+
+instance IsMessage WorkerVersionStamp
+
+instance Aeson.ToJSON WorkerVersionStamp where
+  toJSON msg = jsonObject
+      [ "buildId" .=: msg.buildId
+      , "useVersioning" .=: msg.useVersioning
+      ]
+
+instance Aeson.FromJSON WorkerVersionStamp where
+  parseJSON = Aeson.withObject "WorkerVersionStamp" $ \obj -> do
+    fld_buildId <- parseFieldMaybe obj "buildId"
+    fld_useVersioning <- parseFieldMaybe obj "useVersioning"
+    pure (defaultWorkerVersionStamp
+      { buildId = maybe (defaultWorkerVersionStamp.buildId) Prelude.id fld_buildId
+      , useVersioning = maybe (defaultWorkerVersionStamp.useVersioning) Prelude.id fld_useVersioning
+      , workerVersionStampUnknownFields = []
+      } :: WorkerVersionStamp)
+
+instance Hashable WorkerVersionStamp where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.buildId) msg.useVersioning
+
+instance Proto.Extension.HasExtensions WorkerVersionStamp where
+  messageUnknownFields msg = msg.workerVersionStampUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerVersionStampUnknownFields = ufs }
+
+instance Semigroup WorkerVersionStamp where
+  a <> b = WorkerVersionStamp
+    { buildId = case b.buildId of { Nothing -> a.buildId; x -> x }
+    , useVersioning = case b.useVersioning of { Nothing -> a.useVersioning; x -> x }
+    , workerVersionStampUnknownFields = a.workerVersionStampUnknownFields <> b.workerVersionStampUnknownFields
+    }
+
+instance Monoid WorkerVersionStamp where
+  mempty = defaultWorkerVersionStamp
+
+data WorkerVersionCapabilities = WorkerVersionCapabilities
+  { buildId :: !(Maybe Text)
+  , useVersioning :: !(Maybe Bool)
+  , deploymentSeriesName :: !(Maybe Text)
+  , workerVersionCapabilitiesUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkerVersionCapabilities :: WorkerVersionCapabilities
+defaultWorkerVersionCapabilities = WorkerVersionCapabilities
+  { buildId = Nothing
+  , useVersioning = Nothing
+  , deploymentSeriesName = Nothing
+  , workerVersionCapabilitiesUnknownFields = []
+  }
+
+instance MessageEncode WorkerVersionCapabilities where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.buildId)
+    <> (maybe mempty (\v -> archBool 16 v) msg.useVersioning)
+    <> (maybe mempty (\v -> archString 34 v) msg.deploymentSeriesName)
+    <> encodeUnknownFields msg.workerVersionCapabilitiesUnknownFields
+
+instance MessageSize WorkerVersionCapabilities where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.buildId)
+    + (maybe 0 (\v -> archBoolSize) msg.useVersioning)
+    + (maybe 0 (\v -> archStringSize v) msg.deploymentSeriesName)
+    + unknownFieldsSize msg.workerVersionCapabilitiesUnknownFields
+
+instance MessageDecode WorkerVersionCapabilities where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (WorkerVersionCapabilities {buildId = acc_0, useVersioning = acc_1, deploymentSeriesName = acc_2, workerVersionCapabilitiesUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerVersionCapabilities where
+  protoMessageName _ = "temporal.api.common.v1.WorkerVersionCapabilities"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultWorkerVersionCapabilities
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "build_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerVersionCapabilities) -> m.buildId
+        , fdSet = \v (m :: WorkerVersionCapabilities) -> (m { buildId = v } :: WorkerVersionCapabilities)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "use_versioning"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerVersionCapabilities) -> m.useVersioning
+        , fdSet = \v (m :: WorkerVersionCapabilities) -> (m { useVersioning = v } :: WorkerVersionCapabilities)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "deployment_series_name"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerVersionCapabilities) -> m.deploymentSeriesName
+        , fdSet = \v (m :: WorkerVersionCapabilities) -> (m { deploymentSeriesName = v } :: WorkerVersionCapabilities)
+        })
+    ]
+
+instance IsMessage WorkerVersionCapabilities
+
+instance Aeson.ToJSON WorkerVersionCapabilities where
+  toJSON msg = jsonObject
+      [ "buildId" .=: msg.buildId
+      , "useVersioning" .=: msg.useVersioning
+      , "deploymentSeriesName" .=: msg.deploymentSeriesName
+      ]
+
+instance Aeson.FromJSON WorkerVersionCapabilities where
+  parseJSON = Aeson.withObject "WorkerVersionCapabilities" $ \obj -> do
+    fld_buildId <- parseFieldMaybe obj "buildId"
+    fld_useVersioning <- parseFieldMaybe obj "useVersioning"
+    fld_deploymentSeriesName <- parseFieldMaybe obj "deploymentSeriesName"
+    pure (defaultWorkerVersionCapabilities
+      { buildId = maybe (defaultWorkerVersionCapabilities.buildId) Prelude.id fld_buildId
+      , useVersioning = maybe (defaultWorkerVersionCapabilities.useVersioning) Prelude.id fld_useVersioning
+      , deploymentSeriesName = maybe (defaultWorkerVersionCapabilities.deploymentSeriesName) Prelude.id fld_deploymentSeriesName
+      , workerVersionCapabilitiesUnknownFields = []
+      } :: WorkerVersionCapabilities)
+
+instance Hashable WorkerVersionCapabilities where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.buildId) msg.useVersioning) msg.deploymentSeriesName
+
+instance Proto.Extension.HasExtensions WorkerVersionCapabilities where
+  messageUnknownFields msg = msg.workerVersionCapabilitiesUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerVersionCapabilitiesUnknownFields = ufs }
+
+instance Semigroup WorkerVersionCapabilities where
+  a <> b = WorkerVersionCapabilities
+    { buildId = case b.buildId of { Nothing -> a.buildId; x -> x }
+    , useVersioning = case b.useVersioning of { Nothing -> a.useVersioning; x -> x }
+    , deploymentSeriesName = case b.deploymentSeriesName of { Nothing -> a.deploymentSeriesName; x -> x }
+    , workerVersionCapabilitiesUnknownFields = a.workerVersionCapabilitiesUnknownFields <> b.workerVersionCapabilitiesUnknownFields
+    }
+
+instance Monoid WorkerVersionCapabilities where
+  mempty = defaultWorkerVersionCapabilities
+
+data ResetOptions = ResetOptions
+  { resetReapplyType :: !(Maybe TE_Enums_V1_Reset.ResetReapplyType)
+  , currentRunOnly :: !(Maybe Bool)
+  , resetReapplyExcludeTypes :: !(V.Vector TE_Enums_V1_Reset.ResetReapplyExcludeType)
+  , target :: !(Maybe ResetOptions'Target)
+  , resetOptionsUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data ResetOptions'Target
-  = ResetOptions'FirstWorkflowTask !Proto.Google.Protobuf.Empty.Empty |
-    ResetOptions'LastWorkflowTask !Proto.Google.Protobuf.Empty.Empty |
-    ResetOptions'WorkflowTaskId !Data.Int.Int64 |
-    ResetOptions'BuildId !Data.Text.Text
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField ResetOptions "resetReapplyType" Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'resetReapplyType
-           (\ x__ y__ -> x__ {_ResetOptions'resetReapplyType = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ResetOptions "currentRunOnly" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'currentRunOnly
-           (\ x__ y__ -> x__ {_ResetOptions'currentRunOnly = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ResetOptions "resetReapplyExcludeTypes" [Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'resetReapplyExcludeTypes
-           (\ x__ y__ -> x__ {_ResetOptions'resetReapplyExcludeTypes = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField ResetOptions "vec'resetReapplyExcludeTypes" (Data.Vector.Vector Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'resetReapplyExcludeTypes
-           (\ x__ y__ -> x__ {_ResetOptions'resetReapplyExcludeTypes = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ResetOptions "maybe'target" (Prelude.Maybe ResetOptions'Target) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ResetOptions "maybe'firstWorkflowTask" (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ResetOptions'FirstWorkflowTask x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ResetOptions'FirstWorkflowTask y__))
-instance Data.ProtoLens.Field.HasField ResetOptions "firstWorkflowTask" Proto.Google.Protobuf.Empty.Empty where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ResetOptions'FirstWorkflowTask x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ResetOptions'FirstWorkflowTask y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ResetOptions "maybe'lastWorkflowTask" (Prelude.Maybe Proto.Google.Protobuf.Empty.Empty) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ResetOptions'LastWorkflowTask x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ResetOptions'LastWorkflowTask y__))
-instance Data.ProtoLens.Field.HasField ResetOptions "lastWorkflowTask" Proto.Google.Protobuf.Empty.Empty where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ResetOptions'LastWorkflowTask x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ResetOptions'LastWorkflowTask y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ResetOptions "maybe'workflowTaskId" (Prelude.Maybe Data.Int.Int64) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ResetOptions'WorkflowTaskId x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ResetOptions'WorkflowTaskId y__))
-instance Data.ProtoLens.Field.HasField ResetOptions "workflowTaskId" Data.Int.Int64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ResetOptions'WorkflowTaskId x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ResetOptions'WorkflowTaskId y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Field.HasField ResetOptions "maybe'buildId" (Prelude.Maybe Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ResetOptions'BuildId x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ResetOptions'BuildId y__))
-instance Data.ProtoLens.Field.HasField ResetOptions "buildId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ResetOptions'target
-           (\ x__ y__ -> x__ {_ResetOptions'target = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ResetOptions'BuildId x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ResetOptions'BuildId y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Message ResetOptions where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.ResetOptions"
-  packedMessageDescriptor _
-    = "\n\
-      \\fResetOptions\DC2H\n\
-      \\DC3first_workflow_task\CAN\SOH \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC1firstWorkflowTask\DC2F\n\
-      \\DC2last_workflow_task\CAN\STX \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DLElastWorkflowTask\DC2*\n\
-      \\DLEworkflow_task_id\CAN\ETX \SOH(\ETXH\NULR\SOworkflowTaskId\DC2\ESC\n\
-      \\bbuild_id\CAN\EOT \SOH(\tH\NULR\abuildId\DC2Y\n\
-      \\DC2reset_reapply_type\CAN\n\
-      \ \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyTypeB\STX\CAN\SOH\DC2(\n\
-      \\DLEcurrent_run_only\CAN\v \SOH(\bR\SOcurrentRunOnly\DC2m\n\
-      \\ESCreset_reapply_exclude_types\CAN\f \ETX(\SO2..temporal.api.enums.v1.ResetReapplyExcludeTypeR\CANresetReapplyExcludeTypesB\b\n\
-      \\ACKtarget"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        resetReapplyType__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_reapply_type"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyType)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"resetReapplyType")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-        currentRunOnly__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "current_run_only"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"currentRunOnly")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-        resetReapplyExcludeTypes__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reset_reapply_exclude_types"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Packed
-                 (Data.ProtoLens.Field.field @"resetReapplyExcludeTypes")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-        firstWorkflowTask__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "first_workflow_task"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Empty.Empty)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'firstWorkflowTask")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-        lastWorkflowTask__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "last_workflow_task"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Empty.Empty)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'lastWorkflowTask")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-        workflowTaskId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_task_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workflowTaskId")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-        buildId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "build_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'buildId")) ::
-              Data.ProtoLens.FieldDescriptor ResetOptions
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 10, resetReapplyType__field_descriptor),
-           (Data.ProtoLens.Tag 11, currentRunOnly__field_descriptor),
-           (Data.ProtoLens.Tag 12, 
-            resetReapplyExcludeTypes__field_descriptor),
-           (Data.ProtoLens.Tag 1, firstWorkflowTask__field_descriptor),
-           (Data.ProtoLens.Tag 2, lastWorkflowTask__field_descriptor),
-           (Data.ProtoLens.Tag 3, workflowTaskId__field_descriptor),
-           (Data.ProtoLens.Tag 4, buildId__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ResetOptions'_unknownFields
-        (\ x__ y__ -> x__ {_ResetOptions'_unknownFields = y__})
-  defMessage
-    = ResetOptions'_constructor
-        {_ResetOptions'resetReapplyType = Data.ProtoLens.fieldDefault,
-         _ResetOptions'currentRunOnly = Data.ProtoLens.fieldDefault,
-         _ResetOptions'resetReapplyExcludeTypes = Data.Vector.Generic.empty,
-         _ResetOptions'target = Prelude.Nothing,
-         _ResetOptions'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ResetOptions
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.Temporal.Api.Enums.V1.Reset.ResetReapplyExcludeType
-             -> Data.ProtoLens.Encoding.Bytes.Parser ResetOptions
-        loop x mutable'resetReapplyExcludeTypes
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'resetReapplyExcludeTypes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                           (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                              mutable'resetReapplyExcludeTypes)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'resetReapplyExcludeTypes")
-                              frozen'resetReapplyExcludeTypes x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        80
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "reset_reapply_type"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"resetReapplyType") y x)
-                                  mutable'resetReapplyExcludeTypes
-                        88
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "current_run_only"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"currentRunOnly") y x)
-                                  mutable'resetReapplyExcludeTypes
-                        96
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (Prelude.fmap
-                                           Prelude.toEnum
-                                           (Prelude.fmap
-                                              Prelude.fromIntegral
-                                              Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                        "reset_reapply_exclude_types"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'resetReapplyExcludeTypes y)
-                                loop x v
-                        98
-                          -> do y <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                        Data.ProtoLens.Encoding.Bytes.isolate
-                                          (Prelude.fromIntegral len)
-                                          ((let
-                                              ploop qs
-                                                = do packedEnd <- Data.ProtoLens.Encoding.Bytes.atEnd
-                                                     if packedEnd then
-                                                         Prelude.return qs
-                                                     else
-                                                         do !q <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                    (Prelude.fmap
-                                                                       Prelude.toEnum
-                                                                       (Prelude.fmap
-                                                                          Prelude.fromIntegral
-                                                                          Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                                                    "reset_reapply_exclude_types"
-                                                            qs' <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                                     (Data.ProtoLens.Encoding.Growing.append
-                                                                        qs q)
-                                                            ploop qs'
-                                            in ploop)
-                                             mutable'resetReapplyExcludeTypes)
-                                loop x y
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "first_workflow_task"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"firstWorkflowTask") y x)
-                                  mutable'resetReapplyExcludeTypes
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "last_workflow_task"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"lastWorkflowTask") y x)
-                                  mutable'resetReapplyExcludeTypes
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "workflow_task_id"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowTaskId") y x)
-                                  mutable'resetReapplyExcludeTypes
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
-                                  mutable'resetReapplyExcludeTypes
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'resetReapplyExcludeTypes
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'resetReapplyExcludeTypes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                    Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'resetReapplyExcludeTypes)
-          "ResetOptions"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"resetReapplyType") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 80)
-                      ((Prelude..)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                         Prelude.fromEnum _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"currentRunOnly") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 88)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                ((Data.Monoid.<>)
-                   (let
-                      p = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"vec'resetReapplyExcludeTypes") _x
-                    in
-                      if Data.Vector.Generic.null p then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 98)
-                            ((\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               (Data.ProtoLens.Encoding.Bytes.runBuilder
-                                  (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                                     ((Prelude..)
-                                        ((Prelude..)
-                                           Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           Prelude.fromIntegral)
-                                        Prelude.fromEnum)
-                                     p))))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'target") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just (ResetOptions'FirstWorkflowTask v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage v)
-                         (Prelude.Just (ResetOptions'LastWorkflowTask v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage v)
-                         (Prelude.Just (ResetOptions'WorkflowTaskId v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                                ((Prelude..)
-                                   Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral v)
-                         (Prelude.Just (ResetOptions'BuildId v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.Text.Encoding.encodeUtf8 v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData ResetOptions where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ResetOptions'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_ResetOptions'resetReapplyType x__)
-                (Control.DeepSeq.deepseq
-                   (_ResetOptions'currentRunOnly x__)
-                   (Control.DeepSeq.deepseq
-                      (_ResetOptions'resetReapplyExcludeTypes x__)
-                      (Control.DeepSeq.deepseq (_ResetOptions'target x__) ()))))
-instance Control.DeepSeq.NFData ResetOptions'Target where
-  rnf (ResetOptions'FirstWorkflowTask x__) = Control.DeepSeq.rnf x__
-  rnf (ResetOptions'LastWorkflowTask x__) = Control.DeepSeq.rnf x__
-  rnf (ResetOptions'WorkflowTaskId x__) = Control.DeepSeq.rnf x__
-  rnf (ResetOptions'BuildId x__) = Control.DeepSeq.rnf x__
-_ResetOptions'FirstWorkflowTask ::
-  Data.ProtoLens.Prism.Prism' ResetOptions'Target Proto.Google.Protobuf.Empty.Empty
-_ResetOptions'FirstWorkflowTask
-  = Data.ProtoLens.Prism.prism'
-      ResetOptions'FirstWorkflowTask
-      (\ p__
-         -> case p__ of
-              (ResetOptions'FirstWorkflowTask p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ResetOptions'LastWorkflowTask ::
-  Data.ProtoLens.Prism.Prism' ResetOptions'Target Proto.Google.Protobuf.Empty.Empty
-_ResetOptions'LastWorkflowTask
-  = Data.ProtoLens.Prism.prism'
-      ResetOptions'LastWorkflowTask
-      (\ p__
-         -> case p__ of
-              (ResetOptions'LastWorkflowTask p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ResetOptions'WorkflowTaskId ::
-  Data.ProtoLens.Prism.Prism' ResetOptions'Target Data.Int.Int64
-_ResetOptions'WorkflowTaskId
-  = Data.ProtoLens.Prism.prism'
-      ResetOptions'WorkflowTaskId
-      (\ p__
-         -> case p__ of
-              (ResetOptions'WorkflowTaskId p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ResetOptions'BuildId ::
-  Data.ProtoLens.Prism.Prism' ResetOptions'Target Data.Text.Text
-_ResetOptions'BuildId
-  = Data.ProtoLens.Prism.prism'
-      ResetOptions'BuildId
-      (\ p__
-         -> case p__ of
-              (ResetOptions'BuildId p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.initialInterval' @:: Lens' RetryPolicy Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'initialInterval' @:: Lens' RetryPolicy (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.backoffCoefficient' @:: Lens' RetryPolicy Prelude.Double@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maximumInterval' @:: Lens' RetryPolicy Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'maximumInterval' @:: Lens' RetryPolicy (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maximumAttempts' @:: Lens' RetryPolicy Data.Int.Int32@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.nonRetryableErrorTypes' @:: Lens' RetryPolicy [Data.Text.Text]@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.vec'nonRetryableErrorTypes' @:: Lens' RetryPolicy (Data.Vector.Vector Data.Text.Text)@ -}
-data RetryPolicy
-  = RetryPolicy'_constructor {_RetryPolicy'initialInterval :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                              _RetryPolicy'backoffCoefficient :: !Prelude.Double,
-                              _RetryPolicy'maximumInterval :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                              _RetryPolicy'maximumAttempts :: !Data.Int.Int32,
-                              _RetryPolicy'nonRetryableErrorTypes :: !(Data.Vector.Vector Data.Text.Text),
-                              _RetryPolicy'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show RetryPolicy where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField RetryPolicy "initialInterval" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'initialInterval
-           (\ x__ y__ -> x__ {_RetryPolicy'initialInterval = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RetryPolicy "maybe'initialInterval" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'initialInterval
-           (\ x__ y__ -> x__ {_RetryPolicy'initialInterval = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RetryPolicy "backoffCoefficient" Prelude.Double where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'backoffCoefficient
-           (\ x__ y__ -> x__ {_RetryPolicy'backoffCoefficient = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RetryPolicy "maximumInterval" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'maximumInterval
-           (\ x__ y__ -> x__ {_RetryPolicy'maximumInterval = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RetryPolicy "maybe'maximumInterval" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'maximumInterval
-           (\ x__ y__ -> x__ {_RetryPolicy'maximumInterval = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RetryPolicy "maximumAttempts" Data.Int.Int32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'maximumAttempts
-           (\ x__ y__ -> x__ {_RetryPolicy'maximumAttempts = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField RetryPolicy "nonRetryableErrorTypes" [Data.Text.Text] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'nonRetryableErrorTypes
-           (\ x__ y__ -> x__ {_RetryPolicy'nonRetryableErrorTypes = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField RetryPolicy "vec'nonRetryableErrorTypes" (Data.Vector.Vector Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _RetryPolicy'nonRetryableErrorTypes
-           (\ x__ y__ -> x__ {_RetryPolicy'nonRetryableErrorTypes = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message RetryPolicy where
-  messageName _ = Data.Text.pack "temporal.api.common.v1.RetryPolicy"
-  packedMessageDescriptor _
-    = "\n\
-      \\vRetryPolicy\DC2D\n\
-      \\DLEinitial_interval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\SIinitialInterval\DC2/\n\
-      \\DC3backoff_coefficient\CAN\STX \SOH(\SOHR\DC2backoffCoefficient\DC2D\n\
-      \\DLEmaximum_interval\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SImaximumInterval\DC2)\n\
-      \\DLEmaximum_attempts\CAN\EOT \SOH(\ENQR\SImaximumAttempts\DC29\n\
-      \\EMnon_retryable_error_types\CAN\ENQ \ETX(\tR\SYNnonRetryableErrorTypes"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        initialInterval__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "initial_interval"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'initialInterval")) ::
-              Data.ProtoLens.FieldDescriptor RetryPolicy
-        backoffCoefficient__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "backoff_coefficient"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.DoubleField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Double)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"backoffCoefficient")) ::
-              Data.ProtoLens.FieldDescriptor RetryPolicy
-        maximumInterval__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "maximum_interval"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'maximumInterval")) ::
-              Data.ProtoLens.FieldDescriptor RetryPolicy
-        maximumAttempts__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "maximum_attempts"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"maximumAttempts")) ::
-              Data.ProtoLens.FieldDescriptor RetryPolicy
-        nonRetryableErrorTypes__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "non_retryable_error_types"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked
-                 (Data.ProtoLens.Field.field @"nonRetryableErrorTypes")) ::
-              Data.ProtoLens.FieldDescriptor RetryPolicy
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, initialInterval__field_descriptor),
-           (Data.ProtoLens.Tag 2, backoffCoefficient__field_descriptor),
-           (Data.ProtoLens.Tag 3, maximumInterval__field_descriptor),
-           (Data.ProtoLens.Tag 4, maximumAttempts__field_descriptor),
-           (Data.ProtoLens.Tag 5, nonRetryableErrorTypes__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _RetryPolicy'_unknownFields
-        (\ x__ y__ -> x__ {_RetryPolicy'_unknownFields = y__})
-  defMessage
-    = RetryPolicy'_constructor
-        {_RetryPolicy'initialInterval = Prelude.Nothing,
-         _RetryPolicy'backoffCoefficient = Data.ProtoLens.fieldDefault,
-         _RetryPolicy'maximumInterval = Prelude.Nothing,
-         _RetryPolicy'maximumAttempts = Data.ProtoLens.fieldDefault,
-         _RetryPolicy'nonRetryableErrorTypes = Data.Vector.Generic.empty,
-         _RetryPolicy'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          RetryPolicy
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Data.Text.Text
-             -> Data.ProtoLens.Encoding.Bytes.Parser RetryPolicy
-        loop x mutable'nonRetryableErrorTypes
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'nonRetryableErrorTypes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                         (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                                            mutable'nonRetryableErrorTypes)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'nonRetryableErrorTypes")
-                              frozen'nonRetryableErrorTypes x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "initial_interval"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"initialInterval") y x)
-                                  mutable'nonRetryableErrorTypes
-                        17
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Data.ProtoLens.Encoding.Bytes.wordToDouble
-                                          Data.ProtoLens.Encoding.Bytes.getFixed64)
-                                       "backoff_coefficient"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"backoffCoefficient") y x)
-                                  mutable'nonRetryableErrorTypes
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "maximum_interval"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"maximumInterval") y x)
-                                  mutable'nonRetryableErrorTypes
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "maximum_attempts"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"maximumAttempts") y x)
-                                  mutable'nonRetryableErrorTypes
-                        42
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.getText
-                                              (Prelude.fromIntegral len))
-                                        "non_retryable_error_types"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append
-                                          mutable'nonRetryableErrorTypes y)
-                                loop x v
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'nonRetryableErrorTypes
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'nonRetryableErrorTypes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                                  Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'nonRetryableErrorTypes)
-          "RetryPolicy"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'initialInterval") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"backoffCoefficient") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 17)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putFixed64
-                            Data.ProtoLens.Encoding.Bytes.doubleToWord _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'maximumInterval") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"maximumAttempts") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-                      ((Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                            (\ _v
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                    ((Prelude..)
-                                       (\ bs
-                                          -> (Data.Monoid.<>)
-                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                  (Prelude.fromIntegral
-                                                     (Data.ByteString.length bs)))
-                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                       Data.Text.Encoding.encodeUtf8 _v))
-                            (Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"vec'nonRetryableErrorTypes") _x))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData RetryPolicy where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_RetryPolicy'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_RetryPolicy'initialInterval x__)
-                (Control.DeepSeq.deepseq
-                   (_RetryPolicy'backoffCoefficient x__)
-                   (Control.DeepSeq.deepseq
-                      (_RetryPolicy'maximumInterval x__)
-                      (Control.DeepSeq.deepseq
-                         (_RetryPolicy'maximumAttempts x__)
-                         (Control.DeepSeq.deepseq
-                            (_RetryPolicy'nonRetryableErrorTypes x__) ())))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.indexedFields' @:: Lens' SearchAttributes (Data.Map.Map Data.Text.Text Payload)@ -}
-data SearchAttributes
-  = SearchAttributes'_constructor {_SearchAttributes'indexedFields :: !(Data.Map.Map Data.Text.Text Payload),
-                                   _SearchAttributes'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show SearchAttributes where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField SearchAttributes "indexedFields" (Data.Map.Map Data.Text.Text Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SearchAttributes'indexedFields
-           (\ x__ y__ -> x__ {_SearchAttributes'indexedFields = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message SearchAttributes where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.SearchAttributes"
-  packedMessageDescriptor _
-    = "\n\
-      \\DLESearchAttributes\DC2b\n\
-      \\SOindexed_fields\CAN\SOH \ETX(\v2;.temporal.api.common.v1.SearchAttributes.IndexedFieldsEntryR\rindexedFields\SUBa\n\
-      \\DC2IndexedFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        indexedFields__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "indexed_fields"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor SearchAttributes'IndexedFieldsEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"indexedFields")) ::
-              Data.ProtoLens.FieldDescriptor SearchAttributes
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, indexedFields__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SearchAttributes'_unknownFields
-        (\ x__ y__ -> x__ {_SearchAttributes'_unknownFields = y__})
-  defMessage
-    = SearchAttributes'_constructor
-        {_SearchAttributes'indexedFields = Data.Map.empty,
-         _SearchAttributes'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SearchAttributes
-          -> Data.ProtoLens.Encoding.Bytes.Parser SearchAttributes
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: SearchAttributes'IndexedFieldsEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                                     (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                         Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                           (Prelude.fromIntegral
-                                                                                              len)
-                                                                                           Data.ProtoLens.parseMessage)
-                                                                                     "indexed_fields"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"indexedFields")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SearchAttributes"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage ::
-                                       SearchAttributes'IndexedFieldsEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"indexedFields") _x))))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData SearchAttributes where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SearchAttributes'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_SearchAttributes'indexedFields x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.key' @:: Lens' SearchAttributes'IndexedFieldsEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.value' @:: Lens' SearchAttributes'IndexedFieldsEntry Payload@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'value' @:: Lens' SearchAttributes'IndexedFieldsEntry (Prelude.Maybe Payload)@ -}
-data SearchAttributes'IndexedFieldsEntry
-  = SearchAttributes'IndexedFieldsEntry'_constructor {_SearchAttributes'IndexedFieldsEntry'key :: !Data.Text.Text,
-                                                      _SearchAttributes'IndexedFieldsEntry'value :: !(Prelude.Maybe Payload),
-                                                      _SearchAttributes'IndexedFieldsEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show SearchAttributes'IndexedFieldsEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField SearchAttributes'IndexedFieldsEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SearchAttributes'IndexedFieldsEntry'key
-           (\ x__ y__
-              -> x__ {_SearchAttributes'IndexedFieldsEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField SearchAttributes'IndexedFieldsEntry "value" Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SearchAttributes'IndexedFieldsEntry'value
-           (\ x__ y__
-              -> x__ {_SearchAttributes'IndexedFieldsEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField SearchAttributes'IndexedFieldsEntry "maybe'value" (Prelude.Maybe Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SearchAttributes'IndexedFieldsEntry'value
-           (\ x__ y__
-              -> x__ {_SearchAttributes'IndexedFieldsEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message SearchAttributes'IndexedFieldsEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.common.v1.SearchAttributes.IndexedFieldsEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2IndexedFieldsEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-      \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor SearchAttributes'IndexedFieldsEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor SearchAttributes'IndexedFieldsEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SearchAttributes'IndexedFieldsEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_SearchAttributes'IndexedFieldsEntry'_unknownFields = y__})
-  defMessage
-    = SearchAttributes'IndexedFieldsEntry'_constructor
-        {_SearchAttributes'IndexedFieldsEntry'key = Data.ProtoLens.fieldDefault,
-         _SearchAttributes'IndexedFieldsEntry'value = Prelude.Nothing,
-         _SearchAttributes'IndexedFieldsEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SearchAttributes'IndexedFieldsEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser SearchAttributes'IndexedFieldsEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "IndexedFieldsEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData SearchAttributes'IndexedFieldsEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SearchAttributes'IndexedFieldsEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_SearchAttributes'IndexedFieldsEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_SearchAttributes'IndexedFieldsEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'selector' @:: Lens' WorkerSelector (Prelude.Maybe WorkerSelector'Selector)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.maybe'workerInstanceKey' @:: Lens' WorkerSelector (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workerInstanceKey' @:: Lens' WorkerSelector Data.Text.Text@ -}
-data WorkerSelector
-  = WorkerSelector'_constructor {_WorkerSelector'selector :: !(Prelude.Maybe WorkerSelector'Selector),
-                                 _WorkerSelector'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerSelector where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+  = ResetOptions'Target'FirstWorkflowTask !PB_Empty.Empty
+  | ResetOptions'Target'LastWorkflowTask !PB_Empty.Empty
+  | ResetOptions'Target'WorkflowTaskId {-# UNPACK #-} !Int64
+  | ResetOptions'Target'BuildId !Text
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON ResetOptions'Target where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON ResetOptions'Target where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable ResetOptions'Target where
+  hashWithSalt salt (ResetOptions'Target'FirstWorkflowTask v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ResetOptions'Target'LastWorkflowTask v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ResetOptions'Target'WorkflowTaskId v) = salt `hashWithSalt` (2 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ResetOptions'Target'BuildId v) = salt `hashWithSalt` (3 :: Int) `hashWithSalt` v
+
+defaultResetOptions :: ResetOptions
+defaultResetOptions = ResetOptions
+  { resetReapplyType = Nothing
+  , currentRunOnly = Nothing
+  , resetReapplyExcludeTypes = V.empty
+  , target = Nothing
+  , resetOptionsUnknownFields = []
+  }
+
+instance MessageEncode ResetOptions where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 80 (fromIntegral (fromEnum v))) msg.resetReapplyType)
+    <> (maybe mempty (\v -> archBool 88 v) msg.currentRunOnly)
+    <> V.foldl' (\acc v -> acc <> archVarint 96 (fromIntegral (fromEnum v))) mempty msg.resetReapplyExcludeTypes
+    <> (case msg.target of
+      Nothing -> mempty
+      Just (ResetOptions'Target'FirstWorkflowTask v) -> (let sz = messageSize v in archSubmessage 10 sz (buildMessage v))
+      Just (ResetOptions'Target'LastWorkflowTask v) -> (let sz = messageSize v in archSubmessage 18 sz (buildMessage v))
+      Just (ResetOptions'Target'WorkflowTaskId v) -> archVarint 24 (fromIntegral v)
+      Just (ResetOptions'Target'BuildId v) -> archString 34 v)
+    <> encodeUnknownFields msg.resetOptionsUnknownFields
+
+instance MessageSize ResetOptions where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.resetReapplyType)
+    + (maybe 0 (\v -> archBoolSize) msg.currentRunOnly)
+    + (V.foldl' (\acc v -> acc + archVarintSize (fromIntegral (fromEnum v))) 0 msg.resetReapplyExcludeTypes)
+    + (case msg.target of { Nothing -> 0; Just (ResetOptions'Target'FirstWorkflowTask v) -> archSubmessageSize (messageSize v)
+    ; Just (ResetOptions'Target'LastWorkflowTask v) -> archSubmessageSize (messageSize v)
+    ; Just (ResetOptions'Target'WorkflowTaskId v) -> archVarintSize (fromIntegral v)
+    ; Just (ResetOptions'Target'BuildId v) -> archStringSize v })
+    + unknownFieldsSize msg.resetOptionsUnknownFields
+
+instance MessageDecode ResetOptions where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing V.empty Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (ResetOptions {resetReapplyType = acc_0, currentRunOnly = acc_1, resetReapplyExcludeTypes = acc_2, target = acc_3, resetOptionsUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          10 -> do
+            v <- decodeFieldEnum
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          11 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          12 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 (acc_2 <> V.singleton v) acc_3 acc_unknown_
+          1 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just (ResetOptions'Target'FirstWorkflowTask v)) acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just (ResetOptions'Target'LastWorkflowTask v)) acc_unknown_
+          3 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 acc_1 acc_2 (Just (ResetOptions'Target'WorkflowTaskId v)) acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just (ResetOptions'Target'BuildId v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage ResetOptions where
+  protoMessageName _ = "temporal.api.common.v1.ResetOptions"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultResetOptions
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (10, SomeField FieldDescriptor
+        { fdName = "reset_reapply_type"
+        , fdNumber = 10
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.ResetReapplyType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ResetOptions) -> m.resetReapplyType
+        , fdSet = \v (m :: ResetOptions) -> (m { resetReapplyType = v } :: ResetOptions)
+        }), (11, SomeField FieldDescriptor
+        { fdName = "current_run_only"
+        , fdNumber = 11
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ResetOptions) -> m.currentRunOnly
+        , fdSet = \v (m :: ResetOptions) -> (m { currentRunOnly = v } :: ResetOptions)
+        })
+    , (12, SomeField FieldDescriptor
+        { fdName = "reset_reapply_exclude_types"
+        , fdNumber = 12
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.ResetReapplyExcludeType"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: ResetOptions) -> m.resetReapplyExcludeTypes
+        , fdSet = \v (m :: ResetOptions) -> (m { resetReapplyExcludeTypes = v } :: ResetOptions)
+        })
+    , (1, SomeField FieldDescriptor
+        { fdName = "target"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "target"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ResetOptions) -> m.target
+        , fdSet = \v (m :: ResetOptions) -> (m { target = v } :: ResetOptions)
+        })
+    ]
+
+instance IsMessage ResetOptions
+
+instance Aeson.ToJSON ResetOptions where
+  toJSON msg = jsonObject
+      [ "resetReapplyType" .=: msg.resetReapplyType
+      , "currentRunOnly" .=: msg.currentRunOnly
+      , "resetReapplyExcludeTypes" .=: msg.resetReapplyExcludeTypes
+      , "target" .=: msg.target
+      ]
+
+instance Aeson.FromJSON ResetOptions where
+  parseJSON = Aeson.withObject "ResetOptions" $ \obj -> do
+    fld_resetReapplyType <- parseFieldMaybe obj "resetReapplyType"
+    fld_currentRunOnly <- parseFieldMaybe obj "currentRunOnly"
+    fld_resetReapplyExcludeTypes <- parseFieldMaybe obj "resetReapplyExcludeTypes"
+    fld_target <- parseFieldMaybe obj "target"
+    pure (defaultResetOptions
+      { resetReapplyType = maybe (defaultResetOptions.resetReapplyType) Prelude.id fld_resetReapplyType
+      , currentRunOnly = maybe (defaultResetOptions.currentRunOnly) Prelude.id fld_currentRunOnly
+      , resetReapplyExcludeTypes = maybe (defaultResetOptions.resetReapplyExcludeTypes) Prelude.id fld_resetReapplyExcludeTypes
+      , target = maybe (defaultResetOptions.target) Prelude.id fld_target
+      , resetOptionsUnknownFields = []
+      } :: ResetOptions)
+
+instance Hashable ResetOptions where
+  hashWithSalt salt msg = hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.resetReapplyType) msg.currentRunOnly) msg.resetReapplyExcludeTypes) msg.target
+
+instance Proto.Extension.HasExtensions ResetOptions where
+  messageUnknownFields msg = msg.resetOptionsUnknownFields
+  setMessageUnknownFields !ufs msg = msg { resetOptionsUnknownFields = ufs }
+
+instance Semigroup ResetOptions where
+  a <> b = ResetOptions
+    { resetReapplyType = case b.resetReapplyType of { Nothing -> a.resetReapplyType; x -> x }
+    , currentRunOnly = case b.currentRunOnly of { Nothing -> a.currentRunOnly; x -> x }
+    , resetReapplyExcludeTypes = a.resetReapplyExcludeTypes <> b.resetReapplyExcludeTypes
+    , target = case b.target of { Nothing -> a.target; x -> x }
+    , resetOptionsUnknownFields = a.resetOptionsUnknownFields <> b.resetOptionsUnknownFields
+    }
+
+instance Monoid ResetOptions where
+  mempty = defaultResetOptions
+
+data Callback = Callback
+  { links :: !(V.Vector Link)
+  , variant :: !(Maybe Callback'Variant)
+  , callbackUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Callback'Nexus = Callback'Nexus
+  { url :: !(Maybe Text)
+  , header :: !(V.Vector Callback'Nexus'HeaderEntry)
+  , callbackNexusUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Callback'Nexus'HeaderEntry = Callback'Nexus'HeaderEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Text)
+  , callbackNexusHeaderEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultCallback'Nexus'HeaderEntry :: Callback'Nexus'HeaderEntry
+defaultCallback'Nexus'HeaderEntry = Callback'Nexus'HeaderEntry
+  { key = Nothing
+  , value = Nothing
+  , callbackNexusHeaderEntryUnknownFields = []
+  }
+
+instance MessageEncode Callback'Nexus'HeaderEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> archString 18 v) msg.value)
+    <> encodeUnknownFields msg.callbackNexusHeaderEntryUnknownFields
+
+instance MessageSize Callback'Nexus'HeaderEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archStringSize v) msg.value)
+    + unknownFieldsSize msg.callbackNexusHeaderEntryUnknownFields
+
+instance MessageDecode Callback'Nexus'HeaderEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Callback'Nexus'HeaderEntry {key = acc_0, value = acc_1, callbackNexusHeaderEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Callback'Nexus'HeaderEntry where
+  protoMessageName _ = "temporal.api.common.v1.Callback.Nexus.HeaderEntry"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultCallback'Nexus'HeaderEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Callback'Nexus'HeaderEntry) -> m.key
+        , fdSet = \v (m :: Callback'Nexus'HeaderEntry) -> (m { key = v } :: Callback'Nexus'HeaderEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Callback'Nexus'HeaderEntry) -> m.value
+        , fdSet = \v (m :: Callback'Nexus'HeaderEntry) -> (m { value = v } :: Callback'Nexus'HeaderEntry)
+        })
+    ]
+
+instance IsMessage Callback'Nexus'HeaderEntry
+
+instance Aeson.ToJSON Callback'Nexus'HeaderEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON Callback'Nexus'HeaderEntry where
+  parseJSON = Aeson.withObject "Callback'Nexus'HeaderEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultCallback'Nexus'HeaderEntry
+      { key = maybe (defaultCallback'Nexus'HeaderEntry.key) Prelude.id fld_key
+      , value = maybe (defaultCallback'Nexus'HeaderEntry.value) Prelude.id fld_value
+      , callbackNexusHeaderEntryUnknownFields = []
+      } :: Callback'Nexus'HeaderEntry)
+
+instance Hashable Callback'Nexus'HeaderEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions Callback'Nexus'HeaderEntry where
+  messageUnknownFields msg = msg.callbackNexusHeaderEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { callbackNexusHeaderEntryUnknownFields = ufs }
+
+instance Semigroup Callback'Nexus'HeaderEntry where
+  a <> b = Callback'Nexus'HeaderEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , callbackNexusHeaderEntryUnknownFields = a.callbackNexusHeaderEntryUnknownFields <> b.callbackNexusHeaderEntryUnknownFields
+    }
+
+instance Monoid Callback'Nexus'HeaderEntry where
+  mempty = defaultCallback'Nexus'HeaderEntry
+
+defaultCallback'Nexus :: Callback'Nexus
+defaultCallback'Nexus = Callback'Nexus
+  { url = Nothing
+  , header = V.empty
+  , callbackNexusUnknownFields = []
+  }
+
+instance MessageEncode Callback'Nexus where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.url)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 18 sz (buildMessage v)) mempty msg.header
+    <> encodeUnknownFields msg.callbackNexusUnknownFields
+
+instance MessageSize Callback'Nexus where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.url)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.header)
+    + unknownFieldsSize msg.callbackNexusUnknownFields
+
+instance MessageDecode Callback'Nexus where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing V.empty []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Callback'Nexus {url = acc_0, header = acc_1, callbackNexusUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (acc_1 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Callback'Nexus where
+  protoMessageName _ = "temporal.api.common.v1.Callback.Nexus"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultCallback'Nexus
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "url"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Callback'Nexus) -> m.url
+        , fdSet = \v (m :: Callback'Nexus) -> (m { url = v } :: Callback'Nexus)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "header"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Callback.Nexus.HeaderEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Callback'Nexus) -> m.header
+        , fdSet = \v (m :: Callback'Nexus) -> (m { header = v } :: Callback'Nexus)
+        })
+    ]
+
+instance IsMessage Callback'Nexus
+
+instance Aeson.ToJSON Callback'Nexus where
+  toJSON msg = jsonObject
+      [ "url" .=: msg.url
+      , "header" .=: msg.header
+      ]
+
+instance Aeson.FromJSON Callback'Nexus where
+  parseJSON = Aeson.withObject "Callback'Nexus" $ \obj -> do
+    fld_url <- parseFieldMaybe obj "url"
+    fld_header <- parseFieldMaybe obj "header"
+    pure (defaultCallback'Nexus
+      { url = maybe (defaultCallback'Nexus.url) Prelude.id fld_url
+      , header = maybe (defaultCallback'Nexus.header) Prelude.id fld_header
+      , callbackNexusUnknownFields = []
+      } :: Callback'Nexus)
+
+instance Hashable Callback'Nexus where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (hashWithSalt (salt) msg.url) msg.header
+
+instance Proto.Extension.HasExtensions Callback'Nexus where
+  messageUnknownFields msg = msg.callbackNexusUnknownFields
+  setMessageUnknownFields !ufs msg = msg { callbackNexusUnknownFields = ufs }
+
+instance Semigroup Callback'Nexus where
+  a <> b = Callback'Nexus
+    { url = case b.url of { Nothing -> a.url; x -> x }
+    , header = a.header <> b.header
+    , callbackNexusUnknownFields = a.callbackNexusUnknownFields <> b.callbackNexusUnknownFields
+    }
+
+instance Monoid Callback'Nexus where
+  mempty = defaultCallback'Nexus
+
+data Callback'Internal = Callback'Internal
+  { data' :: !(Maybe ByteString)
+  , callbackInternalUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultCallback'Internal :: Callback'Internal
+defaultCallback'Internal = Callback'Internal
+  { data' = Nothing
+  , callbackInternalUnknownFields = []
+  }
+
+instance MessageEncode Callback'Internal where
+  buildMessage msg =
+    (maybe mempty (\v -> archBytes 10 v) msg.data')
+    <> encodeUnknownFields msg.callbackInternalUnknownFields
+
+instance MessageSize Callback'Internal where
+  messageSize msg =
+    (maybe 0 (\v -> archBytesSize v) msg.data')
+    + unknownFieldsSize msg.callbackInternalUnknownFields
+
+instance MessageDecode Callback'Internal where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Callback'Internal {data' = acc_0, callbackInternalUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBytes
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Callback'Internal where
+  protoMessageName _ = "temporal.api.common.v1.Callback.Internal"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultCallback'Internal
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "data"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BytesField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Callback'Internal) -> m.data'
+        , fdSet = \v (m :: Callback'Internal) -> (m { data' = v } :: Callback'Internal)
+        })
+    ]
+
+instance IsMessage Callback'Internal
+
+instance Aeson.ToJSON Callback'Internal where
+  toJSON msg = jsonObject
+      [ "data" .=: (fmap protoBytesToJSON msg.data')
+
+      ]
+
+instance Aeson.FromJSON Callback'Internal where
+  parseJSON = Aeson.withObject "Callback'Internal" $ \obj -> do
+    fld_data' <- parseBytesFieldMaybe obj "data"
+    pure (defaultCallback'Internal
+      { data' = fld_data'
+      , callbackInternalUnknownFields = []
+      } :: Callback'Internal)
+
+instance Hashable Callback'Internal where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.data'
+
+instance Proto.Extension.HasExtensions Callback'Internal where
+  messageUnknownFields msg = msg.callbackInternalUnknownFields
+  setMessageUnknownFields !ufs msg = msg { callbackInternalUnknownFields = ufs }
+
+instance Semigroup Callback'Internal where
+  a <> b = Callback'Internal
+    { data' = case b.data' of { Nothing -> a.data'; x -> x }
+    , callbackInternalUnknownFields = a.callbackInternalUnknownFields <> b.callbackInternalUnknownFields
+    }
+
+instance Monoid Callback'Internal where
+  mempty = defaultCallback'Internal
+data Callback'Variant
+  = Callback'Variant'Nexus !Callback'Nexus
+  | Callback'Variant'Internal !Callback'Internal
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON Callback'Variant where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON Callback'Variant where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable Callback'Variant where
+  hashWithSalt salt (Callback'Variant'Nexus v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (Callback'Variant'Internal v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultCallback :: Callback
+defaultCallback = Callback
+  { links = V.empty
+  , variant = Nothing
+  , callbackUnknownFields = []
+  }
+
+instance MessageEncode Callback where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> genericArchSubmessage 100 sz (buildMessage v)) mempty msg.links
+    <> (case msg.variant of
+      Nothing -> mempty
+      Just (Callback'Variant'Nexus v) -> (let sz = messageSize v in archSubmessage 18 sz (buildMessage v))
+      Just (Callback'Variant'Internal v) -> (let sz = messageSize v in archSubmessage 26 sz (buildMessage v)))
+    <> encodeUnknownFields msg.callbackUnknownFields
+
+instance MessageSize Callback where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.links)
+    + (case msg.variant of { Nothing -> 0; Just (Callback'Variant'Nexus v) -> archSubmessageSize (messageSize v)
+    ; Just (Callback'Variant'Internal v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.callbackUnknownFields
+    + multiByteTagSizeCallback msg
+
+instance MessageDecode Callback where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Callback {links = acc_0, variant = acc_1, callbackUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          100 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just (Callback'Variant'Nexus v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just (Callback'Variant'Internal v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Callback where
+  protoMessageName _ = "temporal.api.common.v1.Callback"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultCallback
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (100, SomeField FieldDescriptor
+        { fdName = "links"
+        , fdNumber = 100
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Link"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: Callback) -> m.links
+        , fdSet = \v (m :: Callback) -> (m { links = v } :: Callback)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "variant"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "variant"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Callback) -> m.variant
+        , fdSet = \v (m :: Callback) -> (m { variant = v } :: Callback)
+        })
+    ]
+
+instance IsMessage Callback
+
+instance Aeson.ToJSON Callback where
+  toJSON msg = jsonObject
+      [ "links" .=: msg.links
+      , "variant" .=: msg.variant
+      ]
+
+instance Aeson.FromJSON Callback where
+  parseJSON = Aeson.withObject "Callback" $ \obj -> do
+    fld_links <- parseFieldMaybe obj "links"
+    fld_variant <- parseFieldMaybe obj "variant"
+    pure (defaultCallback
+      { links = maybe (defaultCallback.links) Prelude.id fld_links
+      , variant = maybe (defaultCallback.variant) Prelude.id fld_variant
+      , callbackUnknownFields = []
+      } :: Callback)
+
+instance Hashable Callback where
+  hashWithSalt salt msg = hashWithSalt (V.foldl' hashWithSalt (salt) msg.links) msg.variant
+
+instance Proto.Extension.HasExtensions Callback where
+  messageUnknownFields msg = msg.callbackUnknownFields
+  setMessageUnknownFields !ufs msg = msg { callbackUnknownFields = ufs }
+
+instance Semigroup Callback where
+  a <> b = Callback
+    { links = a.links <> b.links
+    , variant = case b.variant of { Nothing -> a.variant; x -> x }
+    , callbackUnknownFields = a.callbackUnknownFields <> b.callbackUnknownFields
+    }
+
+instance Monoid Callback where
+  mempty = defaultCallback
+
+data Link = Link
+  { variant :: !(Maybe Link'Variant)
+  , linkUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Link'WorkflowEvent = Link'WorkflowEvent
+  { namespace :: !(Maybe Text)
+  , workflowId :: !(Maybe Text)
+  , runId :: !(Maybe Text)
+  , reference :: !(Maybe Link'WorkflowEvent'Reference)
+  , linkWorkflowEventUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data Link'WorkflowEvent'EventReference = Link'WorkflowEvent'EventReference
+  { eventId :: !(Maybe Int64)
+  , eventType :: !(Maybe TE_Enums_V1_EventType.EventType)
+  , linkWorkflowEventEventReferenceUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLink'WorkflowEvent'EventReference :: Link'WorkflowEvent'EventReference
+defaultLink'WorkflowEvent'EventReference = Link'WorkflowEvent'EventReference
+  { eventId = Nothing
+  , eventType = Nothing
+  , linkWorkflowEventEventReferenceUnknownFields = []
+  }
+
+instance MessageEncode Link'WorkflowEvent'EventReference where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral v)) msg.eventId)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.eventType)
+    <> encodeUnknownFields msg.linkWorkflowEventEventReferenceUnknownFields
+
+instance MessageSize Link'WorkflowEvent'EventReference where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.eventId)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.eventType)
+    + unknownFieldsSize msg.linkWorkflowEventEventReferenceUnknownFields
+
+instance MessageDecode Link'WorkflowEvent'EventReference where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Link'WorkflowEvent'EventReference {eventId = acc_0, eventType = acc_1, linkWorkflowEventEventReferenceUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Link'WorkflowEvent'EventReference where
+  protoMessageName _ = "temporal.api.common.v1.Link.WorkflowEvent.EventReference"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultLink'WorkflowEvent'EventReference
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "event_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType Int64Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent'EventReference) -> m.eventId
+        , fdSet = \v (m :: Link'WorkflowEvent'EventReference) -> (m { eventId = v } :: Link'WorkflowEvent'EventReference)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "event_type"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.EventType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent'EventReference) -> m.eventType
+        , fdSet = \v (m :: Link'WorkflowEvent'EventReference) -> (m { eventType = v } :: Link'WorkflowEvent'EventReference)
+        })
+    ]
+
+instance IsMessage Link'WorkflowEvent'EventReference
+
+instance Aeson.ToJSON Link'WorkflowEvent'EventReference where
+  toJSON msg = jsonObject
+      [ "eventId" .=: msg.eventId
+      , "eventType" .=: msg.eventType
+      ]
+
+instance Aeson.FromJSON Link'WorkflowEvent'EventReference where
+  parseJSON = Aeson.withObject "Link'WorkflowEvent'EventReference" $ \obj -> do
+    fld_eventId <- parseFieldMaybe obj "eventId"
+    fld_eventType <- parseFieldMaybe obj "eventType"
+    pure (defaultLink'WorkflowEvent'EventReference
+      { eventId = maybe (defaultLink'WorkflowEvent'EventReference.eventId) Prelude.id fld_eventId
+      , eventType = maybe (defaultLink'WorkflowEvent'EventReference.eventType) Prelude.id fld_eventType
+      , linkWorkflowEventEventReferenceUnknownFields = []
+      } :: Link'WorkflowEvent'EventReference)
+
+instance Hashable Link'WorkflowEvent'EventReference where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.eventId) msg.eventType
+
+instance Proto.Extension.HasExtensions Link'WorkflowEvent'EventReference where
+  messageUnknownFields msg = msg.linkWorkflowEventEventReferenceUnknownFields
+  setMessageUnknownFields !ufs msg = msg { linkWorkflowEventEventReferenceUnknownFields = ufs }
+
+instance Semigroup Link'WorkflowEvent'EventReference where
+  a <> b = Link'WorkflowEvent'EventReference
+    { eventId = case b.eventId of { Nothing -> a.eventId; x -> x }
+    , eventType = case b.eventType of { Nothing -> a.eventType; x -> x }
+    , linkWorkflowEventEventReferenceUnknownFields = a.linkWorkflowEventEventReferenceUnknownFields <> b.linkWorkflowEventEventReferenceUnknownFields
+    }
+
+instance Monoid Link'WorkflowEvent'EventReference where
+  mempty = defaultLink'WorkflowEvent'EventReference
+
+data Link'WorkflowEvent'RequestIdReference = Link'WorkflowEvent'RequestIdReference
+  { requestId :: !(Maybe Text)
+  , eventType :: !(Maybe TE_Enums_V1_EventType.EventType)
+  , linkWorkflowEventRequestIdReferenceUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLink'WorkflowEvent'RequestIdReference :: Link'WorkflowEvent'RequestIdReference
+defaultLink'WorkflowEvent'RequestIdReference = Link'WorkflowEvent'RequestIdReference
+  { requestId = Nothing
+  , eventType = Nothing
+  , linkWorkflowEventRequestIdReferenceUnknownFields = []
+  }
+
+instance MessageEncode Link'WorkflowEvent'RequestIdReference where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.requestId)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.eventType)
+    <> encodeUnknownFields msg.linkWorkflowEventRequestIdReferenceUnknownFields
+
+instance MessageSize Link'WorkflowEvent'RequestIdReference where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.requestId)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.eventType)
+    + unknownFieldsSize msg.linkWorkflowEventRequestIdReferenceUnknownFields
+
+instance MessageDecode Link'WorkflowEvent'RequestIdReference where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (Link'WorkflowEvent'RequestIdReference {requestId = acc_0, eventType = acc_1, linkWorkflowEventRequestIdReferenceUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage Link'WorkflowEvent'RequestIdReference where
+  protoMessageName _ = "temporal.api.common.v1.Link.WorkflowEvent.RequestIdReference"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultLink'WorkflowEvent'RequestIdReference
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "request_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent'RequestIdReference) -> m.requestId
+        , fdSet = \v (m :: Link'WorkflowEvent'RequestIdReference) -> (m { requestId = v } :: Link'WorkflowEvent'RequestIdReference)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "event_type"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.EventType"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent'RequestIdReference) -> m.eventType
+        , fdSet = \v (m :: Link'WorkflowEvent'RequestIdReference) -> (m { eventType = v } :: Link'WorkflowEvent'RequestIdReference)
+        })
+    ]
+
+instance IsMessage Link'WorkflowEvent'RequestIdReference
+
+instance Aeson.ToJSON Link'WorkflowEvent'RequestIdReference where
+  toJSON msg = jsonObject
+      [ "requestId" .=: msg.requestId
+      , "eventType" .=: msg.eventType
+      ]
+
+instance Aeson.FromJSON Link'WorkflowEvent'RequestIdReference where
+  parseJSON = Aeson.withObject "Link'WorkflowEvent'RequestIdReference" $ \obj -> do
+    fld_requestId <- parseFieldMaybe obj "requestId"
+    fld_eventType <- parseFieldMaybe obj "eventType"
+    pure (defaultLink'WorkflowEvent'RequestIdReference
+      { requestId = maybe (defaultLink'WorkflowEvent'RequestIdReference.requestId) Prelude.id fld_requestId
+      , eventType = maybe (defaultLink'WorkflowEvent'RequestIdReference.eventType) Prelude.id fld_eventType
+      , linkWorkflowEventRequestIdReferenceUnknownFields = []
+      } :: Link'WorkflowEvent'RequestIdReference)
+
+instance Hashable Link'WorkflowEvent'RequestIdReference where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.requestId) msg.eventType
+
+instance Proto.Extension.HasExtensions Link'WorkflowEvent'RequestIdReference where
+  messageUnknownFields msg = msg.linkWorkflowEventRequestIdReferenceUnknownFields
+  setMessageUnknownFields !ufs msg = msg { linkWorkflowEventRequestIdReferenceUnknownFields = ufs }
+
+instance Semigroup Link'WorkflowEvent'RequestIdReference where
+  a <> b = Link'WorkflowEvent'RequestIdReference
+    { requestId = case b.requestId of { Nothing -> a.requestId; x -> x }
+    , eventType = case b.eventType of { Nothing -> a.eventType; x -> x }
+    , linkWorkflowEventRequestIdReferenceUnknownFields = a.linkWorkflowEventRequestIdReferenceUnknownFields <> b.linkWorkflowEventRequestIdReferenceUnknownFields
+    }
+
+instance Monoid Link'WorkflowEvent'RequestIdReference where
+  mempty = defaultLink'WorkflowEvent'RequestIdReference
+data Link'WorkflowEvent'Reference
+  = Link'WorkflowEvent'Reference'EventRef !Link'WorkflowEvent'EventReference
+  | Link'WorkflowEvent'Reference'RequestIdRef !Link'WorkflowEvent'RequestIdReference
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON Link'WorkflowEvent'Reference where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON Link'WorkflowEvent'Reference where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable Link'WorkflowEvent'Reference where
+  hashWithSalt salt (Link'WorkflowEvent'Reference'EventRef v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (Link'WorkflowEvent'Reference'RequestIdRef v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultLink'WorkflowEvent :: Link'WorkflowEvent
+defaultLink'WorkflowEvent = Link'WorkflowEvent
+  { namespace = Nothing
+  , workflowId = Nothing
+  , runId = Nothing
+  , reference = Nothing
+  , linkWorkflowEventUnknownFields = []
+  }
+
+instance MessageEncode Link'WorkflowEvent where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.namespace)
+    <> (maybe mempty (\v -> archString 18 v) msg.workflowId)
+    <> (maybe mempty (\v -> archString 26 v) msg.runId)
+    <> (case msg.reference of
+      Nothing -> mempty
+      Just (Link'WorkflowEvent'Reference'EventRef v) -> (let sz = messageSize v in genericArchSubmessage 100 sz (buildMessage v))
+      Just (Link'WorkflowEvent'Reference'RequestIdRef v) -> (let sz = messageSize v in genericArchSubmessage 101 sz (buildMessage v)))
+    <> encodeUnknownFields msg.linkWorkflowEventUnknownFields
+
+instance MessageSize Link'WorkflowEvent where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.namespace)
+    + (maybe 0 (\v -> archStringSize v) msg.workflowId)
+    + (maybe 0 (\v -> archStringSize v) msg.runId)
+    + (case msg.reference of { Nothing -> 0; Just (Link'WorkflowEvent'Reference'EventRef v) -> archSubmessageSize (messageSize v)
+    ; Just (Link'WorkflowEvent'Reference'RequestIdRef v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.linkWorkflowEventUnknownFields
+    + multiByteTagSizeLink'WorkflowEvent msg
+
+instance MessageDecode Link'WorkflowEvent where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (Link'WorkflowEvent {namespace = acc_0, workflowId = acc_1, runId = acc_2, reference = acc_3, linkWorkflowEventUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_3 acc_unknown_
+          100 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just (Link'WorkflowEvent'Reference'EventRef v)) acc_unknown_
+          101 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just (Link'WorkflowEvent'Reference'RequestIdRef v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage Link'WorkflowEvent where
+  protoMessageName _ = "temporal.api.common.v1.Link.WorkflowEvent"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultLink'WorkflowEvent
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "namespace"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent) -> m.namespace
+        , fdSet = \v (m :: Link'WorkflowEvent) -> (m { namespace = v } :: Link'WorkflowEvent)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "workflow_id"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent) -> m.workflowId
+        , fdSet = \v (m :: Link'WorkflowEvent) -> (m { workflowId = v } :: Link'WorkflowEvent)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "run_id"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent) -> m.runId
+        , fdSet = \v (m :: Link'WorkflowEvent) -> (m { runId = v } :: Link'WorkflowEvent)
+        })
+    , (100, SomeField FieldDescriptor
+        { fdName = "reference"
+        , fdNumber = 100
+        , fdTypeDesc = MessageType "reference"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'WorkflowEvent) -> m.reference
+        , fdSet = \v (m :: Link'WorkflowEvent) -> (m { reference = v } :: Link'WorkflowEvent)
+        })
+    ]
+
+instance IsMessage Link'WorkflowEvent
+
+instance Aeson.ToJSON Link'WorkflowEvent where
+  toJSON msg = jsonObject
+      [ "namespace" .=: msg.namespace
+      , "workflowId" .=: msg.workflowId
+      , "runId" .=: msg.runId
+      , "reference" .=: msg.reference
+      ]
+
+instance Aeson.FromJSON Link'WorkflowEvent where
+  parseJSON = Aeson.withObject "Link'WorkflowEvent" $ \obj -> do
+    fld_namespace <- parseFieldMaybe obj "namespace"
+    fld_workflowId <- parseFieldMaybe obj "workflowId"
+    fld_runId <- parseFieldMaybe obj "runId"
+    fld_reference <- parseFieldMaybe obj "reference"
+    pure (defaultLink'WorkflowEvent
+      { namespace = maybe (defaultLink'WorkflowEvent.namespace) Prelude.id fld_namespace
+      , workflowId = maybe (defaultLink'WorkflowEvent.workflowId) Prelude.id fld_workflowId
+      , runId = maybe (defaultLink'WorkflowEvent.runId) Prelude.id fld_runId
+      , reference = maybe (defaultLink'WorkflowEvent.reference) Prelude.id fld_reference
+      , linkWorkflowEventUnknownFields = []
+      } :: Link'WorkflowEvent)
+
+instance Hashable Link'WorkflowEvent where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.namespace) msg.workflowId) msg.runId) msg.reference
+
+instance Proto.Extension.HasExtensions Link'WorkflowEvent where
+  messageUnknownFields msg = msg.linkWorkflowEventUnknownFields
+  setMessageUnknownFields !ufs msg = msg { linkWorkflowEventUnknownFields = ufs }
+
+instance Semigroup Link'WorkflowEvent where
+  a <> b = Link'WorkflowEvent
+    { namespace = case b.namespace of { Nothing -> a.namespace; x -> x }
+    , workflowId = case b.workflowId of { Nothing -> a.workflowId; x -> x }
+    , runId = case b.runId of { Nothing -> a.runId; x -> x }
+    , reference = case b.reference of { Nothing -> a.reference; x -> x }
+    , linkWorkflowEventUnknownFields = a.linkWorkflowEventUnknownFields <> b.linkWorkflowEventUnknownFields
+    }
+
+instance Monoid Link'WorkflowEvent where
+  mempty = defaultLink'WorkflowEvent
+
+data Link'BatchJob = Link'BatchJob
+  { jobId :: !(Maybe Text)
+  , linkBatchJobUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultLink'BatchJob :: Link'BatchJob
+defaultLink'BatchJob = Link'BatchJob
+  { jobId = Nothing
+  , linkBatchJobUnknownFields = []
+  }
+
+instance MessageEncode Link'BatchJob where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.jobId)
+    <> encodeUnknownFields msg.linkBatchJobUnknownFields
+
+instance MessageSize Link'BatchJob where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.jobId)
+    + unknownFieldsSize msg.linkBatchJobUnknownFields
+
+instance MessageDecode Link'BatchJob where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Link'BatchJob {jobId = acc_0, linkBatchJobUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Link'BatchJob where
+  protoMessageName _ = "temporal.api.common.v1.Link.BatchJob"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultLink'BatchJob
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "job_id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link'BatchJob) -> m.jobId
+        , fdSet = \v (m :: Link'BatchJob) -> (m { jobId = v } :: Link'BatchJob)
+        })
+    ]
+
+instance IsMessage Link'BatchJob
+
+instance Aeson.ToJSON Link'BatchJob where
+  toJSON msg = jsonObject
+      [ "jobId" .=: msg.jobId
+
+      ]
+
+instance Aeson.FromJSON Link'BatchJob where
+  parseJSON = Aeson.withObject "Link'BatchJob" $ \obj -> do
+    fld_jobId <- parseFieldMaybe obj "jobId"
+    pure (defaultLink'BatchJob
+      { jobId = maybe (defaultLink'BatchJob.jobId) Prelude.id fld_jobId
+      , linkBatchJobUnknownFields = []
+      } :: Link'BatchJob)
+
+instance Hashable Link'BatchJob where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.jobId
+
+instance Proto.Extension.HasExtensions Link'BatchJob where
+  messageUnknownFields msg = msg.linkBatchJobUnknownFields
+  setMessageUnknownFields !ufs msg = msg { linkBatchJobUnknownFields = ufs }
+
+instance Semigroup Link'BatchJob where
+  a <> b = Link'BatchJob
+    { jobId = case b.jobId of { Nothing -> a.jobId; x -> x }
+    , linkBatchJobUnknownFields = a.linkBatchJobUnknownFields <> b.linkBatchJobUnknownFields
+    }
+
+instance Monoid Link'BatchJob where
+  mempty = defaultLink'BatchJob
+data Link'Variant
+  = Link'Variant'WorkflowEvent !Link'WorkflowEvent
+  | Link'Variant'BatchJob !Link'BatchJob
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON Link'Variant where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON Link'Variant where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable Link'Variant where
+  hashWithSalt salt (Link'Variant'WorkflowEvent v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (Link'Variant'BatchJob v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultLink :: Link
+defaultLink = Link
+  { variant = Nothing
+  , linkUnknownFields = []
+  }
+
+instance MessageEncode Link where
+  buildMessage msg =
+    (case msg.variant of
+      Nothing -> mempty
+      Just (Link'Variant'WorkflowEvent v) -> (let sz = messageSize v in archSubmessage 10 sz (buildMessage v))
+      Just (Link'Variant'BatchJob v) -> (let sz = messageSize v in archSubmessage 18 sz (buildMessage v)))
+    <> encodeUnknownFields msg.linkUnknownFields
+
+instance MessageSize Link where
+  messageSize msg =
+    (case msg.variant of { Nothing -> 0; Just (Link'Variant'WorkflowEvent v) -> archSubmessageSize (messageSize v)
+    ; Just (Link'Variant'BatchJob v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.linkUnknownFields
+
+instance MessageDecode Link where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Link {variant = acc_0, linkUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just (Link'Variant'WorkflowEvent v)) acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop (Just (Link'Variant'BatchJob v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Link where
+  protoMessageName _ = "temporal.api.common.v1.Link"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultLink
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "variant"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "variant"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Link) -> m.variant
+        , fdSet = \v (m :: Link) -> (m { variant = v } :: Link)
+        })
+    ]
+
+instance IsMessage Link
+
+instance Aeson.ToJSON Link where
+  toJSON msg = jsonObject
+      [ "variant" .=: msg.variant
+
+      ]
+
+instance Aeson.FromJSON Link where
+  parseJSON = Aeson.withObject "Link" $ \obj -> do
+    fld_variant <- parseFieldMaybe obj "variant"
+    pure (defaultLink
+      { variant = maybe (defaultLink.variant) Prelude.id fld_variant
+      , linkUnknownFields = []
+      } :: Link)
+
+instance Hashable Link where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.variant
+
+instance Proto.Extension.HasExtensions Link where
+  messageUnknownFields msg = msg.linkUnknownFields
+  setMessageUnknownFields !ufs msg = msg { linkUnknownFields = ufs }
+
+instance Semigroup Link where
+  a <> b = Link
+    { variant = case b.variant of { Nothing -> a.variant; x -> x }
+    , linkUnknownFields = a.linkUnknownFields <> b.linkUnknownFields
+    }
+
+instance Monoid Link where
+  mempty = defaultLink
+
+data Priority = Priority
+  { priorityKey :: !(Maybe Int32)
+  , fairnessKey :: !(Maybe Text)
+  , fairnessWeight :: !(Maybe Float)
+  , priorityUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultPriority :: Priority
+defaultPriority = Priority
+  { priorityKey = Nothing
+  , fairnessKey = Nothing
+  , fairnessWeight = Nothing
+  , priorityUnknownFields = []
+  }
+
+instance MessageEncode Priority where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral v)) msg.priorityKey)
+    <> (maybe mempty (\v -> archString 18 v) msg.fairnessKey)
+    <> (maybe mempty (\v -> archFloat 29 v) msg.fairnessWeight)
+    <> encodeUnknownFields msg.priorityUnknownFields
+
+instance MessageSize Priority where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.priorityKey)
+    + (maybe 0 (\v -> archStringSize v) msg.fairnessKey)
+    + (maybe 0 (\v -> archFixed32Size) msg.fairnessWeight)
+    + unknownFieldsSize msg.priorityUnknownFields
+
+instance MessageDecode Priority where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (Priority {priorityKey = acc_0, fairnessKey = acc_1, fairnessWeight = acc_2, priorityUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldFloat
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage Priority where
+  protoMessageName _ = "temporal.api.common.v1.Priority"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultPriority
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "priority_key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType Int32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Priority) -> m.priorityKey
+        , fdSet = \v (m :: Priority) -> (m { priorityKey = v } :: Priority)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "fairness_key"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Priority) -> m.fairnessKey
+        , fdSet = \v (m :: Priority) -> (m { fairnessKey = v } :: Priority)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "fairness_weight"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType FloatField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Priority) -> m.fairnessWeight
+        , fdSet = \v (m :: Priority) -> (m { fairnessWeight = v } :: Priority)
+        })
+    ]
+
+instance IsMessage Priority
+
+instance Aeson.ToJSON Priority where
+  toJSON msg = jsonObject
+      [ "priorityKey" .=: msg.priorityKey
+      , "fairnessKey" .=: msg.fairnessKey
+      , "fairnessWeight" .=: msg.fairnessWeight
+      ]
+
+instance Aeson.FromJSON Priority where
+  parseJSON = Aeson.withObject "Priority" $ \obj -> do
+    fld_priorityKey <- parseFieldMaybe obj "priorityKey"
+    fld_fairnessKey <- parseFieldMaybe obj "fairnessKey"
+    fld_fairnessWeight <- parseFieldMaybe obj "fairnessWeight"
+    pure (defaultPriority
+      { priorityKey = maybe (defaultPriority.priorityKey) Prelude.id fld_priorityKey
+      , fairnessKey = maybe (defaultPriority.fairnessKey) Prelude.id fld_fairnessKey
+      , fairnessWeight = maybe (defaultPriority.fairnessWeight) Prelude.id fld_fairnessWeight
+      , priorityUnknownFields = []
+      } :: Priority)
+
+instance Hashable Priority where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.priorityKey) msg.fairnessKey) msg.fairnessWeight
+
+instance Proto.Extension.HasExtensions Priority where
+  messageUnknownFields msg = msg.priorityUnknownFields
+  setMessageUnknownFields !ufs msg = msg { priorityUnknownFields = ufs }
+
+instance Semigroup Priority where
+  a <> b = Priority
+    { priorityKey = case b.priorityKey of { Nothing -> a.priorityKey; x -> x }
+    , fairnessKey = case b.fairnessKey of { Nothing -> a.fairnessKey; x -> x }
+    , fairnessWeight = case b.fairnessWeight of { Nothing -> a.fairnessWeight; x -> x }
+    , priorityUnknownFields = a.priorityUnknownFields <> b.priorityUnknownFields
+    }
+
+instance Monoid Priority where
+  mempty = defaultPriority
+
+data WorkerSelector = WorkerSelector
+  { selector :: !(Maybe WorkerSelector'Selector)
+  , workerSelectorUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data WorkerSelector'Selector
-  = WorkerSelector'WorkerInstanceKey !Data.Text.Text
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField WorkerSelector "maybe'selector" (Prelude.Maybe WorkerSelector'Selector) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerSelector'selector
-           (\ x__ y__ -> x__ {_WorkerSelector'selector = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerSelector "maybe'workerInstanceKey" (Prelude.Maybe Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerSelector'selector
-           (\ x__ y__ -> x__ {_WorkerSelector'selector = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (WorkerSelector'WorkerInstanceKey x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap WorkerSelector'WorkerInstanceKey y__))
-instance Data.ProtoLens.Field.HasField WorkerSelector "workerInstanceKey" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerSelector'selector
-           (\ x__ y__ -> x__ {_WorkerSelector'selector = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (WorkerSelector'WorkerInstanceKey x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap WorkerSelector'WorkerInstanceKey y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Message WorkerSelector where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.WorkerSelector"
-  packedMessageDescriptor _
-    = "\n\
-      \\SOWorkerSelector\DC20\n\
-      \\DC3worker_instance_key\CAN\SOH \SOH(\tH\NULR\DC1workerInstanceKeyB\n\
-      \\n\
-      \\bselector"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workerInstanceKey__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "worker_instance_key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'workerInstanceKey")) ::
-              Data.ProtoLens.FieldDescriptor WorkerSelector
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, workerInstanceKey__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerSelector'_unknownFields
-        (\ x__ y__ -> x__ {_WorkerSelector'_unknownFields = y__})
-  defMessage
-    = WorkerSelector'_constructor
-        {_WorkerSelector'selector = Prelude.Nothing,
-         _WorkerSelector'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerSelector
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerSelector
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "worker_instance_key"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workerInstanceKey") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkerSelector"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'selector") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just (WorkerSelector'WorkerInstanceKey v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.Text.Encoding.encodeUtf8 v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData WorkerSelector where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerSelector'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_WorkerSelector'selector x__) ())
-instance Control.DeepSeq.NFData WorkerSelector'Selector where
-  rnf (WorkerSelector'WorkerInstanceKey x__)
-    = Control.DeepSeq.rnf x__
-_WorkerSelector'WorkerInstanceKey ::
-  Data.ProtoLens.Prism.Prism' WorkerSelector'Selector Data.Text.Text
-_WorkerSelector'WorkerInstanceKey
-  = Data.ProtoLens.Prism.prism'
-      WorkerSelector'WorkerInstanceKey
-      (\ p__
-         -> case p__ of
-              (WorkerSelector'WorkerInstanceKey p__val) -> Prelude.Just p__val)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionCapabilities Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionCapabilities Prelude.Bool@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.deploymentSeriesName' @:: Lens' WorkerVersionCapabilities Data.Text.Text@ -}
-data WorkerVersionCapabilities
-  = WorkerVersionCapabilities'_constructor {_WorkerVersionCapabilities'buildId :: !Data.Text.Text,
-                                            _WorkerVersionCapabilities'useVersioning :: !Prelude.Bool,
-                                            _WorkerVersionCapabilities'deploymentSeriesName :: !Data.Text.Text,
-                                            _WorkerVersionCapabilities'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerVersionCapabilities where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "buildId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerVersionCapabilities'buildId
-           (\ x__ y__ -> x__ {_WorkerVersionCapabilities'buildId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "useVersioning" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerVersionCapabilities'useVersioning
-           (\ x__ y__
-              -> x__ {_WorkerVersionCapabilities'useVersioning = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerVersionCapabilities "deploymentSeriesName" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerVersionCapabilities'deploymentSeriesName
-           (\ x__ y__
-              -> x__ {_WorkerVersionCapabilities'deploymentSeriesName = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerVersionCapabilities where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.WorkerVersionCapabilities"
-  packedMessageDescriptor _
-    = "\n\
-      \\EMWorkerVersionCapabilities\DC2\EM\n\
-      \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-      \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning\DC24\n\
-      \\SYNdeployment_series_name\CAN\EOT \SOH(\tR\DC4deploymentSeriesName"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        buildId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "build_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
-              Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
-        useVersioning__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "use_versioning"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"useVersioning")) ::
-              Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
-        deploymentSeriesName__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "deployment_series_name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"deploymentSeriesName")) ::
-              Data.ProtoLens.FieldDescriptor WorkerVersionCapabilities
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
-           (Data.ProtoLens.Tag 2, useVersioning__field_descriptor),
-           (Data.ProtoLens.Tag 4, deploymentSeriesName__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerVersionCapabilities'_unknownFields
-        (\ x__ y__
-           -> x__ {_WorkerVersionCapabilities'_unknownFields = y__})
-  defMessage
-    = WorkerVersionCapabilities'_constructor
-        {_WorkerVersionCapabilities'buildId = Data.ProtoLens.fieldDefault,
-         _WorkerVersionCapabilities'useVersioning = Data.ProtoLens.fieldDefault,
-         _WorkerVersionCapabilities'deploymentSeriesName = Data.ProtoLens.fieldDefault,
-         _WorkerVersionCapabilities'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerVersionCapabilities
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerVersionCapabilities
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "use_versioning"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"useVersioning") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "deployment_series_name"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"deploymentSeriesName") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkerVersionCapabilities"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"useVersioning") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"deploymentSeriesName") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData WorkerVersionCapabilities where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerVersionCapabilities'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerVersionCapabilities'buildId x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerVersionCapabilities'useVersioning x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkerVersionCapabilities'deploymentSeriesName x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.buildId' @:: Lens' WorkerVersionStamp Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.useVersioning' @:: Lens' WorkerVersionStamp Prelude.Bool@ -}
-data WorkerVersionStamp
-  = WorkerVersionStamp'_constructor {_WorkerVersionStamp'buildId :: !Data.Text.Text,
-                                     _WorkerVersionStamp'useVersioning :: !Prelude.Bool,
-                                     _WorkerVersionStamp'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkerVersionStamp where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkerVersionStamp "buildId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerVersionStamp'buildId
-           (\ x__ y__ -> x__ {_WorkerVersionStamp'buildId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkerVersionStamp "useVersioning" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkerVersionStamp'useVersioning
-           (\ x__ y__ -> x__ {_WorkerVersionStamp'useVersioning = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkerVersionStamp where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.WorkerVersionStamp"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2WorkerVersionStamp\DC2\EM\n\
-      \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-      \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        buildId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "build_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"buildId")) ::
-              Data.ProtoLens.FieldDescriptor WorkerVersionStamp
-        useVersioning__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "use_versioning"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"useVersioning")) ::
-              Data.ProtoLens.FieldDescriptor WorkerVersionStamp
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, buildId__field_descriptor),
-           (Data.ProtoLens.Tag 3, useVersioning__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkerVersionStamp'_unknownFields
-        (\ x__ y__ -> x__ {_WorkerVersionStamp'_unknownFields = y__})
-  defMessage
-    = WorkerVersionStamp'_constructor
-        {_WorkerVersionStamp'buildId = Data.ProtoLens.fieldDefault,
-         _WorkerVersionStamp'useVersioning = Data.ProtoLens.fieldDefault,
-         _WorkerVersionStamp'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkerVersionStamp
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkerVersionStamp
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "build_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"buildId") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "use_versioning"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"useVersioning") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkerVersionStamp"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"buildId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"useVersioning") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData WorkerVersionStamp where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkerVersionStamp'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkerVersionStamp'buildId x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkerVersionStamp'useVersioning x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.workflowId' @:: Lens' WorkflowExecution Data.Text.Text@
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.runId' @:: Lens' WorkflowExecution Data.Text.Text@ -}
-data WorkflowExecution
-  = WorkflowExecution'_constructor {_WorkflowExecution'workflowId :: !Data.Text.Text,
-                                    _WorkflowExecution'runId :: !Data.Text.Text,
-                                    _WorkflowExecution'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowExecution where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowExecution "workflowId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowExecution'workflowId
-           (\ x__ y__ -> x__ {_WorkflowExecution'workflowId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowExecution "runId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowExecution'runId
-           (\ x__ y__ -> x__ {_WorkflowExecution'runId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowExecution where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.WorkflowExecution"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1WorkflowExecution\DC2\US\n\
-      \\vworkflow_id\CAN\SOH \SOH(\tR\n\
-      \workflowId\DC2\NAK\n\
-      \\ACKrun_id\CAN\STX \SOH(\tR\ENQrunId"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workflowId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workflowId")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowExecution
-        runId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "run_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"runId")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowExecution
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, workflowId__field_descriptor),
-           (Data.ProtoLens.Tag 2, runId__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowExecution'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowExecution'_unknownFields = y__})
-  defMessage
-    = WorkflowExecution'_constructor
-        {_WorkflowExecution'workflowId = Data.ProtoLens.fieldDefault,
-         _WorkflowExecution'runId = Data.ProtoLens.fieldDefault,
-         _WorkflowExecution'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowExecution
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowExecution
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "workflow_id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"workflowId") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "run_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"runId") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowExecution"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"workflowId") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"runId") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData WorkflowExecution where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowExecution'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowExecution'workflowId x__)
-                (Control.DeepSeq.deepseq (_WorkflowExecution'runId x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Common.V1.Message_Fields.name' @:: Lens' WorkflowType Data.Text.Text@ -}
-data WorkflowType
-  = WorkflowType'_constructor {_WorkflowType'name :: !Data.Text.Text,
-                               _WorkflowType'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowType where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowType "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowType'name (\ x__ y__ -> x__ {_WorkflowType'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowType where
-  messageName _
-    = Data.Text.pack "temporal.api.common.v1.WorkflowType"
-  packedMessageDescriptor _
-    = "\n\
-      \\fWorkflowType\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowType
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, name__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowType'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowType'_unknownFields = y__})
-  defMessage
-    = WorkflowType'_constructor
-        {_WorkflowType'name = Data.ProtoLens.fieldDefault,
-         _WorkflowType'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowType -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowType
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowType"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData WorkflowType where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowType'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_WorkflowType'name x__) ())
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \$temporal/api/common/v1/message.proto\DC2\SYNtemporal.api.common.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\ESCgoogle/protobuf/empty.proto\SUB\"temporal/api/enums/v1/common.proto\SUB&temporal/api/enums/v1/event_type.proto\SUB!temporal/api/enums/v1/reset.proto\"h\n\
-    \\bDataBlob\DC2H\n\
-    \\rencoding_type\CAN\SOH \SOH(\SO2#.temporal.api.enums.v1.EncodingTypeR\fencodingType\DC2\DC2\n\
-    \\EOTdata\CAN\STX \SOH(\fR\EOTdata\"G\n\
-    \\bPayloads\DC2;\n\
-    \\bpayloads\CAN\SOH \ETX(\v2\US.temporal.api.common.v1.PayloadR\bpayloads\"\165\SOH\n\
-    \\aPayload\DC2I\n\
-    \\bmetadata\CAN\SOH \ETX(\v2-.temporal.api.common.v1.Payload.MetadataEntryR\bmetadata\DC2\DC2\n\
-    \\EOTdata\CAN\STX \SOH(\fR\EOTdata\SUB;\n\
-    \\rMetadataEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\fR\ENQvalue:\STX8\SOH\"\217\SOH\n\
-    \\DLESearchAttributes\DC2b\n\
-    \\SOindexed_fields\CAN\SOH \ETX(\v2;.temporal.api.common.v1.SearchAttributes.IndexedFieldsEntryR\rindexedFields\SUBa\n\
-    \\DC2IndexedFieldsEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\164\SOH\n\
-    \\EOTMemo\DC2@\n\
-    \\ACKfields\CAN\SOH \ETX(\v2(.temporal.api.common.v1.Memo.FieldsEntryR\ACKfields\SUBZ\n\
-    \\vFieldsEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"\168\SOH\n\
-    \\ACKHeader\DC2B\n\
-    \\ACKfields\CAN\SOH \ETX(\v2*.temporal.api.common.v1.Header.FieldsEntryR\ACKfields\SUBZ\n\
-    \\vFieldsEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC25\n\
-    \\ENQvalue\CAN\STX \SOH(\v2\US.temporal.api.common.v1.PayloadR\ENQvalue:\STX8\SOH\"K\n\
-    \\DC1WorkflowExecution\DC2\US\n\
-    \\vworkflow_id\CAN\SOH \SOH(\tR\n\
-    \workflowId\DC2\NAK\n\
-    \\ACKrun_id\CAN\STX \SOH(\tR\ENQrunId\"\"\n\
-    \\fWorkflowType\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\"\n\
-    \\fActivityType\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\"\176\STX\n\
-    \\vRetryPolicy\DC2D\n\
-    \\DLEinitial_interval\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\SIinitialInterval\DC2/\n\
-    \\DC3backoff_coefficient\CAN\STX \SOH(\SOHR\DC2backoffCoefficient\DC2D\n\
-    \\DLEmaximum_interval\CAN\ETX \SOH(\v2\EM.google.protobuf.DurationR\SImaximumInterval\DC2)\n\
-    \\DLEmaximum_attempts\CAN\EOT \SOH(\ENQR\SImaximumAttempts\DC29\n\
-    \\EMnon_retryable_error_types\CAN\ENQ \ETX(\tR\SYNnonRetryableErrorTypes\"n\n\
-    \\DLEMeteringMetadata\DC2Z\n\
-    \*nonfirst_local_activity_execution_attempts\CAN\r \SOH(\rR&nonfirstLocalActivityExecutionAttempts\"V\n\
-    \\DC2WorkerVersionStamp\DC2\EM\n\
-    \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-    \\SOuse_versioning\CAN\ETX \SOH(\bR\ruseVersioning\"\147\SOH\n\
-    \\EMWorkerVersionCapabilities\DC2\EM\n\
-    \\bbuild_id\CAN\SOH \SOH(\tR\abuildId\DC2%\n\
-    \\SOuse_versioning\CAN\STX \SOH(\bR\ruseVersioning\DC24\n\
-    \\SYNdeployment_series_name\CAN\EOT \SOH(\tR\DC4deploymentSeriesName\"\231\ETX\n\
-    \\fResetOptions\DC2H\n\
-    \\DC3first_workflow_task\CAN\SOH \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DC1firstWorkflowTask\DC2F\n\
-    \\DC2last_workflow_task\CAN\STX \SOH(\v2\SYN.google.protobuf.EmptyH\NULR\DLElastWorkflowTask\DC2*\n\
-    \\DLEworkflow_task_id\CAN\ETX \SOH(\ETXH\NULR\SOworkflowTaskId\DC2\ESC\n\
-    \\bbuild_id\CAN\EOT \SOH(\tH\NULR\abuildId\DC2Y\n\
-    \\DC2reset_reapply_type\CAN\n\
-    \ \SOH(\SO2'.temporal.api.enums.v1.ResetReapplyTypeR\DLEresetReapplyTypeB\STX\CAN\SOH\DC2(\n\
-    \\DLEcurrent_run_only\CAN\v \SOH(\bR\SOcurrentRunOnly\DC2m\n\
-    \\ESCreset_reapply_exclude_types\CAN\f \ETX(\SO2..temporal.api.enums.v1.ResetReapplyExcludeTypeR\CANresetReapplyExcludeTypesB\b\n\
-    \\ACKtarget\"\155\ETX\n\
-    \\bCallback\DC2>\n\
-    \\ENQnexus\CAN\STX \SOH(\v2&.temporal.api.common.v1.Callback.NexusH\NULR\ENQnexus\DC2G\n\
-    \\binternal\CAN\ETX \SOH(\v2).temporal.api.common.v1.Callback.InternalH\NULR\binternal\DC22\n\
-    \\ENQlinks\CANd \ETX(\v2\FS.temporal.api.common.v1.LinkR\ENQlinks\SUB\160\SOH\n\
-    \\ENQNexus\DC2\DLE\n\
-    \\ETXurl\CAN\SOH \SOH(\tR\ETXurl\DC2J\n\
-    \\ACKheader\CAN\STX \ETX(\v22.temporal.api.common.v1.Callback.Nexus.HeaderEntryR\ACKheader\SUB9\n\
-    \\vHeaderEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\RS\n\
-    \\bInternal\DC2\DC2\n\
-    \\EOTdata\CAN\SOH \SOH(\fR\EOTdataB\t\n\
-    \\avariantJ\EOT\b\SOH\DLE\STX\"\233\ENQ\n\
-    \\EOTLink\DC2S\n\
-    \\SOworkflow_event\CAN\SOH \SOH(\v2*.temporal.api.common.v1.Link.WorkflowEventH\NULR\rworkflowEvent\DC2D\n\
-    \\tbatch_job\CAN\STX \SOH(\v2%.temporal.api.common.v1.Link.BatchJobH\NULR\bbatchJob\SUB\151\EOT\n\
-    \\rWorkflowEvent\DC2\FS\n\
-    \\tnamespace\CAN\SOH \SOH(\tR\tnamespace\DC2\US\n\
-    \\vworkflow_id\CAN\STX \SOH(\tR\n\
-    \workflowId\DC2\NAK\n\
-    \\ACKrun_id\CAN\ETX \SOH(\tR\ENQrunId\DC2X\n\
-    \\tevent_ref\CANd \SOH(\v29.temporal.api.common.v1.Link.WorkflowEvent.EventReferenceH\NULR\beventRef\DC2e\n\
-    \\SOrequest_id_ref\CANe \SOH(\v2=.temporal.api.common.v1.Link.WorkflowEvent.RequestIdReferenceH\NULR\frequestIdRef\SUBl\n\
-    \\SOEventReference\DC2\EM\n\
-    \\bevent_id\CAN\SOH \SOH(\ETXR\aeventId\DC2?\n\
-    \\n\
-    \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventType\SUBt\n\
-    \\DC2RequestIdReference\DC2\GS\n\
-    \\n\
-    \request_id\CAN\SOH \SOH(\tR\trequestId\DC2?\n\
-    \\n\
-    \event_type\CAN\STX \SOH(\SO2 .temporal.api.enums.v1.EventTypeR\teventTypeB\v\n\
-    \\treference\SUB!\n\
-    \\bBatchJob\DC2\NAK\n\
-    \\ACKjob_id\CAN\SOH \SOH(\tR\ENQjobIdB\t\n\
-    \\avariant\"y\n\
-    \\bPriority\DC2!\n\
-    \\fpriority_key\CAN\SOH \SOH(\ENQR\vpriorityKey\DC2!\n\
-    \\ffairness_key\CAN\STX \SOH(\tR\vfairnessKey\DC2'\n\
-    \\SIfairness_weight\CAN\ETX \SOH(\STXR\SOfairnessWeight\"N\n\
-    \\SOWorkerSelector\DC20\n\
-    \\DC3worker_instance_key\CAN\SOH \SOH(\tH\NULR\DC1workerInstanceKeyB\n\
-    \\n\
-    \\bselectorB\137\SOH\n\
-    \\EMio.temporal.api.common.v1B\fMessageProtoP\SOHZ#go.temporal.io/api/common/v1;common\170\STX\CANTemporalio.Api.Common.V1\234\STX\ESCTemporalio::Api::Common::V1J\217r\n\
-    \\a\DC2\ENQ\NUL\NUL\211\STX\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\US\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL:\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL:\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL2\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL2\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL4\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL4\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL5\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL5\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\f\NUL%\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\SO\NUL,\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\SI\NUL0\n\
-    \\t\n\
-    \\STX\ETX\EOT\DC2\ETX\DLE\NUL+\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT\DC2\NUL\NAK\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\DC2\b\DLE\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC3\EOT9\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC3\EOT&\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC3'4\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC378\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC4\EOT\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\DC4\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC4\n\
-    \\SO\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC4\DC1\DC2\n\
-    \\ESC\n\
-    \\STX\EOT\SOH\DC2\EOT\CAN\NUL\SUB\SOH\SUB\SI See `Payload`\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\CAN\b\DLE\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\EM\EOT\"\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\EOT\DC2\ETX\EM\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\EM\r\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\EM\NAK\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\EM !\n\
-    \\239\SOH\n\
-    \\STX\EOT\STX\DC2\EOT\US\NUL\"\SOH\SUB\226\SOH Represents some binary (byte array) data (ex: activity input parameters or workflow result) with\n\
-    \ metadata which describes this binary data (format, encoding, encryption, etc). Serialization\n\
-    \ of the data may be user-defined.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\US\b\SI\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX \EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX \EOT\NAK\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX \SYN\RS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX !\"\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX!\EOT\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX!\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX!\n\
-    \\SO\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX!\DC1\DC2\n\
-    \\163\SOH\n\
-    \\STX\EOT\ETX\DC2\EOT&\NUL(\SOH\SUB\150\SOH A user-defined set of *indexed* fields that are used/exposed when listing/searching workflows.\n\
-    \ The payload is not serialized in a user-defined way.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX&\b\CAN\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX'\EOT,\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX'\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX'\EM'\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX'*+\n\
-    \h\n\
-    \\STX\EOT\EOT\DC2\EOT+\NUL-\SOH\SUB\\ A user-defined set of *unindexed* fields that are exposed when listing/searching workflows\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX+\b\f\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX,\EOT$\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX,\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX,\EM\US\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX,\"#\n\
-    \\176\SOH\n\
-    \\STX\EOT\ENQ\DC2\EOT1\NUL3\SOH\SUB\163\SOH Contains metadata that can be attached to a variety of requests, like starting a workflow, and\n\
-    \ can be propagated between, for example, workflows and activities.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX1\b\SO\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX2\EOT$\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX2\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX2\EM\US\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX2\"#\n\
-    \\145\STX\n\
-    \\STX\EOT\ACK\DC2\EOT8\NUL;\SOH\SUB\132\STX Identifies a specific workflow within a namespace. Practically speaking, because run_id is a\n\
-    \ uuid, a workflow execution is globally unique. Note that many commands allow specifying an empty\n\
-    \ run id as a way of saying \"target the latest run of the workflow\".\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX8\b\EM\n\
-    \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETX9\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETX9\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX9\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX9\EM\SUB\n\
-    \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETX:\EOT\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ENQ\DC2\ETX:\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETX:\v\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETX:\DC4\NAK\n\
-    \\181\SOH\n\
-    \\STX\EOT\a\DC2\EOT?\NULA\SOH\SUB\168\SOH Represents the identifier used by a workflow author to define the workflow. Typically, the\n\
-    \ name of a function. This is sometimes referred to as the workflow's \"name\"\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX?\b\DC4\n\
-    \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX@\EOT\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ENQ\DC2\ETX@\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX@\v\SI\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX@\DC2\DC3\n\
-    \\181\SOH\n\
-    \\STX\EOT\b\DC2\EOTE\NULG\SOH\SUB\168\SOH Represents the identifier used by a activity author to define the activity. Typically, the\n\
-    \ name of a function. This is sometimes referred to as the activity's \"name\"\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\b\SOH\DC2\ETXE\b\DC4\n\
-    \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETXF\EOT\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ENQ\DC2\ETXF\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETXF\v\SI\n\
-    \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETXF\DC2\DC3\n\
-    \V\n\
-    \\STX\EOT\t\DC2\EOTJ\NULZ\SOH\SUBJ How retries ought to be handled, usable by both workflows and activities\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\t\SOH\DC2\ETXJ\b\DC3\n\
-    \n\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETXL\EOT2\SUBa Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETXL\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETXL\GS-\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETXL01\n\
-    \\169\SOH\n\
-    \\EOT\EOT\t\STX\SOH\DC2\ETXP\EOT#\SUB\155\SOH Coefficient used to calculate the next retry interval.\n\
-    \ The next retry interval is previous interval multiplied by the coefficient.\n\
-    \ Must be 1 or larger.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ENQ\DC2\ETXP\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\SOH\SOH\DC2\ETXP\v\RS\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\SOH\ETX\DC2\ETXP!\"\n\
-    \\178\SOH\n\
-    \\EOT\EOT\t\STX\STX\DC2\ETXS\EOT2\SUB\164\SOH Maximum interval between retries. Exponential backoff leads to interval increase.\n\
-    \ This value is the cap of the increase. Default is 100x of the initial interval.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\STX\ACK\DC2\ETXS\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\STX\SOH\DC2\ETXS\GS-\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\STX\ETX\DC2\ETXS01\n\
-    \\159\SOH\n\
-    \\EOT\EOT\t\STX\ETX\DC2\ETXV\EOT\US\SUB\145\SOH Maximum number of attempts. When exceeded the retries stop even if not expired yet.\n\
-    \ 1 disables retries. 0 means unlimited (up to the timeouts)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\ETX\ENQ\DC2\ETXV\EOT\t\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\ETX\SOH\DC2\ETXV\n\
-    \\SUB\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\ETX\ETX\DC2\ETXV\GS\RS\n\
-    \\192\SOH\n\
-    \\EOT\EOT\t\STX\EOT\DC2\ETXY\EOT2\SUB\178\SOH Non-Retryable errors types. Will stop retrying if the error type matches this list. Note that\n\
-    \ this is not a substring match, the error *type* (not message) must match exactly.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\EOT\EOT\DC2\ETXY\EOT\f\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\EOT\ENQ\DC2\ETXY\r\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\EOT\SOH\DC2\ETXY\DC4-\n\
-    \\f\n\
-    \\ENQ\EOT\t\STX\EOT\ETX\DC2\ETXY01\n\
-    \5\n\
-    \\STX\EOT\n\
-    \\DC2\EOT]\NULe\SOH\SUB) Metadata relevant for metering purposes\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\n\
-    \\SOH\DC2\ETX]\b\CAN\n\
-    \\239\STX\n\
-    \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETXd\EOT;\SUB\225\STX Count of local activities which have begun an execution attempt during this workflow task,\n\
-    \ and whose first attempt occurred in some previous task. This is used for metering\n\
-    \ purposes, and does not affect workflow state.\n\
-    \\n\
-    \ (-- api-linter: core::0141::forbidden-types=disabled\n\
-    \     aip.dev/not-precedent: Negative values make no sense to represent. --)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETXd\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETXd\v5\n\
-    \\f\n\
-    \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETXd8:\n\
-    \\156\SOH\n\
-    \\STX\EOT\v\DC2\EOTi\NULs\SOH\SUB\143\SOH Deprecated. This message is replaced with `Deployment` and `VersioningBehavior`.\n\
-    \ Identifies the version(s) of a worker that processed a task\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\v\SOH\DC2\ETXi\b\SUB\n\
-    \\169\SOH\n\
-    \\EOT\EOT\v\STX\NUL\DC2\ETXl\EOT\CAN\SUB\155\SOH An opaque whole-worker identifier. Replaces the deprecated `binary_checksum` field when this\n\
-    \ message is included in requests which previously used that.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETXl\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETXl\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETXl\SYN\ETB\n\
-    \\172\SOH\n\
-    \\EOT\EOT\v\STX\SOH\DC2\ETXp\EOT\FS\SUB\158\SOH If set, the worker is opting in to worker versioning. Otherwise, this is used only as a\n\
-    \ marker for workflow reset points and the BuildIDs search attribute.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\ENQ\DC2\ETXp\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\SOH\DC2\ETXp\t\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\v\STX\SOH\ETX\DC2\ETXp\SUB\ESC\n\
-    \\197\STX\n\
-    \\STX\EOT\f\DC2\ENQy\NUL\133\SOH\SOH\SUB\183\STX Identifies the version that a worker is compatible with when polling or identifying itself,\n\
-    \ and whether or not this worker is opting into the build-id based versioning feature. This is\n\
-    \ used by matching to determine which workers ought to receive what tasks.\n\
-    \ Deprecated. Use WorkerDeploymentOptions instead.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\f\SOH\DC2\ETXy\b!\n\
-    \0\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETX{\EOT\CAN\SUB# An opaque whole-worker identifier\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETX{\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETX{\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETX{\SYN\ETB\n\
-    \s\n\
-    \\EOT\EOT\f\STX\SOH\DC2\ETX\DEL\EOT\FS\SUBf If set, the worker is opting in to worker versioning, and wishes to only receive appropriate\n\
-    \ tasks.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ENQ\DC2\ETX\DEL\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\f\STX\SOH\SOH\DC2\ETX\DEL\t\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\f\STX\SOH\ETX\DC2\ETX\DEL\SUB\ESC\n\
-    \U\n\
-    \\EOT\EOT\f\STX\STX\DC2\EOT\130\SOH\EOT&\SUBG Must be sent if user has set a deployment series name (versioning-3).\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\STX\ENQ\DC2\EOT\130\SOH\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\STX\SOH\DC2\EOT\130\SOH\v!\n\
-    \\r\n\
-    \\ENQ\EOT\f\STX\STX\ETX\DC2\EOT\130\SOH$%\n\
-    \\141\SOH\n\
-    \\STX\EOT\r\DC2\ACK\137\SOH\NUL\166\SOH\SOH\SUB\DEL Describes where and how to reset a workflow, used for batch reset currently\n\
-    \ and may be used for single-workflow reset later.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\r\SOH\DC2\EOT\137\SOH\b\DC4\n\
-    \2\n\
-    \\EOT\EOT\r\b\NUL\DC2\ACK\139\SOH\EOT\154\SOH\ENQ\SUB\" Which workflow task to reset to.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\b\NUL\SOH\DC2\EOT\139\SOH\n\
-    \\DLE\n\
-    \M\n\
-    \\EOT\EOT\r\STX\NUL\DC2\EOT\141\SOH\b6\SUB? Resets to the first workflow task completed or started event.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\EOT\141\SOH\b\GS\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\EOT\141\SOH\RS1\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\EOT\141\SOH45\n\
-    \L\n\
-    \\EOT\EOT\r\STX\SOH\DC2\EOT\143\SOH\b5\SUB> Resets to the last workflow task completed or started event.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ACK\DC2\EOT\143\SOH\b\GS\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\SOH\SOH\DC2\EOT\143\SOH\RS0\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\SOH\ETX\DC2\EOT\143\SOH34\n\
-    \\241\SOH\n\
-    \\EOT\EOT\r\STX\STX\DC2\EOT\147\SOH\b#\SUB\226\SOH The id of a specific `WORKFLOW_TASK_COMPLETED`,`WORKFLOW_TASK_TIMED_OUT`, `WORKFLOW_TASK_FAILED`, or\n\
-    \ `WORKFLOW_TASK_STARTED` event to reset to.\n\
-    \ Note that this option doesn't make sense when used as part of a batch request.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\STX\ENQ\DC2\EOT\147\SOH\b\r\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\STX\SOH\DC2\EOT\147\SOH\SO\RS\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\STX\ETX\DC2\EOT\147\SOH!\"\n\
-    \\171\STX\n\
-    \\EOT\EOT\r\STX\ETX\DC2\EOT\153\SOH\b\FS\SUB\156\STX Resets to the first workflow task processed by this build id.\n\
-    \ If the workflow was not processed by the build id, or the workflow task can't be\n\
-    \ determined, no reset will be performed.\n\
-    \ Note that by default, this reset is allowed to be to a prior run in a chain of\n\
-    \ continue-as-new.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ENQ\DC2\EOT\153\SOH\b\SO\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ETX\SOH\DC2\EOT\153\SOH\SI\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ETX\ETX\DC2\EOT\153\SOH\SUB\ESC\n\
-    \N\n\
-    \\EOT\EOT\r\STX\EOT\DC2\EOT\158\SOH\EOTW\SUB@ Deprecated. Use `options`.\n\
-    \ Default: RESET_REAPPLY_TYPE_SIGNAL\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\EOT\ACK\DC2\EOT\158\SOH\EOT*\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\EOT\SOH\DC2\EOT\158\SOH+=\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\EOT\ETX\DC2\EOT\158\SOH@B\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\EOT\b\DC2\EOT\158\SOHCV\n\
-    \\SO\n\
-    \\ACK\EOT\r\STX\EOT\b\ETX\DC2\EOT\158\SOHDU\n\
-    \\138\SOH\n\
-    \\EOT\EOT\r\STX\ENQ\DC2\EOT\162\SOH\EOT\US\SUB| If true, limit the reset to only within the current run. (Applies to build_id targets and\n\
-    \ possibly others in the future.)\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\ENQ\DC2\EOT\162\SOH\EOT\b\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\SOH\DC2\EOT\162\SOH\t\EM\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ENQ\ETX\DC2\EOT\162\SOH\FS\RS\n\
-    \/\n\
-    \\EOT\EOT\r\STX\ACK\DC2\EOT\165\SOH\EOT\\\SUB! Event types not to be reapplied\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ACK\EOT\DC2\EOT\165\SOH\EOT\f\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ACK\ACK\DC2\EOT\165\SOH\r:\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ACK\SOH\DC2\EOT\165\SOH;V\n\
-    \\r\n\
-    \\ENQ\EOT\r\STX\ACK\ETX\DC2\EOT\165\SOHY[\n\
-    \a\n\
-    \\STX\EOT\SO\DC2\ACK\169\SOH\NUL\195\SOH\SOH\SUBS Callback to attach to various events in the system, e.g. workflow run completion.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\SO\SOH\DC2\EOT\169\SOH\b\DLE\n\
-    \\SO\n\
-    \\EOT\EOT\SO\ETX\NUL\DC2\ACK\170\SOH\EOT\175\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\SO\ETX\NUL\SOH\DC2\EOT\170\SOH\f\DC1\n\
-    \\US\n\
-    \\ACK\EOT\SO\ETX\NUL\STX\NUL\DC2\EOT\172\SOH\b\ETB\SUB\SI Callback URL.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\NUL\ENQ\DC2\EOT\172\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\NUL\SOH\DC2\EOT\172\SOH\SI\DC2\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\NUL\ETX\DC2\EOT\172\SOH\NAK\SYN\n\
-    \7\n\
-    \\ACK\EOT\SO\ETX\NUL\STX\SOH\DC2\EOT\174\SOH\b'\SUB' Header to attach to callback request.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\SOH\ACK\DC2\EOT\174\SOH\b\ESC\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\SOH\SOH\DC2\EOT\174\SOH\FS\"\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\NUL\STX\SOH\ETX\DC2\EOT\174\SOH%&\n\
-    \\222\STX\n\
-    \\EOT\EOT\SO\ETX\SOH\DC2\ACK\181\SOH\EOT\184\SOH\ENQ\SUB\205\STX Callbacks to be delivered internally within the system.\n\
-    \ This variant is not settable in the API and will be rejected by the service with an INVALID_ARGUMENT error.\n\
-    \ The only reason that this is exposed is because callbacks are replicated across clusters via the\n\
-    \ WorkflowExecutionStarted event, which is defined in the public API.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\SO\ETX\SOH\SOH\DC2\EOT\181\SOH\f\DC4\n\
-    \'\n\
-    \\ACK\EOT\SO\ETX\SOH\STX\NUL\DC2\EOT\183\SOH\b\ETB\SUB\ETB Opaque internal data.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\SOH\STX\NUL\ENQ\DC2\EOT\183\SOH\b\r\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\SOH\STX\NUL\SOH\DC2\EOT\183\SOH\SO\DC2\n\
-    \\SI\n\
-    \\a\EOT\SO\ETX\SOH\STX\NUL\ETX\DC2\EOT\183\SOH\NAK\SYN\n\
-    \B\n\
-    \\ETX\EOT\SO\t\DC2\EOT\186\SOH\EOT\SI\"5 For a generic callback mechanism to be added later.\n\
-    \\n\
-    \\f\n\
-    \\EOT\EOT\SO\t\NUL\DC2\EOT\186\SOH\r\SO\n\
-    \\r\n\
-    \\ENQ\EOT\SO\t\NUL\SOH\DC2\EOT\186\SOH\r\SO\n\
-    \\r\n\
-    \\ENQ\EOT\SO\t\NUL\STX\DC2\EOT\186\SOH\r\SO\n\
-    \\SO\n\
-    \\EOT\EOT\SO\b\NUL\DC2\ACK\187\SOH\EOT\190\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\SO\b\NUL\SOH\DC2\EOT\187\SOH\n\
-    \\DC1\n\
-    \\f\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\EOT\188\SOH\b\CAN\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\EOT\188\SOH\b\r\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\EOT\188\SOH\SO\DC3\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\EOT\188\SOH\SYN\ETB\n\
-    \\f\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\EOT\189\SOH\b\RS\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\EOT\189\SOH\b\DLE\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\EOT\189\SOH\DC1\EM\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\EOT\189\SOH\FS\GS\n\
-    \t\n\
-    \\EOT\EOT\SO\STX\STX\DC2\EOT\194\SOH\EOT\RS\SUBf Links associated with the callback. It can be used to link to underlying resources of the\n\
-    \ callback.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\STX\EOT\DC2\EOT\194\SOH\EOT\f\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\STX\ACK\DC2\EOT\194\SOH\r\DC1\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\STX\SOH\DC2\EOT\194\SOH\DC2\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\SO\STX\STX\ETX\DC2\EOT\194\SOH\SUB\GS\n\
-    \\212\STX\n\
-    \\STX\EOT\SI\DC2\ACK\201\SOH\NUL\238\SOH\SOH\SUB\197\STX Link can be associated with history events. It might contain information about an external entity\n\
-    \ related to the history event. For example, workflow A makes a Nexus call that starts workflow B:\n\
-    \ in this case, a history event in workflow A could contain a Link to the workflow started event in\n\
-    \ workflow B, and vice-versa.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\SI\SOH\DC2\EOT\201\SOH\b\f\n\
-    \\SO\n\
-    \\EOT\EOT\SI\ETX\NUL\DC2\ACK\202\SOH\EOT\225\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\SI\ETX\NUL\SOH\DC2\EOT\202\SOH\f\EM\n\
-    \a\n\
-    \\ACK\EOT\SI\ETX\NUL\ETX\NUL\DC2\ACK\204\SOH\b\207\SOH\t\SUBO EventReference is a direct reference to a history event through the event ID.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\ETX\NUL\SOH\DC2\EOT\204\SOH\DLE\RS\n\
-    \\DLE\n\
-    \\b\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\DC2\EOT\205\SOH\f\US\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\ENQ\DC2\EOT\205\SOH\f\DC1\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\SOH\DC2\EOT\205\SOH\DC2\SUB\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\NUL\ETX\DC2\EOT\205\SOH\GS\RS\n\
-    \\DLE\n\
-    \\b\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\DC2\EOT\206\SOH\f;\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\ACK\DC2\EOT\206\SOH\f+\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\SOH\DC2\EOT\206\SOH,6\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\NUL\STX\SOH\ETX\DC2\EOT\206\SOH9:\n\
-    \i\n\
-    \\ACK\EOT\SI\ETX\NUL\ETX\SOH\DC2\ACK\210\SOH\b\213\SOH\t\SUBW RequestIdReference is a indirect reference to a history event through the request ID.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\ETX\SOH\SOH\DC2\EOT\210\SOH\DLE\"\n\
-    \\DLE\n\
-    \\b\EOT\SI\ETX\NUL\ETX\SOH\STX\NUL\DC2\EOT\211\SOH\f\"\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\SOH\STX\NUL\ENQ\DC2\EOT\211\SOH\f\DC2\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\SOH\STX\NUL\SOH\DC2\EOT\211\SOH\DC3\GS\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\SOH\STX\NUL\ETX\DC2\EOT\211\SOH !\n\
-    \\DLE\n\
-    \\b\EOT\SI\ETX\NUL\ETX\SOH\STX\SOH\DC2\EOT\212\SOH\f;\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\SOH\STX\SOH\ACK\DC2\EOT\212\SOH\f+\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\SOH\STX\SOH\SOH\DC2\EOT\212\SOH,6\n\
-    \\DC1\n\
-    \\t\EOT\SI\ETX\NUL\ETX\SOH\STX\SOH\ETX\DC2\EOT\212\SOH9:\n\
-    \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\NUL\DC2\EOT\215\SOH\b\GS\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\NUL\ENQ\DC2\EOT\215\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\NUL\SOH\DC2\EOT\215\SOH\SI\CAN\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\NUL\ETX\DC2\EOT\215\SOH\ESC\FS\n\
-    \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\SOH\DC2\EOT\216\SOH\b\US\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\SOH\ENQ\DC2\EOT\216\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\SOH\SOH\DC2\EOT\216\SOH\SI\SUB\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\SOH\ETX\DC2\EOT\216\SOH\GS\RS\n\
-    \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\STX\DC2\EOT\217\SOH\b\SUB\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\ENQ\DC2\EOT\217\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\SOH\DC2\EOT\217\SOH\SI\NAK\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\STX\ETX\DC2\EOT\217\SOH\CAN\EM\n\
-    \\155\SOH\n\
-    \\ACK\EOT\SI\ETX\NUL\b\NUL\DC2\ACK\221\SOH\b\224\SOH\t\SUB\136\SOH Additional information about the workflow event.\n\
-    \ Eg: the caller workflow can send the history event details that made the Nexus call.\n\
-    \\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\b\NUL\SOH\DC2\EOT\221\SOH\SO\ETB\n\
-    \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\ETX\DC2\EOT\222\SOH\f+\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\ETX\ACK\DC2\EOT\222\SOH\f\SUB\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\ETX\SOH\DC2\EOT\222\SOH\ESC$\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\ETX\ETX\DC2\EOT\222\SOH'*\n\
-    \\SO\n\
-    \\ACK\EOT\SI\ETX\NUL\STX\EOT\DC2\EOT\223\SOH\f4\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\EOT\ACK\DC2\EOT\223\SOH\f\RS\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\EOT\SOH\DC2\EOT\223\SOH\US-\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\NUL\STX\EOT\ETX\DC2\EOT\223\SOH03\n\
-    \\249\SOH\n\
-    \\EOT\EOT\SI\ETX\SOH\DC2\ACK\230\SOH\EOT\232\SOH\ENQ\SUB\232\SOH A link to a built-in batch job.\n\
-    \ Batch jobs can be used to perform operations on a set of workflows (e.g. terminate, signal, cancel, etc).\n\
-    \ This link can be put on workflow history events generated by actions taken by a batch job.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\SI\ETX\SOH\SOH\DC2\EOT\230\SOH\f\DC4\n\
-    \\SO\n\
-    \\ACK\EOT\SI\ETX\SOH\STX\NUL\DC2\EOT\231\SOH\b\SUB\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\SOH\STX\NUL\ENQ\DC2\EOT\231\SOH\b\SO\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\SOH\STX\NUL\SOH\DC2\EOT\231\SOH\SI\NAK\n\
-    \\SI\n\
-    \\a\EOT\SI\ETX\SOH\STX\NUL\ETX\DC2\EOT\231\SOH\CAN\EM\n\
-    \\SO\n\
-    \\EOT\EOT\SI\b\NUL\DC2\ACK\234\SOH\EOT\237\SOH\ENQ\n\
-    \\r\n\
-    \\ENQ\EOT\SI\b\NUL\SOH\DC2\EOT\234\SOH\n\
-    \\DC1\n\
-    \\f\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\EOT\235\SOH\b)\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ACK\DC2\EOT\235\SOH\b\NAK\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\EOT\235\SOH\SYN$\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\EOT\235\SOH'(\n\
-    \\f\n\
-    \\EOT\EOT\SI\STX\SOH\DC2\EOT\236\SOH\b\US\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ACK\DC2\EOT\236\SOH\b\DLE\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\SOH\DC2\EOT\236\SOH\DC1\SUB\n\
-    \\r\n\
-    \\ENQ\EOT\SI\STX\SOH\ETX\DC2\EOT\236\SOH\GS\RS\n\
-    \\230\f\n\
-    \\STX\EOT\DLE\DC2\ACK\144\STX\NUL\193\STX\SOH\SUB\215\f Priority contains metadata that controls relative ordering of task processing\n\
-    \ when tasks are backed up in a queue. Initially, Priority will be used in\n\
-    \ matching (workflow and activity) task queues. Later it may be used in history\n\
-    \ task queues and in rate limiting decisions.\n\
-    \\n\
-    \ Priority is attached to workflows and activities. By default, activities\n\
-    \ inherit Priority from the workflow that created them, but may override fields\n\
-    \ when an activity is started or modified.\n\
-    \\n\
-    \ Despite being named \"Priority\", this message also contains fields that\n\
-    \ control \"fairness\" mechanisms.\n\
-    \\n\
-    \ For all fields, the field not present or equal to zero/empty string means to\n\
-    \ inherit the value from the calling workflow, or if there is no calling\n\
-    \ workflow, then use the default value.\n\
-    \\n\
-    \ For all fields other than fairness_key, the zero value isn't meaningful so\n\
-    \ there's no confusion between inherit/default and a meaningful value. For\n\
-    \ fairness_key, the empty string will be interpreted as \"inherit\". This means\n\
-    \ that if a workflow has a non-empty fairness key, you can't override the\n\
-    \ fairness key of its activity to the empty string.\n\
-    \\n\
-    \ The overall semantics of Priority are:\n\
-    \ 1. First, consider \"priority\": higher priority (lower number) goes first.\n\
-    \ 2. Then, consider fairness: try to dispatch tasks for different fairness keys\n\
-    \    in proportion to their weight.\n\
-    \\n\
-    \ Applications may use any subset of mechanisms that are useful to them and\n\
-    \ leave the other fields to use default values.\n\
-    \\n\
-    \ Not all queues in the system may support the \"full\" semantics of all priority\n\
-    \ fields. (Currently only support in matching task queues is planned.)\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\DLE\SOH\DC2\EOT\144\STX\b\DLE\n\
-    \\180\EOT\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\EOT\156\STX\EOT\ESC\SUB\165\EOT Priority key is a positive integer from 1 to n, where smaller integers\n\
-    \ correspond to higher priorities (tasks run sooner). In general, tasks in\n\
-    \ a queue should be processed in close to priority order, although small\n\
-    \ deviations are possible.\n\
-    \\n\
-    \ The maximum priority value (minimum priority) is determined by server\n\
-    \ configuration, and defaults to 5.\n\
-    \\n\
-    \ If priority is not present (or zero), then the effective priority will be\n\
-    \ the default priority, which is calculated by (min+max)/2. With the\n\
-    \ default max of 5, and min of 1, that comes out to 3.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ENQ\DC2\EOT\156\STX\EOT\t\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\EOT\156\STX\n\
-    \\SYN\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\EOT\156\STX\EM\SUB\n\
-    \\146\t\n\
-    \\EOT\EOT\DLE\STX\SOH\DC2\EOT\182\STX\EOT\FS\SUB\131\t Fairness key is a short string that's used as a key for a fairness\n\
-    \ balancing mechanism. It may correspond to a tenant id, or to a fixed\n\
-    \ string like \"high\" or \"low\". The default is the empty string.\n\
-    \\n\
-    \ The fairness mechanism attempts to dispatch tasks for a given key in\n\
-    \ proportion to its weight. For example, using a thousand distinct tenant\n\
-    \ ids, each with a weight of 1.0 (the default) will result in each tenant\n\
-    \ getting a roughly equal share of task dispatch throughput.\n\
-    \\n\
-    \ (Note: this does not imply equal share of worker capacity! Fairness\n\
-    \ decisions are made based on queue statistics, not\n\
-    \ current worker load.)\n\
-    \\n\
-    \ As another example, using keys \"high\" and \"low\" with weight 9.0 and 1.0\n\
-    \ respectively will prefer dispatching \"high\" tasks over \"low\" tasks at a\n\
-    \ 9:1 ratio, while allowing either key to use all worker capacity if the\n\
-    \ other is not present.\n\
-    \\n\
-    \ All fairness mechanisms, including rate limits, are best-effort and\n\
-    \ probabilistic. The results may not match what a \"perfect\" algorithm with\n\
-    \ infinite resources would produce. The more unique keys are used, the less\n\
-    \ accurate the results will be.\n\
-    \\n\
-    \ Fairness keys are limited to 64 bytes.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ENQ\DC2\EOT\182\STX\EOT\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\SOH\DC2\EOT\182\STX\v\ETB\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\SOH\ETX\DC2\EOT\182\STX\SUB\ESC\n\
-    \\133\ETX\n\
-    \\EOT\EOT\DLE\STX\STX\DC2\EOT\192\STX\EOT\RS\SUB\246\STX Fairness weight for a task can come from multiple sources for\n\
-    \ flexibility. From highest to lowest precedence:\n\
-    \ 1. Weights for a small set of keys can be overridden in task queue\n\
-    \    configuration with an API.\n\
-    \ 2. It can be attached to the workflow/activity in this field.\n\
-    \ 3. The default weight of 1.0 will be used.\n\
-    \\n\
-    \ Weight values are clamped to the range [0.001, 1000].\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\STX\ENQ\DC2\EOT\192\STX\EOT\t\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\STX\SOH\DC2\EOT\192\STX\n\
-    \\EM\n\
-    \\r\n\
-    \\ENQ\EOT\DLE\STX\STX\ETX\DC2\EOT\192\STX\FS\GS\n\
-    \\227\SOH\n\
-    \\STX\EOT\DC1\DC2\ACK\198\STX\NUL\211\STX\SOH\SUB\212\SOH This is used to send commands to a specific worker or a group of workers.\n\
-    \ Right now, it is used to send commands to a specific worker instance.\n\
-    \ Will be extended to be able to send command to multiple workers.\n\
-    \\n\
-    \\v\n\
-    \\ETX\EOT\DC1\SOH\DC2\EOT\198\STX\b\SYN\n\
-    \\220\STX\n\
-    \\EOT\EOT\DC1\b\NUL\DC2\ACK\207\STX\EOT\210\STX\ENQ\SUB\203\STX Options are:\n\
-    \ - query (will be used as query to ListWorkers, same format as in ListWorkersRequest.query)\n\
-    \ - task queue (just a shortcut. Same as query=' \"TaskQueue\"=\"my-task-queue\" ')\n\
-    \ - etc.\n\
-    \   All but 'query' are shortcuts, can be replaced with a query, but it is not convenient.\n\
-    \ string query = 5;\n\
-    \ string task_queue = 6;\n\
-    \ ...\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\b\NUL\SOH\DC2\EOT\207\STX\n\
-    \\DC2\n\
-    \H\n\
-    \\EOT\EOT\DC1\STX\NUL\DC2\EOT\209\STX\b'\SUB: Worker instance key to which the command should be sent.\n\
-    \\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ENQ\DC2\EOT\209\STX\b\SO\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\SOH\DC2\EOT\209\STX\SI\"\n\
-    \\r\n\
-    \\ENQ\EOT\DC1\STX\NUL\ETX\DC2\EOT\209\STX%&b\ACKproto3"
+  = WorkerSelector'Selector'WorkerInstanceKey !Text
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON WorkerSelector'Selector where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON WorkerSelector'Selector where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable WorkerSelector'Selector where
+  hashWithSalt salt (WorkerSelector'Selector'WorkerInstanceKey v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+
+defaultWorkerSelector :: WorkerSelector
+defaultWorkerSelector = WorkerSelector
+  { selector = Nothing
+  , workerSelectorUnknownFields = []
+  }
+
+instance MessageEncode WorkerSelector where
+  buildMessage msg =
+    (case msg.selector of
+      Nothing -> mempty
+      Just (WorkerSelector'Selector'WorkerInstanceKey v) -> archString 10 v)
+    <> encodeUnknownFields msg.workerSelectorUnknownFields
+
+instance MessageSize WorkerSelector where
+  messageSize msg =
+    (case msg.selector of { Nothing -> 0; Just (WorkerSelector'Selector'WorkerInstanceKey v) -> archStringSize v })
+    + unknownFieldsSize msg.workerSelectorUnknownFields
+
+instance MessageDecode WorkerSelector where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (WorkerSelector {selector = acc_0, workerSelectorUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just (WorkerSelector'Selector'WorkerInstanceKey v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage WorkerSelector where
+  protoMessageName _ = "temporal.api.common.v1.WorkerSelector"
+  protoPackageName _ = "temporal.api.common.v1"
+  protoDefaultValue = defaultWorkerSelector
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "selector"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "selector"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkerSelector) -> m.selector
+        , fdSet = \v (m :: WorkerSelector) -> (m { selector = v } :: WorkerSelector)
+        })
+    ]
+
+instance IsMessage WorkerSelector
+
+instance Aeson.ToJSON WorkerSelector where
+  toJSON msg = jsonObject
+      [ "selector" .=: msg.selector
+
+      ]
+
+instance Aeson.FromJSON WorkerSelector where
+  parseJSON = Aeson.withObject "WorkerSelector" $ \obj -> do
+    fld_selector <- parseFieldMaybe obj "selector"
+    pure (defaultWorkerSelector
+      { selector = maybe (defaultWorkerSelector.selector) Prelude.id fld_selector
+      , workerSelectorUnknownFields = []
+      } :: WorkerSelector)
+
+instance Hashable WorkerSelector where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.selector
+
+instance Proto.Extension.HasExtensions WorkerSelector where
+  messageUnknownFields msg = msg.workerSelectorUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workerSelectorUnknownFields = ufs }
+
+instance Semigroup WorkerSelector where
+  a <> b = WorkerSelector
+    { selector = case b.selector of { Nothing -> a.selector; x -> x }
+    , workerSelectorUnknownFields = a.workerSelectorUnknownFields <> b.workerSelectorUnknownFields
+    }
+
+instance Monoid WorkerSelector where
+  mempty = defaultWorkerSelector
+
+multiByteTagSizeCallback :: Callback -> Int
+multiByteTagSizeCallback msg = ((tagSize 100 - 1) * V.length msg.links)
+
+
+multiByteTagSizeLink'WorkflowEvent :: Link'WorkflowEvent -> Int
+multiByteTagSizeLink'WorkflowEvent msg = (case msg.reference of { Nothing -> 0; Just (Link'WorkflowEvent'Reference'EventRef _) -> (tagSize 100 - 1); Just (Link'WorkflowEvent'Reference'RequestIdRef _) -> (tagSize 101 - 1) })
+

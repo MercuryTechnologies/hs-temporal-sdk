@@ -1,3062 +1,1508 @@
-{- This file was auto-generated from temporal/api/namespace/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Namespace.V1.Message (
-        BadBinaries(), BadBinaries'BinariesEntry(), BadBinaryInfo(),
-        NamespaceConfig(),
-        NamespaceConfig'CustomSearchAttributeAliasesEntry(),
-        NamespaceFilter(), NamespaceInfo(), NamespaceInfo'Capabilities(),
-        NamespaceInfo'DataEntry(), UpdateNamespaceInfo(),
-        UpdateNamespaceInfo'DataEntry()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Enums.V1.Namespace
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.binaries' @:: Lens' BadBinaries (Data.Map.Map Data.Text.Text BadBinaryInfo)@ -}
-data BadBinaries
-  = BadBinaries'_constructor {_BadBinaries'binaries :: !(Data.Map.Map Data.Text.Text BadBinaryInfo),
-                              _BadBinaries'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BadBinaries where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BadBinaries "binaries" (Data.Map.Map Data.Text.Text BadBinaryInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaries'binaries
-           (\ x__ y__ -> x__ {_BadBinaries'binaries = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BadBinaries where
-  messageName _
-    = Data.Text.pack "temporal.api.namespace.v1.BadBinaries"
-  packedMessageDescriptor _
-    = "\n\
-      \\vBadBinaries\DC2P\n\
-      \\bbinaries\CAN\SOH \ETX(\v24.temporal.api.namespace.v1.BadBinaries.BinariesEntryR\bbinaries\SUBe\n\
-      \\rBinariesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2>\n\
-      \\ENQvalue\CAN\STX \SOH(\v2(.temporal.api.namespace.v1.BadBinaryInfoR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        binaries__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "binaries"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor BadBinaries'BinariesEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"binaries")) ::
-              Data.ProtoLens.FieldDescriptor BadBinaries
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, binaries__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BadBinaries'_unknownFields
-        (\ x__ y__ -> x__ {_BadBinaries'_unknownFields = y__})
-  defMessage
-    = BadBinaries'_constructor
-        {_BadBinaries'binaries = Data.Map.empty,
-         _BadBinaries'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BadBinaries -> Data.ProtoLens.Encoding.Bytes.Parser BadBinaries
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do !(entry :: BadBinaries'BinariesEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                           (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                               Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                 (Prelude.fromIntegral
-                                                                                    len)
-                                                                                 Data.ProtoLens.parseMessage)
-                                                                           "binaries"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"binaries")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BadBinaries"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (Data.Monoid.mconcat
-                (Prelude.map
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                 (Lens.Family2.set
-                                    (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                    (Data.ProtoLens.defMessage :: BadBinaries'BinariesEntry)))))
-                   (Data.Map.toList
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"binaries") _x))))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData BadBinaries where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BadBinaries'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_BadBinaries'binaries x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.key' @:: Lens' BadBinaries'BinariesEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.value' @:: Lens' BadBinaries'BinariesEntry BadBinaryInfo@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.maybe'value' @:: Lens' BadBinaries'BinariesEntry (Prelude.Maybe BadBinaryInfo)@ -}
-data BadBinaries'BinariesEntry
-  = BadBinaries'BinariesEntry'_constructor {_BadBinaries'BinariesEntry'key :: !Data.Text.Text,
-                                            _BadBinaries'BinariesEntry'value :: !(Prelude.Maybe BadBinaryInfo),
-                                            _BadBinaries'BinariesEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BadBinaries'BinariesEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BadBinaries'BinariesEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaries'BinariesEntry'key
-           (\ x__ y__ -> x__ {_BadBinaries'BinariesEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BadBinaries'BinariesEntry "value" BadBinaryInfo where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaries'BinariesEntry'value
-           (\ x__ y__ -> x__ {_BadBinaries'BinariesEntry'value = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BadBinaries'BinariesEntry "maybe'value" (Prelude.Maybe BadBinaryInfo) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaries'BinariesEntry'value
-           (\ x__ y__ -> x__ {_BadBinaries'BinariesEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BadBinaries'BinariesEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.namespace.v1.BadBinaries.BinariesEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\rBinariesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2>\n\
-      \\ENQvalue\CAN\STX \SOH(\v2(.temporal.api.namespace.v1.BadBinaryInfoR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor BadBinaries'BinariesEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor BadBinaryInfo)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'value")) ::
-              Data.ProtoLens.FieldDescriptor BadBinaries'BinariesEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BadBinaries'BinariesEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_BadBinaries'BinariesEntry'_unknownFields = y__})
-  defMessage
-    = BadBinaries'BinariesEntry'_constructor
-        {_BadBinaries'BinariesEntry'key = Data.ProtoLens.fieldDefault,
-         _BadBinaries'BinariesEntry'value = Prelude.Nothing,
-         _BadBinaries'BinariesEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BadBinaries'BinariesEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser BadBinaries'BinariesEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BinariesEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'value") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData BadBinaries'BinariesEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BadBinaries'BinariesEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BadBinaries'BinariesEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_BadBinaries'BinariesEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.reason' @:: Lens' BadBinaryInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.operator' @:: Lens' BadBinaryInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.createTime' @:: Lens' BadBinaryInfo Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.maybe'createTime' @:: Lens' BadBinaryInfo (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data BadBinaryInfo
-  = BadBinaryInfo'_constructor {_BadBinaryInfo'reason :: !Data.Text.Text,
-                                _BadBinaryInfo'operator :: !Data.Text.Text,
-                                _BadBinaryInfo'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                _BadBinaryInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show BadBinaryInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField BadBinaryInfo "reason" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaryInfo'reason
-           (\ x__ y__ -> x__ {_BadBinaryInfo'reason = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BadBinaryInfo "operator" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaryInfo'operator
-           (\ x__ y__ -> x__ {_BadBinaryInfo'operator = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField BadBinaryInfo "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaryInfo'createTime
-           (\ x__ y__ -> x__ {_BadBinaryInfo'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField BadBinaryInfo "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _BadBinaryInfo'createTime
-           (\ x__ y__ -> x__ {_BadBinaryInfo'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message BadBinaryInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.namespace.v1.BadBinaryInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\rBadBinaryInfo\DC2\SYN\n\
-      \\ACKreason\CAN\SOH \SOH(\tR\ACKreason\DC2\SUB\n\
-      \\boperator\CAN\STX \SOH(\tR\boperator\DC2;\n\
-      \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        reason__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reason"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"reason")) ::
-              Data.ProtoLens.FieldDescriptor BadBinaryInfo
-        operator__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "operator"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"operator")) ::
-              Data.ProtoLens.FieldDescriptor BadBinaryInfo
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor BadBinaryInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, reason__field_descriptor),
-           (Data.ProtoLens.Tag 2, operator__field_descriptor),
-           (Data.ProtoLens.Tag 3, createTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _BadBinaryInfo'_unknownFields
-        (\ x__ y__ -> x__ {_BadBinaryInfo'_unknownFields = y__})
-  defMessage
-    = BadBinaryInfo'_constructor
-        {_BadBinaryInfo'reason = Data.ProtoLens.fieldDefault,
-         _BadBinaryInfo'operator = Data.ProtoLens.fieldDefault,
-         _BadBinaryInfo'createTime = Prelude.Nothing,
-         _BadBinaryInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          BadBinaryInfo -> Data.ProtoLens.Encoding.Bytes.Parser BadBinaryInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "reason"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"reason") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "operator"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"operator") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "BadBinaryInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"reason") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"operator") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'createTime") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData BadBinaryInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_BadBinaryInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_BadBinaryInfo'reason x__)
-                (Control.DeepSeq.deepseq
-                   (_BadBinaryInfo'operator x__)
-                   (Control.DeepSeq.deepseq (_BadBinaryInfo'createTime x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.workflowExecutionRetentionTtl' @:: Lens' NamespaceConfig Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.maybe'workflowExecutionRetentionTtl' @:: Lens' NamespaceConfig (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.badBinaries' @:: Lens' NamespaceConfig BadBinaries@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.maybe'badBinaries' @:: Lens' NamespaceConfig (Prelude.Maybe BadBinaries)@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.historyArchivalState' @:: Lens' NamespaceConfig Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.historyArchivalUri' @:: Lens' NamespaceConfig Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.visibilityArchivalState' @:: Lens' NamespaceConfig Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.visibilityArchivalUri' @:: Lens' NamespaceConfig Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.customSearchAttributeAliases' @:: Lens' NamespaceConfig (Data.Map.Map Data.Text.Text Data.Text.Text)@ -}
-data NamespaceConfig
-  = NamespaceConfig'_constructor {_NamespaceConfig'workflowExecutionRetentionTtl :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                                  _NamespaceConfig'badBinaries :: !(Prelude.Maybe BadBinaries),
-                                  _NamespaceConfig'historyArchivalState :: !Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState,
-                                  _NamespaceConfig'historyArchivalUri :: !Data.Text.Text,
-                                  _NamespaceConfig'visibilityArchivalState :: !Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState,
-                                  _NamespaceConfig'visibilityArchivalUri :: !Data.Text.Text,
-                                  _NamespaceConfig'customSearchAttributeAliases :: !(Data.Map.Map Data.Text.Text Data.Text.Text),
-                                  _NamespaceConfig'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NamespaceConfig where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NamespaceConfig "workflowExecutionRetentionTtl" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'workflowExecutionRetentionTtl
-           (\ x__ y__
-              -> x__ {_NamespaceConfig'workflowExecutionRetentionTtl = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField NamespaceConfig "maybe'workflowExecutionRetentionTtl" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'workflowExecutionRetentionTtl
-           (\ x__ y__
-              -> x__ {_NamespaceConfig'workflowExecutionRetentionTtl = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig "badBinaries" BadBinaries where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'badBinaries
-           (\ x__ y__ -> x__ {_NamespaceConfig'badBinaries = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField NamespaceConfig "maybe'badBinaries" (Prelude.Maybe BadBinaries) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'badBinaries
-           (\ x__ y__ -> x__ {_NamespaceConfig'badBinaries = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig "historyArchivalState" Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'historyArchivalState
-           (\ x__ y__ -> x__ {_NamespaceConfig'historyArchivalState = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig "historyArchivalUri" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'historyArchivalUri
-           (\ x__ y__ -> x__ {_NamespaceConfig'historyArchivalUri = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig "visibilityArchivalState" Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'visibilityArchivalState
-           (\ x__ y__
-              -> x__ {_NamespaceConfig'visibilityArchivalState = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig "visibilityArchivalUri" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'visibilityArchivalUri
-           (\ x__ y__ -> x__ {_NamespaceConfig'visibilityArchivalUri = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig "customSearchAttributeAliases" (Data.Map.Map Data.Text.Text Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'customSearchAttributeAliases
-           (\ x__ y__
-              -> x__ {_NamespaceConfig'customSearchAttributeAliases = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NamespaceConfig where
-  messageName _
-    = Data.Text.pack "temporal.api.namespace.v1.NamespaceConfig"
-  packedMessageDescriptor _
-    = "\n\
-      \\SINamespaceConfig\DC2b\n\
-      \ workflow_execution_retention_ttl\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\GSworkflowExecutionRetentionTtl\DC2I\n\
-      \\fbad_binaries\CAN\STX \SOH(\v2&.temporal.api.namespace.v1.BadBinariesR\vbadBinaries\DC2Z\n\
-      \\SYNhistory_archival_state\CAN\ETX \SOH(\SO2$.temporal.api.enums.v1.ArchivalStateR\DC4historyArchivalState\DC20\n\
-      \\DC4history_archival_uri\CAN\EOT \SOH(\tR\DC2historyArchivalUri\DC2`\n\
-      \\EMvisibility_archival_state\CAN\ENQ \SOH(\SO2$.temporal.api.enums.v1.ArchivalStateR\ETBvisibilityArchivalState\DC26\n\
-      \\ETBvisibility_archival_uri\CAN\ACK \SOH(\tR\NAKvisibilityArchivalUri\DC2\147\SOH\n\
-      \\UScustom_search_attribute_aliases\CAN\a \ETX(\v2L.temporal.api.namespace.v1.NamespaceConfig.CustomSearchAttributeAliasesEntryR\FScustomSearchAttributeAliases\SUBO\n\
-      \!CustomSearchAttributeAliasesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        workflowExecutionRetentionTtl__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "workflow_execution_retention_ttl"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field
-                    @"maybe'workflowExecutionRetentionTtl")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-        badBinaries__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "bad_binaries"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor BadBinaries)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'badBinaries")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-        historyArchivalState__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "history_archival_state"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"historyArchivalState")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-        historyArchivalUri__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "history_archival_uri"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"historyArchivalUri")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-        visibilityArchivalState__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "visibility_archival_state"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Namespace.ArchivalState)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"visibilityArchivalState")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-        visibilityArchivalUri__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "visibility_archival_uri"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"visibilityArchivalUri")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-        customSearchAttributeAliases__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "custom_search_attribute_aliases"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor NamespaceConfig'CustomSearchAttributeAliasesEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"customSearchAttributeAliases")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, 
-            workflowExecutionRetentionTtl__field_descriptor),
-           (Data.ProtoLens.Tag 2, badBinaries__field_descriptor),
-           (Data.ProtoLens.Tag 3, historyArchivalState__field_descriptor),
-           (Data.ProtoLens.Tag 4, historyArchivalUri__field_descriptor),
-           (Data.ProtoLens.Tag 5, visibilityArchivalState__field_descriptor),
-           (Data.ProtoLens.Tag 6, visibilityArchivalUri__field_descriptor),
-           (Data.ProtoLens.Tag 7, 
-            customSearchAttributeAliases__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NamespaceConfig'_unknownFields
-        (\ x__ y__ -> x__ {_NamespaceConfig'_unknownFields = y__})
-  defMessage
-    = NamespaceConfig'_constructor
-        {_NamespaceConfig'workflowExecutionRetentionTtl = Prelude.Nothing,
-         _NamespaceConfig'badBinaries = Prelude.Nothing,
-         _NamespaceConfig'historyArchivalState = Data.ProtoLens.fieldDefault,
-         _NamespaceConfig'historyArchivalUri = Data.ProtoLens.fieldDefault,
-         _NamespaceConfig'visibilityArchivalState = Data.ProtoLens.fieldDefault,
-         _NamespaceConfig'visibilityArchivalUri = Data.ProtoLens.fieldDefault,
-         _NamespaceConfig'customSearchAttributeAliases = Data.Map.empty,
-         _NamespaceConfig'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NamespaceConfig
-          -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceConfig
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "workflow_execution_retention_ttl"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workflowExecutionRetentionTtl") y
-                                     x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "bad_binaries"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"badBinaries") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "history_archival_state"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"historyArchivalState") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "history_archival_uri"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"historyArchivalUri") y x)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "visibility_archival_state"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"visibilityArchivalState") y x)
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "visibility_archival_uri"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"visibilityArchivalUri") y x)
-                        58
-                          -> do !(entry :: NamespaceConfig'CustomSearchAttributeAliasesEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                                                   (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                                       Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                                         (Prelude.fromIntegral
-                                                                                                            len)
-                                                                                                         Data.ProtoLens.parseMessage)
-                                                                                                   "custom_search_attribute_aliases"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"customSearchAttributeAliases")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "NamespaceConfig"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'workflowExecutionRetentionTtl")
-                    _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'badBinaries") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"historyArchivalState") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                            ((Prelude..)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                               Prelude.fromEnum _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"historyArchivalUri") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"visibilityArchivalState") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                                  ((Prelude..)
-                                     ((Prelude..)
-                                        Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        Prelude.fromIntegral)
-                                     Prelude.fromEnum _v))
-                         ((Data.Monoid.<>)
-                            (let
-                               _v
-                                 = Lens.Family2.view
-                                     (Data.ProtoLens.Field.field @"visibilityArchivalUri") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                     ((Prelude..)
-                                        (\ bs
-                                           -> (Data.Monoid.<>)
-                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                   (Prelude.fromIntegral
-                                                      (Data.ByteString.length bs)))
-                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                        Data.Text.Encoding.encodeUtf8 _v))
-                            ((Data.Monoid.<>)
-                               (Data.Monoid.mconcat
-                                  (Prelude.map
-                                     (\ _v
-                                        -> (Data.Monoid.<>)
-                                             (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                             ((Prelude..)
-                                                (\ bs
-                                                   -> (Data.Monoid.<>)
-                                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                           (Prelude.fromIntegral
-                                                              (Data.ByteString.length bs)))
-                                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                                Data.ProtoLens.encodeMessage
-                                                (Lens.Family2.set
-                                                   (Data.ProtoLens.Field.field @"key")
-                                                   (Prelude.fst _v)
-                                                   (Lens.Family2.set
-                                                      (Data.ProtoLens.Field.field @"value")
-                                                      (Prelude.snd _v)
-                                                      (Data.ProtoLens.defMessage ::
-                                                         NamespaceConfig'CustomSearchAttributeAliasesEntry)))))
-                                     (Data.Map.toList
-                                        (Lens.Family2.view
-                                           (Data.ProtoLens.Field.field
-                                              @"customSearchAttributeAliases")
-                                           _x))))
-                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
-instance Control.DeepSeq.NFData NamespaceConfig where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NamespaceConfig'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_NamespaceConfig'workflowExecutionRetentionTtl x__)
-                (Control.DeepSeq.deepseq
-                   (_NamespaceConfig'badBinaries x__)
-                   (Control.DeepSeq.deepseq
-                      (_NamespaceConfig'historyArchivalState x__)
-                      (Control.DeepSeq.deepseq
-                         (_NamespaceConfig'historyArchivalUri x__)
-                         (Control.DeepSeq.deepseq
-                            (_NamespaceConfig'visibilityArchivalState x__)
-                            (Control.DeepSeq.deepseq
-                               (_NamespaceConfig'visibilityArchivalUri x__)
-                               (Control.DeepSeq.deepseq
-                                  (_NamespaceConfig'customSearchAttributeAliases x__) ())))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.key' @:: Lens' NamespaceConfig'CustomSearchAttributeAliasesEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.value' @:: Lens' NamespaceConfig'CustomSearchAttributeAliasesEntry Data.Text.Text@ -}
-data NamespaceConfig'CustomSearchAttributeAliasesEntry
-  = NamespaceConfig'CustomSearchAttributeAliasesEntry'_constructor {_NamespaceConfig'CustomSearchAttributeAliasesEntry'key :: !Data.Text.Text,
-                                                                    _NamespaceConfig'CustomSearchAttributeAliasesEntry'value :: !Data.Text.Text,
-                                                                    _NamespaceConfig'CustomSearchAttributeAliasesEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NamespaceConfig'CustomSearchAttributeAliasesEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NamespaceConfig'CustomSearchAttributeAliasesEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'CustomSearchAttributeAliasesEntry'key
-           (\ x__ y__
-              -> x__
-                   {_NamespaceConfig'CustomSearchAttributeAliasesEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceConfig'CustomSearchAttributeAliasesEntry "value" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceConfig'CustomSearchAttributeAliasesEntry'value
-           (\ x__ y__
-              -> x__
-                   {_NamespaceConfig'CustomSearchAttributeAliasesEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NamespaceConfig'CustomSearchAttributeAliasesEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.namespace.v1.NamespaceConfig.CustomSearchAttributeAliasesEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \!CustomSearchAttributeAliasesEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig'CustomSearchAttributeAliasesEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"value")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceConfig'CustomSearchAttributeAliasesEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NamespaceConfig'CustomSearchAttributeAliasesEntry'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_NamespaceConfig'CustomSearchAttributeAliasesEntry'_unknownFields = y__})
-  defMessage
-    = NamespaceConfig'CustomSearchAttributeAliasesEntry'_constructor
-        {_NamespaceConfig'CustomSearchAttributeAliasesEntry'key = Data.ProtoLens.fieldDefault,
-         _NamespaceConfig'CustomSearchAttributeAliasesEntry'value = Data.ProtoLens.fieldDefault,
-         _NamespaceConfig'CustomSearchAttributeAliasesEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NamespaceConfig'CustomSearchAttributeAliasesEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceConfig'CustomSearchAttributeAliasesEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage)
-          "CustomSearchAttributeAliasesEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"value") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData NamespaceConfig'CustomSearchAttributeAliasesEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NamespaceConfig'CustomSearchAttributeAliasesEntry'_unknownFields
-                x__)
-             (Control.DeepSeq.deepseq
-                (_NamespaceConfig'CustomSearchAttributeAliasesEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_NamespaceConfig'CustomSearchAttributeAliasesEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.includeDeleted' @:: Lens' NamespaceFilter Prelude.Bool@ -}
-data NamespaceFilter
-  = NamespaceFilter'_constructor {_NamespaceFilter'includeDeleted :: !Prelude.Bool,
-                                  _NamespaceFilter'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NamespaceFilter where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NamespaceFilter "includeDeleted" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceFilter'includeDeleted
-           (\ x__ y__ -> x__ {_NamespaceFilter'includeDeleted = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NamespaceFilter where
-  messageName _
-    = Data.Text.pack "temporal.api.namespace.v1.NamespaceFilter"
-  packedMessageDescriptor _
-    = "\n\
-      \\SINamespaceFilter\DC2'\n\
-      \\SIinclude_deleted\CAN\SOH \SOH(\bR\SOincludeDeleted"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        includeDeleted__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "include_deleted"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"includeDeleted")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceFilter
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, includeDeleted__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NamespaceFilter'_unknownFields
-        (\ x__ y__ -> x__ {_NamespaceFilter'_unknownFields = y__})
-  defMessage
-    = NamespaceFilter'_constructor
-        {_NamespaceFilter'includeDeleted = Data.ProtoLens.fieldDefault,
-         _NamespaceFilter'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NamespaceFilter
-          -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceFilter
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "include_deleted"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"includeDeleted") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "NamespaceFilter"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"includeDeleted") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData NamespaceFilter where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NamespaceFilter'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_NamespaceFilter'includeDeleted x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.name' @:: Lens' NamespaceInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.state' @:: Lens' NamespaceInfo Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.description' @:: Lens' NamespaceInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.ownerEmail' @:: Lens' NamespaceInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.data'' @:: Lens' NamespaceInfo (Data.Map.Map Data.Text.Text Data.Text.Text)@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.id' @:: Lens' NamespaceInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.capabilities' @:: Lens' NamespaceInfo NamespaceInfo'Capabilities@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.maybe'capabilities' @:: Lens' NamespaceInfo (Prelude.Maybe NamespaceInfo'Capabilities)@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.supportsSchedules' @:: Lens' NamespaceInfo Prelude.Bool@ -}
-data NamespaceInfo
-  = NamespaceInfo'_constructor {_NamespaceInfo'name :: !Data.Text.Text,
-                                _NamespaceInfo'state :: !Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState,
-                                _NamespaceInfo'description :: !Data.Text.Text,
-                                _NamespaceInfo'ownerEmail :: !Data.Text.Text,
-                                _NamespaceInfo'data' :: !(Data.Map.Map Data.Text.Text Data.Text.Text),
-                                _NamespaceInfo'id :: !Data.Text.Text,
-                                _NamespaceInfo'capabilities :: !(Prelude.Maybe NamespaceInfo'Capabilities),
-                                _NamespaceInfo'supportsSchedules :: !Prelude.Bool,
-                                _NamespaceInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NamespaceInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NamespaceInfo "name" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'name (\ x__ y__ -> x__ {_NamespaceInfo'name = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "state" Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'state
-           (\ x__ y__ -> x__ {_NamespaceInfo'state = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "description" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'description
-           (\ x__ y__ -> x__ {_NamespaceInfo'description = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "ownerEmail" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'ownerEmail
-           (\ x__ y__ -> x__ {_NamespaceInfo'ownerEmail = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "data'" (Data.Map.Map Data.Text.Text Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'data'
-           (\ x__ y__ -> x__ {_NamespaceInfo'data' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "id" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'id (\ x__ y__ -> x__ {_NamespaceInfo'id = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "capabilities" NamespaceInfo'Capabilities where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'capabilities
-           (\ x__ y__ -> x__ {_NamespaceInfo'capabilities = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField NamespaceInfo "maybe'capabilities" (Prelude.Maybe NamespaceInfo'Capabilities) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'capabilities
-           (\ x__ y__ -> x__ {_NamespaceInfo'capabilities = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo "supportsSchedules" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'supportsSchedules
-           (\ x__ y__ -> x__ {_NamespaceInfo'supportsSchedules = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NamespaceInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.namespace.v1.NamespaceInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\rNamespaceInfo\DC2\DC2\n\
-      \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2;\n\
-      \\ENQstate\CAN\STX \SOH(\SO2%.temporal.api.enums.v1.NamespaceStateR\ENQstate\DC2 \n\
-      \\vdescription\CAN\ETX \SOH(\tR\vdescription\DC2\US\n\
-      \\vowner_email\CAN\EOT \SOH(\tR\n\
-      \ownerEmail\DC2F\n\
-      \\EOTdata\CAN\ENQ \ETX(\v22.temporal.api.namespace.v1.NamespaceInfo.DataEntryR\EOTdata\DC2\SO\n\
-      \\STXid\CAN\ACK \SOH(\tR\STXid\DC2Y\n\
-      \\fcapabilities\CAN\a \SOH(\v25.temporal.api.namespace.v1.NamespaceInfo.CapabilitiesR\fcapabilities\DC2-\n\
-      \\DC2supports_schedules\CANd \SOH(\bR\DC1supportsSchedules\SUB7\n\
-      \\tDataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\254\SOH\n\
-      \\fCapabilities\DC20\n\
-      \\DC4eager_workflow_start\CAN\SOH \SOH(\bR\DC2eagerWorkflowStart\DC2\US\n\
-      \\vsync_update\CAN\STX \SOH(\bR\n\
-      \syncUpdate\DC2!\n\
-      \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\DC2+\n\
-      \\DC1worker_heartbeats\CAN\EOT \SOH(\bR\DLEworkerHeartbeats\DC2K\n\
-      \\"reported_problems_search_attribute\CAN\ENQ \SOH(\bR\USreportedProblemsSearchAttribute"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        name__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "name"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"name")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        state__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "state"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"state")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        description__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "description"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"description")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        ownerEmail__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "owner_email"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"ownerEmail")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        data'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "data"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor NamespaceInfo'DataEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"data'")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        id__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        capabilities__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "capabilities"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor NamespaceInfo'Capabilities)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'capabilities")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-        supportsSchedules__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "supports_schedules"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"supportsSchedules")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, name__field_descriptor),
-           (Data.ProtoLens.Tag 2, state__field_descriptor),
-           (Data.ProtoLens.Tag 3, description__field_descriptor),
-           (Data.ProtoLens.Tag 4, ownerEmail__field_descriptor),
-           (Data.ProtoLens.Tag 5, data'__field_descriptor),
-           (Data.ProtoLens.Tag 6, id__field_descriptor),
-           (Data.ProtoLens.Tag 7, capabilities__field_descriptor),
-           (Data.ProtoLens.Tag 100, supportsSchedules__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NamespaceInfo'_unknownFields
-        (\ x__ y__ -> x__ {_NamespaceInfo'_unknownFields = y__})
-  defMessage
-    = NamespaceInfo'_constructor
-        {_NamespaceInfo'name = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'state = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'description = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'ownerEmail = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'data' = Data.Map.empty,
-         _NamespaceInfo'id = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'capabilities = Prelude.Nothing,
-         _NamespaceInfo'supportsSchedules = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NamespaceInfo -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "name"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"name") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "state"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"state") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "description"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"description") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "owner_email"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"ownerEmail") y x)
-                        42
-                          -> do !(entry :: NamespaceInfo'DataEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                         (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                             Data.ProtoLens.Encoding.Bytes.isolate
-                                                                               (Prelude.fromIntegral
-                                                                                  len)
-                                                                               Data.ProtoLens.parseMessage)
-                                                                         "data"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"data'")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        50
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
-                        58
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "capabilities"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"capabilities") y x)
-                        800
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "supports_schedules"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"supportsSchedules") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "NamespaceInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"name") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"state") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view (Data.ProtoLens.Field.field @"description") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"ownerEmail") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      ((Data.Monoid.<>)
-                         (Data.Monoid.mconcat
-                            (Prelude.map
-                               (\ _v
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                       ((Prelude..)
-                                          (\ bs
-                                             -> (Data.Monoid.<>)
-                                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                     (Prelude.fromIntegral
-                                                        (Data.ByteString.length bs)))
-                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                          Data.ProtoLens.encodeMessage
-                                          (Lens.Family2.set
-                                             (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                             (Lens.Family2.set
-                                                (Data.ProtoLens.Field.field @"value")
-                                                (Prelude.snd _v)
-                                                (Data.ProtoLens.defMessage ::
-                                                   NamespaceInfo'DataEntry)))))
-                               (Data.Map.toList
-                                  (Lens.Family2.view (Data.ProtoLens.Field.field @"data'") _x))))
-                         ((Data.Monoid.<>)
-                            (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
-                             in
-                               if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                   Data.Monoid.mempty
-                               else
-                                   (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
-                                     ((Prelude..)
-                                        (\ bs
-                                           -> (Data.Monoid.<>)
-                                                (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                   (Prelude.fromIntegral
-                                                      (Data.ByteString.length bs)))
-                                                (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                        Data.Text.Encoding.encodeUtf8 _v))
-                            ((Data.Monoid.<>)
-                               (case
-                                    Lens.Family2.view
-                                      (Data.ProtoLens.Field.field @"maybe'capabilities") _x
-                                of
-                                  Prelude.Nothing -> Data.Monoid.mempty
-                                  (Prelude.Just _v)
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
-                                         ((Prelude..)
-                                            (\ bs
-                                               -> (Data.Monoid.<>)
-                                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                       (Prelude.fromIntegral
-                                                          (Data.ByteString.length bs)))
-                                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage _v))
-                               ((Data.Monoid.<>)
-                                  (let
-                                     _v
-                                       = Lens.Family2.view
-                                           (Data.ProtoLens.Field.field @"supportsSchedules") _x
-                                   in
-                                     if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                         Data.Monoid.mempty
-                                     else
-                                         (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt 800)
-                                           ((Prelude..)
-                                              Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (\ b -> if b then 1 else 0) _v))
-                                  (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                                     (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))))
-instance Control.DeepSeq.NFData NamespaceInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NamespaceInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_NamespaceInfo'name x__)
-                (Control.DeepSeq.deepseq
-                   (_NamespaceInfo'state x__)
-                   (Control.DeepSeq.deepseq
-                      (_NamespaceInfo'description x__)
-                      (Control.DeepSeq.deepseq
-                         (_NamespaceInfo'ownerEmail x__)
-                         (Control.DeepSeq.deepseq
-                            (_NamespaceInfo'data' x__)
-                            (Control.DeepSeq.deepseq
-                               (_NamespaceInfo'id x__)
-                               (Control.DeepSeq.deepseq
-                                  (_NamespaceInfo'capabilities x__)
-                                  (Control.DeepSeq.deepseq
-                                     (_NamespaceInfo'supportsSchedules x__) ()))))))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.eagerWorkflowStart' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.syncUpdate' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.asyncUpdate' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.workerHeartbeats' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.reportedProblemsSearchAttribute' @:: Lens' NamespaceInfo'Capabilities Prelude.Bool@ -}
-data NamespaceInfo'Capabilities
-  = NamespaceInfo'Capabilities'_constructor {_NamespaceInfo'Capabilities'eagerWorkflowStart :: !Prelude.Bool,
-                                             _NamespaceInfo'Capabilities'syncUpdate :: !Prelude.Bool,
-                                             _NamespaceInfo'Capabilities'asyncUpdate :: !Prelude.Bool,
-                                             _NamespaceInfo'Capabilities'workerHeartbeats :: !Prelude.Bool,
-                                             _NamespaceInfo'Capabilities'reportedProblemsSearchAttribute :: !Prelude.Bool,
-                                             _NamespaceInfo'Capabilities'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NamespaceInfo'Capabilities where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "eagerWorkflowStart" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'Capabilities'eagerWorkflowStart
-           (\ x__ y__
-              -> x__ {_NamespaceInfo'Capabilities'eagerWorkflowStart = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "syncUpdate" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'Capabilities'syncUpdate
-           (\ x__ y__ -> x__ {_NamespaceInfo'Capabilities'syncUpdate = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "asyncUpdate" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'Capabilities'asyncUpdate
-           (\ x__ y__ -> x__ {_NamespaceInfo'Capabilities'asyncUpdate = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "workerHeartbeats" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'Capabilities'workerHeartbeats
-           (\ x__ y__
-              -> x__ {_NamespaceInfo'Capabilities'workerHeartbeats = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo'Capabilities "reportedProblemsSearchAttribute" Prelude.Bool where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'Capabilities'reportedProblemsSearchAttribute
-           (\ x__ y__
-              -> x__
-                   {_NamespaceInfo'Capabilities'reportedProblemsSearchAttribute = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NamespaceInfo'Capabilities where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.namespace.v1.NamespaceInfo.Capabilities"
-  packedMessageDescriptor _
-    = "\n\
-      \\fCapabilities\DC20\n\
-      \\DC4eager_workflow_start\CAN\SOH \SOH(\bR\DC2eagerWorkflowStart\DC2\US\n\
-      \\vsync_update\CAN\STX \SOH(\bR\n\
-      \syncUpdate\DC2!\n\
-      \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\DC2+\n\
-      \\DC1worker_heartbeats\CAN\EOT \SOH(\bR\DLEworkerHeartbeats\DC2K\n\
-      \\"reported_problems_search_attribute\CAN\ENQ \SOH(\bR\USreportedProblemsSearchAttribute"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        eagerWorkflowStart__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "eager_workflow_start"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"eagerWorkflowStart")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
-        syncUpdate__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "sync_update"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"syncUpdate")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
-        asyncUpdate__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "async_update"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"asyncUpdate")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
-        workerHeartbeats__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "worker_heartbeats"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"workerHeartbeats")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
-        reportedProblemsSearchAttribute__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "reported_problems_search_attribute"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.BoolField ::
-                 Data.ProtoLens.FieldTypeDescriptor Prelude.Bool)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'Capabilities
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, eagerWorkflowStart__field_descriptor),
-           (Data.ProtoLens.Tag 2, syncUpdate__field_descriptor),
-           (Data.ProtoLens.Tag 3, asyncUpdate__field_descriptor),
-           (Data.ProtoLens.Tag 4, workerHeartbeats__field_descriptor),
-           (Data.ProtoLens.Tag 5, 
-            reportedProblemsSearchAttribute__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NamespaceInfo'Capabilities'_unknownFields
-        (\ x__ y__
-           -> x__ {_NamespaceInfo'Capabilities'_unknownFields = y__})
-  defMessage
-    = NamespaceInfo'Capabilities'_constructor
-        {_NamespaceInfo'Capabilities'eagerWorkflowStart = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'Capabilities'syncUpdate = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'Capabilities'asyncUpdate = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'Capabilities'workerHeartbeats = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'Capabilities'reportedProblemsSearchAttribute = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'Capabilities'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NamespaceInfo'Capabilities
-          -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceInfo'Capabilities
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "eager_workflow_start"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"eagerWorkflowStart") y x)
-                        16
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "sync_update"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"syncUpdate") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "async_update"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"asyncUpdate") y x)
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "worker_heartbeats"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"workerHeartbeats") y x)
-                        40
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          ((Prelude./=) 0) Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "reported_problems_search_attribute"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute")
-                                     y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Capabilities"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"eagerWorkflowStart") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                         _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"syncUpdate") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
-                         ((Prelude..)
-                            Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                            _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view (Data.ProtoLens.Field.field @"asyncUpdate") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                            ((Prelude..)
-                               Data.ProtoLens.Encoding.Bytes.putVarInt (\ b -> if b then 1 else 0)
-                               _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view
-                               (Data.ProtoLens.Field.field @"workerHeartbeats") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                               ((Prelude..)
-                                  Data.ProtoLens.Encoding.Bytes.putVarInt
-                                  (\ b -> if b then 1 else 0) _v))
-                      ((Data.Monoid.<>)
-                         (let
-                            _v
-                              = Lens.Family2.view
-                                  (Data.ProtoLens.Field.field @"reportedProblemsSearchAttribute") _x
-                          in
-                            if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                                Data.Monoid.mempty
-                            else
-                                (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt 40)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (\ b -> if b then 1 else 0) _v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData NamespaceInfo'Capabilities where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NamespaceInfo'Capabilities'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_NamespaceInfo'Capabilities'eagerWorkflowStart x__)
-                (Control.DeepSeq.deepseq
-                   (_NamespaceInfo'Capabilities'syncUpdate x__)
-                   (Control.DeepSeq.deepseq
-                      (_NamespaceInfo'Capabilities'asyncUpdate x__)
-                      (Control.DeepSeq.deepseq
-                         (_NamespaceInfo'Capabilities'workerHeartbeats x__)
-                         (Control.DeepSeq.deepseq
-                            (_NamespaceInfo'Capabilities'reportedProblemsSearchAttribute x__)
-                            ())))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.key' @:: Lens' NamespaceInfo'DataEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.value' @:: Lens' NamespaceInfo'DataEntry Data.Text.Text@ -}
-data NamespaceInfo'DataEntry
-  = NamespaceInfo'DataEntry'_constructor {_NamespaceInfo'DataEntry'key :: !Data.Text.Text,
-                                          _NamespaceInfo'DataEntry'value :: !Data.Text.Text,
-                                          _NamespaceInfo'DataEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show NamespaceInfo'DataEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField NamespaceInfo'DataEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'DataEntry'key
-           (\ x__ y__ -> x__ {_NamespaceInfo'DataEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField NamespaceInfo'DataEntry "value" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _NamespaceInfo'DataEntry'value
-           (\ x__ y__ -> x__ {_NamespaceInfo'DataEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message NamespaceInfo'DataEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.namespace.v1.NamespaceInfo.DataEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\tDataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'DataEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"value")) ::
-              Data.ProtoLens.FieldDescriptor NamespaceInfo'DataEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _NamespaceInfo'DataEntry'_unknownFields
-        (\ x__ y__ -> x__ {_NamespaceInfo'DataEntry'_unknownFields = y__})
-  defMessage
-    = NamespaceInfo'DataEntry'_constructor
-        {_NamespaceInfo'DataEntry'key = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'DataEntry'value = Data.ProtoLens.fieldDefault,
-         _NamespaceInfo'DataEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          NamespaceInfo'DataEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser NamespaceInfo'DataEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "DataEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"value") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData NamespaceInfo'DataEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_NamespaceInfo'DataEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_NamespaceInfo'DataEntry'key x__)
-                (Control.DeepSeq.deepseq (_NamespaceInfo'DataEntry'value x__) ()))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.description' @:: Lens' UpdateNamespaceInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.ownerEmail' @:: Lens' UpdateNamespaceInfo Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.data'' @:: Lens' UpdateNamespaceInfo (Data.Map.Map Data.Text.Text Data.Text.Text)@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.state' @:: Lens' UpdateNamespaceInfo Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState@ -}
-data UpdateNamespaceInfo
-  = UpdateNamespaceInfo'_constructor {_UpdateNamespaceInfo'description :: !Data.Text.Text,
-                                      _UpdateNamespaceInfo'ownerEmail :: !Data.Text.Text,
-                                      _UpdateNamespaceInfo'data' :: !(Data.Map.Map Data.Text.Text Data.Text.Text),
-                                      _UpdateNamespaceInfo'state :: !Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState,
-                                      _UpdateNamespaceInfo'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show UpdateNamespaceInfo where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField UpdateNamespaceInfo "description" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateNamespaceInfo'description
-           (\ x__ y__ -> x__ {_UpdateNamespaceInfo'description = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField UpdateNamespaceInfo "ownerEmail" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateNamespaceInfo'ownerEmail
-           (\ x__ y__ -> x__ {_UpdateNamespaceInfo'ownerEmail = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField UpdateNamespaceInfo "data'" (Data.Map.Map Data.Text.Text Data.Text.Text) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateNamespaceInfo'data'
-           (\ x__ y__ -> x__ {_UpdateNamespaceInfo'data' = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField UpdateNamespaceInfo "state" Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateNamespaceInfo'state
-           (\ x__ y__ -> x__ {_UpdateNamespaceInfo'state = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message UpdateNamespaceInfo where
-  messageName _
-    = Data.Text.pack "temporal.api.namespace.v1.UpdateNamespaceInfo"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC3UpdateNamespaceInfo\DC2 \n\
-      \\vdescription\CAN\SOH \SOH(\tR\vdescription\DC2\US\n\
-      \\vowner_email\CAN\STX \SOH(\tR\n\
-      \ownerEmail\DC2L\n\
-      \\EOTdata\CAN\ETX \ETX(\v28.temporal.api.namespace.v1.UpdateNamespaceInfo.DataEntryR\EOTdata\DC2;\n\
-      \\ENQstate\CAN\EOT \SOH(\SO2%.temporal.api.enums.v1.NamespaceStateR\ENQstate\SUB7\n\
-      \\tDataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        description__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "description"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"description")) ::
-              Data.ProtoLens.FieldDescriptor UpdateNamespaceInfo
-        ownerEmail__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "owner_email"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"ownerEmail")) ::
-              Data.ProtoLens.FieldDescriptor UpdateNamespaceInfo
-        data'__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "data"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor UpdateNamespaceInfo'DataEntry)
-              (Data.ProtoLens.MapField
-                 (Data.ProtoLens.Field.field @"key")
-                 (Data.ProtoLens.Field.field @"value")
-                 (Data.ProtoLens.Field.field @"data'")) ::
-              Data.ProtoLens.FieldDescriptor UpdateNamespaceInfo
-        state__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "state"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Enums.V1.Namespace.NamespaceState)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"state")) ::
-              Data.ProtoLens.FieldDescriptor UpdateNamespaceInfo
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, description__field_descriptor),
-           (Data.ProtoLens.Tag 2, ownerEmail__field_descriptor),
-           (Data.ProtoLens.Tag 3, data'__field_descriptor),
-           (Data.ProtoLens.Tag 4, state__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _UpdateNamespaceInfo'_unknownFields
-        (\ x__ y__ -> x__ {_UpdateNamespaceInfo'_unknownFields = y__})
-  defMessage
-    = UpdateNamespaceInfo'_constructor
-        {_UpdateNamespaceInfo'description = Data.ProtoLens.fieldDefault,
-         _UpdateNamespaceInfo'ownerEmail = Data.ProtoLens.fieldDefault,
-         _UpdateNamespaceInfo'data' = Data.Map.empty,
-         _UpdateNamespaceInfo'state = Data.ProtoLens.fieldDefault,
-         _UpdateNamespaceInfo'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          UpdateNamespaceInfo
-          -> Data.ProtoLens.Encoding.Bytes.Parser UpdateNamespaceInfo
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "description"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"description") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "owner_email"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"ownerEmail") y x)
-                        26
-                          -> do !(entry :: UpdateNamespaceInfo'DataEntry) <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                                                               (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                                                   Data.ProtoLens.Encoding.Bytes.isolate
-                                                                                     (Prelude.fromIntegral
-                                                                                        len)
-                                                                                     Data.ProtoLens.parseMessage)
-                                                                               "data"
-                                (let
-                                   key = Lens.Family2.view (Data.ProtoLens.Field.field @"key") entry
-                                   value
-                                     = Lens.Family2.view (Data.ProtoLens.Field.field @"value") entry
-                                 in
-                                   loop
-                                     (Lens.Family2.over
-                                        (Data.ProtoLens.Field.field @"data'")
-                                        (\ !t -> Data.Map.insert key value t) x))
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.toEnum
-                                          (Prelude.fmap
-                                             Prelude.fromIntegral
-                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
-                                       "state"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"state") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "UpdateNamespaceInfo"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v
-                  = Lens.Family2.view (Data.ProtoLens.Field.field @"description") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view (Data.ProtoLens.Field.field @"ownerEmail") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (Data.Monoid.mconcat
-                      (Prelude.map
-                         (\ _v
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                                 ((Prelude..)
-                                    (\ bs
-                                       -> (Data.Monoid.<>)
-                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                    Data.ProtoLens.encodeMessage
-                                    (Lens.Family2.set
-                                       (Data.ProtoLens.Field.field @"key") (Prelude.fst _v)
-                                       (Lens.Family2.set
-                                          (Data.ProtoLens.Field.field @"value") (Prelude.snd _v)
-                                          (Data.ProtoLens.defMessage ::
-                                             UpdateNamespaceInfo'DataEntry)))))
-                         (Data.Map.toList
-                            (Lens.Family2.view (Data.ProtoLens.Field.field @"data'") _x))))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"state") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                               ((Prelude..)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                                  Prelude.fromEnum _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData UpdateNamespaceInfo where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_UpdateNamespaceInfo'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_UpdateNamespaceInfo'description x__)
-                (Control.DeepSeq.deepseq
-                   (_UpdateNamespaceInfo'ownerEmail x__)
-                   (Control.DeepSeq.deepseq
-                      (_UpdateNamespaceInfo'data' x__)
-                      (Control.DeepSeq.deepseq (_UpdateNamespaceInfo'state x__) ()))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.key' @:: Lens' UpdateNamespaceInfo'DataEntry Data.Text.Text@
-         * 'Proto.Temporal.Api.Namespace.V1.Message_Fields.value' @:: Lens' UpdateNamespaceInfo'DataEntry Data.Text.Text@ -}
-data UpdateNamespaceInfo'DataEntry
-  = UpdateNamespaceInfo'DataEntry'_constructor {_UpdateNamespaceInfo'DataEntry'key :: !Data.Text.Text,
-                                                _UpdateNamespaceInfo'DataEntry'value :: !Data.Text.Text,
-                                                _UpdateNamespaceInfo'DataEntry'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show UpdateNamespaceInfo'DataEntry where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField UpdateNamespaceInfo'DataEntry "key" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateNamespaceInfo'DataEntry'key
-           (\ x__ y__ -> x__ {_UpdateNamespaceInfo'DataEntry'key = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField UpdateNamespaceInfo'DataEntry "value" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _UpdateNamespaceInfo'DataEntry'value
-           (\ x__ y__ -> x__ {_UpdateNamespaceInfo'DataEntry'value = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message UpdateNamespaceInfo'DataEntry where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.namespace.v1.UpdateNamespaceInfo.DataEntry"
-  packedMessageDescriptor _
-    = "\n\
-      \\tDataEntry\DC2\DLE\n\
-      \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-      \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        key__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "key"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"key")) ::
-              Data.ProtoLens.FieldDescriptor UpdateNamespaceInfo'DataEntry
-        value__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "value"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"value")) ::
-              Data.ProtoLens.FieldDescriptor UpdateNamespaceInfo'DataEntry
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, key__field_descriptor),
-           (Data.ProtoLens.Tag 2, value__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _UpdateNamespaceInfo'DataEntry'_unknownFields
-        (\ x__ y__
-           -> x__ {_UpdateNamespaceInfo'DataEntry'_unknownFields = y__})
-  defMessage
-    = UpdateNamespaceInfo'DataEntry'_constructor
-        {_UpdateNamespaceInfo'DataEntry'key = Data.ProtoLens.fieldDefault,
-         _UpdateNamespaceInfo'DataEntry'value = Data.ProtoLens.fieldDefault,
-         _UpdateNamespaceInfo'DataEntry'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          UpdateNamespaceInfo'DataEntry
-          -> Data.ProtoLens.Encoding.Bytes.Parser UpdateNamespaceInfo'DataEntry
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "key"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"key") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "value"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"value") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "DataEntry"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"key") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v = Lens.Family2.view (Data.ProtoLens.Field.field @"value") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData UpdateNamespaceInfo'DataEntry where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_UpdateNamespaceInfo'DataEntry'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_UpdateNamespaceInfo'DataEntry'key x__)
-                (Control.DeepSeq.deepseq
-                   (_UpdateNamespaceInfo'DataEntry'value x__) ()))
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \'temporal/api/namespace/v1/message.proto\DC2\EMtemporal.api.namespace.v1\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB%temporal/api/enums/v1/namespace.proto\"\191\ENQ\n\
-    \\rNamespaceInfo\DC2\DC2\n\
-    \\EOTname\CAN\SOH \SOH(\tR\EOTname\DC2;\n\
-    \\ENQstate\CAN\STX \SOH(\SO2%.temporal.api.enums.v1.NamespaceStateR\ENQstate\DC2 \n\
-    \\vdescription\CAN\ETX \SOH(\tR\vdescription\DC2\US\n\
-    \\vowner_email\CAN\EOT \SOH(\tR\n\
-    \ownerEmail\DC2F\n\
-    \\EOTdata\CAN\ENQ \ETX(\v22.temporal.api.namespace.v1.NamespaceInfo.DataEntryR\EOTdata\DC2\SO\n\
-    \\STXid\CAN\ACK \SOH(\tR\STXid\DC2Y\n\
-    \\fcapabilities\CAN\a \SOH(\v25.temporal.api.namespace.v1.NamespaceInfo.CapabilitiesR\fcapabilities\DC2-\n\
-    \\DC2supports_schedules\CANd \SOH(\bR\DC1supportsSchedules\SUB7\n\
-    \\tDataEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\SUB\254\SOH\n\
-    \\fCapabilities\DC20\n\
-    \\DC4eager_workflow_start\CAN\SOH \SOH(\bR\DC2eagerWorkflowStart\DC2\US\n\
-    \\vsync_update\CAN\STX \SOH(\bR\n\
-    \syncUpdate\DC2!\n\
-    \\fasync_update\CAN\ETX \SOH(\bR\vasyncUpdate\DC2+\n\
-    \\DC1worker_heartbeats\CAN\EOT \SOH(\bR\DLEworkerHeartbeats\DC2K\n\
-    \\"reported_problems_search_attribute\CAN\ENQ \SOH(\bR\USreportedProblemsSearchAttribute\"\207\ENQ\n\
-    \\SINamespaceConfig\DC2b\n\
-    \ workflow_execution_retention_ttl\CAN\SOH \SOH(\v2\EM.google.protobuf.DurationR\GSworkflowExecutionRetentionTtl\DC2I\n\
-    \\fbad_binaries\CAN\STX \SOH(\v2&.temporal.api.namespace.v1.BadBinariesR\vbadBinaries\DC2Z\n\
-    \\SYNhistory_archival_state\CAN\ETX \SOH(\SO2$.temporal.api.enums.v1.ArchivalStateR\DC4historyArchivalState\DC20\n\
-    \\DC4history_archival_uri\CAN\EOT \SOH(\tR\DC2historyArchivalUri\DC2`\n\
-    \\EMvisibility_archival_state\CAN\ENQ \SOH(\SO2$.temporal.api.enums.v1.ArchivalStateR\ETBvisibilityArchivalState\DC26\n\
-    \\ETBvisibility_archival_uri\CAN\ACK \SOH(\tR\NAKvisibilityArchivalUri\DC2\147\SOH\n\
-    \\UScustom_search_attribute_aliases\CAN\a \ETX(\v2L.temporal.api.namespace.v1.NamespaceConfig.CustomSearchAttributeAliasesEntryR\FScustomSearchAttributeAliases\SUBO\n\
-    \!CustomSearchAttributeAliasesEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\"\198\SOH\n\
-    \\vBadBinaries\DC2P\n\
-    \\bbinaries\CAN\SOH \ETX(\v24.temporal.api.namespace.v1.BadBinaries.BinariesEntryR\bbinaries\SUBe\n\
-    \\rBinariesEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2>\n\
-    \\ENQvalue\CAN\STX \SOH(\v2(.temporal.api.namespace.v1.BadBinaryInfoR\ENQvalue:\STX8\SOH\"\128\SOH\n\
-    \\rBadBinaryInfo\DC2\SYN\n\
-    \\ACKreason\CAN\SOH \SOH(\tR\ACKreason\DC2\SUB\n\
-    \\boperator\CAN\STX \SOH(\tR\boperator\DC2;\n\
-    \\vcreate_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\"\156\STX\n\
-    \\DC3UpdateNamespaceInfo\DC2 \n\
-    \\vdescription\CAN\SOH \SOH(\tR\vdescription\DC2\US\n\
-    \\vowner_email\CAN\STX \SOH(\tR\n\
-    \ownerEmail\DC2L\n\
-    \\EOTdata\CAN\ETX \ETX(\v28.temporal.api.namespace.v1.UpdateNamespaceInfo.DataEntryR\EOTdata\DC2;\n\
-    \\ENQstate\CAN\EOT \SOH(\SO2%.temporal.api.enums.v1.NamespaceStateR\ENQstate\SUB7\n\
-    \\tDataEntry\DC2\DLE\n\
-    \\ETXkey\CAN\SOH \SOH(\tR\ETXkey\DC2\DC4\n\
-    \\ENQvalue\CAN\STX \SOH(\tR\ENQvalue:\STX8\SOH\":\n\
-    \\SINamespaceFilter\DC2'\n\
-    \\SIinclude_deleted\CAN\SOH \SOH(\bR\SOincludeDeletedB\152\SOH\n\
-    \\FSio.temporal.api.namespace.v1B\fMessageProtoP\SOHZ)go.temporal.io/api/namespace/v1;namespace\170\STX\ESCTemporalio.Api.Namespace.V1\234\STX\RSTemporalio::Api::Namespace::V1J\157\ESC\n\
-    \\ACK\DC2\EOT\NUL\NULZ\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL@\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL@\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL5\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL5\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL7\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL7\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL8\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL8\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\f\NUL)\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\SO\NUL/\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT\DC1\NUL-\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\DC1\b\NAK\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC2\EOT\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC2\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC2\v\SI\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC2\DC2\DC3\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC3\EOT3\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC3\EOT(\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC3).\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC312\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC4\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\DC4\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC4\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC4\EM\SUB\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\NAK\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX\NAK\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\NAK\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\NAK\EM\SUB\n\
-    \:\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX\ETB\EOT!\SUB- A key-value map for any customized purpose.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX\ETB\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX\ETB\CAN\FS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX\ETB\US \n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ENQ\DC2\ETX\CAN\EOT\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ENQ\DC2\ETX\CAN\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\SOH\DC2\ETX\CAN\v\r\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ENQ\ETX\DC2\ETX\CAN\DLE\DC1\n\
-    \7\n\
-    \\EOT\EOT\NUL\STX\ACK\DC2\ETX\SUB\EOT\"\SUB* All capabilities the namespace supports.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ACK\DC2\ETX\SUB\EOT\DLE\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\SOH\DC2\ETX\SUB\DC1\GS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ACK\ETX\DC2\ETX\SUB !\n\
-    \f\n\
-    \\EOT\EOT\NUL\ETX\SOH\DC2\EOT\GS\EOT(\ENQ\SUBX Namespace capability details. Should contain what features are enabled in a namespace.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\ETX\SOH\SOH\DC2\ETX\GS\f\CAN\n\
-    \E\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\NUL\DC2\ETX\US\b&\SUB6 True if the namespace supports eager workflow start.\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\NUL\ENQ\DC2\ETX\US\b\f\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\NUL\SOH\DC2\ETX\US\r!\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\NUL\ETX\DC2\ETX\US$%\n\
-    \;\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\SOH\DC2\ETX!\b\GS\SUB, True if the namespace supports sync update\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\SOH\ENQ\DC2\ETX!\b\f\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\SOH\SOH\DC2\ETX!\r\CAN\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\SOH\ETX\DC2\ETX!\ESC\FS\n\
-    \<\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\STX\DC2\ETX#\b\RS\SUB- True if the namespace supports async update\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\STX\ENQ\DC2\ETX#\b\f\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\STX\SOH\DC2\ETX#\r\EM\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\STX\ETX\DC2\ETX#\FS\GS\n\
-    \A\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\ETX\DC2\ETX%\b#\SUB2 True if the namespace supports worker heartbeats\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\ETX\ENQ\DC2\ETX%\b\f\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\ETX\SOH\DC2\ETX%\r\RS\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\ETX\ETX\DC2\ETX%!\"\n\
-    \R\n\
-    \\ACK\EOT\NUL\ETX\SOH\STX\EOT\DC2\ETX'\b4\SUBC True if the namespace supports reported problems search attribute\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\EOT\ENQ\DC2\ETX'\b\f\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\EOT\SOH\DC2\ETX'\r/\n\
-    \\SO\n\
-    \\a\EOT\NUL\ETX\SOH\STX\EOT\ETX\DC2\ETX'23\n\
-    \\174\SOH\n\
-    \\EOT\EOT\NUL\STX\a\DC2\ETX,\EOT\"\SUB\160\SOH Whether scheduled workflows are supported on this namespace. This is only needed\n\
-    \ temporarily while the feature is experimental, so we can give it a high tag.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ENQ\DC2\ETX,\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\a\SOH\DC2\ETX,\t\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\a\ETX\DC2\ETX,\RS!\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT/\NUL:\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX/\b\ETB\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX0\EOTB\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX0\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX0\GS=\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX0@A\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX1\EOT!\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX1\EOT\SI\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX1\DLE\FS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX1\US \n\
-    \e\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX3\EOTC\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX3\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX3(>\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX3AB\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX4\EOT$\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ENQ\DC2\ETX4\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX4\v\US\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX4\"#\n\
-    \e\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETX6\EOTF\SUBX If unspecified (ARCHIVAL_STATE_UNSPECIFIED) then default server configuration is used.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX6\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX6(A\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX6DE\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX7\EOT'\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ENQ\DC2\ETX7\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX7\v\"\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX7%&\n\
-    \,\n\
-    \\EOT\EOT\SOH\STX\ACK\DC2\ETX9\EOT<\SUB\US Map from field name to alias.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETX9\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETX9\CAN7\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETX9:;\n\
-    \\n\
-    \\n\
-    \\STX\EOT\STX\DC2\EOT<\NUL>\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX<\b\DC3\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX=\EOT,\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX=\EOT\RS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX=\US'\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX=*+\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ETX\DC2\EOT@\NULD\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX@\b\NAK\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETXA\EOT\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETXA\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETXA\v\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETXA\DC4\NAK\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETXB\EOT\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETXB\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETXB\v\DC3\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETXB\SYN\ETB\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\STX\DC2\ETXC\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ACK\DC2\ETXC\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\SOH\DC2\ETXC\RS)\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\STX\ETX\DC2\ETXC,-\n\
-    \\n\
-    \\n\
-    \\STX\EOT\EOT\DC2\EOTF\NULS\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETXF\b\ESC\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETXG\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETXG\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETXG\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETXG\EM\SUB\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETXH\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETXH\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETXH\v\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETXH\EM\SUB\n\
-    \\148\SOH\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETXL\EOT!\SUB\134\SOH A key-value map for any customized purpose.\n\
-    \ If data already exists on the namespace,\n\
-    \ this will merge with the existing key values.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ACK\DC2\ETXL\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETXL\CAN\FS\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETXL\US \n\
-    \\134\STX\n\
-    \\EOT\EOT\EOT\STX\ETX\DC2\ETXR\EOT3\SUB\248\SOH New namespace state, server will reject if transition is not allowed.\n\
-    \ Allowed transitions are:\n\
-    \  Registered -> [ Deleted | Deprecated | Handover ]\n\
-    \  Handover -> [ Registered ]\n\
-    \ Default is NAMESPACE_STATE_UNSPECIFIED which is do not change state.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ACK\DC2\ETXR\EOT(\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\SOH\DC2\ETXR).\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\ETX\ETX\DC2\ETXR12\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ENQ\DC2\EOTU\NULZ\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETXU\b\ETB\n\
-    \\155\STX\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETXY\EOT\GS\SUB\141\STX By default namespaces in NAMESPACE_STATE_DELETED state are not included.\n\
-    \ Setting include_deleted to true will include deleted namespaces.\n\
-    \ Note: Namespace is in NAMESPACE_STATE_DELETED state when it was deleted from the system but associated data is not deleted yet.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETXY\EOT\b\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETXY\t\CAN\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETXY\ESC\FSb\ACKproto3"
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.namespace.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Namespace.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+import qualified Proto.Temporal.Api.Enums.V1.Namespace as TE_Enums_V1_Namespace
+
+genericArchVarint :: Int -> Word64 -> B.Builder
+genericArchVarint fieldNumber value = putTag fieldNumber WireVarint <> putVarint value
+genericArchSVarint32 :: Int -> Int32 -> B.Builder
+genericArchSVarint32 fieldNumber value = putTag fieldNumber WireVarint <> putSVarint32 value
+genericArchSVarint64 :: Int -> Int64 -> B.Builder
+genericArchSVarint64 fieldNumber value = putTag fieldNumber WireVarint <> putSVarint64 value
+genericArchFixed32 :: Int -> Word32 -> B.Builder
+genericArchFixed32 fieldNumber value = putTag fieldNumber Wire32Bit <> putFixed32 value
+genericArchFixed64 :: Int -> Word64 -> B.Builder
+genericArchFixed64 fieldNumber value = putTag fieldNumber Wire64Bit <> putFixed64 value
+genericArchFloat :: Int -> Float -> B.Builder
+genericArchFloat fieldNumber value = putTag fieldNumber Wire32Bit <> putFloat value
+genericArchDouble :: Int -> Double -> B.Builder
+genericArchDouble fieldNumber value = putTag fieldNumber Wire64Bit <> putDouble value
+genericArchBool :: Int -> Bool -> B.Builder
+genericArchBool fieldNumber value = putTag fieldNumber WireVarint <> putVarint (if value then 1 else 0)
+genericArchString :: Int -> Text -> B.Builder
+genericArchString fieldNumber value = putTag fieldNumber WireLengthDelimited <> putText value
+genericArchBytes :: Int -> ByteString -> B.Builder
+genericArchBytes fieldNumber value = putTag fieldNumber WireLengthDelimited <> putByteString value
+genericArchSubmessage :: Int -> Int -> B.Builder -> B.Builder
+genericArchSubmessage fieldNumber size body = putTag fieldNumber WireLengthDelimited <> putVarint (fromIntegral size) <> body
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x27\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x19\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x70\x72\x6f\x74\x6f\x22\xfb\x03\x0a\x0d\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x49\x6e\x66\x6f\x12\x0c\x0a\x04\x6e\x61\x6d\x65\x18\x01\x20\x01\x28\x09\x12\x33\x0a\x05\x73\x74\x61\x74\x65\x18\x02\x20\x01\x28\x0b\x32\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x53\x74\x61\x74\x65\x12\x13\x0a\x0b\x64\x65\x73\x63\x72\x69\x70\x74\x69\x6f\x6e\x18\x03\x20\x01\x28\x09\x12\x13\x0a\x0b\x6f\x77\x6e\x65\x72\x5f\x65\x6d\x61\x69\x6c\x18\x04\x20\x01\x28\x09\x12\x3f\x0a\x04\x64\x61\x74\x61\x18\x05\x20\x03\x28\x0b\x32\x31\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x49\x6e\x66\x6f\x2e\x44\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x0a\x0a\x02\x69\x64\x18\x06\x20\x01\x28\x09\x12\x4a\x0a\x0c\x63\x61\x70\x61\x62\x69\x6c\x69\x74\x69\x65\x73\x18\x07\x20\x01\x28\x0b\x32\x34\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x49\x6e\x66\x6f\x2e\x43\x61\x70\x61\x62\x69\x6c\x69\x74\x69\x65\x73\x12\x1a\x0a\x12\x73\x75\x70\x70\x6f\x72\x74\x73\x5f\x73\x63\x68\x65\x64\x75\x6c\x65\x73\x18\x64\x20\x01\x28\x08\x1a\x27\x0a\x09\x44\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x0d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x09\x1a\x9e\x01\x0a\x0c\x43\x61\x70\x61\x62\x69\x6c\x69\x74\x69\x65\x73\x12\x1c\x0a\x14\x65\x61\x67\x65\x72\x5f\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x73\x74\x61\x72\x74\x18\x01\x20\x01\x28\x08\x12\x13\x0a\x0b\x73\x79\x6e\x63\x5f\x75\x70\x64\x61\x74\x65\x18\x02\x20\x01\x28\x08\x12\x14\x0a\x0c\x61\x73\x79\x6e\x63\x5f\x75\x70\x64\x61\x74\x65\x18\x03\x20\x01\x28\x08\x12\x19\x0a\x11\x77\x6f\x72\x6b\x65\x72\x5f\x68\x65\x61\x72\x74\x62\x65\x61\x74\x73\x18\x04\x20\x01\x28\x08\x12\x2a\x0a\x22\x72\x65\x70\x6f\x72\x74\x65\x64\x5f\x70\x72\x6f\x62\x6c\x65\x6d\x73\x5f\x73\x65\x61\x72\x63\x68\x5f\x61\x74\x74\x72\x69\x62\x75\x74\x65\x18\x05\x20\x01\x28\x08\x22\x95\x04\x0a\x0f\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x43\x6f\x6e\x66\x69\x67\x12\x42\x0a\x20\x77\x6f\x72\x6b\x66\x6c\x6f\x77\x5f\x65\x78\x65\x63\x75\x74\x69\x6f\x6e\x5f\x72\x65\x74\x65\x6e\x74\x69\x6f\x6e\x5f\x74\x74\x6c\x18\x01\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x3b\x0a\x0c\x62\x61\x64\x5f\x62\x69\x6e\x61\x72\x69\x65\x73\x18\x02\x20\x01\x28\x0b\x32\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x42\x61\x64\x42\x69\x6e\x61\x72\x69\x65\x73\x12\x43\x0a\x16\x68\x69\x73\x74\x6f\x72\x79\x5f\x61\x72\x63\x68\x69\x76\x61\x6c\x5f\x73\x74\x61\x74\x65\x18\x03\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x41\x72\x63\x68\x69\x76\x61\x6c\x53\x74\x61\x74\x65\x12\x1c\x0a\x14\x68\x69\x73\x74\x6f\x72\x79\x5f\x61\x72\x63\x68\x69\x76\x61\x6c\x5f\x75\x72\x69\x18\x04\x20\x01\x28\x09\x12\x46\x0a\x19\x76\x69\x73\x69\x62\x69\x6c\x69\x74\x79\x5f\x61\x72\x63\x68\x69\x76\x61\x6c\x5f\x73\x74\x61\x74\x65\x18\x05\x20\x01\x28\x0b\x32\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x41\x72\x63\x68\x69\x76\x61\x6c\x53\x74\x61\x74\x65\x12\x1f\x0a\x17\x76\x69\x73\x69\x62\x69\x6c\x69\x74\x79\x5f\x61\x72\x63\x68\x69\x76\x61\x6c\x5f\x75\x72\x69\x18\x06\x20\x01\x28\x09\x12\x74\x0a\x1f\x63\x75\x73\x74\x6f\x6d\x5f\x73\x65\x61\x72\x63\x68\x5f\x61\x74\x74\x72\x69\x62\x75\x74\x65\x5f\x61\x6c\x69\x61\x73\x65\x73\x18\x07\x20\x03\x28\x0b\x32\x4b\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x43\x6f\x6e\x66\x69\x67\x2e\x43\x75\x73\x74\x6f\x6d\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x41\x6c\x69\x61\x73\x65\x73\x45\x6e\x74\x72\x79\x1a\x3f\x0a\x21\x43\x75\x73\x74\x6f\x6d\x53\x65\x61\x72\x63\x68\x41\x74\x74\x72\x69\x62\x75\x74\x65\x41\x6c\x69\x61\x73\x65\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x0d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x09\x22\xaa\x01\x0a\x0b\x42\x61\x64\x42\x69\x6e\x61\x72\x69\x65\x73\x12\x45\x0a\x08\x62\x69\x6e\x61\x72\x69\x65\x73\x18\x01\x20\x03\x28\x0b\x32\x33\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x42\x61\x64\x42\x69\x6e\x61\x72\x69\x65\x73\x2e\x42\x69\x6e\x61\x72\x69\x65\x73\x45\x6e\x74\x72\x79\x1a\x54\x0a\x0d\x42\x69\x6e\x61\x72\x69\x65\x73\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x36\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x0b\x32\x27\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x42\x61\x64\x42\x69\x6e\x61\x72\x79\x49\x6e\x66\x6f\x22\x61\x0a\x0d\x42\x61\x64\x42\x69\x6e\x61\x72\x79\x49\x6e\x66\x6f\x12\x0e\x0a\x06\x72\x65\x61\x73\x6f\x6e\x18\x01\x20\x01\x28\x09\x12\x10\x0a\x08\x6f\x70\x65\x72\x61\x74\x6f\x72\x18\x02\x20\x01\x28\x09\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x22\xe4\x01\x0a\x13\x55\x70\x64\x61\x74\x65\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x49\x6e\x66\x6f\x12\x13\x0a\x0b\x64\x65\x73\x63\x72\x69\x70\x74\x69\x6f\x6e\x18\x01\x20\x01\x28\x09\x12\x13\x0a\x0b\x6f\x77\x6e\x65\x72\x5f\x65\x6d\x61\x69\x6c\x18\x02\x20\x01\x28\x09\x12\x45\x0a\x04\x64\x61\x74\x61\x18\x03\x20\x03\x28\x0b\x32\x37\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x6e\x61\x6d\x65\x73\x70\x61\x63\x65\x2e\x76\x31\x2e\x55\x70\x64\x61\x74\x65\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x49\x6e\x66\x6f\x2e\x44\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x33\x0a\x05\x73\x74\x61\x74\x65\x18\x04\x20\x01\x28\x0b\x32\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2e\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x53\x74\x61\x74\x65\x1a\x27\x0a\x09\x44\x61\x74\x61\x45\x6e\x74\x72\x79\x12\x0b\x0a\x03\x6b\x65\x79\x18\x01\x20\x01\x28\x09\x12\x0d\x0a\x05\x76\x61\x6c\x75\x65\x18\x02\x20\x01\x28\x09\x22\x2a\x0a\x0f\x4e\x61\x6d\x65\x73\x70\x61\x63\x65\x46\x69\x6c\x74\x65\x72\x12\x17\x0a\x0f\x69\x6e\x63\x6c\x75\x64\x65\x5f\x64\x65\x6c\x65\x74\x65\x64\x18\x01\x20\x01\x28\x08\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data NamespaceInfo = NamespaceInfo
+  { name :: !(Maybe Text)
+  , state :: !(Maybe TE_Enums_V1_Namespace.NamespaceState)
+  , description :: !(Maybe Text)
+  , ownerEmail :: !(Maybe Text)
+  , data' :: !(V.Vector NamespaceInfo'DataEntry)
+  , id :: !(Maybe Text)
+  , capabilities :: !(Maybe NamespaceInfo'Capabilities)
+  , supportsSchedules :: !(Maybe Bool)
+  , namespaceInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data NamespaceInfo'DataEntry = NamespaceInfo'DataEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Text)
+  , namespaceInfoDataEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultNamespaceInfo'DataEntry :: NamespaceInfo'DataEntry
+defaultNamespaceInfo'DataEntry = NamespaceInfo'DataEntry
+  { key = Nothing
+  , value = Nothing
+  , namespaceInfoDataEntryUnknownFields = []
+  }
+
+instance MessageEncode NamespaceInfo'DataEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> archString 18 v) msg.value)
+    <> encodeUnknownFields msg.namespaceInfoDataEntryUnknownFields
+
+instance MessageSize NamespaceInfo'DataEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archStringSize v) msg.value)
+    + unknownFieldsSize msg.namespaceInfoDataEntryUnknownFields
+
+instance MessageDecode NamespaceInfo'DataEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (NamespaceInfo'DataEntry {key = acc_0, value = acc_1, namespaceInfoDataEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage NamespaceInfo'DataEntry where
+  protoMessageName _ = "temporal.api.namespace.v1.NamespaceInfo.DataEntry"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultNamespaceInfo'DataEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'DataEntry) -> m.key
+        , fdSet = \v (m :: NamespaceInfo'DataEntry) -> (m { key = v } :: NamespaceInfo'DataEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'DataEntry) -> m.value
+        , fdSet = \v (m :: NamespaceInfo'DataEntry) -> (m { value = v } :: NamespaceInfo'DataEntry)
+        })
+    ]
+
+instance IsMessage NamespaceInfo'DataEntry
+
+instance Aeson.ToJSON NamespaceInfo'DataEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON NamespaceInfo'DataEntry where
+  parseJSON = Aeson.withObject "NamespaceInfo'DataEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultNamespaceInfo'DataEntry
+      { key = maybe (defaultNamespaceInfo'DataEntry.key) Prelude.id fld_key
+      , value = maybe (defaultNamespaceInfo'DataEntry.value) Prelude.id fld_value
+      , namespaceInfoDataEntryUnknownFields = []
+      } :: NamespaceInfo'DataEntry)
+
+instance Hashable NamespaceInfo'DataEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions NamespaceInfo'DataEntry where
+  messageUnknownFields msg = msg.namespaceInfoDataEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { namespaceInfoDataEntryUnknownFields = ufs }
+
+instance Semigroup NamespaceInfo'DataEntry where
+  a <> b = NamespaceInfo'DataEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , namespaceInfoDataEntryUnknownFields = a.namespaceInfoDataEntryUnknownFields <> b.namespaceInfoDataEntryUnknownFields
+    }
+
+instance Monoid NamespaceInfo'DataEntry where
+  mempty = defaultNamespaceInfo'DataEntry
+
+data NamespaceInfo'Capabilities = NamespaceInfo'Capabilities
+  { eagerWorkflowStart :: !(Maybe Bool)
+  , syncUpdate :: !(Maybe Bool)
+  , asyncUpdate :: !(Maybe Bool)
+  , workerHeartbeats :: !(Maybe Bool)
+  , reportedProblemsSearchAttribute :: !(Maybe Bool)
+  , namespaceInfoCapabilitiesUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultNamespaceInfo'Capabilities :: NamespaceInfo'Capabilities
+defaultNamespaceInfo'Capabilities = NamespaceInfo'Capabilities
+  { eagerWorkflowStart = Nothing
+  , syncUpdate = Nothing
+  , asyncUpdate = Nothing
+  , workerHeartbeats = Nothing
+  , reportedProblemsSearchAttribute = Nothing
+  , namespaceInfoCapabilitiesUnknownFields = []
+  }
+
+instance MessageEncode NamespaceInfo'Capabilities where
+  buildMessage msg =
+    (maybe mempty (\v -> archBool 8 v) msg.eagerWorkflowStart)
+    <> (maybe mempty (\v -> archBool 16 v) msg.syncUpdate)
+    <> (maybe mempty (\v -> archBool 24 v) msg.asyncUpdate)
+    <> (maybe mempty (\v -> archBool 32 v) msg.workerHeartbeats)
+    <> (maybe mempty (\v -> archBool 40 v) msg.reportedProblemsSearchAttribute)
+    <> encodeUnknownFields msg.namespaceInfoCapabilitiesUnknownFields
+
+instance MessageSize NamespaceInfo'Capabilities where
+  messageSize msg =
+    (maybe 0 (\v -> archBoolSize) msg.eagerWorkflowStart)
+    + (maybe 0 (\v -> archBoolSize) msg.syncUpdate)
+    + (maybe 0 (\v -> archBoolSize) msg.asyncUpdate)
+    + (maybe 0 (\v -> archBoolSize) msg.workerHeartbeats)
+    + (maybe 0 (\v -> archBoolSize) msg.reportedProblemsSearchAttribute)
+    + unknownFieldsSize msg.namespaceInfoCapabilitiesUnknownFields
+
+instance MessageDecode NamespaceInfo'Capabilities where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (NamespaceInfo'Capabilities {eagerWorkflowStart = acc_0, syncUpdate = acc_1, asyncUpdate = acc_2, workerHeartbeats = acc_3, reportedProblemsSearchAttribute = acc_4, namespaceInfoCapabilitiesUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBool
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldBool
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          3 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage NamespaceInfo'Capabilities where
+  protoMessageName _ = "temporal.api.namespace.v1.NamespaceInfo.Capabilities"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultNamespaceInfo'Capabilities
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "eager_workflow_start"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'Capabilities) -> m.eagerWorkflowStart
+        , fdSet = \v (m :: NamespaceInfo'Capabilities) -> (m { eagerWorkflowStart = v } :: NamespaceInfo'Capabilities)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "sync_update"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'Capabilities) -> m.syncUpdate
+        , fdSet = \v (m :: NamespaceInfo'Capabilities) -> (m { syncUpdate = v } :: NamespaceInfo'Capabilities)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "async_update"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'Capabilities) -> m.asyncUpdate
+        , fdSet = \v (m :: NamespaceInfo'Capabilities) -> (m { asyncUpdate = v } :: NamespaceInfo'Capabilities)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "worker_heartbeats"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'Capabilities) -> m.workerHeartbeats
+        , fdSet = \v (m :: NamespaceInfo'Capabilities) -> (m { workerHeartbeats = v } :: NamespaceInfo'Capabilities)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "reported_problems_search_attribute"
+        , fdNumber = 5
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo'Capabilities) -> m.reportedProblemsSearchAttribute
+        , fdSet = \v (m :: NamespaceInfo'Capabilities) -> (m { reportedProblemsSearchAttribute = v } :: NamespaceInfo'Capabilities)
+        })
+    ]
+
+instance IsMessage NamespaceInfo'Capabilities
+
+instance Aeson.ToJSON NamespaceInfo'Capabilities where
+  toJSON msg = jsonObject
+      [ "eagerWorkflowStart" .=: msg.eagerWorkflowStart
+      , "syncUpdate" .=: msg.syncUpdate
+      , "asyncUpdate" .=: msg.asyncUpdate
+      , "workerHeartbeats" .=: msg.workerHeartbeats
+      , "reportedProblemsSearchAttribute" .=: msg.reportedProblemsSearchAttribute
+      ]
+
+instance Aeson.FromJSON NamespaceInfo'Capabilities where
+  parseJSON = Aeson.withObject "NamespaceInfo'Capabilities" $ \obj -> do
+    fld_eagerWorkflowStart <- parseFieldMaybe obj "eagerWorkflowStart"
+    fld_syncUpdate <- parseFieldMaybe obj "syncUpdate"
+    fld_asyncUpdate <- parseFieldMaybe obj "asyncUpdate"
+    fld_workerHeartbeats <- parseFieldMaybe obj "workerHeartbeats"
+    fld_reportedProblemsSearchAttribute <- parseFieldMaybe obj "reportedProblemsSearchAttribute"
+    pure (defaultNamespaceInfo'Capabilities
+      { eagerWorkflowStart = maybe (defaultNamespaceInfo'Capabilities.eagerWorkflowStart) Prelude.id fld_eagerWorkflowStart
+      , syncUpdate = maybe (defaultNamespaceInfo'Capabilities.syncUpdate) Prelude.id fld_syncUpdate
+      , asyncUpdate = maybe (defaultNamespaceInfo'Capabilities.asyncUpdate) Prelude.id fld_asyncUpdate
+      , workerHeartbeats = maybe (defaultNamespaceInfo'Capabilities.workerHeartbeats) Prelude.id fld_workerHeartbeats
+      , reportedProblemsSearchAttribute = maybe (defaultNamespaceInfo'Capabilities.reportedProblemsSearchAttribute) Prelude.id fld_reportedProblemsSearchAttribute
+      , namespaceInfoCapabilitiesUnknownFields = []
+      } :: NamespaceInfo'Capabilities)
+
+instance Hashable NamespaceInfo'Capabilities where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.eagerWorkflowStart) msg.syncUpdate) msg.asyncUpdate) msg.workerHeartbeats) msg.reportedProblemsSearchAttribute
+
+instance Proto.Extension.HasExtensions NamespaceInfo'Capabilities where
+  messageUnknownFields msg = msg.namespaceInfoCapabilitiesUnknownFields
+  setMessageUnknownFields !ufs msg = msg { namespaceInfoCapabilitiesUnknownFields = ufs }
+
+instance Semigroup NamespaceInfo'Capabilities where
+  a <> b = NamespaceInfo'Capabilities
+    { eagerWorkflowStart = case b.eagerWorkflowStart of { Nothing -> a.eagerWorkflowStart; x -> x }
+    , syncUpdate = case b.syncUpdate of { Nothing -> a.syncUpdate; x -> x }
+    , asyncUpdate = case b.asyncUpdate of { Nothing -> a.asyncUpdate; x -> x }
+    , workerHeartbeats = case b.workerHeartbeats of { Nothing -> a.workerHeartbeats; x -> x }
+    , reportedProblemsSearchAttribute = case b.reportedProblemsSearchAttribute of { Nothing -> a.reportedProblemsSearchAttribute; x -> x }
+    , namespaceInfoCapabilitiesUnknownFields = a.namespaceInfoCapabilitiesUnknownFields <> b.namespaceInfoCapabilitiesUnknownFields
+    }
+
+instance Monoid NamespaceInfo'Capabilities where
+  mempty = defaultNamespaceInfo'Capabilities
+
+defaultNamespaceInfo :: NamespaceInfo
+defaultNamespaceInfo = NamespaceInfo
+  { name = Nothing
+  , state = Nothing
+  , description = Nothing
+  , ownerEmail = Nothing
+  , data' = V.empty
+  , id = Nothing
+  , capabilities = Nothing
+  , supportsSchedules = Nothing
+  , namespaceInfoUnknownFields = []
+  }
+
+instance MessageEncode NamespaceInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.name)
+    <> (maybe mempty (\v -> archVarint 16 (fromIntegral (fromEnum v))) msg.state)
+    <> (maybe mempty (\v -> archString 26 v) msg.description)
+    <> (maybe mempty (\v -> archString 34 v) msg.ownerEmail)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 42 sz (buildMessage v)) mempty msg.data'
+    <> (maybe mempty (\v -> archString 50 v) msg.id)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 58 sz (buildMessage v)) msg.capabilities)
+    <> (maybe mempty (\v -> genericArchBool 100 v) msg.supportsSchedules)
+    <> encodeUnknownFields msg.namespaceInfoUnknownFields
+
+instance MessageSize NamespaceInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.name)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.state)
+    + (maybe 0 (\v -> archStringSize v) msg.description)
+    + (maybe 0 (\v -> archStringSize v) msg.ownerEmail)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.data')
+    + (maybe 0 (\v -> archStringSize v) msg.id)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.capabilities)
+    + (maybe 0 (\v -> archBoolSize) msg.supportsSchedules)
+    + unknownFieldsSize msg.namespaceInfoUnknownFields
+    + multiByteTagSizeNamespaceInfo msg
+
+instance MessageDecode NamespaceInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing V.empty Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_ = withTagM
+        (pure (NamespaceInfo {name = acc_0, state = acc_1, description = acc_2, ownerEmail = acc_3, data' = acc_4, id = acc_5, capabilities = acc_6, supportsSchedules = acc_7, namespaceInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          2 -> do
+            v <- decodeFieldEnum
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_7 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (acc_4 <> V.singleton v) acc_5 acc_6 acc_7 acc_unknown_
+          6 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_7 acc_unknown_
+          7 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (Just v) acc_7 acc_unknown_
+          100 -> do
+            v <- decodeFieldBool
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_7 (uf : acc_unknown_))
+
+instance ProtoMessage NamespaceInfo where
+  protoMessageName _ = "temporal.api.namespace.v1.NamespaceInfo"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultNamespaceInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "name"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.name
+        , fdSet = \v (m :: NamespaceInfo) -> (m { name = v } :: NamespaceInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "state"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.NamespaceState"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.state
+        , fdSet = \v (m :: NamespaceInfo) -> (m { state = v } :: NamespaceInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "description"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.description
+        , fdSet = \v (m :: NamespaceInfo) -> (m { description = v } :: NamespaceInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "owner_email"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.ownerEmail
+        , fdSet = \v (m :: NamespaceInfo) -> (m { ownerEmail = v } :: NamespaceInfo)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "data"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.NamespaceInfo.DataEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: NamespaceInfo) -> m.data'
+        , fdSet = \v (m :: NamespaceInfo) -> (m { data' = v } :: NamespaceInfo)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "id"
+        , fdNumber = 6
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.id
+        , fdSet = \v (m :: NamespaceInfo) -> (m { id = v } :: NamespaceInfo)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "capabilities"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.NamespaceInfo.Capabilities"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.capabilities
+        , fdSet = \v (m :: NamespaceInfo) -> (m { capabilities = v } :: NamespaceInfo)
+        })
+    , (100, SomeField FieldDescriptor
+        { fdName = "supports_schedules"
+        , fdNumber = 100
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceInfo) -> m.supportsSchedules
+        , fdSet = \v (m :: NamespaceInfo) -> (m { supportsSchedules = v } :: NamespaceInfo)
+        })
+    ]
+
+instance IsMessage NamespaceInfo
+
+instance Aeson.ToJSON NamespaceInfo where
+  toJSON msg = jsonObject
+      [ "name" .=: msg.name
+      , "state" .=: msg.state
+      , "description" .=: msg.description
+      , "ownerEmail" .=: msg.ownerEmail
+      , "data" .=: msg.data'
+      , "id" .=: msg.id
+      , "capabilities" .=: msg.capabilities
+      , "supportsSchedules" .=: msg.supportsSchedules
+      ]
+
+instance Aeson.FromJSON NamespaceInfo where
+  parseJSON = Aeson.withObject "NamespaceInfo" $ \obj -> do
+    fld_name <- parseFieldMaybe obj "name"
+    fld_state <- parseFieldMaybe obj "state"
+    fld_description <- parseFieldMaybe obj "description"
+    fld_ownerEmail <- parseFieldMaybe obj "ownerEmail"
+    fld_data' <- parseFieldMaybe obj "data"
+    fld_id <- parseFieldMaybe obj "id"
+    fld_capabilities <- parseFieldMaybe obj "capabilities"
+    fld_supportsSchedules <- parseFieldMaybe obj "supportsSchedules"
+    pure (defaultNamespaceInfo
+      { name = maybe (defaultNamespaceInfo.name) Prelude.id fld_name
+      , state = maybe (defaultNamespaceInfo.state) Prelude.id fld_state
+      , description = maybe (defaultNamespaceInfo.description) Prelude.id fld_description
+      , ownerEmail = maybe (defaultNamespaceInfo.ownerEmail) Prelude.id fld_ownerEmail
+      , data' = maybe (defaultNamespaceInfo.data') Prelude.id fld_data'
+      , id = maybe (defaultNamespaceInfo.id) Prelude.id fld_id
+      , capabilities = maybe (defaultNamespaceInfo.capabilities) Prelude.id fld_capabilities
+      , supportsSchedules = maybe (defaultNamespaceInfo.supportsSchedules) Prelude.id fld_supportsSchedules
+      , namespaceInfoUnknownFields = []
+      } :: NamespaceInfo)
+
+instance Hashable NamespaceInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.name) msg.state) msg.description) msg.ownerEmail) msg.data') msg.id) msg.capabilities) msg.supportsSchedules
+
+instance Proto.Extension.HasExtensions NamespaceInfo where
+  messageUnknownFields msg = msg.namespaceInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { namespaceInfoUnknownFields = ufs }
+
+instance Semigroup NamespaceInfo where
+  a <> b = NamespaceInfo
+    { name = case b.name of { Nothing -> a.name; x -> x }
+    , state = case b.state of { Nothing -> a.state; x -> x }
+    , description = case b.description of { Nothing -> a.description; x -> x }
+    , ownerEmail = case b.ownerEmail of { Nothing -> a.ownerEmail; x -> x }
+    , data' = a.data' <> b.data'
+    , id = case b.id of { Nothing -> a.id; x -> x }
+    , capabilities = case b.capabilities of { Nothing -> a.capabilities; x -> x }
+    , supportsSchedules = case b.supportsSchedules of { Nothing -> a.supportsSchedules; x -> x }
+    , namespaceInfoUnknownFields = a.namespaceInfoUnknownFields <> b.namespaceInfoUnknownFields
+    }
+
+instance Monoid NamespaceInfo where
+  mempty = defaultNamespaceInfo
+
+data NamespaceConfig = NamespaceConfig
+  { workflowExecutionRetentionTtl :: !(Maybe PB_Duration.Duration)
+  , badBinaries :: !(Maybe BadBinaries)
+  , historyArchivalState :: !(Maybe TE_Enums_V1_Namespace.ArchivalState)
+  , historyArchivalUri :: !(Maybe Text)
+  , visibilityArchivalState :: !(Maybe TE_Enums_V1_Namespace.ArchivalState)
+  , visibilityArchivalUri :: !(Maybe Text)
+  , customSearchAttributeAliases :: !(V.Vector NamespaceConfig'CustomSearchAttributeAliasesEntry)
+  , namespaceConfigUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data NamespaceConfig'CustomSearchAttributeAliasesEntry = NamespaceConfig'CustomSearchAttributeAliasesEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Text)
+  , namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultNamespaceConfig'CustomSearchAttributeAliasesEntry :: NamespaceConfig'CustomSearchAttributeAliasesEntry
+defaultNamespaceConfig'CustomSearchAttributeAliasesEntry = NamespaceConfig'CustomSearchAttributeAliasesEntry
+  { key = Nothing
+  , value = Nothing
+  , namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields = []
+  }
+
+instance MessageEncode NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> archString 18 v) msg.value)
+    <> encodeUnknownFields msg.namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields
+
+instance MessageSize NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archStringSize v) msg.value)
+    + unknownFieldsSize msg.namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields
+
+instance MessageDecode NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (NamespaceConfig'CustomSearchAttributeAliasesEntry {key = acc_0, value = acc_1, namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  protoMessageName _ = "temporal.api.namespace.v1.NamespaceConfig.CustomSearchAttributeAliasesEntry"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultNamespaceConfig'CustomSearchAttributeAliasesEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig'CustomSearchAttributeAliasesEntry) -> m.key
+        , fdSet = \v (m :: NamespaceConfig'CustomSearchAttributeAliasesEntry) -> (m { key = v } :: NamespaceConfig'CustomSearchAttributeAliasesEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig'CustomSearchAttributeAliasesEntry) -> m.value
+        , fdSet = \v (m :: NamespaceConfig'CustomSearchAttributeAliasesEntry) -> (m { value = v } :: NamespaceConfig'CustomSearchAttributeAliasesEntry)
+        })
+    ]
+
+instance IsMessage NamespaceConfig'CustomSearchAttributeAliasesEntry
+
+instance Aeson.ToJSON NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  parseJSON = Aeson.withObject "NamespaceConfig'CustomSearchAttributeAliasesEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultNamespaceConfig'CustomSearchAttributeAliasesEntry
+      { key = maybe (defaultNamespaceConfig'CustomSearchAttributeAliasesEntry.key) Prelude.id fld_key
+      , value = maybe (defaultNamespaceConfig'CustomSearchAttributeAliasesEntry.value) Prelude.id fld_value
+      , namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields = []
+      } :: NamespaceConfig'CustomSearchAttributeAliasesEntry)
+
+instance Hashable NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  messageUnknownFields msg = msg.namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields = ufs }
+
+instance Semigroup NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  a <> b = NamespaceConfig'CustomSearchAttributeAliasesEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields = a.namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields <> b.namespaceConfigCustomSearchAttributeAliasesEntryUnknownFields
+    }
+
+instance Monoid NamespaceConfig'CustomSearchAttributeAliasesEntry where
+  mempty = defaultNamespaceConfig'CustomSearchAttributeAliasesEntry
+
+defaultNamespaceConfig :: NamespaceConfig
+defaultNamespaceConfig = NamespaceConfig
+  { workflowExecutionRetentionTtl = Nothing
+  , badBinaries = Nothing
+  , historyArchivalState = Nothing
+  , historyArchivalUri = Nothing
+  , visibilityArchivalState = Nothing
+  , visibilityArchivalUri = Nothing
+  , customSearchAttributeAliases = V.empty
+  , namespaceConfigUnknownFields = []
+  }
+
+instance MessageEncode NamespaceConfig where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.workflowExecutionRetentionTtl)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.badBinaries)
+    <> (maybe mempty (\v -> archVarint 24 (fromIntegral (fromEnum v))) msg.historyArchivalState)
+    <> (maybe mempty (\v -> archString 34 v) msg.historyArchivalUri)
+    <> (maybe mempty (\v -> archVarint 40 (fromIntegral (fromEnum v))) msg.visibilityArchivalState)
+    <> (maybe mempty (\v -> archString 50 v) msg.visibilityArchivalUri)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 58 sz (buildMessage v)) mempty msg.customSearchAttributeAliases
+    <> encodeUnknownFields msg.namespaceConfigUnknownFields
+
+instance MessageSize NamespaceConfig where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.workflowExecutionRetentionTtl)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.badBinaries)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.historyArchivalState)
+    + (maybe 0 (\v -> archStringSize v) msg.historyArchivalUri)
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.visibilityArchivalState)
+    + (maybe 0 (\v -> archStringSize v) msg.visibilityArchivalUri)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.customSearchAttributeAliases)
+    + unknownFieldsSize msg.namespaceConfigUnknownFields
+
+instance MessageDecode NamespaceConfig where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing Nothing Nothing V.empty []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_ = withTagM
+        (pure (NamespaceConfig {workflowExecutionRetentionTtl = acc_0, badBinaries = acc_1, historyArchivalState = acc_2, historyArchivalUri = acc_3, visibilityArchivalState = acc_4, visibilityArchivalUri = acc_5, customSearchAttributeAliases = acc_6, namespaceConfigUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          3 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 (Just v) acc_3 acc_4 acc_5 acc_6 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_5 acc_6 acc_unknown_
+          5 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 acc_2 acc_3 (Just v) acc_5 acc_6 acc_unknown_
+          6 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (Just v) acc_6 acc_unknown_
+          7 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 (acc_6 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_5 acc_6 (uf : acc_unknown_))
+
+instance ProtoMessage NamespaceConfig where
+  protoMessageName _ = "temporal.api.namespace.v1.NamespaceConfig"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultNamespaceConfig
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "workflow_execution_retention_ttl"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig) -> m.workflowExecutionRetentionTtl
+        , fdSet = \v (m :: NamespaceConfig) -> (m { workflowExecutionRetentionTtl = v } :: NamespaceConfig)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "bad_binaries"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.BadBinaries"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig) -> m.badBinaries
+        , fdSet = \v (m :: NamespaceConfig) -> (m { badBinaries = v } :: NamespaceConfig)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "history_archival_state"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.ArchivalState"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig) -> m.historyArchivalState
+        , fdSet = \v (m :: NamespaceConfig) -> (m { historyArchivalState = v } :: NamespaceConfig)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "history_archival_uri"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig) -> m.historyArchivalUri
+        , fdSet = \v (m :: NamespaceConfig) -> (m { historyArchivalUri = v } :: NamespaceConfig)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "visibility_archival_state"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.ArchivalState"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig) -> m.visibilityArchivalState
+        , fdSet = \v (m :: NamespaceConfig) -> (m { visibilityArchivalState = v } :: NamespaceConfig)
+        })
+    , (6, SomeField FieldDescriptor
+        { fdName = "visibility_archival_uri"
+        , fdNumber = 6
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceConfig) -> m.visibilityArchivalUri
+        , fdSet = \v (m :: NamespaceConfig) -> (m { visibilityArchivalUri = v } :: NamespaceConfig)
+        })
+    , (7, SomeField FieldDescriptor
+        { fdName = "custom_search_attribute_aliases"
+        , fdNumber = 7
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.NamespaceConfig.CustomSearchAttributeAliasesEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: NamespaceConfig) -> m.customSearchAttributeAliases
+        , fdSet = \v (m :: NamespaceConfig) -> (m { customSearchAttributeAliases = v } :: NamespaceConfig)
+        })
+    ]
+
+instance IsMessage NamespaceConfig
+
+instance Aeson.ToJSON NamespaceConfig where
+  toJSON msg = jsonObject
+      [ "workflowExecutionRetentionTtl" .=: msg.workflowExecutionRetentionTtl
+      , "badBinaries" .=: msg.badBinaries
+      , "historyArchivalState" .=: msg.historyArchivalState
+      , "historyArchivalUri" .=: msg.historyArchivalUri
+      , "visibilityArchivalState" .=: msg.visibilityArchivalState
+      , "visibilityArchivalUri" .=: msg.visibilityArchivalUri
+      , "customSearchAttributeAliases" .=: msg.customSearchAttributeAliases
+      ]
+
+instance Aeson.FromJSON NamespaceConfig where
+  parseJSON = Aeson.withObject "NamespaceConfig" $ \obj -> do
+    fld_workflowExecutionRetentionTtl <- parseFieldMaybe obj "workflowExecutionRetentionTtl"
+    fld_badBinaries <- parseFieldMaybe obj "badBinaries"
+    fld_historyArchivalState <- parseFieldMaybe obj "historyArchivalState"
+    fld_historyArchivalUri <- parseFieldMaybe obj "historyArchivalUri"
+    fld_visibilityArchivalState <- parseFieldMaybe obj "visibilityArchivalState"
+    fld_visibilityArchivalUri <- parseFieldMaybe obj "visibilityArchivalUri"
+    fld_customSearchAttributeAliases <- parseFieldMaybe obj "customSearchAttributeAliases"
+    pure (defaultNamespaceConfig
+      { workflowExecutionRetentionTtl = maybe (defaultNamespaceConfig.workflowExecutionRetentionTtl) Prelude.id fld_workflowExecutionRetentionTtl
+      , badBinaries = maybe (defaultNamespaceConfig.badBinaries) Prelude.id fld_badBinaries
+      , historyArchivalState = maybe (defaultNamespaceConfig.historyArchivalState) Prelude.id fld_historyArchivalState
+      , historyArchivalUri = maybe (defaultNamespaceConfig.historyArchivalUri) Prelude.id fld_historyArchivalUri
+      , visibilityArchivalState = maybe (defaultNamespaceConfig.visibilityArchivalState) Prelude.id fld_visibilityArchivalState
+      , visibilityArchivalUri = maybe (defaultNamespaceConfig.visibilityArchivalUri) Prelude.id fld_visibilityArchivalUri
+      , customSearchAttributeAliases = maybe (defaultNamespaceConfig.customSearchAttributeAliases) Prelude.id fld_customSearchAttributeAliases
+      , namespaceConfigUnknownFields = []
+      } :: NamespaceConfig)
+
+instance Hashable NamespaceConfig where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.workflowExecutionRetentionTtl) msg.badBinaries) msg.historyArchivalState) msg.historyArchivalUri) msg.visibilityArchivalState) msg.visibilityArchivalUri) msg.customSearchAttributeAliases
+
+instance Proto.Extension.HasExtensions NamespaceConfig where
+  messageUnknownFields msg = msg.namespaceConfigUnknownFields
+  setMessageUnknownFields !ufs msg = msg { namespaceConfigUnknownFields = ufs }
+
+instance Semigroup NamespaceConfig where
+  a <> b = NamespaceConfig
+    { workflowExecutionRetentionTtl = case b.workflowExecutionRetentionTtl of { Nothing -> a.workflowExecutionRetentionTtl; x -> x }
+    , badBinaries = case b.badBinaries of { Nothing -> a.badBinaries; x -> x }
+    , historyArchivalState = case b.historyArchivalState of { Nothing -> a.historyArchivalState; x -> x }
+    , historyArchivalUri = case b.historyArchivalUri of { Nothing -> a.historyArchivalUri; x -> x }
+    , visibilityArchivalState = case b.visibilityArchivalState of { Nothing -> a.visibilityArchivalState; x -> x }
+    , visibilityArchivalUri = case b.visibilityArchivalUri of { Nothing -> a.visibilityArchivalUri; x -> x }
+    , customSearchAttributeAliases = a.customSearchAttributeAliases <> b.customSearchAttributeAliases
+    , namespaceConfigUnknownFields = a.namespaceConfigUnknownFields <> b.namespaceConfigUnknownFields
+    }
+
+instance Monoid NamespaceConfig where
+  mempty = defaultNamespaceConfig
+
+data BadBinaries = BadBinaries
+  { binaries :: !(V.Vector BadBinaries'BinariesEntry)
+  , badBinariesUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data BadBinaries'BinariesEntry = BadBinaries'BinariesEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe BadBinaryInfo)
+  , badBinariesBinariesEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBadBinaries'BinariesEntry :: BadBinaries'BinariesEntry
+defaultBadBinaries'BinariesEntry = BadBinaries'BinariesEntry
+  { key = Nothing
+  , value = Nothing
+  , badBinariesBinariesEntryUnknownFields = []
+  }
+
+instance MessageEncode BadBinaries'BinariesEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.value)
+    <> encodeUnknownFields msg.badBinariesBinariesEntryUnknownFields
+
+instance MessageSize BadBinaries'BinariesEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.value)
+    + unknownFieldsSize msg.badBinariesBinariesEntryUnknownFields
+
+instance MessageDecode BadBinaries'BinariesEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (BadBinaries'BinariesEntry {key = acc_0, value = acc_1, badBinariesBinariesEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage BadBinaries'BinariesEntry where
+  protoMessageName _ = "temporal.api.namespace.v1.BadBinaries.BinariesEntry"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultBadBinaries'BinariesEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BadBinaries'BinariesEntry) -> m.key
+        , fdSet = \v (m :: BadBinaries'BinariesEntry) -> (m { key = v } :: BadBinaries'BinariesEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.BadBinaryInfo"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BadBinaries'BinariesEntry) -> m.value
+        , fdSet = \v (m :: BadBinaries'BinariesEntry) -> (m { value = v } :: BadBinaries'BinariesEntry)
+        })
+    ]
+
+instance IsMessage BadBinaries'BinariesEntry
+
+instance Aeson.ToJSON BadBinaries'BinariesEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON BadBinaries'BinariesEntry where
+  parseJSON = Aeson.withObject "BadBinaries'BinariesEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultBadBinaries'BinariesEntry
+      { key = maybe (defaultBadBinaries'BinariesEntry.key) Prelude.id fld_key
+      , value = maybe (defaultBadBinaries'BinariesEntry.value) Prelude.id fld_value
+      , badBinariesBinariesEntryUnknownFields = []
+      } :: BadBinaries'BinariesEntry)
+
+instance Hashable BadBinaries'BinariesEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions BadBinaries'BinariesEntry where
+  messageUnknownFields msg = msg.badBinariesBinariesEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { badBinariesBinariesEntryUnknownFields = ufs }
+
+instance Semigroup BadBinaries'BinariesEntry where
+  a <> b = BadBinaries'BinariesEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , badBinariesBinariesEntryUnknownFields = a.badBinariesBinariesEntryUnknownFields <> b.badBinariesBinariesEntryUnknownFields
+    }
+
+instance Monoid BadBinaries'BinariesEntry where
+  mempty = defaultBadBinaries'BinariesEntry
+
+defaultBadBinaries :: BadBinaries
+defaultBadBinaries = BadBinaries
+  { binaries = V.empty
+  , badBinariesUnknownFields = []
+  }
+
+instance MessageEncode BadBinaries where
+  buildMessage msg =
+    V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 10 sz (buildMessage v)) mempty msg.binaries
+    <> encodeUnknownFields msg.badBinariesUnknownFields
+
+instance MessageSize BadBinaries where
+  messageSize msg =
+    (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.binaries)
+    + unknownFieldsSize msg.badBinariesUnknownFields
+
+instance MessageDecode BadBinaries where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop V.empty []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (BadBinaries {binaries = acc_0, badBinariesUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (acc_0 <> V.singleton v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage BadBinaries where
+  protoMessageName _ = "temporal.api.namespace.v1.BadBinaries"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultBadBinaries
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "binaries"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.BadBinaries.BinariesEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: BadBinaries) -> m.binaries
+        , fdSet = \v (m :: BadBinaries) -> (m { binaries = v } :: BadBinaries)
+        })
+    ]
+
+instance IsMessage BadBinaries
+
+instance Aeson.ToJSON BadBinaries where
+  toJSON msg = jsonObject
+      [ "binaries" .=: msg.binaries
+
+      ]
+
+instance Aeson.FromJSON BadBinaries where
+  parseJSON = Aeson.withObject "BadBinaries" $ \obj -> do
+    fld_binaries <- parseFieldMaybe obj "binaries"
+    pure (defaultBadBinaries
+      { binaries = maybe (defaultBadBinaries.binaries) Prelude.id fld_binaries
+      , badBinariesUnknownFields = []
+      } :: BadBinaries)
+
+instance Hashable BadBinaries where
+  hashWithSalt salt msg = V.foldl' hashWithSalt (salt) msg.binaries
+
+instance Proto.Extension.HasExtensions BadBinaries where
+  messageUnknownFields msg = msg.badBinariesUnknownFields
+  setMessageUnknownFields !ufs msg = msg { badBinariesUnknownFields = ufs }
+
+instance Semigroup BadBinaries where
+  a <> b = BadBinaries
+    { binaries = a.binaries <> b.binaries
+    , badBinariesUnknownFields = a.badBinariesUnknownFields <> b.badBinariesUnknownFields
+    }
+
+instance Monoid BadBinaries where
+  mempty = defaultBadBinaries
+
+data BadBinaryInfo = BadBinaryInfo
+  { reason :: !(Maybe Text)
+  , operator :: !(Maybe Text)
+  , createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , badBinaryInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultBadBinaryInfo :: BadBinaryInfo
+defaultBadBinaryInfo = BadBinaryInfo
+  { reason = Nothing
+  , operator = Nothing
+  , createTime = Nothing
+  , badBinaryInfoUnknownFields = []
+  }
+
+instance MessageEncode BadBinaryInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.reason)
+    <> (maybe mempty (\v -> archString 18 v) msg.operator)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.createTime)
+    <> encodeUnknownFields msg.badBinaryInfoUnknownFields
+
+instance MessageSize BadBinaryInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.reason)
+    + (maybe 0 (\v -> archStringSize v) msg.operator)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + unknownFieldsSize msg.badBinaryInfoUnknownFields
+
+instance MessageDecode BadBinaryInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (BadBinaryInfo {reason = acc_0, operator = acc_1, createTime = acc_2, badBinaryInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage BadBinaryInfo where
+  protoMessageName _ = "temporal.api.namespace.v1.BadBinaryInfo"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultBadBinaryInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "reason"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BadBinaryInfo) -> m.reason
+        , fdSet = \v (m :: BadBinaryInfo) -> (m { reason = v } :: BadBinaryInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "operator"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BadBinaryInfo) -> m.operator
+        , fdSet = \v (m :: BadBinaryInfo) -> (m { operator = v } :: BadBinaryInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: BadBinaryInfo) -> m.createTime
+        , fdSet = \v (m :: BadBinaryInfo) -> (m { createTime = v } :: BadBinaryInfo)
+        })
+    ]
+
+instance IsMessage BadBinaryInfo
+
+instance Aeson.ToJSON BadBinaryInfo where
+  toJSON msg = jsonObject
+      [ "reason" .=: msg.reason
+      , "operator" .=: msg.operator
+      , "createTime" .=: msg.createTime
+      ]
+
+instance Aeson.FromJSON BadBinaryInfo where
+  parseJSON = Aeson.withObject "BadBinaryInfo" $ \obj -> do
+    fld_reason <- parseFieldMaybe obj "reason"
+    fld_operator <- parseFieldMaybe obj "operator"
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    pure (defaultBadBinaryInfo
+      { reason = maybe (defaultBadBinaryInfo.reason) Prelude.id fld_reason
+      , operator = maybe (defaultBadBinaryInfo.operator) Prelude.id fld_operator
+      , createTime = maybe (defaultBadBinaryInfo.createTime) Prelude.id fld_createTime
+      , badBinaryInfoUnknownFields = []
+      } :: BadBinaryInfo)
+
+instance Hashable BadBinaryInfo where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.reason) msg.operator) msg.createTime
+
+instance Proto.Extension.HasExtensions BadBinaryInfo where
+  messageUnknownFields msg = msg.badBinaryInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { badBinaryInfoUnknownFields = ufs }
+
+instance Semigroup BadBinaryInfo where
+  a <> b = BadBinaryInfo
+    { reason = case b.reason of { Nothing -> a.reason; x -> x }
+    , operator = case b.operator of { Nothing -> a.operator; x -> x }
+    , createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , badBinaryInfoUnknownFields = a.badBinaryInfoUnknownFields <> b.badBinaryInfoUnknownFields
+    }
+
+instance Monoid BadBinaryInfo where
+  mempty = defaultBadBinaryInfo
+
+data UpdateNamespaceInfo = UpdateNamespaceInfo
+  { description :: !(Maybe Text)
+  , ownerEmail :: !(Maybe Text)
+  , data' :: !(V.Vector UpdateNamespaceInfo'DataEntry)
+  , state :: !(Maybe TE_Enums_V1_Namespace.NamespaceState)
+  , updateNamespaceInfoUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data UpdateNamespaceInfo'DataEntry = UpdateNamespaceInfo'DataEntry
+  { key :: !(Maybe Text)
+  , value :: !(Maybe Text)
+  , updateNamespaceInfoDataEntryUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultUpdateNamespaceInfo'DataEntry :: UpdateNamespaceInfo'DataEntry
+defaultUpdateNamespaceInfo'DataEntry = UpdateNamespaceInfo'DataEntry
+  { key = Nothing
+  , value = Nothing
+  , updateNamespaceInfoDataEntryUnknownFields = []
+  }
+
+instance MessageEncode UpdateNamespaceInfo'DataEntry where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.key)
+    <> (maybe mempty (\v -> archString 18 v) msg.value)
+    <> encodeUnknownFields msg.updateNamespaceInfoDataEntryUnknownFields
+
+instance MessageSize UpdateNamespaceInfo'DataEntry where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.key)
+    + (maybe 0 (\v -> archStringSize v) msg.value)
+    + unknownFieldsSize msg.updateNamespaceInfoDataEntryUnknownFields
+
+instance MessageDecode UpdateNamespaceInfo'DataEntry where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_unknown_ = withTagM
+        (pure (UpdateNamespaceInfo'DataEntry {key = acc_0, value = acc_1, updateNamespaceInfoDataEntryUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 (uf : acc_unknown_))
+
+instance ProtoMessage UpdateNamespaceInfo'DataEntry where
+  protoMessageName _ = "temporal.api.namespace.v1.UpdateNamespaceInfo.DataEntry"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultUpdateNamespaceInfo'DataEntry
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "key"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateNamespaceInfo'DataEntry) -> m.key
+        , fdSet = \v (m :: UpdateNamespaceInfo'DataEntry) -> (m { key = v } :: UpdateNamespaceInfo'DataEntry)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "value"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateNamespaceInfo'DataEntry) -> m.value
+        , fdSet = \v (m :: UpdateNamespaceInfo'DataEntry) -> (m { value = v } :: UpdateNamespaceInfo'DataEntry)
+        })
+    ]
+
+instance IsMessage UpdateNamespaceInfo'DataEntry
+
+instance Aeson.ToJSON UpdateNamespaceInfo'DataEntry where
+  toJSON msg = jsonObject
+      [ "key" .=: msg.key
+      , "value" .=: msg.value
+      ]
+
+instance Aeson.FromJSON UpdateNamespaceInfo'DataEntry where
+  parseJSON = Aeson.withObject "UpdateNamespaceInfo'DataEntry" $ \obj -> do
+    fld_key <- parseFieldMaybe obj "key"
+    fld_value <- parseFieldMaybe obj "value"
+    pure (defaultUpdateNamespaceInfo'DataEntry
+      { key = maybe (defaultUpdateNamespaceInfo'DataEntry.key) Prelude.id fld_key
+      , value = maybe (defaultUpdateNamespaceInfo'DataEntry.value) Prelude.id fld_value
+      , updateNamespaceInfoDataEntryUnknownFields = []
+      } :: UpdateNamespaceInfo'DataEntry)
+
+instance Hashable UpdateNamespaceInfo'DataEntry where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (salt) msg.key) msg.value
+
+instance Proto.Extension.HasExtensions UpdateNamespaceInfo'DataEntry where
+  messageUnknownFields msg = msg.updateNamespaceInfoDataEntryUnknownFields
+  setMessageUnknownFields !ufs msg = msg { updateNamespaceInfoDataEntryUnknownFields = ufs }
+
+instance Semigroup UpdateNamespaceInfo'DataEntry where
+  a <> b = UpdateNamespaceInfo'DataEntry
+    { key = case b.key of { Nothing -> a.key; x -> x }
+    , value = case b.value of { Nothing -> a.value; x -> x }
+    , updateNamespaceInfoDataEntryUnknownFields = a.updateNamespaceInfoDataEntryUnknownFields <> b.updateNamespaceInfoDataEntryUnknownFields
+    }
+
+instance Monoid UpdateNamespaceInfo'DataEntry where
+  mempty = defaultUpdateNamespaceInfo'DataEntry
+
+defaultUpdateNamespaceInfo :: UpdateNamespaceInfo
+defaultUpdateNamespaceInfo = UpdateNamespaceInfo
+  { description = Nothing
+  , ownerEmail = Nothing
+  , data' = V.empty
+  , state = Nothing
+  , updateNamespaceInfoUnknownFields = []
+  }
+
+instance MessageEncode UpdateNamespaceInfo where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.description)
+    <> (maybe mempty (\v -> archString 18 v) msg.ownerEmail)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 26 sz (buildMessage v)) mempty msg.data'
+    <> (maybe mempty (\v -> archVarint 32 (fromIntegral (fromEnum v))) msg.state)
+    <> encodeUnknownFields msg.updateNamespaceInfoUnknownFields
+
+instance MessageSize UpdateNamespaceInfo where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.description)
+    + (maybe 0 (\v -> archStringSize v) msg.ownerEmail)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.data')
+    + (maybe 0 (\v -> archVarintSize (fromIntegral (fromEnum v))) msg.state)
+    + unknownFieldsSize msg.updateNamespaceInfoUnknownFields
+
+instance MessageDecode UpdateNamespaceInfo where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing V.empty Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (UpdateNamespaceInfo {description = acc_0, ownerEmail = acc_1, data' = acc_2, state = acc_3, updateNamespaceInfoUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (acc_2 <> V.singleton v) acc_3 acc_unknown_
+          4 -> do
+            v <- decodeFieldEnum
+            loop acc_0 acc_1 acc_2 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage UpdateNamespaceInfo where
+  protoMessageName _ = "temporal.api.namespace.v1.UpdateNamespaceInfo"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultUpdateNamespaceInfo
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "description"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateNamespaceInfo) -> m.description
+        , fdSet = \v (m :: UpdateNamespaceInfo) -> (m { description = v } :: UpdateNamespaceInfo)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "owner_email"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateNamespaceInfo) -> m.ownerEmail
+        , fdSet = \v (m :: UpdateNamespaceInfo) -> (m { ownerEmail = v } :: UpdateNamespaceInfo)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "data"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "temporal.api.namespace.v1.UpdateNamespaceInfo.DataEntry"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: UpdateNamespaceInfo) -> m.data'
+        , fdSet = \v (m :: UpdateNamespaceInfo) -> (m { data' = v } :: UpdateNamespaceInfo)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "state"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.enums.v1.NamespaceState"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: UpdateNamespaceInfo) -> m.state
+        , fdSet = \v (m :: UpdateNamespaceInfo) -> (m { state = v } :: UpdateNamespaceInfo)
+        })
+    ]
+
+instance IsMessage UpdateNamespaceInfo
+
+instance Aeson.ToJSON UpdateNamespaceInfo where
+  toJSON msg = jsonObject
+      [ "description" .=: msg.description
+      , "ownerEmail" .=: msg.ownerEmail
+      , "data" .=: msg.data'
+      , "state" .=: msg.state
+      ]
+
+instance Aeson.FromJSON UpdateNamespaceInfo where
+  parseJSON = Aeson.withObject "UpdateNamespaceInfo" $ \obj -> do
+    fld_description <- parseFieldMaybe obj "description"
+    fld_ownerEmail <- parseFieldMaybe obj "ownerEmail"
+    fld_data' <- parseFieldMaybe obj "data"
+    fld_state <- parseFieldMaybe obj "state"
+    pure (defaultUpdateNamespaceInfo
+      { description = maybe (defaultUpdateNamespaceInfo.description) Prelude.id fld_description
+      , ownerEmail = maybe (defaultUpdateNamespaceInfo.ownerEmail) Prelude.id fld_ownerEmail
+      , data' = maybe (defaultUpdateNamespaceInfo.data') Prelude.id fld_data'
+      , state = maybe (defaultUpdateNamespaceInfo.state) Prelude.id fld_state
+      , updateNamespaceInfoUnknownFields = []
+      } :: UpdateNamespaceInfo)
+
+instance Hashable UpdateNamespaceInfo where
+  hashWithSalt salt msg = hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.description) msg.ownerEmail) msg.data') msg.state
+
+instance Proto.Extension.HasExtensions UpdateNamespaceInfo where
+  messageUnknownFields msg = msg.updateNamespaceInfoUnknownFields
+  setMessageUnknownFields !ufs msg = msg { updateNamespaceInfoUnknownFields = ufs }
+
+instance Semigroup UpdateNamespaceInfo where
+  a <> b = UpdateNamespaceInfo
+    { description = case b.description of { Nothing -> a.description; x -> x }
+    , ownerEmail = case b.ownerEmail of { Nothing -> a.ownerEmail; x -> x }
+    , data' = a.data' <> b.data'
+    , state = case b.state of { Nothing -> a.state; x -> x }
+    , updateNamespaceInfoUnknownFields = a.updateNamespaceInfoUnknownFields <> b.updateNamespaceInfoUnknownFields
+    }
+
+instance Monoid UpdateNamespaceInfo where
+  mempty = defaultUpdateNamespaceInfo
+
+data NamespaceFilter = NamespaceFilter
+  { includeDeleted :: !(Maybe Bool)
+  , namespaceFilterUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultNamespaceFilter :: NamespaceFilter
+defaultNamespaceFilter = NamespaceFilter
+  { includeDeleted = Nothing
+  , namespaceFilterUnknownFields = []
+  }
+
+instance MessageEncode NamespaceFilter where
+  buildMessage msg =
+    (maybe mempty (\v -> archBool 8 v) msg.includeDeleted)
+    <> encodeUnknownFields msg.namespaceFilterUnknownFields
+
+instance MessageSize NamespaceFilter where
+  messageSize msg =
+    (maybe 0 (\v -> archBoolSize) msg.includeDeleted)
+    + unknownFieldsSize msg.namespaceFilterUnknownFields
+
+instance MessageDecode NamespaceFilter where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (NamespaceFilter {includeDeleted = acc_0, namespaceFilterUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldBool
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage NamespaceFilter where
+  protoMessageName _ = "temporal.api.namespace.v1.NamespaceFilter"
+  protoPackageName _ = "temporal.api.namespace.v1"
+  protoDefaultValue = defaultNamespaceFilter
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "include_deleted"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType BoolField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: NamespaceFilter) -> m.includeDeleted
+        , fdSet = \v (m :: NamespaceFilter) -> (m { includeDeleted = v } :: NamespaceFilter)
+        })
+    ]
+
+instance IsMessage NamespaceFilter
+
+instance Aeson.ToJSON NamespaceFilter where
+  toJSON msg = jsonObject
+      [ "includeDeleted" .=: msg.includeDeleted
+
+      ]
+
+instance Aeson.FromJSON NamespaceFilter where
+  parseJSON = Aeson.withObject "NamespaceFilter" $ \obj -> do
+    fld_includeDeleted <- parseFieldMaybe obj "includeDeleted"
+    pure (defaultNamespaceFilter
+      { includeDeleted = maybe (defaultNamespaceFilter.includeDeleted) Prelude.id fld_includeDeleted
+      , namespaceFilterUnknownFields = []
+      } :: NamespaceFilter)
+
+instance Hashable NamespaceFilter where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.includeDeleted
+
+instance Proto.Extension.HasExtensions NamespaceFilter where
+  messageUnknownFields msg = msg.namespaceFilterUnknownFields
+  setMessageUnknownFields !ufs msg = msg { namespaceFilterUnknownFields = ufs }
+
+instance Semigroup NamespaceFilter where
+  a <> b = NamespaceFilter
+    { includeDeleted = case b.includeDeleted of { Nothing -> a.includeDeleted; x -> x }
+    , namespaceFilterUnknownFields = a.namespaceFilterUnknownFields <> b.namespaceFilterUnknownFields
+    }
+
+instance Monoid NamespaceFilter where
+  mempty = defaultNamespaceFilter
+
+multiByteTagSizeNamespaceInfo :: NamespaceInfo -> Int
+multiByteTagSizeNamespaceInfo msg = (maybe 0 (const (tagSize 100 - 1)) msg.supportsSchedules)
+

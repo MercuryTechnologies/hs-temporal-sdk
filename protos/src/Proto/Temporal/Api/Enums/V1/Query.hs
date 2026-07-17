@@ -1,199 +1,153 @@
-{- This file was auto-generated from temporal/api/enums/v1/query.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Enums.V1.Query (
-        QueryRejectCondition(..), QueryRejectCondition(),
-        QueryRejectCondition'UnrecognizedValue, QueryResultType(..),
-        QueryResultType(), QueryResultType'UnrecognizedValue
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-newtype QueryRejectCondition'UnrecognizedValue
-  = QueryRejectCondition'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
-data QueryRejectCondition
-  = QUERY_REJECT_CONDITION_UNSPECIFIED |
-    QUERY_REJECT_CONDITION_NONE |
-    QUERY_REJECT_CONDITION_NOT_OPEN |
-    QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY |
-    QueryRejectCondition'Unrecognized !QueryRejectCondition'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum QueryRejectCondition where
-  maybeToEnum 0 = Prelude.Just QUERY_REJECT_CONDITION_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just QUERY_REJECT_CONDITION_NONE
-  maybeToEnum 2 = Prelude.Just QUERY_REJECT_CONDITION_NOT_OPEN
-  maybeToEnum 3
-    = Prelude.Just QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-  maybeToEnum k
-    = Prelude.Just
-        (QueryRejectCondition'Unrecognized
-           (QueryRejectCondition'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum QUERY_REJECT_CONDITION_UNSPECIFIED
-    = "QUERY_REJECT_CONDITION_UNSPECIFIED"
-  showEnum QUERY_REJECT_CONDITION_NONE
-    = "QUERY_REJECT_CONDITION_NONE"
-  showEnum QUERY_REJECT_CONDITION_NOT_OPEN
-    = "QUERY_REJECT_CONDITION_NOT_OPEN"
-  showEnum QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-    = "QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"
-  showEnum
-    (QueryRejectCondition'Unrecognized (QueryRejectCondition'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "QUERY_REJECT_CONDITION_UNSPECIFIED"
-    = Prelude.Just QUERY_REJECT_CONDITION_UNSPECIFIED
-    | (Prelude.==) k "QUERY_REJECT_CONDITION_NONE"
-    = Prelude.Just QUERY_REJECT_CONDITION_NONE
-    | (Prelude.==) k "QUERY_REJECT_CONDITION_NOT_OPEN"
-    = Prelude.Just QUERY_REJECT_CONDITION_NOT_OPEN
-    | (Prelude.==) k "QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"
-    = Prelude.Just QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded QueryRejectCondition where
-  minBound = QUERY_REJECT_CONDITION_UNSPECIFIED
-  maxBound = QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-instance Prelude.Enum QueryRejectCondition where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum QueryRejectCondition: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum QUERY_REJECT_CONDITION_UNSPECIFIED = 0
-  fromEnum QUERY_REJECT_CONDITION_NONE = 1
-  fromEnum QUERY_REJECT_CONDITION_NOT_OPEN = 2
-  fromEnum QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY = 3
-  fromEnum
-    (QueryRejectCondition'Unrecognized (QueryRejectCondition'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-    = Prelude.error
-        "QueryRejectCondition.succ: bad argument QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY. This value would be out of bounds."
-  succ QUERY_REJECT_CONDITION_UNSPECIFIED
-    = QUERY_REJECT_CONDITION_NONE
-  succ QUERY_REJECT_CONDITION_NONE = QUERY_REJECT_CONDITION_NOT_OPEN
-  succ QUERY_REJECT_CONDITION_NOT_OPEN
-    = QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-  succ (QueryRejectCondition'Unrecognized _)
-    = Prelude.error
-        "QueryRejectCondition.succ: bad argument: unrecognized value"
-  pred QUERY_REJECT_CONDITION_UNSPECIFIED
-    = Prelude.error
-        "QueryRejectCondition.pred: bad argument QUERY_REJECT_CONDITION_UNSPECIFIED. This value would be out of bounds."
-  pred QUERY_REJECT_CONDITION_NONE
-    = QUERY_REJECT_CONDITION_UNSPECIFIED
-  pred QUERY_REJECT_CONDITION_NOT_OPEN = QUERY_REJECT_CONDITION_NONE
-  pred QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY
-    = QUERY_REJECT_CONDITION_NOT_OPEN
-  pred (QueryRejectCondition'Unrecognized _)
-    = Prelude.error
-        "QueryRejectCondition.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault QueryRejectCondition where
-  fieldDefault = QUERY_REJECT_CONDITION_UNSPECIFIED
-instance Control.DeepSeq.NFData QueryRejectCondition where
-  rnf x__ = Prelude.seq x__ ()
-newtype QueryResultType'UnrecognizedValue
-  = QueryResultType'UnrecognizedValue Data.Int.Int32
-  deriving stock (Prelude.Eq, Prelude.Ord, Prelude.Show)
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.enums.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Enums.V1.Query where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x21\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x65\x6e\x75\x6d\x73\x2f\x76\x31\x2f\x71\x75\x65\x72\x79\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x65\x6e\x75\x6d\x73\x2e\x76\x31\x2a\x70\x0a\x0f\x51\x75\x65\x72\x79\x52\x65\x73\x75\x6c\x74\x54\x79\x70\x65\x12\x1f\x0a\x1d\x51\x55\x45\x52\x59\x5f\x52\x45\x53\x55\x4c\x54\x5f\x54\x59\x50\x45\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1e\x0a\x1a\x51\x55\x45\x52\x59\x5f\x52\x45\x53\x55\x4c\x54\x5f\x54\x59\x50\x45\x5f\x41\x4e\x53\x57\x45\x52\x45\x44\x10\x01\x12\x1c\x0a\x18\x51\x55\x45\x52\x59\x5f\x52\x45\x53\x55\x4c\x54\x5f\x54\x59\x50\x45\x5f\x46\x41\x49\x4c\x45\x44\x10\x02\x2a\xb4\x01\x0a\x14\x51\x75\x65\x72\x79\x52\x65\x6a\x65\x63\x74\x43\x6f\x6e\x64\x69\x74\x69\x6f\x6e\x12\x24\x0a\x22\x51\x55\x45\x52\x59\x5f\x52\x45\x4a\x45\x43\x54\x5f\x43\x4f\x4e\x44\x49\x54\x49\x4f\x4e\x5f\x55\x4e\x53\x50\x45\x43\x49\x46\x49\x45\x44\x12\x1f\x0a\x1b\x51\x55\x45\x52\x59\x5f\x52\x45\x4a\x45\x43\x54\x5f\x43\x4f\x4e\x44\x49\x54\x49\x4f\x4e\x5f\x4e\x4f\x4e\x45\x10\x01\x12\x23\x0a\x1f\x51\x55\x45\x52\x59\x5f\x52\x45\x4a\x45\x43\x54\x5f\x43\x4f\x4e\x44\x49\x54\x49\x4f\x4e\x5f\x4e\x4f\x54\x5f\x4f\x50\x45\x4e\x10\x02\x12\x30\x0a\x2c\x51\x55\x45\x52\x59\x5f\x52\x45\x4a\x45\x43\x54\x5f\x43\x4f\x4e\x44\x49\x54\x49\x4f\x4e\x5f\x4e\x4f\x54\x5f\x43\x4f\x4d\x50\x4c\x45\x54\x45\x44\x5f\x43\x4c\x45\x41\x4e\x4c\x59\x10\x03\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
 data QueryResultType
-  = QUERY_RESULT_TYPE_UNSPECIFIED |
-    QUERY_RESULT_TYPE_ANSWERED |
-    QUERY_RESULT_TYPE_FAILED |
-    QueryResultType'Unrecognized !QueryResultType'UnrecognizedValue
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.MessageEnum QueryResultType where
-  maybeToEnum 0 = Prelude.Just QUERY_RESULT_TYPE_UNSPECIFIED
-  maybeToEnum 1 = Prelude.Just QUERY_RESULT_TYPE_ANSWERED
-  maybeToEnum 2 = Prelude.Just QUERY_RESULT_TYPE_FAILED
-  maybeToEnum k
-    = Prelude.Just
-        (QueryResultType'Unrecognized
-           (QueryResultType'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum QUERY_RESULT_TYPE_UNSPECIFIED
-    = "QUERY_RESULT_TYPE_UNSPECIFIED"
-  showEnum QUERY_RESULT_TYPE_ANSWERED = "QUERY_RESULT_TYPE_ANSWERED"
-  showEnum QUERY_RESULT_TYPE_FAILED = "QUERY_RESULT_TYPE_FAILED"
-  showEnum
-    (QueryResultType'Unrecognized (QueryResultType'UnrecognizedValue k))
-    = Prelude.show k
-  readEnum k
-    | (Prelude.==) k "QUERY_RESULT_TYPE_UNSPECIFIED"
-    = Prelude.Just QUERY_RESULT_TYPE_UNSPECIFIED
-    | (Prelude.==) k "QUERY_RESULT_TYPE_ANSWERED"
-    = Prelude.Just QUERY_RESULT_TYPE_ANSWERED
-    | (Prelude.==) k "QUERY_RESULT_TYPE_FAILED"
-    = Prelude.Just QUERY_RESULT_TYPE_FAILED
-    | Prelude.otherwise
-    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
-instance Prelude.Bounded QueryResultType where
-  minBound = QUERY_RESULT_TYPE_UNSPECIFIED
-  maxBound = QUERY_RESULT_TYPE_FAILED
-instance Prelude.Enum QueryResultType where
-  toEnum k__
-    = Prelude.maybe
-        (Prelude.error
-           ((Prelude.++)
-              "toEnum: unknown value for enum QueryResultType: "
-              (Prelude.show k__)))
-        Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum QUERY_RESULT_TYPE_UNSPECIFIED = 0
-  fromEnum QUERY_RESULT_TYPE_ANSWERED = 1
-  fromEnum QUERY_RESULT_TYPE_FAILED = 2
-  fromEnum
-    (QueryResultType'Unrecognized (QueryResultType'UnrecognizedValue k))
-    = Prelude.fromIntegral k
-  succ QUERY_RESULT_TYPE_FAILED
-    = Prelude.error
-        "QueryResultType.succ: bad argument QUERY_RESULT_TYPE_FAILED. This value would be out of bounds."
-  succ QUERY_RESULT_TYPE_UNSPECIFIED = QUERY_RESULT_TYPE_ANSWERED
-  succ QUERY_RESULT_TYPE_ANSWERED = QUERY_RESULT_TYPE_FAILED
-  succ (QueryResultType'Unrecognized _)
-    = Prelude.error
-        "QueryResultType.succ: bad argument: unrecognized value"
-  pred QUERY_RESULT_TYPE_UNSPECIFIED
-    = Prelude.error
-        "QueryResultType.pred: bad argument QUERY_RESULT_TYPE_UNSPECIFIED. This value would be out of bounds."
-  pred QUERY_RESULT_TYPE_ANSWERED = QUERY_RESULT_TYPE_UNSPECIFIED
-  pred QUERY_RESULT_TYPE_FAILED = QUERY_RESULT_TYPE_ANSWERED
-  pred (QueryResultType'Unrecognized _)
-    = Prelude.error
-        "QueryResultType.pred: bad argument: unrecognized value"
-  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
-  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
-  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
-  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
-instance Data.ProtoLens.FieldDefault QueryResultType where
-  fieldDefault = QUERY_RESULT_TYPE_UNSPECIFIED
-instance Control.DeepSeq.NFData QueryResultType where
-  rnf x__ = Prelude.seq x__ ()
+  = QueryResultType'QueryResultTypeUnspecified
+  | QueryResultType'QueryResultTypeAnswered
+  | QueryResultType'QueryResultTypeFailed
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumQueryResultType :: QueryResultType -> Int
+toProtoEnumQueryResultType QueryResultType'QueryResultTypeUnspecified = 0
+toProtoEnumQueryResultType QueryResultType'QueryResultTypeAnswered = 1
+toProtoEnumQueryResultType QueryResultType'QueryResultTypeFailed = 2
+
+fromProtoEnumQueryResultType :: Int -> Maybe QueryResultType
+fromProtoEnumQueryResultType 0 = Just QueryResultType'QueryResultTypeUnspecified
+fromProtoEnumQueryResultType 1 = Just QueryResultType'QueryResultTypeAnswered
+fromProtoEnumQueryResultType 2 = Just QueryResultType'QueryResultTypeFailed
+fromProtoEnumQueryResultType _ = Nothing
+
+instance MessageEncode QueryResultType where
+  buildMessage _ = mempty
+instance MessageSize QueryResultType where
+  messageSize _ = 0
+instance MessageDecode QueryResultType where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON QueryResultType where
+  toJSON QueryResultType'QueryResultTypeUnspecified = Aeson.String "QUERY_RESULT_TYPE_UNSPECIFIED"
+  toJSON QueryResultType'QueryResultTypeAnswered = Aeson.String "QUERY_RESULT_TYPE_ANSWERED"
+  toJSON QueryResultType'QueryResultTypeFailed = Aeson.String "QUERY_RESULT_TYPE_FAILED"
+
+instance Aeson.FromJSON QueryResultType where
+  parseJSON = \case
+    Aeson.String "QUERY_RESULT_TYPE_UNSPECIFIED" -> pure QueryResultType'QueryResultTypeUnspecified
+    Aeson.String "QUERY_RESULT_TYPE_ANSWERED" -> pure QueryResultType'QueryResultTypeAnswered
+    Aeson.String "QUERY_RESULT_TYPE_FAILED" -> pure QueryResultType'QueryResultTypeFailed
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for QueryResultType"
+
+instance Hashable QueryResultType where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumQueryResultType x)
+
+data QueryRejectCondition
+  = QueryRejectCondition'QueryRejectConditionUnspecified
+  | QueryRejectCondition'QueryRejectConditionNone
+  | QueryRejectCondition'QueryRejectConditionNotOpen
+  | QueryRejectCondition'QueryRejectConditionNotCompletedCleanly
+  deriving stock (Show, Eq, Ord, Enum, Bounded, Generic)
+  deriving anyclass NFData
+
+toProtoEnumQueryRejectCondition :: QueryRejectCondition -> Int
+toProtoEnumQueryRejectCondition QueryRejectCondition'QueryRejectConditionUnspecified = 0
+toProtoEnumQueryRejectCondition QueryRejectCondition'QueryRejectConditionNone = 1
+toProtoEnumQueryRejectCondition QueryRejectCondition'QueryRejectConditionNotOpen = 2
+toProtoEnumQueryRejectCondition QueryRejectCondition'QueryRejectConditionNotCompletedCleanly = 3
+
+fromProtoEnumQueryRejectCondition :: Int -> Maybe QueryRejectCondition
+fromProtoEnumQueryRejectCondition 0 = Just QueryRejectCondition'QueryRejectConditionUnspecified
+fromProtoEnumQueryRejectCondition 1 = Just QueryRejectCondition'QueryRejectConditionNone
+fromProtoEnumQueryRejectCondition 2 = Just QueryRejectCondition'QueryRejectConditionNotOpen
+fromProtoEnumQueryRejectCondition 3 = Just QueryRejectCondition'QueryRejectConditionNotCompletedCleanly
+fromProtoEnumQueryRejectCondition _ = Nothing
+
+instance MessageEncode QueryRejectCondition where
+  buildMessage _ = mempty
+instance MessageSize QueryRejectCondition where
+  messageSize _ = 0
+instance MessageDecode QueryRejectCondition where
+  messageDecoder = pure (toEnum 0)
+
+instance Aeson.ToJSON QueryRejectCondition where
+  toJSON QueryRejectCondition'QueryRejectConditionUnspecified = Aeson.String "QUERY_REJECT_CONDITION_UNSPECIFIED"
+  toJSON QueryRejectCondition'QueryRejectConditionNone = Aeson.String "QUERY_REJECT_CONDITION_NONE"
+  toJSON QueryRejectCondition'QueryRejectConditionNotOpen = Aeson.String "QUERY_REJECT_CONDITION_NOT_OPEN"
+  toJSON QueryRejectCondition'QueryRejectConditionNotCompletedCleanly = Aeson.String "QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY"
+
+instance Aeson.FromJSON QueryRejectCondition where
+  parseJSON = \case
+    Aeson.String "QUERY_REJECT_CONDITION_UNSPECIFIED" -> pure QueryRejectCondition'QueryRejectConditionUnspecified
+    Aeson.String "QUERY_REJECT_CONDITION_NONE" -> pure QueryRejectCondition'QueryRejectConditionNone
+    Aeson.String "QUERY_REJECT_CONDITION_NOT_OPEN" -> pure QueryRejectCondition'QueryRejectConditionNotOpen
+    Aeson.String "QUERY_REJECT_CONDITION_NOT_COMPLETED_CLEANLY" -> pure QueryRejectCondition'QueryRejectConditionNotCompletedCleanly
+    Aeson.Number n -> pure (toEnum (round n))
+    _ -> fail "Invalid enum value for QueryRejectCondition"
+
+instance Hashable QueryRejectCondition where
+  hashWithSalt salt x = hashWithSalt salt (toProtoEnumQueryRejectCondition x)

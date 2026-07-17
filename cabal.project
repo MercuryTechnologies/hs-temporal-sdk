@@ -1,1 +1,2 @@
-packages: */*.cabal
+packages: */*.cabal tools/*/*.cabal
+

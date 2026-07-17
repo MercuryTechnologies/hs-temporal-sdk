@@ -1,1264 +1,622 @@
-{- This file was auto-generated from temporal/api/rules/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Rules.V1.Message (
-        WorkflowRule(), WorkflowRuleAction(),
-        WorkflowRuleAction'Variant(..), _WorkflowRuleAction'ActivityPause,
-        WorkflowRuleAction'ActionActivityPause(), WorkflowRuleSpec(),
-        WorkflowRuleSpec'Trigger(..), _WorkflowRuleSpec'ActivityStart,
-        WorkflowRuleSpec'ActivityStartingTrigger()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Timestamp
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.createTime' @:: Lens' WorkflowRule Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'createTime' @:: Lens' WorkflowRule (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.spec' @:: Lens' WorkflowRule WorkflowRuleSpec@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'spec' @:: Lens' WorkflowRule (Prelude.Maybe WorkflowRuleSpec)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.createdByIdentity' @:: Lens' WorkflowRule Data.Text.Text@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.description' @:: Lens' WorkflowRule Data.Text.Text@ -}
-data WorkflowRule
-  = WorkflowRule'_constructor {_WorkflowRule'createTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                               _WorkflowRule'spec :: !(Prelude.Maybe WorkflowRuleSpec),
-                               _WorkflowRule'createdByIdentity :: !Data.Text.Text,
-                               _WorkflowRule'description :: !Data.Text.Text,
-                               _WorkflowRule'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowRule where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowRule "createTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRule'createTime
-           (\ x__ y__ -> x__ {_WorkflowRule'createTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowRule "maybe'createTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRule'createTime
-           (\ x__ y__ -> x__ {_WorkflowRule'createTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRule "spec" WorkflowRuleSpec where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRule'spec (\ x__ y__ -> x__ {_WorkflowRule'spec = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowRule "maybe'spec" (Prelude.Maybe WorkflowRuleSpec) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRule'spec (\ x__ y__ -> x__ {_WorkflowRule'spec = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRule "createdByIdentity" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRule'createdByIdentity
-           (\ x__ y__ -> x__ {_WorkflowRule'createdByIdentity = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRule "description" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRule'description
-           (\ x__ y__ -> x__ {_WorkflowRule'description = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowRule where
-  messageName _ = Data.Text.pack "temporal.api.rules.v1.WorkflowRule"
-  packedMessageDescriptor _
-    = "\n\
-      \\fWorkflowRule\DC2;\n\
-      \\vcreate_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-      \createTime\DC2;\n\
-      \\EOTspec\CAN\STX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecR\EOTspec\DC2.\n\
-      \\DC3created_by_identity\CAN\ETX \SOH(\tR\DC1createdByIdentity\DC2 \n\
-      \\vdescription\CAN\EOT \SOH(\tR\vdescription"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        createTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "create_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'createTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRule
-        spec__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "spec"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkflowRuleSpec)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'spec")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRule
-        createdByIdentity__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "created_by_identity"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"createdByIdentity")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRule
-        description__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "description"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"description")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRule
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, createTime__field_descriptor),
-           (Data.ProtoLens.Tag 2, spec__field_descriptor),
-           (Data.ProtoLens.Tag 3, createdByIdentity__field_descriptor),
-           (Data.ProtoLens.Tag 4, description__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowRule'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowRule'_unknownFields = y__})
-  defMessage
-    = WorkflowRule'_constructor
-        {_WorkflowRule'createTime = Prelude.Nothing,
-         _WorkflowRule'spec = Prelude.Nothing,
-         _WorkflowRule'createdByIdentity = Data.ProtoLens.fieldDefault,
-         _WorkflowRule'description = Data.ProtoLens.fieldDefault,
-         _WorkflowRule'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowRule -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowRule
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "create_time"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"createTime") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "spec"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"spec") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "created_by_identity"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"createdByIdentity") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "description"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"description") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowRule"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'createTime") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'spec") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (let
-                      _v
-                        = Lens.Family2.view
-                            (Data.ProtoLens.Field.field @"createdByIdentity") _x
-                    in
-                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                          Data.Monoid.mempty
-                      else
-                          (Data.Monoid.<>)
-                            (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                            ((Prelude..)
-                               (\ bs
-                                  -> (Data.Monoid.<>)
-                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                               Data.Text.Encoding.encodeUtf8 _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v
-                           = Lens.Family2.view (Data.ProtoLens.Field.field @"description") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                               ((Prelude..)
-                                  (\ bs
-                                     -> (Data.Monoid.<>)
-                                          (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                             (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                          (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                  Data.Text.Encoding.encodeUtf8 _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData WorkflowRule where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowRule'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowRule'createTime x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkflowRule'spec x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkflowRule'createdByIdentity x__)
-                      (Control.DeepSeq.deepseq (_WorkflowRule'description x__) ()))))
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'variant' @:: Lens' WorkflowRuleAction (Prelude.Maybe WorkflowRuleAction'Variant)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'activityPause' @:: Lens' WorkflowRuleAction (Prelude.Maybe WorkflowRuleAction'ActionActivityPause)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.activityPause' @:: Lens' WorkflowRuleAction WorkflowRuleAction'ActionActivityPause@ -}
-data WorkflowRuleAction
-  = WorkflowRuleAction'_constructor {_WorkflowRuleAction'variant :: !(Prelude.Maybe WorkflowRuleAction'Variant),
-                                     _WorkflowRuleAction'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowRuleAction where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.rules.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Rules.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x23\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x72\x75\x6c\x65\x73\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x15\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x72\x75\x6c\x65\x73\x2e\x76\x31\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x22\x8c\x01\x0a\x12\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x41\x63\x74\x69\x6f\x6e\x12\x54\x0a\x0e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x70\x61\x75\x73\x65\x18\x01\x20\x01\x28\x0b\x32\x3c\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x72\x75\x6c\x65\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x41\x63\x74\x69\x6f\x6e\x2e\x41\x63\x74\x69\x6f\x6e\x41\x63\x74\x69\x76\x69\x74\x79\x50\x61\x75\x73\x65\x1a\x15\x0a\x13\x41\x63\x74\x69\x6f\x6e\x41\x63\x74\x69\x76\x69\x74\x79\x50\x61\x75\x73\x65\x42\x09\x0a\x07\x76\x61\x72\x69\x61\x6e\x74\x22\xb8\x02\x0a\x10\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x53\x70\x65\x63\x12\x0a\x0a\x02\x69\x64\x18\x01\x20\x01\x28\x09\x12\x18\x0a\x10\x76\x69\x73\x69\x62\x69\x6c\x69\x74\x79\x5f\x71\x75\x65\x72\x79\x18\x03\x20\x01\x28\x09\x12\x39\x0a\x07\x61\x63\x74\x69\x6f\x6e\x73\x18\x04\x20\x03\x28\x0b\x32\x28\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x72\x75\x6c\x65\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x41\x63\x74\x69\x6f\x6e\x12\x32\x0a\x0f\x65\x78\x70\x69\x72\x61\x74\x69\x6f\x6e\x5f\x74\x69\x6d\x65\x18\x05\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x56\x0a\x0e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x73\x74\x61\x72\x74\x18\x02\x20\x01\x28\x0b\x32\x3e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x72\x75\x6c\x65\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x53\x70\x65\x63\x2e\x41\x63\x74\x69\x76\x69\x74\x79\x53\x74\x61\x72\x74\x69\x6e\x67\x54\x72\x69\x67\x67\x65\x72\x1a\x2c\x0a\x17\x41\x63\x74\x69\x76\x69\x74\x79\x53\x74\x61\x72\x74\x69\x6e\x67\x54\x72\x69\x67\x67\x65\x72\x12\x11\x0a\x09\x70\x72\x65\x64\x69\x63\x61\x74\x65\x18\x01\x20\x01\x28\x09\x42\x09\x0a\x07\x74\x72\x69\x67\x67\x65\x72\x22\xa6\x01\x0a\x0c\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x12\x2e\x0a\x0b\x63\x72\x65\x61\x74\x65\x5f\x74\x69\x6d\x65\x18\x01\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x12\x34\x0a\x04\x73\x70\x65\x63\x18\x02\x20\x01\x28\x0b\x32\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x72\x75\x6c\x65\x73\x2e\x76\x31\x2e\x57\x6f\x72\x6b\x66\x6c\x6f\x77\x52\x75\x6c\x65\x53\x70\x65\x63\x12\x1b\x0a\x13\x63\x72\x65\x61\x74\x65\x64\x5f\x62\x79\x5f\x69\x64\x65\x6e\x74\x69\x74\x79\x18\x03\x20\x01\x28\x09\x12\x13\x0a\x0b\x64\x65\x73\x63\x72\x69\x70\x74\x69\x6f\x6e\x18\x04\x20\x01\x28\x09\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data WorkflowRuleAction = WorkflowRuleAction
+  { variant :: !(Maybe WorkflowRuleAction'Variant)
+  , workflowRuleActionUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data WorkflowRuleAction'ActionActivityPause = WorkflowRuleAction'ActionActivityPause
+  { workflowRuleActionActionActivityPauseUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowRuleAction'ActionActivityPause :: WorkflowRuleAction'ActionActivityPause
+defaultWorkflowRuleAction'ActionActivityPause = WorkflowRuleAction'ActionActivityPause
+  { workflowRuleActionActionActivityPauseUnknownFields = []
+  }
+
+instance MessageEncode WorkflowRuleAction'ActionActivityPause where
+  buildMessage msg =
+    encodeUnknownFields msg.workflowRuleActionActionActivityPauseUnknownFields
+
+instance MessageSize WorkflowRuleAction'ActionActivityPause where
+  messageSize msg =
+    unknownFieldsSize msg.workflowRuleActionActionActivityPauseUnknownFields
+
+instance MessageDecode WorkflowRuleAction'ActionActivityPause where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (WorkflowRuleAction'ActionActivityPause {workflowRuleActionActionActivityPauseUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowRuleAction'ActionActivityPause where
+  protoMessageName _ = "temporal.api.rules.v1.WorkflowRuleAction.ActionActivityPause"
+  protoPackageName _ = "temporal.api.rules.v1"
+  protoDefaultValue = defaultWorkflowRuleAction'ActionActivityPause
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage WorkflowRuleAction'ActionActivityPause
+
+instance Aeson.ToJSON WorkflowRuleAction'ActionActivityPause where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON WorkflowRuleAction'ActionActivityPause where
+  parseJSON _ = pure defaultWorkflowRuleAction'ActionActivityPause
+
+instance Hashable WorkflowRuleAction'ActionActivityPause where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions WorkflowRuleAction'ActionActivityPause where
+  messageUnknownFields msg = msg.workflowRuleActionActionActivityPauseUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowRuleActionActionActivityPauseUnknownFields = ufs }
+
+instance Semigroup WorkflowRuleAction'ActionActivityPause where
+  a <> b = WorkflowRuleAction'ActionActivityPause
+    { workflowRuleActionActionActivityPauseUnknownFields = a.workflowRuleActionActionActivityPauseUnknownFields <> b.workflowRuleActionActionActivityPauseUnknownFields
+    }
+
+instance Monoid WorkflowRuleAction'ActionActivityPause where
+  mempty = defaultWorkflowRuleAction'ActionActivityPause
 data WorkflowRuleAction'Variant
-  = WorkflowRuleAction'ActivityPause !WorkflowRuleAction'ActionActivityPause
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField WorkflowRuleAction "maybe'variant" (Prelude.Maybe WorkflowRuleAction'Variant) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleAction'variant
-           (\ x__ y__ -> x__ {_WorkflowRuleAction'variant = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRuleAction "maybe'activityPause" (Prelude.Maybe WorkflowRuleAction'ActionActivityPause) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleAction'variant
-           (\ x__ y__ -> x__ {_WorkflowRuleAction'variant = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (WorkflowRuleAction'ActivityPause x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap WorkflowRuleAction'ActivityPause y__))
-instance Data.ProtoLens.Field.HasField WorkflowRuleAction "activityPause" WorkflowRuleAction'ActionActivityPause where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleAction'variant
-           (\ x__ y__ -> x__ {_WorkflowRuleAction'variant = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (WorkflowRuleAction'ActivityPause x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap WorkflowRuleAction'ActivityPause y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message WorkflowRuleAction where
-  messageName _
-    = Data.Text.pack "temporal.api.rules.v1.WorkflowRuleAction"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2WorkflowRuleAction\DC2f\n\
-      \\SOactivity_pause\CAN\SOH \SOH(\v2=.temporal.api.rules.v1.WorkflowRuleAction.ActionActivityPauseH\NULR\ractivityPause\SUB\NAK\n\
-      \\DC3ActionActivityPauseB\t\n\
-      \\avariant"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        activityPause__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_pause"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkflowRuleAction'ActionActivityPause)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'activityPause")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleAction
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, activityPause__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowRuleAction'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowRuleAction'_unknownFields = y__})
-  defMessage
-    = WorkflowRuleAction'_constructor
-        {_WorkflowRuleAction'variant = Prelude.Nothing,
-         _WorkflowRuleAction'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowRuleAction
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowRuleAction
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "activity_pause"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityPause") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WorkflowRuleAction"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'variant") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just (WorkflowRuleAction'ActivityPause v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData WorkflowRuleAction where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowRuleAction'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_WorkflowRuleAction'variant x__) ())
-instance Control.DeepSeq.NFData WorkflowRuleAction'Variant where
-  rnf (WorkflowRuleAction'ActivityPause x__)
-    = Control.DeepSeq.rnf x__
-_WorkflowRuleAction'ActivityPause ::
-  Data.ProtoLens.Prism.Prism' WorkflowRuleAction'Variant WorkflowRuleAction'ActionActivityPause
-_WorkflowRuleAction'ActivityPause
-  = Data.ProtoLens.Prism.prism'
-      WorkflowRuleAction'ActivityPause
-      (\ p__
-         -> case p__ of
-              (WorkflowRuleAction'ActivityPause p__val) -> Prelude.Just p__val)
-{- | Fields :
-      -}
-data WorkflowRuleAction'ActionActivityPause
-  = WorkflowRuleAction'ActionActivityPause'_constructor {_WorkflowRuleAction'ActionActivityPause'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowRuleAction'ActionActivityPause where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message WorkflowRuleAction'ActionActivityPause where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.rules.v1.WorkflowRuleAction.ActionActivityPause"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC3ActionActivityPause"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowRuleAction'ActionActivityPause'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_WorkflowRuleAction'ActionActivityPause'_unknownFields = y__})
-  defMessage
-    = WorkflowRuleAction'ActionActivityPause'_constructor
-        {_WorkflowRuleAction'ActionActivityPause'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowRuleAction'ActionActivityPause
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowRuleAction'ActionActivityPause
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActionActivityPause"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData WorkflowRuleAction'ActionActivityPause where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowRuleAction'ActionActivityPause'_unknownFields x__) ()
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.id' @:: Lens' WorkflowRuleSpec Data.Text.Text@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.visibilityQuery' @:: Lens' WorkflowRuleSpec Data.Text.Text@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.actions' @:: Lens' WorkflowRuleSpec [WorkflowRuleAction]@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.vec'actions' @:: Lens' WorkflowRuleSpec (Data.Vector.Vector WorkflowRuleAction)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.expirationTime' @:: Lens' WorkflowRuleSpec Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'expirationTime' @:: Lens' WorkflowRuleSpec (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'trigger' @:: Lens' WorkflowRuleSpec (Prelude.Maybe WorkflowRuleSpec'Trigger)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.maybe'activityStart' @:: Lens' WorkflowRuleSpec (Prelude.Maybe WorkflowRuleSpec'ActivityStartingTrigger)@
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.activityStart' @:: Lens' WorkflowRuleSpec WorkflowRuleSpec'ActivityStartingTrigger@ -}
-data WorkflowRuleSpec
-  = WorkflowRuleSpec'_constructor {_WorkflowRuleSpec'id :: !Data.Text.Text,
-                                   _WorkflowRuleSpec'visibilityQuery :: !Data.Text.Text,
-                                   _WorkflowRuleSpec'actions :: !(Data.Vector.Vector WorkflowRuleAction),
-                                   _WorkflowRuleSpec'expirationTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                                   _WorkflowRuleSpec'trigger :: !(Prelude.Maybe WorkflowRuleSpec'Trigger),
-                                   _WorkflowRuleSpec'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowRuleSpec where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+  = WorkflowRuleAction'Variant'ActivityPause !WorkflowRuleAction'ActionActivityPause
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON WorkflowRuleAction'Variant where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON WorkflowRuleAction'Variant where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable WorkflowRuleAction'Variant where
+  hashWithSalt salt (WorkflowRuleAction'Variant'ActivityPause v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+
+defaultWorkflowRuleAction :: WorkflowRuleAction
+defaultWorkflowRuleAction = WorkflowRuleAction
+  { variant = Nothing
+  , workflowRuleActionUnknownFields = []
+  }
+
+instance MessageEncode WorkflowRuleAction where
+  buildMessage msg =
+    (case msg.variant of
+      Nothing -> mempty
+      Just (WorkflowRuleAction'Variant'ActivityPause v) -> (let sz = messageSize v in archSubmessage 10 sz (buildMessage v)))
+    <> encodeUnknownFields msg.workflowRuleActionUnknownFields
+
+instance MessageSize WorkflowRuleAction where
+  messageSize msg =
+    (case msg.variant of { Nothing -> 0; Just (WorkflowRuleAction'Variant'ActivityPause v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.workflowRuleActionUnknownFields
+
+instance MessageDecode WorkflowRuleAction where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (WorkflowRuleAction {variant = acc_0, workflowRuleActionUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just (WorkflowRuleAction'Variant'ActivityPause v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowRuleAction where
+  protoMessageName _ = "temporal.api.rules.v1.WorkflowRuleAction"
+  protoPackageName _ = "temporal.api.rules.v1"
+  protoDefaultValue = defaultWorkflowRuleAction
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "variant"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "variant"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRuleAction) -> m.variant
+        , fdSet = \v (m :: WorkflowRuleAction) -> (m { variant = v } :: WorkflowRuleAction)
+        })
+    ]
+
+instance IsMessage WorkflowRuleAction
+
+instance Aeson.ToJSON WorkflowRuleAction where
+  toJSON msg = jsonObject
+      [ "variant" .=: msg.variant
+
+      ]
+
+instance Aeson.FromJSON WorkflowRuleAction where
+  parseJSON = Aeson.withObject "WorkflowRuleAction" $ \obj -> do
+    fld_variant <- parseFieldMaybe obj "variant"
+    pure (defaultWorkflowRuleAction
+      { variant = maybe (defaultWorkflowRuleAction.variant) Prelude.id fld_variant
+      , workflowRuleActionUnknownFields = []
+      } :: WorkflowRuleAction)
+
+instance Hashable WorkflowRuleAction where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.variant
+
+instance Proto.Extension.HasExtensions WorkflowRuleAction where
+  messageUnknownFields msg = msg.workflowRuleActionUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowRuleActionUnknownFields = ufs }
+
+instance Semigroup WorkflowRuleAction where
+  a <> b = WorkflowRuleAction
+    { variant = case b.variant of { Nothing -> a.variant; x -> x }
+    , workflowRuleActionUnknownFields = a.workflowRuleActionUnknownFields <> b.workflowRuleActionUnknownFields
+    }
+
+instance Monoid WorkflowRuleAction where
+  mempty = defaultWorkflowRuleAction
+
+data WorkflowRuleSpec = WorkflowRuleSpec
+  { id :: !(Maybe Text)
+  , visibilityQuery :: !(Maybe Text)
+  , actions :: !(V.Vector WorkflowRuleAction)
+  , expirationTime :: !(Maybe PB_Timestamp.Timestamp)
+  , trigger :: !(Maybe WorkflowRuleSpec'Trigger)
+  , workflowRuleSpecUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+data WorkflowRuleSpec'ActivityStartingTrigger = WorkflowRuleSpec'ActivityStartingTrigger
+  { predicate :: !(Maybe Text)
+  , workflowRuleSpecActivityStartingTriggerUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowRuleSpec'ActivityStartingTrigger :: WorkflowRuleSpec'ActivityStartingTrigger
+defaultWorkflowRuleSpec'ActivityStartingTrigger = WorkflowRuleSpec'ActivityStartingTrigger
+  { predicate = Nothing
+  , workflowRuleSpecActivityStartingTriggerUnknownFields = []
+  }
+
+instance MessageEncode WorkflowRuleSpec'ActivityStartingTrigger where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.predicate)
+    <> encodeUnknownFields msg.workflowRuleSpecActivityStartingTriggerUnknownFields
+
+instance MessageSize WorkflowRuleSpec'ActivityStartingTrigger where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.predicate)
+    + unknownFieldsSize msg.workflowRuleSpecActivityStartingTriggerUnknownFields
+
+instance MessageDecode WorkflowRuleSpec'ActivityStartingTrigger where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (WorkflowRuleSpec'ActivityStartingTrigger {predicate = acc_0, workflowRuleSpecActivityStartingTriggerUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowRuleSpec'ActivityStartingTrigger where
+  protoMessageName _ = "temporal.api.rules.v1.WorkflowRuleSpec.ActivityStartingTrigger"
+  protoPackageName _ = "temporal.api.rules.v1"
+  protoDefaultValue = defaultWorkflowRuleSpec'ActivityStartingTrigger
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "predicate"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRuleSpec'ActivityStartingTrigger) -> m.predicate
+        , fdSet = \v (m :: WorkflowRuleSpec'ActivityStartingTrigger) -> (m { predicate = v } :: WorkflowRuleSpec'ActivityStartingTrigger)
+        })
+    ]
+
+instance IsMessage WorkflowRuleSpec'ActivityStartingTrigger
+
+instance Aeson.ToJSON WorkflowRuleSpec'ActivityStartingTrigger where
+  toJSON msg = jsonObject
+      [ "predicate" .=: msg.predicate
+
+      ]
+
+instance Aeson.FromJSON WorkflowRuleSpec'ActivityStartingTrigger where
+  parseJSON = Aeson.withObject "WorkflowRuleSpec'ActivityStartingTrigger" $ \obj -> do
+    fld_predicate <- parseFieldMaybe obj "predicate"
+    pure (defaultWorkflowRuleSpec'ActivityStartingTrigger
+      { predicate = maybe (defaultWorkflowRuleSpec'ActivityStartingTrigger.predicate) Prelude.id fld_predicate
+      , workflowRuleSpecActivityStartingTriggerUnknownFields = []
+      } :: WorkflowRuleSpec'ActivityStartingTrigger)
+
+instance Hashable WorkflowRuleSpec'ActivityStartingTrigger where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.predicate
+
+instance Proto.Extension.HasExtensions WorkflowRuleSpec'ActivityStartingTrigger where
+  messageUnknownFields msg = msg.workflowRuleSpecActivityStartingTriggerUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowRuleSpecActivityStartingTriggerUnknownFields = ufs }
+
+instance Semigroup WorkflowRuleSpec'ActivityStartingTrigger where
+  a <> b = WorkflowRuleSpec'ActivityStartingTrigger
+    { predicate = case b.predicate of { Nothing -> a.predicate; x -> x }
+    , workflowRuleSpecActivityStartingTriggerUnknownFields = a.workflowRuleSpecActivityStartingTriggerUnknownFields <> b.workflowRuleSpecActivityStartingTriggerUnknownFields
+    }
+
+instance Monoid WorkflowRuleSpec'ActivityStartingTrigger where
+  mempty = defaultWorkflowRuleSpec'ActivityStartingTrigger
 data WorkflowRuleSpec'Trigger
-  = WorkflowRuleSpec'ActivityStart !WorkflowRuleSpec'ActivityStartingTrigger
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "id" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'id
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'id = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "visibilityQuery" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'visibilityQuery
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'visibilityQuery = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "actions" [WorkflowRuleAction] where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'actions
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'actions = y__}))
-        (Lens.Family2.Unchecked.lens
-           Data.Vector.Generic.toList
-           (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "vec'actions" (Data.Vector.Vector WorkflowRuleAction) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'actions
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'actions = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "expirationTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'expirationTime
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'expirationTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "maybe'expirationTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'expirationTime
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'expirationTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "maybe'trigger" (Prelude.Maybe WorkflowRuleSpec'Trigger) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'trigger
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'trigger = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "maybe'activityStart" (Prelude.Maybe WorkflowRuleSpec'ActivityStartingTrigger) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'trigger
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'trigger = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (WorkflowRuleSpec'ActivityStart x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap WorkflowRuleSpec'ActivityStart y__))
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec "activityStart" WorkflowRuleSpec'ActivityStartingTrigger where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'trigger
-           (\ x__ y__ -> x__ {_WorkflowRuleSpec'trigger = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (WorkflowRuleSpec'ActivityStart x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap WorkflowRuleSpec'ActivityStart y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message WorkflowRuleSpec where
-  messageName _
-    = Data.Text.pack "temporal.api.rules.v1.WorkflowRuleSpec"
-  packedMessageDescriptor _
-    = "\n\
-      \\DLEWorkflowRuleSpec\DC2\SO\n\
-      \\STXid\CAN\SOH \SOH(\tR\STXid\DC2h\n\
-      \\SOactivity_start\CAN\STX \SOH(\v2?.temporal.api.rules.v1.WorkflowRuleSpec.ActivityStartingTriggerH\NULR\ractivityStart\DC2)\n\
-      \\DLEvisibility_query\CAN\ETX \SOH(\tR\SIvisibilityQuery\DC2C\n\
-      \\aactions\CAN\EOT \ETX(\v2).temporal.api.rules.v1.WorkflowRuleActionR\aactions\DC2C\n\
-      \\SIexpiration_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTime\SUB7\n\
-      \\ETBActivityStartingTrigger\DC2\FS\n\
-      \\tpredicate\CAN\SOH \SOH(\tR\tpredicateB\t\n\
-      \\atrigger"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        id__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleSpec
-        visibilityQuery__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "visibility_query"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"visibilityQuery")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleSpec
-        actions__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "actions"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkflowRuleAction)
-              (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"actions")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleSpec
-        expirationTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "expiration_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'expirationTime")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleSpec
-        activityStart__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "activity_start"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WorkflowRuleSpec'ActivityStartingTrigger)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'activityStart")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleSpec
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, id__field_descriptor),
-           (Data.ProtoLens.Tag 3, visibilityQuery__field_descriptor),
-           (Data.ProtoLens.Tag 4, actions__field_descriptor),
-           (Data.ProtoLens.Tag 5, expirationTime__field_descriptor),
-           (Data.ProtoLens.Tag 2, activityStart__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowRuleSpec'_unknownFields
-        (\ x__ y__ -> x__ {_WorkflowRuleSpec'_unknownFields = y__})
-  defMessage
-    = WorkflowRuleSpec'_constructor
-        {_WorkflowRuleSpec'id = Data.ProtoLens.fieldDefault,
-         _WorkflowRuleSpec'visibilityQuery = Data.ProtoLens.fieldDefault,
-         _WorkflowRuleSpec'actions = Data.Vector.Generic.empty,
-         _WorkflowRuleSpec'expirationTime = Prelude.Nothing,
-         _WorkflowRuleSpec'trigger = Prelude.Nothing,
-         _WorkflowRuleSpec'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowRuleSpec
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld WorkflowRuleAction
-             -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowRuleSpec
-        loop x mutable'actions
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do frozen'actions <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                          (Data.ProtoLens.Encoding.Growing.unsafeFreeze
-                                             mutable'actions)
-                      (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
-                           (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'actions") frozen'actions x))
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "id"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
-                                  mutable'actions
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "visibility_query"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"visibilityQuery") y x)
-                                  mutable'actions
-                        34
-                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                            Data.ProtoLens.Encoding.Bytes.isolate
-                                              (Prelude.fromIntegral len)
-                                              Data.ProtoLens.parseMessage)
-                                        "actions"
-                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'actions y)
-                                loop x v
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "expiration_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"expirationTime") y x)
-                                  mutable'actions
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "activity_start"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"activityStart") y x)
-                                  mutable'actions
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'actions
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'actions <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                   Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'actions)
-          "WorkflowRuleSpec"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"visibilityQuery") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                      (\ _v
-                         -> (Data.Monoid.<>)
-                              (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                              ((Prelude..)
-                                 (\ bs
-                                    -> (Data.Monoid.<>)
-                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                 Data.ProtoLens.encodeMessage _v))
-                      (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'actions") _x))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'expirationTime") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just _v)
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                                ((Prelude..)
-                                   (\ bs
-                                      -> (Data.Monoid.<>)
-                                           (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                              (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                           (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage _v))
-                      ((Data.Monoid.<>)
-                         (case
-                              Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'trigger") _x
-                          of
-                            Prelude.Nothing -> Data.Monoid.mempty
-                            (Prelude.Just (WorkflowRuleSpec'ActivityStart v))
-                              -> (Data.Monoid.<>)
-                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                                   ((Prelude..)
-                                      (\ bs
-                                         -> (Data.Monoid.<>)
-                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage v))
-                         (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                            (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))
-instance Control.DeepSeq.NFData WorkflowRuleSpec where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowRuleSpec'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowRuleSpec'id x__)
-                (Control.DeepSeq.deepseq
-                   (_WorkflowRuleSpec'visibilityQuery x__)
-                   (Control.DeepSeq.deepseq
-                      (_WorkflowRuleSpec'actions x__)
-                      (Control.DeepSeq.deepseq
-                         (_WorkflowRuleSpec'expirationTime x__)
-                         (Control.DeepSeq.deepseq (_WorkflowRuleSpec'trigger x__) ())))))
-instance Control.DeepSeq.NFData WorkflowRuleSpec'Trigger where
-  rnf (WorkflowRuleSpec'ActivityStart x__) = Control.DeepSeq.rnf x__
-_WorkflowRuleSpec'ActivityStart ::
-  Data.ProtoLens.Prism.Prism' WorkflowRuleSpec'Trigger WorkflowRuleSpec'ActivityStartingTrigger
-_WorkflowRuleSpec'ActivityStart
-  = Data.ProtoLens.Prism.prism'
-      WorkflowRuleSpec'ActivityStart
-      (\ p__
-         -> case p__ of
-              (WorkflowRuleSpec'ActivityStart p__val) -> Prelude.Just p__val)
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Rules.V1.Message_Fields.predicate' @:: Lens' WorkflowRuleSpec'ActivityStartingTrigger Data.Text.Text@ -}
-data WorkflowRuleSpec'ActivityStartingTrigger
-  = WorkflowRuleSpec'ActivityStartingTrigger'_constructor {_WorkflowRuleSpec'ActivityStartingTrigger'predicate :: !Data.Text.Text,
-                                                           _WorkflowRuleSpec'ActivityStartingTrigger'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WorkflowRuleSpec'ActivityStartingTrigger where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField WorkflowRuleSpec'ActivityStartingTrigger "predicate" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _WorkflowRuleSpec'ActivityStartingTrigger'predicate
-           (\ x__ y__
-              -> x__
-                   {_WorkflowRuleSpec'ActivityStartingTrigger'predicate = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message WorkflowRuleSpec'ActivityStartingTrigger where
-  messageName _
-    = Data.Text.pack
-        "temporal.api.rules.v1.WorkflowRuleSpec.ActivityStartingTrigger"
-  packedMessageDescriptor _
-    = "\n\
-      \\ETBActivityStartingTrigger\DC2\FS\n\
-      \\tpredicate\CAN\SOH \SOH(\tR\tpredicate"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        predicate__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "predicate"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"predicate")) ::
-              Data.ProtoLens.FieldDescriptor WorkflowRuleSpec'ActivityStartingTrigger
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, predicate__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WorkflowRuleSpec'ActivityStartingTrigger'_unknownFields
-        (\ x__ y__
-           -> x__
-                {_WorkflowRuleSpec'ActivityStartingTrigger'_unknownFields = y__})
-  defMessage
-    = WorkflowRuleSpec'ActivityStartingTrigger'_constructor
-        {_WorkflowRuleSpec'ActivityStartingTrigger'predicate = Data.ProtoLens.fieldDefault,
-         _WorkflowRuleSpec'ActivityStartingTrigger'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WorkflowRuleSpec'ActivityStartingTrigger
-          -> Data.ProtoLens.Encoding.Bytes.Parser WorkflowRuleSpec'ActivityStartingTrigger
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "predicate"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"predicate") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityStartingTrigger"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"predicate") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData WorkflowRuleSpec'ActivityStartingTrigger where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WorkflowRuleSpec'ActivityStartingTrigger'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_WorkflowRuleSpec'ActivityStartingTrigger'predicate x__) ())
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \#temporal/api/rules/v1/message.proto\DC2\NAKtemporal.api.rules.v1\SUB\USgoogle/protobuf/timestamp.proto\"\158\SOH\n\
-    \\DC2WorkflowRuleAction\DC2f\n\
-    \\SOactivity_pause\CAN\SOH \SOH(\v2=.temporal.api.rules.v1.WorkflowRuleAction.ActionActivityPauseH\NULR\ractivityPause\SUB\NAK\n\
-    \\DC3ActionActivityPauseB\t\n\
-    \\avariant\"\133\ETX\n\
-    \\DLEWorkflowRuleSpec\DC2\SO\n\
-    \\STXid\CAN\SOH \SOH(\tR\STXid\DC2h\n\
-    \\SOactivity_start\CAN\STX \SOH(\v2?.temporal.api.rules.v1.WorkflowRuleSpec.ActivityStartingTriggerH\NULR\ractivityStart\DC2)\n\
-    \\DLEvisibility_query\CAN\ETX \SOH(\tR\SIvisibilityQuery\DC2C\n\
-    \\aactions\CAN\EOT \ETX(\v2).temporal.api.rules.v1.WorkflowRuleActionR\aactions\DC2C\n\
-    \\SIexpiration_time\CAN\ENQ \SOH(\v2\SUB.google.protobuf.TimestampR\SOexpirationTime\SUB7\n\
-    \\ETBActivityStartingTrigger\DC2\FS\n\
-    \\tpredicate\CAN\SOH \SOH(\tR\tpredicateB\t\n\
-    \\atrigger\"\218\SOH\n\
-    \\fWorkflowRule\DC2;\n\
-    \\vcreate_time\CAN\SOH \SOH(\v2\SUB.google.protobuf.TimestampR\n\
-    \createTime\DC2;\n\
-    \\EOTspec\CAN\STX \SOH(\v2'.temporal.api.rules.v1.WorkflowRuleSpecR\EOTspec\DC2.\n\
-    \\DC3created_by_identity\CAN\ETX \SOH(\tR\DC1createdByIdentity\DC2 \n\
-    \\vdescription\CAN\EOT \SOH(\tR\vdescriptionB\132\SOH\n\
-    \\CANio.temporal.api.rules.v1B\fMessageProtoP\SOHZ!go.temporal.io/api/rules/v1;rules\170\STX\ETBTemporalio.Api.Rules.V1\234\STX\SUBTemporalio::Api::Rules::V1J\207\CAN\n\
-    \\ACK\DC2\EOT\NUL\NULY\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\RS\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL8\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL8\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL1\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL1\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL3\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL3\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL4\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL4\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\f\NUL)\n\
-    \\n\
-    \\n\
-    \\STX\EOT\NUL\DC2\EOT\SO\NUL\SYN\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\SO\b\SUB\n\
-    \\f\n\
-    \\EOT\EOT\NUL\ETX\NUL\DC2\EOT\SI\STX\DLE\ETX\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\ETX\NUL\SOH\DC2\ETX\SI\n\
-    \\GS\n\
-    \\"\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT\DC3\STX\NAK\ETX\SUB\DC4 Supported actions.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\DC3\b\SI\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC4\EOT+\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\DC4\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC4\CAN&\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC4)*\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT\CAN\NULF\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\CAN\b\CAN\n\
-    \\140\SOH\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ESC\STX\DLE\SUB\DEL The id of the new workflow rule. Must be unique within the namespace.\n\
-    \ Can be set by the user, and can have business meaning.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\ESC\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ESC\t\v\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ESC\SO\SI\n\
-    \V\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\RS\STX.\ETX\SUBH Activity trigger will be triggered when an activity is about to start.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\RS\n\
-    \!\n\
-    \\149\ACK\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX-\EOT\EM\SUB\133\ACK Activity predicate is a SQL-like string filter parameter.\n\
-    \ It is used to match against workflow data.\n\
-    \ The following activity attributes are supported as part of the predicate:\n\
-    \ - ActivityType: An Activity Type is the mapping of a name to an Activity Definition..\n\
-    \ - ActivityId: The ID of the activity.\n\
-    \ - ActivityAttempt: The number attempts of the activity.\n\
-    \ - BackoffInterval: The current amount of time between scheduled attempts of the activity.\n\
-    \ - ActivityStatus: The status of the activity. Can be one of \"Scheduled\", \"Started\", \"Paused\".\n\
-    \ - TaskQueue: The name of the task queue the workflow specified that the activity should run on.\n\
-    \ Activity predicate support the following operators:\n\
-    \  * =, !=, >, >=, <, <=\n\
-    \  * AND, OR, ()\n\
-    \  * BETWEEN ... AND\n\
-    \    STARTS_WITH\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ENQ\DC2\ETX-\EOT\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX-\v\DC4\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX-\ETB\CAN\n\
-    \~\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOT2\STX4\ETX\SUBp Specifies how the rule should be triggered and evaluated.\n\
-    \ Currently, only \"activity start\" type is supported.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX2\b\SI\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX3\EOT/\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX3\EOT\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX3\FS*\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX3-.\n\
-    \\238\STX\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX>\STX\RS\SUB\224\STX Restricted Visibility query.\n\
-    \ This query is used to filter workflows in this namespace to which this rule should apply.\n\
-    \ It is applied to any running workflow each time a triggering event occurs, before the trigger predicate is evaluated.\n\
-    \ The following workflow attributes are supported:\n\
-    \ - WorkflowType\n\
-    \ - WorkflowId\n\
-    \ - StartTime\n\
-    \ - ExecutionStatus\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ENQ\DC2\ETX>\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX>\t\EM\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX>\FS\GS\n\
-    \b\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETXA\STX*\SUBU WorkflowRuleAction to be taken when the rule is triggered and predicate is matched.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\EOT\DC2\ETXA\STX\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETXA\v\GS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETXA\RS%\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETXA()\n\
-    \\133\SOH\n\
-    \\EOT\EOT\SOH\STX\EOT\DC2\ETXE\STX0\SUBx Expiration time of the rule. After this time, the rule will be deleted.\n\
-    \ Can be empty if the rule should never expire.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETXE\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETXE\FS+\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETXE./\n\
-    \b\n\
-    \\STX\EOT\STX\DC2\EOTI\NULY\SOH\SUBV WorkflowRule describes a rule that can be applied to any workflow in this namespace.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETXI\b\DC4\n\
-    \\"\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETXK\STX,\SUB\NAK Rule creation time.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETXK\STX\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETXK\FS'\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETXK*+\n\
-    \!\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETXN\STX\FS\SUB\DC4 Rule specification\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETXN\STX\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETXN\DC3\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETXN\SUB\ESC\n\
-    \\220\STX\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETXU\STX!\SUB\206\STX Identity of the actor that created the rule\n\
-    \ (-- api-linter: core::0140::prepositions=disabled\n\
-    \     aip.dev/not-precedent: It is better reflect the intent this way, we will also have updated_by. --)\n\
-    \ (-- api-linter: core::0142::time-field-names=disabled\n\
-    \     aip.dev/not-precedent: Same as above. All other options sounds clumsy --)\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETXU\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETXU\t\FS\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETXU\US \n\
-    \ \n\
-    \\EOT\EOT\STX\STX\ETX\DC2\ETXX\STX\EM\SUB\DC3 Rule description.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ENQ\DC2\ETXX\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\SOH\DC2\ETXX\t\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\ETX\ETX\DC2\ETXX\ETB\CANb\ACKproto3"
+  = WorkflowRuleSpec'Trigger'ActivityStart !WorkflowRuleSpec'ActivityStartingTrigger
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON WorkflowRuleSpec'Trigger where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON WorkflowRuleSpec'Trigger where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable WorkflowRuleSpec'Trigger where
+  hashWithSalt salt (WorkflowRuleSpec'Trigger'ActivityStart v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+
+defaultWorkflowRuleSpec :: WorkflowRuleSpec
+defaultWorkflowRuleSpec = WorkflowRuleSpec
+  { id = Nothing
+  , visibilityQuery = Nothing
+  , actions = V.empty
+  , expirationTime = Nothing
+  , trigger = Nothing
+  , workflowRuleSpecUnknownFields = []
+  }
+
+instance MessageEncode WorkflowRuleSpec where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.id)
+    <> (maybe mempty (\v -> archString 26 v) msg.visibilityQuery)
+    <> V.foldl' (\acc v -> let sz = messageSize v in acc <> archSubmessage 34 sz (buildMessage v)) mempty msg.actions
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.expirationTime)
+    <> (case msg.trigger of
+      Nothing -> mempty
+      Just (WorkflowRuleSpec'Trigger'ActivityStart v) -> (let sz = messageSize v in archSubmessage 18 sz (buildMessage v)))
+    <> encodeUnknownFields msg.workflowRuleSpecUnknownFields
+
+instance MessageSize WorkflowRuleSpec where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.id)
+    + (maybe 0 (\v -> archStringSize v) msg.visibilityQuery)
+    + (V.foldl' (\acc v -> acc + archSubmessageSize (messageSize v)) 0 msg.actions)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.expirationTime)
+    + (case msg.trigger of { Nothing -> 0; Just (WorkflowRuleSpec'Trigger'ActivityStart v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.workflowRuleSpecUnknownFields
+
+instance MessageDecode WorkflowRuleSpec where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing V.empty Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_4 acc_unknown_ = withTagM
+        (pure (WorkflowRuleSpec {id = acc_0, visibilityQuery = acc_1, actions = acc_2, expirationTime = acc_3, trigger = acc_4, workflowRuleSpecUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_4 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_3 acc_4 acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (acc_2 <> V.singleton v) acc_3 acc_4 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 (Just v) acc_4 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 acc_2 acc_3 (Just (WorkflowRuleSpec'Trigger'ActivityStart v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 acc_4 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowRuleSpec where
+  protoMessageName _ = "temporal.api.rules.v1.WorkflowRuleSpec"
+  protoPackageName _ = "temporal.api.rules.v1"
+  protoDefaultValue = defaultWorkflowRuleSpec
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRuleSpec) -> m.id
+        , fdSet = \v (m :: WorkflowRuleSpec) -> (m { id = v } :: WorkflowRuleSpec)
+        }), (3, SomeField FieldDescriptor
+        { fdName = "visibility_query"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRuleSpec) -> m.visibilityQuery
+        , fdSet = \v (m :: WorkflowRuleSpec) -> (m { visibilityQuery = v } :: WorkflowRuleSpec)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "actions"
+        , fdNumber = 4
+        , fdTypeDesc = MessageType "temporal.api.rules.v1.WorkflowRuleAction"
+        , fdLabel = LabelRepeated
+        , fdGet = \(m :: WorkflowRuleSpec) -> m.actions
+        , fdSet = \v (m :: WorkflowRuleSpec) -> (m { actions = v } :: WorkflowRuleSpec)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "expiration_time"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRuleSpec) -> m.expirationTime
+        , fdSet = \v (m :: WorkflowRuleSpec) -> (m { expirationTime = v } :: WorkflowRuleSpec)
+        })
+    , (2, SomeField FieldDescriptor
+        { fdName = "trigger"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "trigger"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRuleSpec) -> m.trigger
+        , fdSet = \v (m :: WorkflowRuleSpec) -> (m { trigger = v } :: WorkflowRuleSpec)
+        })
+    ]
+
+instance IsMessage WorkflowRuleSpec
+
+instance Aeson.ToJSON WorkflowRuleSpec where
+  toJSON msg = jsonObject
+      [ "id" .=: msg.id
+      , "visibilityQuery" .=: msg.visibilityQuery
+      , "actions" .=: msg.actions
+      , "expirationTime" .=: msg.expirationTime
+      , "trigger" .=: msg.trigger
+      ]
+
+instance Aeson.FromJSON WorkflowRuleSpec where
+  parseJSON = Aeson.withObject "WorkflowRuleSpec" $ \obj -> do
+    fld_id <- parseFieldMaybe obj "id"
+    fld_visibilityQuery <- parseFieldMaybe obj "visibilityQuery"
+    fld_actions <- parseFieldMaybe obj "actions"
+    fld_expirationTime <- parseFieldMaybe obj "expirationTime"
+    fld_trigger <- parseFieldMaybe obj "trigger"
+    pure (defaultWorkflowRuleSpec
+      { id = maybe (defaultWorkflowRuleSpec.id) Prelude.id fld_id
+      , visibilityQuery = maybe (defaultWorkflowRuleSpec.visibilityQuery) Prelude.id fld_visibilityQuery
+      , actions = maybe (defaultWorkflowRuleSpec.actions) Prelude.id fld_actions
+      , expirationTime = maybe (defaultWorkflowRuleSpec.expirationTime) Prelude.id fld_expirationTime
+      , trigger = maybe (defaultWorkflowRuleSpec.trigger) Prelude.id fld_trigger
+      , workflowRuleSpecUnknownFields = []
+      } :: WorkflowRuleSpec)
+
+instance Hashable WorkflowRuleSpec where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (V.foldl' hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.id) msg.visibilityQuery) msg.actions) msg.expirationTime) msg.trigger
+
+instance Proto.Extension.HasExtensions WorkflowRuleSpec where
+  messageUnknownFields msg = msg.workflowRuleSpecUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowRuleSpecUnknownFields = ufs }
+
+instance Semigroup WorkflowRuleSpec where
+  a <> b = WorkflowRuleSpec
+    { id = case b.id of { Nothing -> a.id; x -> x }
+    , visibilityQuery = case b.visibilityQuery of { Nothing -> a.visibilityQuery; x -> x }
+    , actions = a.actions <> b.actions
+    , expirationTime = case b.expirationTime of { Nothing -> a.expirationTime; x -> x }
+    , trigger = case b.trigger of { Nothing -> a.trigger; x -> x }
+    , workflowRuleSpecUnknownFields = a.workflowRuleSpecUnknownFields <> b.workflowRuleSpecUnknownFields
+    }
+
+instance Monoid WorkflowRuleSpec where
+  mempty = defaultWorkflowRuleSpec
+
+data WorkflowRule = WorkflowRule
+  { createTime :: !(Maybe PB_Timestamp.Timestamp)
+  , spec :: !(Maybe WorkflowRuleSpec)
+  , createdByIdentity :: !(Maybe Text)
+  , description :: !(Maybe Text)
+  , workflowRuleUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWorkflowRule :: WorkflowRule
+defaultWorkflowRule = WorkflowRule
+  { createTime = Nothing
+  , spec = Nothing
+  , createdByIdentity = Nothing
+  , description = Nothing
+  , workflowRuleUnknownFields = []
+  }
+
+instance MessageEncode WorkflowRule where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.createTime)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.spec)
+    <> (maybe mempty (\v -> archString 26 v) msg.createdByIdentity)
+    <> (maybe mempty (\v -> archString 34 v) msg.description)
+    <> encodeUnknownFields msg.workflowRuleUnknownFields
+
+instance MessageSize WorkflowRule where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.createTime)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.spec)
+    + (maybe 0 (\v -> archStringSize v) msg.createdByIdentity)
+    + (maybe 0 (\v -> archStringSize v) msg.description)
+    + unknownFieldsSize msg.workflowRuleUnknownFields
+
+instance MessageDecode WorkflowRule where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (WorkflowRule {createTime = acc_0, spec = acc_1, createdByIdentity = acc_2, description = acc_3, workflowRuleUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          3 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 (Just v) acc_3 acc_unknown_
+          4 -> do
+            v <- decodeFieldString
+            loop acc_0 acc_1 acc_2 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage WorkflowRule where
+  protoMessageName _ = "temporal.api.rules.v1.WorkflowRule"
+  protoPackageName _ = "temporal.api.rules.v1"
+  protoDefaultValue = defaultWorkflowRule
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "create_time"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRule) -> m.createTime
+        , fdSet = \v (m :: WorkflowRule) -> (m { createTime = v } :: WorkflowRule)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "spec"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "temporal.api.rules.v1.WorkflowRuleSpec"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRule) -> m.spec
+        , fdSet = \v (m :: WorkflowRule) -> (m { spec = v } :: WorkflowRule)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "created_by_identity"
+        , fdNumber = 3
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRule) -> m.createdByIdentity
+        , fdSet = \v (m :: WorkflowRule) -> (m { createdByIdentity = v } :: WorkflowRule)
+        })
+    , (4, SomeField FieldDescriptor
+        { fdName = "description"
+        , fdNumber = 4
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: WorkflowRule) -> m.description
+        , fdSet = \v (m :: WorkflowRule) -> (m { description = v } :: WorkflowRule)
+        })
+    ]
+
+instance IsMessage WorkflowRule
+
+instance Aeson.ToJSON WorkflowRule where
+  toJSON msg = jsonObject
+      [ "createTime" .=: msg.createTime
+      , "spec" .=: msg.spec
+      , "createdByIdentity" .=: msg.createdByIdentity
+      , "description" .=: msg.description
+      ]
+
+instance Aeson.FromJSON WorkflowRule where
+  parseJSON = Aeson.withObject "WorkflowRule" $ \obj -> do
+    fld_createTime <- parseFieldMaybe obj "createTime"
+    fld_spec <- parseFieldMaybe obj "spec"
+    fld_createdByIdentity <- parseFieldMaybe obj "createdByIdentity"
+    fld_description <- parseFieldMaybe obj "description"
+    pure (defaultWorkflowRule
+      { createTime = maybe (defaultWorkflowRule.createTime) Prelude.id fld_createTime
+      , spec = maybe (defaultWorkflowRule.spec) Prelude.id fld_spec
+      , createdByIdentity = maybe (defaultWorkflowRule.createdByIdentity) Prelude.id fld_createdByIdentity
+      , description = maybe (defaultWorkflowRule.description) Prelude.id fld_description
+      , workflowRuleUnknownFields = []
+      } :: WorkflowRule)
+
+instance Hashable WorkflowRule where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.createTime) msg.spec) msg.createdByIdentity) msg.description
+
+instance Proto.Extension.HasExtensions WorkflowRule where
+  messageUnknownFields msg = msg.workflowRuleUnknownFields
+  setMessageUnknownFields !ufs msg = msg { workflowRuleUnknownFields = ufs }
+
+instance Semigroup WorkflowRule where
+  a <> b = WorkflowRule
+    { createTime = case b.createTime of { Nothing -> a.createTime; x -> x }
+    , spec = case b.spec of { Nothing -> a.spec; x -> x }
+    , createdByIdentity = case b.createdByIdentity of { Nothing -> a.createdByIdentity; x -> x }
+    , description = case b.description of { Nothing -> a.description; x -> x }
+    , workflowRuleUnknownFields = a.workflowRuleUnknownFields <> b.workflowRuleUnknownFields
+    }
+
+instance Monoid WorkflowRule where
+  mempty = defaultWorkflowRule

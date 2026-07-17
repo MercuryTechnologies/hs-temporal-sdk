@@ -26,7 +26,7 @@ core/src/Temporal/Core/Worker.hs    Worker FFI wrappers
 core/src/Temporal/Internal/FFI.hs   Low-level FFI helpers
 
 protos/             Haskell protobuf package (temporal-api-protos)
-protos/src/Proto/   Generated proto-lens modules
+protos/src/Proto/   Generated wireform-proto modules
 
 sdk/                High-level Haskell SDK (temporal-sdk)
 sdk/src/Temporal/   Public API modules
@@ -179,10 +179,10 @@ protogen
 
 This is a shell command provided by the devshell (defined in
 `nix/packages/protogen.nix`). It:
-- Runs `protoc` with `proto-lens-protoc` plugin against the upstream proto
-  files (sourced from the sdk-core-protos crate via Nix).
+- Runs `protoc` with the in-repository `temporal-protogen-wireform` plugin against
+  the upstream proto files (sourced from the sdk-core-protos crate via Nix).
 - Outputs generated Haskell modules to `protos/src/Proto/`.
-- Removes well-known Google Protobuf types (proto-lens provides these).
+- Removes well-known Google Protobuf types (`wireform-proto` provides these).
 - Runs `hpack` on `protos/` to update the cabal file with new modules.
 
 **Important**: Because the proto source files come from the `temporal-sdk-core-src`

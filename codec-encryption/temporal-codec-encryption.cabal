@@ -51,9 +51,9 @@ library
     , crypton
     , errors
     , memory
-    , proto-lens
     , temporal-sdk
     , text
+    , wireform-proto
   default-language: Haskell2010
 
 test-suite encryption-tests
@@ -99,8 +99,8 @@ test-suite encryption-tests
     , errors
     , hedgehog
     , memory
-    , proto-lens
     , temporal-codec-encryption
     , temporal-sdk
     , text
+    , wireform-proto
   default-language: Haskell2010

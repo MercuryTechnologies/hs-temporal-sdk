@@ -123,8 +123,6 @@ library
     , mtl
     , network
     , primitive
-    , proto-lens
-    , proto-lens-protobuf-types
     , random
     , require-callstack
     , scientific
@@ -146,6 +144,7 @@ library
     , validation-selective
     , vault
     , vector
+    , wireform-proto
     , zlib
   default-language: Haskell2010
   if true
@@ -219,8 +218,6 @@ test-suite temporal-sdk-tests
     , mtl
     , network
     , primitive
-    , proto-lens
-    , proto-lens-protobuf-types
     , random
     , require-callstack
     , resourcet
@@ -244,5 +241,6 @@ test-suite temporal-sdk-tests
     , validation-selective
     , vault
     , vector
+    , wireform-proto
     , zlib
   default-language: Haskell2010

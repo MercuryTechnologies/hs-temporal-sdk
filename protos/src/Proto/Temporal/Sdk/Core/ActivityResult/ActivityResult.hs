@@ -1,1640 +1,744 @@
-{- This file was auto-generated from temporal/sdk/core/activity_result/activity_result.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult (
-        ActivityExecutionResult(), ActivityExecutionResult'Status(..),
-        _ActivityExecutionResult'Completed,
-        _ActivityExecutionResult'Failed,
-        _ActivityExecutionResult'Cancelled,
-        _ActivityExecutionResult'WillCompleteAsync, ActivityResolution(),
-        ActivityResolution'Status(..), _ActivityResolution'Completed,
-        _ActivityResolution'Failed, _ActivityResolution'Cancelled,
-        _ActivityResolution'Backoff, Cancellation(), DoBackoff(),
-        Failure(), Success(), WillCompleteAsync()
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Duration
-import qualified Proto.Google.Protobuf.Timestamp
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Api.Failure.V1.Message
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'status' @:: Lens' ActivityExecutionResult (Prelude.Maybe ActivityExecutionResult'Status)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'completed' @:: Lens' ActivityExecutionResult (Prelude.Maybe Success)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.completed' @:: Lens' ActivityExecutionResult Success@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'failed' @:: Lens' ActivityExecutionResult (Prelude.Maybe Failure)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.failed' @:: Lens' ActivityExecutionResult Failure@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'cancelled' @:: Lens' ActivityExecutionResult (Prelude.Maybe Cancellation)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.cancelled' @:: Lens' ActivityExecutionResult Cancellation@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'willCompleteAsync' @:: Lens' ActivityExecutionResult (Prelude.Maybe WillCompleteAsync)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.willCompleteAsync' @:: Lens' ActivityExecutionResult WillCompleteAsync@ -}
-data ActivityExecutionResult
-  = ActivityExecutionResult'_constructor {_ActivityExecutionResult'status :: !(Prelude.Maybe ActivityExecutionResult'Status),
-                                          _ActivityExecutionResult'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityExecutionResult where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @coresdk.activity_result@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Duration as PB_Duration
+import qualified Proto.Google.Protobuf.Timestamp as PB_Timestamp
+import qualified Proto.Temporal.Api.Common.V1.Message as TE_Common_V1_Message
+import qualified Proto.Temporal.Api.Failure.V1.Message as TE_Failure_V1_Message
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x37\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x73\x64\x6b\x2f\x63\x6f\x72\x65\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2f\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x70\x72\x6f\x74\x6f\x12\x17\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x1a\x1e\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x64\x75\x72\x61\x74\x69\x6f\x6e\x2e\x70\x72\x6f\x74\x6f\x1a\x1f\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x74\x69\x6d\x65\x73\x74\x61\x6d\x70\x2e\x70\x72\x6f\x74\x6f\x1a\x24\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x1a\x25\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x66\x61\x69\x6c\x75\x72\x65\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x22\x89\x02\x0a\x17\x41\x63\x74\x69\x76\x69\x74\x79\x45\x78\x65\x63\x75\x74\x69\x6f\x6e\x52\x65\x73\x75\x6c\x74\x12\x32\x0a\x09\x63\x6f\x6d\x70\x6c\x65\x74\x65\x64\x18\x01\x20\x01\x28\x0b\x32\x1f\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x53\x75\x63\x63\x65\x73\x73\x12\x2f\x0a\x06\x66\x61\x69\x6c\x65\x64\x18\x02\x20\x01\x28\x0b\x32\x1f\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x46\x61\x69\x6c\x75\x72\x65\x12\x37\x0a\x09\x63\x61\x6e\x63\x65\x6c\x6c\x65\x64\x18\x03\x20\x01\x28\x0b\x32\x24\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x12\x46\x0a\x13\x77\x69\x6c\x6c\x5f\x63\x6f\x6d\x70\x6c\x65\x74\x65\x5f\x61\x73\x79\x6e\x63\x18\x04\x20\x01\x28\x0b\x32\x29\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x57\x69\x6c\x6c\x43\x6f\x6d\x70\x6c\x65\x74\x65\x41\x73\x79\x6e\x63\x42\x08\x0a\x06\x73\x74\x61\x74\x75\x73\x22\xf0\x01\x0a\x12\x41\x63\x74\x69\x76\x69\x74\x79\x52\x65\x73\x6f\x6c\x75\x74\x69\x6f\x6e\x12\x32\x0a\x09\x63\x6f\x6d\x70\x6c\x65\x74\x65\x64\x18\x01\x20\x01\x28\x0b\x32\x1f\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x53\x75\x63\x63\x65\x73\x73\x12\x2f\x0a\x06\x66\x61\x69\x6c\x65\x64\x18\x02\x20\x01\x28\x0b\x32\x1f\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x46\x61\x69\x6c\x75\x72\x65\x12\x37\x0a\x09\x63\x61\x6e\x63\x65\x6c\x6c\x65\x64\x18\x03\x20\x01\x28\x0b\x32\x24\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x12\x32\x0a\x07\x62\x61\x63\x6b\x6f\x66\x66\x18\x04\x20\x01\x28\x0b\x32\x21\x63\x6f\x72\x65\x73\x64\x6b\x2e\x61\x63\x74\x69\x76\x69\x74\x79\x5f\x72\x65\x73\x75\x6c\x74\x2e\x44\x6f\x42\x61\x63\x6b\x6f\x66\x66\x42\x08\x0a\x06\x73\x74\x61\x74\x75\x73\x22\x39\x0a\x07\x53\x75\x63\x63\x65\x73\x73\x12\x2e\x0a\x06\x72\x65\x73\x75\x6c\x74\x18\x01\x20\x01\x28\x0b\x32\x1e\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x63\x6f\x6d\x6d\x6f\x6e\x2e\x76\x31\x2e\x50\x61\x79\x6c\x6f\x61\x64\x22\x3b\x0a\x07\x46\x61\x69\x6c\x75\x72\x65\x12\x30\x0a\x07\x66\x61\x69\x6c\x75\x72\x65\x18\x01\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x66\x61\x69\x6c\x75\x72\x65\x2e\x76\x31\x2e\x46\x61\x69\x6c\x75\x72\x65\x22\x40\x0a\x0c\x43\x61\x6e\x63\x65\x6c\x6c\x61\x74\x69\x6f\x6e\x12\x30\x0a\x07\x66\x61\x69\x6c\x75\x72\x65\x18\x01\x20\x01\x28\x0b\x32\x1f\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x66\x61\x69\x6c\x75\x72\x65\x2e\x76\x31\x2e\x46\x61\x69\x6c\x75\x72\x65\x22\x13\x0a\x11\x57\x69\x6c\x6c\x43\x6f\x6d\x70\x6c\x65\x74\x65\x41\x73\x79\x6e\x63\x22\x8b\x01\x0a\x09\x44\x6f\x42\x61\x63\x6b\x6f\x66\x66\x12\x0f\x0a\x07\x61\x74\x74\x65\x6d\x70\x74\x18\x01\x20\x01\x28\x0d\x12\x32\x0a\x10\x62\x61\x63\x6b\x6f\x66\x66\x5f\x64\x75\x72\x61\x74\x69\x6f\x6e\x18\x02\x20\x01\x28\x0b\x32\x18\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x44\x75\x72\x61\x74\x69\x6f\x6e\x12\x39\x0a\x16\x6f\x72\x69\x67\x69\x6e\x61\x6c\x5f\x73\x63\x68\x65\x64\x75\x6c\x65\x5f\x74\x69\x6d\x65\x18\x03\x20\x01\x28\x0b\x32\x19\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x54\x69\x6d\x65\x73\x74\x61\x6d\x70\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data ActivityExecutionResult = ActivityExecutionResult
+  { status :: !(Maybe ActivityExecutionResult'Status)
+  , activityExecutionResultUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data ActivityExecutionResult'Status
-  = ActivityExecutionResult'Completed !Success |
-    ActivityExecutionResult'Failed !Failure |
-    ActivityExecutionResult'Cancelled !Cancellation |
-    ActivityExecutionResult'WillCompleteAsync !WillCompleteAsync
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "maybe'status" (Prelude.Maybe ActivityExecutionResult'Status) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "maybe'completed" (Prelude.Maybe Success) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityExecutionResult'Completed x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityExecutionResult'Completed y__))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "completed" Success where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityExecutionResult'Completed x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityExecutionResult'Completed y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "maybe'failed" (Prelude.Maybe Failure) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityExecutionResult'Failed x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityExecutionResult'Failed y__))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "failed" Failure where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityExecutionResult'Failed x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityExecutionResult'Failed y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "maybe'cancelled" (Prelude.Maybe Cancellation) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityExecutionResult'Cancelled x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityExecutionResult'Cancelled y__))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "cancelled" Cancellation where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityExecutionResult'Cancelled x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityExecutionResult'Cancelled y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "maybe'willCompleteAsync" (Prelude.Maybe WillCompleteAsync) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityExecutionResult'WillCompleteAsync x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__
-              -> Prelude.fmap ActivityExecutionResult'WillCompleteAsync y__))
-instance Data.ProtoLens.Field.HasField ActivityExecutionResult "willCompleteAsync" WillCompleteAsync where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityExecutionResult'status
-           (\ x__ y__ -> x__ {_ActivityExecutionResult'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityExecutionResult'WillCompleteAsync x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__
-                 -> Prelude.fmap ActivityExecutionResult'WillCompleteAsync y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message ActivityExecutionResult where
-  messageName _
-    = Data.Text.pack "coresdk.activity_result.ActivityExecutionResult"
-  packedMessageDescriptor _
-    = "\n\
-      \\ETBActivityExecutionResult\DC2@\n\
-      \\tcompleted\CAN\SOH \SOH(\v2 .coresdk.activity_result.SuccessH\NULR\tcompleted\DC2:\n\
-      \\ACKfailed\CAN\STX \SOH(\v2 .coresdk.activity_result.FailureH\NULR\ACKfailed\DC2E\n\
-      \\tcancelled\CAN\ETX \SOH(\v2%.coresdk.activity_result.CancellationH\NULR\tcancelled\DC2\\\n\
-      \\DC3will_complete_async\CAN\EOT \SOH(\v2*.coresdk.activity_result.WillCompleteAsyncH\NULR\DC1willCompleteAsyncB\b\n\
-      \\ACKstatus"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        completed__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "completed"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Success)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'completed")) ::
-              Data.ProtoLens.FieldDescriptor ActivityExecutionResult
-        failed__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "failed"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Failure)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'failed")) ::
-              Data.ProtoLens.FieldDescriptor ActivityExecutionResult
-        cancelled__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "cancelled"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Cancellation)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'cancelled")) ::
-              Data.ProtoLens.FieldDescriptor ActivityExecutionResult
-        willCompleteAsync__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "will_complete_async"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor WillCompleteAsync)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'willCompleteAsync")) ::
-              Data.ProtoLens.FieldDescriptor ActivityExecutionResult
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, completed__field_descriptor),
-           (Data.ProtoLens.Tag 2, failed__field_descriptor),
-           (Data.ProtoLens.Tag 3, cancelled__field_descriptor),
-           (Data.ProtoLens.Tag 4, willCompleteAsync__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityExecutionResult'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityExecutionResult'_unknownFields = y__})
-  defMessage
-    = ActivityExecutionResult'_constructor
-        {_ActivityExecutionResult'status = Prelude.Nothing,
-         _ActivityExecutionResult'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityExecutionResult
-          -> Data.ProtoLens.Encoding.Bytes.Parser ActivityExecutionResult
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "completed"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"completed") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "failed"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"failed") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "cancelled"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"cancelled") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "will_complete_async"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"willCompleteAsync") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityExecutionResult"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'status") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just (ActivityExecutionResult'Completed v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (ActivityExecutionResult'Failed v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (ActivityExecutionResult'Cancelled v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (ActivityExecutionResult'WillCompleteAsync v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData ActivityExecutionResult where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityExecutionResult'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_ActivityExecutionResult'status x__) ())
-instance Control.DeepSeq.NFData ActivityExecutionResult'Status where
-  rnf (ActivityExecutionResult'Completed x__)
-    = Control.DeepSeq.rnf x__
-  rnf (ActivityExecutionResult'Failed x__) = Control.DeepSeq.rnf x__
-  rnf (ActivityExecutionResult'Cancelled x__)
-    = Control.DeepSeq.rnf x__
-  rnf (ActivityExecutionResult'WillCompleteAsync x__)
-    = Control.DeepSeq.rnf x__
-_ActivityExecutionResult'Completed ::
-  Data.ProtoLens.Prism.Prism' ActivityExecutionResult'Status Success
-_ActivityExecutionResult'Completed
-  = Data.ProtoLens.Prism.prism'
-      ActivityExecutionResult'Completed
-      (\ p__
-         -> case p__ of
-              (ActivityExecutionResult'Completed p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityExecutionResult'Failed ::
-  Data.ProtoLens.Prism.Prism' ActivityExecutionResult'Status Failure
-_ActivityExecutionResult'Failed
-  = Data.ProtoLens.Prism.prism'
-      ActivityExecutionResult'Failed
-      (\ p__
-         -> case p__ of
-              (ActivityExecutionResult'Failed p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityExecutionResult'Cancelled ::
-  Data.ProtoLens.Prism.Prism' ActivityExecutionResult'Status Cancellation
-_ActivityExecutionResult'Cancelled
-  = Data.ProtoLens.Prism.prism'
-      ActivityExecutionResult'Cancelled
-      (\ p__
-         -> case p__ of
-              (ActivityExecutionResult'Cancelled p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityExecutionResult'WillCompleteAsync ::
-  Data.ProtoLens.Prism.Prism' ActivityExecutionResult'Status WillCompleteAsync
-_ActivityExecutionResult'WillCompleteAsync
-  = Data.ProtoLens.Prism.prism'
-      ActivityExecutionResult'WillCompleteAsync
-      (\ p__
-         -> case p__ of
-              (ActivityExecutionResult'WillCompleteAsync p__val)
-                -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'status' @:: Lens' ActivityResolution (Prelude.Maybe ActivityResolution'Status)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'completed' @:: Lens' ActivityResolution (Prelude.Maybe Success)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.completed' @:: Lens' ActivityResolution Success@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'failed' @:: Lens' ActivityResolution (Prelude.Maybe Failure)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.failed' @:: Lens' ActivityResolution Failure@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'cancelled' @:: Lens' ActivityResolution (Prelude.Maybe Cancellation)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.cancelled' @:: Lens' ActivityResolution Cancellation@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'backoff' @:: Lens' ActivityResolution (Prelude.Maybe DoBackoff)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.backoff' @:: Lens' ActivityResolution DoBackoff@ -}
-data ActivityResolution
-  = ActivityResolution'_constructor {_ActivityResolution'status :: !(Prelude.Maybe ActivityResolution'Status),
-                                     _ActivityResolution'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show ActivityResolution where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+  = ActivityExecutionResult'Status'Completed !Success
+  | ActivityExecutionResult'Status'Failed !Failure
+  | ActivityExecutionResult'Status'Cancelled !Cancellation
+  | ActivityExecutionResult'Status'WillCompleteAsync !WillCompleteAsync
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON ActivityExecutionResult'Status where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON ActivityExecutionResult'Status where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable ActivityExecutionResult'Status where
+  hashWithSalt salt (ActivityExecutionResult'Status'Completed v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityExecutionResult'Status'Failed v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityExecutionResult'Status'Cancelled v) = salt `hashWithSalt` (2 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityExecutionResult'Status'WillCompleteAsync v) = salt `hashWithSalt` (3 :: Int) `hashWithSalt` v
+
+defaultActivityExecutionResult :: ActivityExecutionResult
+defaultActivityExecutionResult = ActivityExecutionResult
+  { status = Nothing
+  , activityExecutionResultUnknownFields = []
+  }
+
+instance MessageEncode ActivityExecutionResult where
+  buildMessage msg =
+    (case msg.status of
+      Nothing -> mempty
+      Just (ActivityExecutionResult'Status'Completed v) -> (let sz = messageSize v in archSubmessage 10 sz (buildMessage v))
+      Just (ActivityExecutionResult'Status'Failed v) -> (let sz = messageSize v in archSubmessage 18 sz (buildMessage v))
+      Just (ActivityExecutionResult'Status'Cancelled v) -> (let sz = messageSize v in archSubmessage 26 sz (buildMessage v))
+      Just (ActivityExecutionResult'Status'WillCompleteAsync v) -> (let sz = messageSize v in archSubmessage 34 sz (buildMessage v)))
+    <> encodeUnknownFields msg.activityExecutionResultUnknownFields
+
+instance MessageSize ActivityExecutionResult where
+  messageSize msg =
+    (case msg.status of { Nothing -> 0; Just (ActivityExecutionResult'Status'Completed v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityExecutionResult'Status'Failed v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityExecutionResult'Status'Cancelled v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityExecutionResult'Status'WillCompleteAsync v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.activityExecutionResultUnknownFields
+
+instance MessageDecode ActivityExecutionResult where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (ActivityExecutionResult {status = acc_0, activityExecutionResultUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityExecutionResult'Status'Completed v)) acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityExecutionResult'Status'Failed v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityExecutionResult'Status'Cancelled v)) acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityExecutionResult'Status'WillCompleteAsync v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityExecutionResult where
+  protoMessageName _ = "coresdk.activity_result.ActivityExecutionResult"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultActivityExecutionResult
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "status"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "status"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityExecutionResult) -> m.status
+        , fdSet = \v (m :: ActivityExecutionResult) -> (m { status = v } :: ActivityExecutionResult)
+        })
+    ]
+
+instance IsMessage ActivityExecutionResult
+
+instance Aeson.ToJSON ActivityExecutionResult where
+  toJSON msg = jsonObject
+      [ "status" .=: msg.status
+
+      ]
+
+instance Aeson.FromJSON ActivityExecutionResult where
+  parseJSON = Aeson.withObject "ActivityExecutionResult" $ \obj -> do
+    fld_status <- parseFieldMaybe obj "status"
+    pure (defaultActivityExecutionResult
+      { status = maybe (defaultActivityExecutionResult.status) Prelude.id fld_status
+      , activityExecutionResultUnknownFields = []
+      } :: ActivityExecutionResult)
+
+instance Hashable ActivityExecutionResult where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.status
+
+instance Proto.Extension.HasExtensions ActivityExecutionResult where
+  messageUnknownFields msg = msg.activityExecutionResultUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityExecutionResultUnknownFields = ufs }
+
+instance Semigroup ActivityExecutionResult where
+  a <> b = ActivityExecutionResult
+    { status = case b.status of { Nothing -> a.status; x -> x }
+    , activityExecutionResultUnknownFields = a.activityExecutionResultUnknownFields <> b.activityExecutionResultUnknownFields
+    }
+
+instance Monoid ActivityExecutionResult where
+  mempty = defaultActivityExecutionResult
+
+data ActivityResolution = ActivityResolution
+  { status :: !(Maybe ActivityResolution'Status)
+  , activityResolutionUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data ActivityResolution'Status
-  = ActivityResolution'Completed !Success |
-    ActivityResolution'Failed !Failure |
-    ActivityResolution'Cancelled !Cancellation |
-    ActivityResolution'Backoff !DoBackoff
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField ActivityResolution "maybe'status" (Prelude.Maybe ActivityResolution'Status) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField ActivityResolution "maybe'completed" (Prelude.Maybe Success) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityResolution'Completed x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityResolution'Completed y__))
-instance Data.ProtoLens.Field.HasField ActivityResolution "completed" Success where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityResolution'Completed x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityResolution'Completed y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityResolution "maybe'failed" (Prelude.Maybe Failure) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityResolution'Failed x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityResolution'Failed y__))
-instance Data.ProtoLens.Field.HasField ActivityResolution "failed" Failure where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityResolution'Failed x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityResolution'Failed y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityResolution "maybe'cancelled" (Prelude.Maybe Cancellation) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityResolution'Cancelled x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityResolution'Cancelled y__))
-instance Data.ProtoLens.Field.HasField ActivityResolution "cancelled" Cancellation where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityResolution'Cancelled x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityResolution'Cancelled y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Field.HasField ActivityResolution "maybe'backoff" (Prelude.Maybe DoBackoff) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (ActivityResolution'Backoff x__val))
-                     -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap ActivityResolution'Backoff y__))
-instance Data.ProtoLens.Field.HasField ActivityResolution "backoff" DoBackoff where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _ActivityResolution'status
-           (\ x__ y__ -> x__ {_ActivityResolution'status = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (ActivityResolution'Backoff x__val))
-                        -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap ActivityResolution'Backoff y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage))
-instance Data.ProtoLens.Message ActivityResolution where
-  messageName _
-    = Data.Text.pack "coresdk.activity_result.ActivityResolution"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC2ActivityResolution\DC2@\n\
-      \\tcompleted\CAN\SOH \SOH(\v2 .coresdk.activity_result.SuccessH\NULR\tcompleted\DC2:\n\
-      \\ACKfailed\CAN\STX \SOH(\v2 .coresdk.activity_result.FailureH\NULR\ACKfailed\DC2E\n\
-      \\tcancelled\CAN\ETX \SOH(\v2%.coresdk.activity_result.CancellationH\NULR\tcancelled\DC2>\n\
-      \\abackoff\CAN\EOT \SOH(\v2\".coresdk.activity_result.DoBackoffH\NULR\abackoffB\b\n\
-      \\ACKstatus"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        completed__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "completed"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Success)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'completed")) ::
-              Data.ProtoLens.FieldDescriptor ActivityResolution
-        failed__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "failed"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Failure)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'failed")) ::
-              Data.ProtoLens.FieldDescriptor ActivityResolution
-        cancelled__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "cancelled"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Cancellation)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'cancelled")) ::
-              Data.ProtoLens.FieldDescriptor ActivityResolution
-        backoff__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "backoff"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor DoBackoff)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'backoff")) ::
-              Data.ProtoLens.FieldDescriptor ActivityResolution
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, completed__field_descriptor),
-           (Data.ProtoLens.Tag 2, failed__field_descriptor),
-           (Data.ProtoLens.Tag 3, cancelled__field_descriptor),
-           (Data.ProtoLens.Tag 4, backoff__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _ActivityResolution'_unknownFields
-        (\ x__ y__ -> x__ {_ActivityResolution'_unknownFields = y__})
-  defMessage
-    = ActivityResolution'_constructor
-        {_ActivityResolution'status = Prelude.Nothing,
-         _ActivityResolution'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          ActivityResolution
-          -> Data.ProtoLens.Encoding.Bytes.Parser ActivityResolution
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "completed"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"completed") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "failed"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"failed") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "cancelled"
-                                loop
-                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"cancelled") y x)
-                        34
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "backoff"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"backoff") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "ActivityResolution"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'status") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just (ActivityResolution'Completed v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (ActivityResolution'Failed v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (ActivityResolution'Cancelled v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v)
-                (Prelude.Just (ActivityResolution'Backoff v))
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 34)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData ActivityResolution where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_ActivityResolution'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_ActivityResolution'status x__) ())
-instance Control.DeepSeq.NFData ActivityResolution'Status where
-  rnf (ActivityResolution'Completed x__) = Control.DeepSeq.rnf x__
-  rnf (ActivityResolution'Failed x__) = Control.DeepSeq.rnf x__
-  rnf (ActivityResolution'Cancelled x__) = Control.DeepSeq.rnf x__
-  rnf (ActivityResolution'Backoff x__) = Control.DeepSeq.rnf x__
-_ActivityResolution'Completed ::
-  Data.ProtoLens.Prism.Prism' ActivityResolution'Status Success
-_ActivityResolution'Completed
-  = Data.ProtoLens.Prism.prism'
-      ActivityResolution'Completed
-      (\ p__
-         -> case p__ of
-              (ActivityResolution'Completed p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityResolution'Failed ::
-  Data.ProtoLens.Prism.Prism' ActivityResolution'Status Failure
-_ActivityResolution'Failed
-  = Data.ProtoLens.Prism.prism'
-      ActivityResolution'Failed
-      (\ p__
-         -> case p__ of
-              (ActivityResolution'Failed p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityResolution'Cancelled ::
-  Data.ProtoLens.Prism.Prism' ActivityResolution'Status Cancellation
-_ActivityResolution'Cancelled
-  = Data.ProtoLens.Prism.prism'
-      ActivityResolution'Cancelled
-      (\ p__
-         -> case p__ of
-              (ActivityResolution'Cancelled p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_ActivityResolution'Backoff ::
-  Data.ProtoLens.Prism.Prism' ActivityResolution'Status DoBackoff
-_ActivityResolution'Backoff
-  = Data.ProtoLens.Prism.prism'
-      ActivityResolution'Backoff
-      (\ p__
-         -> case p__ of
-              (ActivityResolution'Backoff p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.failure' @:: Lens' Cancellation Proto.Temporal.Api.Failure.V1.Message.Failure@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'failure' @:: Lens' Cancellation (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@ -}
-data Cancellation
-  = Cancellation'_constructor {_Cancellation'failure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
-                               _Cancellation'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Cancellation where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Cancellation "failure" Proto.Temporal.Api.Failure.V1.Message.Failure where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Cancellation'failure
-           (\ x__ y__ -> x__ {_Cancellation'failure = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Cancellation "maybe'failure" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Cancellation'failure
-           (\ x__ y__ -> x__ {_Cancellation'failure = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Cancellation where
-  messageName _
-    = Data.Text.pack "coresdk.activity_result.Cancellation"
-  packedMessageDescriptor _
-    = "\n\
-      \\fCancellation\DC2:\n\
-      \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        failure__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "failure"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'failure")) ::
-              Data.ProtoLens.FieldDescriptor Cancellation
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, failure__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Cancellation'_unknownFields
-        (\ x__ y__ -> x__ {_Cancellation'_unknownFields = y__})
-  defMessage
-    = Cancellation'_constructor
-        {_Cancellation'failure = Prelude.Nothing,
-         _Cancellation'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Cancellation -> Data.ProtoLens.Encoding.Bytes.Parser Cancellation
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "failure"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"failure") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Cancellation"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'failure") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Cancellation where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Cancellation'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Cancellation'failure x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.attempt' @:: Lens' DoBackoff Data.Word.Word32@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.backoffDuration' @:: Lens' DoBackoff Proto.Google.Protobuf.Duration.Duration@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'backoffDuration' @:: Lens' DoBackoff (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration)@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.originalScheduleTime' @:: Lens' DoBackoff Proto.Google.Protobuf.Timestamp.Timestamp@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'originalScheduleTime' @:: Lens' DoBackoff (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp)@ -}
-data DoBackoff
-  = DoBackoff'_constructor {_DoBackoff'attempt :: !Data.Word.Word32,
-                            _DoBackoff'backoffDuration :: !(Prelude.Maybe Proto.Google.Protobuf.Duration.Duration),
-                            _DoBackoff'originalScheduleTime :: !(Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp),
-                            _DoBackoff'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show DoBackoff where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField DoBackoff "attempt" Data.Word.Word32 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DoBackoff'attempt (\ x__ y__ -> x__ {_DoBackoff'attempt = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DoBackoff "backoffDuration" Proto.Google.Protobuf.Duration.Duration where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DoBackoff'backoffDuration
-           (\ x__ y__ -> x__ {_DoBackoff'backoffDuration = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DoBackoff "maybe'backoffDuration" (Prelude.Maybe Proto.Google.Protobuf.Duration.Duration) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DoBackoff'backoffDuration
-           (\ x__ y__ -> x__ {_DoBackoff'backoffDuration = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField DoBackoff "originalScheduleTime" Proto.Google.Protobuf.Timestamp.Timestamp where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DoBackoff'originalScheduleTime
-           (\ x__ y__ -> x__ {_DoBackoff'originalScheduleTime = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField DoBackoff "maybe'originalScheduleTime" (Prelude.Maybe Proto.Google.Protobuf.Timestamp.Timestamp) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _DoBackoff'originalScheduleTime
-           (\ x__ y__ -> x__ {_DoBackoff'originalScheduleTime = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message DoBackoff where
-  messageName _ = Data.Text.pack "coresdk.activity_result.DoBackoff"
-  packedMessageDescriptor _
-    = "\n\
-      \\tDoBackoff\DC2\CAN\n\
-      \\aattempt\CAN\SOH \SOH(\rR\aattempt\DC2D\n\
-      \\DLEbackoff_duration\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SIbackoffDuration\DC2P\n\
-      \\SYNoriginal_schedule_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\DC4originalScheduleTime"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        attempt__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "attempt"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt32Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word32)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"attempt")) ::
-              Data.ProtoLens.FieldDescriptor DoBackoff
-        backoffDuration__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "backoff_duration"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Duration.Duration)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'backoffDuration")) ::
-              Data.ProtoLens.FieldDescriptor DoBackoff
-        originalScheduleTime__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "original_schedule_time"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Timestamp.Timestamp)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'originalScheduleTime")) ::
-              Data.ProtoLens.FieldDescriptor DoBackoff
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, attempt__field_descriptor),
-           (Data.ProtoLens.Tag 2, backoffDuration__field_descriptor),
-           (Data.ProtoLens.Tag 3, originalScheduleTime__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _DoBackoff'_unknownFields
-        (\ x__ y__ -> x__ {_DoBackoff'_unknownFields = y__})
-  defMessage
-    = DoBackoff'_constructor
-        {_DoBackoff'attempt = Data.ProtoLens.fieldDefault,
-         _DoBackoff'backoffDuration = Prelude.Nothing,
-         _DoBackoff'originalScheduleTime = Prelude.Nothing,
-         _DoBackoff'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: DoBackoff -> Data.ProtoLens.Encoding.Bytes.Parser DoBackoff
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "attempt"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"attempt") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "backoff_duration"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"backoffDuration") y x)
-                        26
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "original_schedule_time"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"originalScheduleTime") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "DoBackoff"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let
-                _v = Lens.Family2.view (Data.ProtoLens.Field.field @"attempt") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      ((Prelude..)
-                         Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'backoffDuration") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'originalScheduleTime") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
-instance Control.DeepSeq.NFData DoBackoff where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_DoBackoff'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_DoBackoff'attempt x__)
-                (Control.DeepSeq.deepseq
-                   (_DoBackoff'backoffDuration x__)
-                   (Control.DeepSeq.deepseq
-                      (_DoBackoff'originalScheduleTime x__) ())))
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.failure' @:: Lens' Failure Proto.Temporal.Api.Failure.V1.Message.Failure@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'failure' @:: Lens' Failure (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure)@ -}
-data Failure
-  = Failure'_constructor {_Failure'failure :: !(Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure),
-                          _Failure'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Failure where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Failure "failure" Proto.Temporal.Api.Failure.V1.Message.Failure where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Failure'failure (\ x__ y__ -> x__ {_Failure'failure = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Failure "maybe'failure" (Prelude.Maybe Proto.Temporal.Api.Failure.V1.Message.Failure) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Failure'failure (\ x__ y__ -> x__ {_Failure'failure = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Failure where
-  messageName _ = Data.Text.pack "coresdk.activity_result.Failure"
-  packedMessageDescriptor _
-    = "\n\
-      \\aFailure\DC2:\n\
-      \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        failure__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "failure"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Failure.V1.Message.Failure)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'failure")) ::
-              Data.ProtoLens.FieldDescriptor Failure
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, failure__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Failure'_unknownFields
-        (\ x__ y__ -> x__ {_Failure'_unknownFields = y__})
-  defMessage
-    = Failure'_constructor
-        {_Failure'failure = Prelude.Nothing, _Failure'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Failure -> Data.ProtoLens.Encoding.Bytes.Parser Failure
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "failure"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"failure") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Failure"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'failure") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Failure where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Failure'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Failure'failure x__) ())
-{- | Fields :
-     
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.result' @:: Lens' Success Proto.Temporal.Api.Common.V1.Message.Payload@
-         * 'Proto.Temporal.Sdk.Core.ActivityResult.ActivityResult_Fields.maybe'result' @:: Lens' Success (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload)@ -}
-data Success
-  = Success'_constructor {_Success'result :: !(Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload),
-                          _Success'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Success where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Field.HasField Success "result" Proto.Temporal.Api.Common.V1.Message.Payload where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Success'result (\ x__ y__ -> x__ {_Success'result = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Success "maybe'result" (Prelude.Maybe Proto.Temporal.Api.Common.V1.Message.Payload) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Success'result (\ x__ y__ -> x__ {_Success'result = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message Success where
-  messageName _ = Data.Text.pack "coresdk.activity_result.Success"
-  packedMessageDescriptor _
-    = "\n\
-      \\aSuccess\DC27\n\
-      \\ACKresult\CAN\SOH \SOH(\v2\US.temporal.api.common.v1.PayloadR\ACKresult"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        result__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "result"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Temporal.Api.Common.V1.Message.Payload)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'result")) ::
-              Data.ProtoLens.FieldDescriptor Success
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, result__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Success'_unknownFields
-        (\ x__ y__ -> x__ {_Success'_unknownFields = y__})
-  defMessage
-    = Success'_constructor
-        {_Success'result = Prelude.Nothing, _Success'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Success -> Data.ProtoLens.Encoding.Bytes.Parser Success
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "result"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"result") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Success"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'result") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Success where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Success'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Success'result x__) ())
-{- | Fields :
-      -}
-data WillCompleteAsync
-  = WillCompleteAsync'_constructor {_WillCompleteAsync'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show WillCompleteAsync where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Data.ProtoLens.Message WillCompleteAsync where
-  messageName _
-    = Data.Text.pack "coresdk.activity_result.WillCompleteAsync"
-  packedMessageDescriptor _
-    = "\n\
-      \\DC1WillCompleteAsync"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _WillCompleteAsync'_unknownFields
-        (\ x__ y__ -> x__ {_WillCompleteAsync'_unknownFields = y__})
-  defMessage
-    = WillCompleteAsync'_constructor
-        {_WillCompleteAsync'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          WillCompleteAsync
-          -> Data.ProtoLens.Encoding.Bytes.Parser WillCompleteAsync
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "WillCompleteAsync"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData WillCompleteAsync where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_WillCompleteAsync'_unknownFields x__) ()
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \7temporal/sdk/core/activity_result/activity_result.proto\DC2\ETBcoresdk.activity_result\SUB\RSgoogle/protobuf/duration.proto\SUB\USgoogle/protobuf/timestamp.proto\SUB$temporal/api/common/v1/message.proto\SUB%temporal/api/failure/v1/message.proto\"\198\STX\n\
-    \\ETBActivityExecutionResult\DC2@\n\
-    \\tcompleted\CAN\SOH \SOH(\v2 .coresdk.activity_result.SuccessH\NULR\tcompleted\DC2:\n\
-    \\ACKfailed\CAN\STX \SOH(\v2 .coresdk.activity_result.FailureH\NULR\ACKfailed\DC2E\n\
-    \\tcancelled\CAN\ETX \SOH(\v2%.coresdk.activity_result.CancellationH\NULR\tcancelled\DC2\\\n\
-    \\DC3will_complete_async\CAN\EOT \SOH(\v2*.coresdk.activity_result.WillCompleteAsyncH\NULR\DC1willCompleteAsyncB\b\n\
-    \\ACKstatus\"\163\STX\n\
-    \\DC2ActivityResolution\DC2@\n\
-    \\tcompleted\CAN\SOH \SOH(\v2 .coresdk.activity_result.SuccessH\NULR\tcompleted\DC2:\n\
-    \\ACKfailed\CAN\STX \SOH(\v2 .coresdk.activity_result.FailureH\NULR\ACKfailed\DC2E\n\
-    \\tcancelled\CAN\ETX \SOH(\v2%.coresdk.activity_result.CancellationH\NULR\tcancelled\DC2>\n\
-    \\abackoff\CAN\EOT \SOH(\v2\".coresdk.activity_result.DoBackoffH\NULR\abackoffB\b\n\
-    \\ACKstatus\"B\n\
-    \\aSuccess\DC27\n\
-    \\ACKresult\CAN\SOH \SOH(\v2\US.temporal.api.common.v1.PayloadR\ACKresult\"E\n\
-    \\aFailure\DC2:\n\
-    \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\"J\n\
-    \\fCancellation\DC2:\n\
-    \\afailure\CAN\SOH \SOH(\v2 .temporal.api.failure.v1.FailureR\afailure\"\DC3\n\
-    \\DC1WillCompleteAsync\"\189\SOH\n\
-    \\tDoBackoff\DC2\CAN\n\
-    \\aattempt\CAN\SOH \SOH(\rR\aattempt\DC2D\n\
-    \\DLEbackoff_duration\CAN\STX \SOH(\v2\EM.google.protobuf.DurationR\SIbackoffDuration\DC2P\n\
-    \\SYNoriginal_schedule_time\CAN\ETX \SOH(\v2\SUB.google.protobuf.TimestampR\DC4originalScheduleTimeB4\234\STX1Temporalio::Internal::Bridge::Api::ActivityResultJ\230\DC4\n\
-    \\ACK\DC2\EOT\NUL\NULK\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL \n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ETX\NULJ\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\ETX\NULJ\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\ENQ\NUL(\n\
-    \\t\n\
-    \\STX\ETX\SOH\DC2\ETX\ACK\NUL)\n\
-    \\t\n\
-    \\STX\ETX\STX\DC2\ETX\a\NUL.\n\
-    \\t\n\
-    \\STX\ETX\ETX\DC2\ETX\b\NUL/\n\
-    \9\n\
-    \\STX\EOT\NUL\DC2\EOT\v\NUL\DC2\SOH\SUB- Used to report activity completions to core\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\v\b\US\n\
-    \\f\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT\f\EOT\DC1\ENQ\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\f\n\
-    \\DLE\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\r\b\RS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\r\b\SI\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\r\DLE\EM\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\r\FS\GS\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\SO\b\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\SO\b\SI\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\SO\DLE\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\SO\EM\SUB\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\SI\b#\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\SI\b\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\SI\NAK\RS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\SI!\"\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\DLE\b2\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\DLE\b\EM\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\DLE\SUB-\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\DLE01\n\
-    \~\n\
-    \\STX\EOT\SOH\DC2\EOT\SYN\NUL\GS\SOH\SUBr Used to report activity resolutions to lang. IE: This is what the activities are resolved with\n\
-    \ in the workflow.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\SYN\b\SUB\n\
-    \\f\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOT\ETB\EOT\FS\ENQ\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\ETB\n\
-    \\DLE\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\CAN\b\RS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\CAN\b\SI\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\CAN\DLE\EM\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\CAN\FS\GS\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\EM\b\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\EM\b\SI\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\EM\DLE\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\EM\EM\SUB\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX\SUB\b#\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\SUB\b\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\SUB\NAK\RS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SUB!\"\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX\ESC\b\RS\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX\ESC\b\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX\ESC\DC2\EM\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX\ESC\FS\GS\n\
-    \U\n\
-    \\STX\EOT\STX\DC2\EOT \NUL\"\SOH\SUBI Used to report successful completion either when executing or resolving\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX \b\SI\n\
-    \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX!\EOT.\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX!\EOT\"\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX!#)\n\
-    \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX!,-\n\
-    \P\n\
-    \\STX\EOT\ETX\DC2\EOT%\NUL'\SOH\SUBD Used to report activity failure either when executing or resolving\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX%\b\SI\n\
-    \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX&\EOT0\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX&\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX&$+\n\
-    \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX&./\n\
-    \\164\STX\n\
-    \\STX\EOT\EOT\DC2\EOT/\NUL1\SOH\SUB\151\STX\n\
-    \ Used to report cancellation from both Core and Lang.\n\
-    \ When Lang reports a cancelled activity, it must put a CancelledFailure in the failure field.\n\
-    \ When Core reports a cancelled activity, it must put an ActivityFailure with CancelledFailure\n\
-    \ as the cause in the failure field.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX/\b\DC4\n\
-    \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX0\EOT0\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX0\EOT#\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX0$+\n\
-    \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX0./\n\
-    \\200\SOH\n\
-    \\STX\EOT\ENQ\DC2\EOT7\NUL8\SOH\SUB\187\SOH\n\
-    \ Used in ActivityExecutionResult to notify Core that this Activity will complete asynchronously.\n\
-    \ Core will forget about this Activity and free up resources used to track this Activity.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX7\b\EM\n\
-    \\131\EOT\n\
-    \\STX\EOT\ACK\DC2\EOTC\NULK\SOH\SUB\246\ETX\n\
-    \ Issued when a local activity needs to retry but also wants to back off more than would be\n\
-    \ reasonable to WFT heartbeat for. Lang is expected to schedule a timer for the duration\n\
-    \ and then start a local activity of the same type & same inputs with the provided attempt number\n\
-    \ after the timer has elapsed.\n\
-    \\n\
-    \ This exists because Core does not have a concept of starting commands by itself, they originate\n\
-    \ from lang. So expecting lang to start the timer / next pass of the activity fits more smoothly.\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETXC\b\DC1\n\
-    \\183\SOH\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETXF\EOT\ETB\SUB\169\SOH The attempt number that lang should provide when scheduling the retry. If the LA failed\n\
-    \ on attempt 4 and we told lang to back off with a timer, this number will be 5.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ENQ\DC2\ETXF\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETXF\v\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETXF\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\ACK\STX\SOH\DC2\ETXG\EOT2\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ACK\DC2\ETXG\EOT\FS\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\SOH\DC2\ETXG\GS-\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\SOH\ETX\DC2\ETXG01\n\
-    \}\n\
-    \\EOT\EOT\ACK\STX\STX\DC2\ETXJ\EOT9\SUBp The time the first attempt of this local activity was scheduled. Must be passed with attempt\n\
-    \ to the retry LA.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ACK\DC2\ETXJ\EOT\GS\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\SOH\DC2\ETXJ\RS4\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\STX\ETX\DC2\ETXJ78b\ACKproto3"
+  = ActivityResolution'Status'Completed !Success
+  | ActivityResolution'Status'Failed !Failure
+  | ActivityResolution'Status'Cancelled !Cancellation
+  | ActivityResolution'Status'Backoff !DoBackoff
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON ActivityResolution'Status where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON ActivityResolution'Status where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable ActivityResolution'Status where
+  hashWithSalt salt (ActivityResolution'Status'Completed v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityResolution'Status'Failed v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityResolution'Status'Cancelled v) = salt `hashWithSalt` (2 :: Int) `hashWithSalt` v
+  hashWithSalt salt (ActivityResolution'Status'Backoff v) = salt `hashWithSalt` (3 :: Int) `hashWithSalt` v
+
+defaultActivityResolution :: ActivityResolution
+defaultActivityResolution = ActivityResolution
+  { status = Nothing
+  , activityResolutionUnknownFields = []
+  }
+
+instance MessageEncode ActivityResolution where
+  buildMessage msg =
+    (case msg.status of
+      Nothing -> mempty
+      Just (ActivityResolution'Status'Completed v) -> (let sz = messageSize v in archSubmessage 10 sz (buildMessage v))
+      Just (ActivityResolution'Status'Failed v) -> (let sz = messageSize v in archSubmessage 18 sz (buildMessage v))
+      Just (ActivityResolution'Status'Cancelled v) -> (let sz = messageSize v in archSubmessage 26 sz (buildMessage v))
+      Just (ActivityResolution'Status'Backoff v) -> (let sz = messageSize v in archSubmessage 34 sz (buildMessage v)))
+    <> encodeUnknownFields msg.activityResolutionUnknownFields
+
+instance MessageSize ActivityResolution where
+  messageSize msg =
+    (case msg.status of { Nothing -> 0; Just (ActivityResolution'Status'Completed v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityResolution'Status'Failed v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityResolution'Status'Cancelled v) -> archSubmessageSize (messageSize v)
+    ; Just (ActivityResolution'Status'Backoff v) -> archSubmessageSize (messageSize v) })
+    + unknownFieldsSize msg.activityResolutionUnknownFields
+
+instance MessageDecode ActivityResolution where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (ActivityResolution {status = acc_0, activityResolutionUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityResolution'Status'Completed v)) acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityResolution'Status'Failed v)) acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityResolution'Status'Cancelled v)) acc_unknown_
+          4 -> do
+            v <- decodeFieldMessage
+            loop (Just (ActivityResolution'Status'Backoff v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage ActivityResolution where
+  protoMessageName _ = "coresdk.activity_result.ActivityResolution"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultActivityResolution
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "status"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "status"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: ActivityResolution) -> m.status
+        , fdSet = \v (m :: ActivityResolution) -> (m { status = v } :: ActivityResolution)
+        })
+    ]
+
+instance IsMessage ActivityResolution
+
+instance Aeson.ToJSON ActivityResolution where
+  toJSON msg = jsonObject
+      [ "status" .=: msg.status
+
+      ]
+
+instance Aeson.FromJSON ActivityResolution where
+  parseJSON = Aeson.withObject "ActivityResolution" $ \obj -> do
+    fld_status <- parseFieldMaybe obj "status"
+    pure (defaultActivityResolution
+      { status = maybe (defaultActivityResolution.status) Prelude.id fld_status
+      , activityResolutionUnknownFields = []
+      } :: ActivityResolution)
+
+instance Hashable ActivityResolution where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.status
+
+instance Proto.Extension.HasExtensions ActivityResolution where
+  messageUnknownFields msg = msg.activityResolutionUnknownFields
+  setMessageUnknownFields !ufs msg = msg { activityResolutionUnknownFields = ufs }
+
+instance Semigroup ActivityResolution where
+  a <> b = ActivityResolution
+    { status = case b.status of { Nothing -> a.status; x -> x }
+    , activityResolutionUnknownFields = a.activityResolutionUnknownFields <> b.activityResolutionUnknownFields
+    }
+
+instance Monoid ActivityResolution where
+  mempty = defaultActivityResolution
+
+data Success = Success
+  { result :: !(Maybe TE_Common_V1_Message.Payload)
+  , successUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultSuccess :: Success
+defaultSuccess = Success
+  { result = Nothing
+  , successUnknownFields = []
+  }
+
+instance MessageEncode Success where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.result)
+    <> encodeUnknownFields msg.successUnknownFields
+
+instance MessageSize Success where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.result)
+    + unknownFieldsSize msg.successUnknownFields
+
+instance MessageDecode Success where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Success {result = acc_0, successUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Success where
+  protoMessageName _ = "coresdk.activity_result.Success"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultSuccess
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "result"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.common.v1.Payload"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Success) -> m.result
+        , fdSet = \v (m :: Success) -> (m { result = v } :: Success)
+        })
+    ]
+
+instance IsMessage Success
+
+instance Aeson.ToJSON Success where
+  toJSON msg = jsonObject
+      [ "result" .=: msg.result
+
+      ]
+
+instance Aeson.FromJSON Success where
+  parseJSON = Aeson.withObject "Success" $ \obj -> do
+    fld_result <- parseFieldMaybe obj "result"
+    pure (defaultSuccess
+      { result = maybe (defaultSuccess.result) Prelude.id fld_result
+      , successUnknownFields = []
+      } :: Success)
+
+instance Hashable Success where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.result
+
+instance Proto.Extension.HasExtensions Success where
+  messageUnknownFields msg = msg.successUnknownFields
+  setMessageUnknownFields !ufs msg = msg { successUnknownFields = ufs }
+
+instance Semigroup Success where
+  a <> b = Success
+    { result = case b.result of { Nothing -> a.result; x -> x }
+    , successUnknownFields = a.successUnknownFields <> b.successUnknownFields
+    }
+
+instance Monoid Success where
+  mempty = defaultSuccess
+
+data Failure = Failure
+  { failure :: !(Maybe TE_Failure_V1_Message.Failure)
+  , failureUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultFailure :: Failure
+defaultFailure = Failure
+  { failure = Nothing
+  , failureUnknownFields = []
+  }
+
+instance MessageEncode Failure where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.failure)
+    <> encodeUnknownFields msg.failureUnknownFields
+
+instance MessageSize Failure where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.failure)
+    + unknownFieldsSize msg.failureUnknownFields
+
+instance MessageDecode Failure where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Failure {failure = acc_0, failureUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Failure where
+  protoMessageName _ = "coresdk.activity_result.Failure"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultFailure
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "failure"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.failure.v1.Failure"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Failure) -> m.failure
+        , fdSet = \v (m :: Failure) -> (m { failure = v } :: Failure)
+        })
+    ]
+
+instance IsMessage Failure
+
+instance Aeson.ToJSON Failure where
+  toJSON msg = jsonObject
+      [ "failure" .=: msg.failure
+
+      ]
+
+instance Aeson.FromJSON Failure where
+  parseJSON = Aeson.withObject "Failure" $ \obj -> do
+    fld_failure <- parseFieldMaybe obj "failure"
+    pure (defaultFailure
+      { failure = maybe (defaultFailure.failure) Prelude.id fld_failure
+      , failureUnknownFields = []
+      } :: Failure)
+
+instance Hashable Failure where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.failure
+
+instance Proto.Extension.HasExtensions Failure where
+  messageUnknownFields msg = msg.failureUnknownFields
+  setMessageUnknownFields !ufs msg = msg { failureUnknownFields = ufs }
+
+instance Semigroup Failure where
+  a <> b = Failure
+    { failure = case b.failure of { Nothing -> a.failure; x -> x }
+    , failureUnknownFields = a.failureUnknownFields <> b.failureUnknownFields
+    }
+
+instance Monoid Failure where
+  mempty = defaultFailure
+
+data Cancellation = Cancellation
+  { failure :: !(Maybe TE_Failure_V1_Message.Failure)
+  , cancellationUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultCancellation :: Cancellation
+defaultCancellation = Cancellation
+  { failure = Nothing
+  , cancellationUnknownFields = []
+  }
+
+instance MessageEncode Cancellation where
+  buildMessage msg =
+    (maybe mempty (\v -> let sz = messageSize v in archSubmessage 10 sz (buildMessage v)) msg.failure)
+    <> encodeUnknownFields msg.cancellationUnknownFields
+
+instance MessageSize Cancellation where
+  messageSize msg =
+    (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.failure)
+    + unknownFieldsSize msg.cancellationUnknownFields
+
+instance MessageDecode Cancellation where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing []
+    where
+      loop acc_0 acc_unknown_ = withTagM
+        (pure (Cancellation {failure = acc_0, cancellationUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldMessage
+            loop (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 (uf : acc_unknown_))
+
+instance ProtoMessage Cancellation where
+  protoMessageName _ = "coresdk.activity_result.Cancellation"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultCancellation
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "failure"
+        , fdNumber = 1
+        , fdTypeDesc = MessageType "temporal.api.failure.v1.Failure"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Cancellation) -> m.failure
+        , fdSet = \v (m :: Cancellation) -> (m { failure = v } :: Cancellation)
+        })
+    ]
+
+instance IsMessage Cancellation
+
+instance Aeson.ToJSON Cancellation where
+  toJSON msg = jsonObject
+      [ "failure" .=: msg.failure
+
+      ]
+
+instance Aeson.FromJSON Cancellation where
+  parseJSON = Aeson.withObject "Cancellation" $ \obj -> do
+    fld_failure <- parseFieldMaybe obj "failure"
+    pure (defaultCancellation
+      { failure = maybe (defaultCancellation.failure) Prelude.id fld_failure
+      , cancellationUnknownFields = []
+      } :: Cancellation)
+
+instance Hashable Cancellation where
+  hashWithSalt salt msg = hashWithSalt (salt) msg.failure
+
+instance Proto.Extension.HasExtensions Cancellation where
+  messageUnknownFields msg = msg.cancellationUnknownFields
+  setMessageUnknownFields !ufs msg = msg { cancellationUnknownFields = ufs }
+
+instance Semigroup Cancellation where
+  a <> b = Cancellation
+    { failure = case b.failure of { Nothing -> a.failure; x -> x }
+    , cancellationUnknownFields = a.cancellationUnknownFields <> b.cancellationUnknownFields
+    }
+
+instance Monoid Cancellation where
+  mempty = defaultCancellation
+
+data WillCompleteAsync = WillCompleteAsync
+  { willCompleteAsyncUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultWillCompleteAsync :: WillCompleteAsync
+defaultWillCompleteAsync = WillCompleteAsync
+  { willCompleteAsyncUnknownFields = []
+  }
+
+instance MessageEncode WillCompleteAsync where
+  buildMessage msg =
+    encodeUnknownFields msg.willCompleteAsyncUnknownFields
+
+instance MessageSize WillCompleteAsync where
+  messageSize msg =
+    unknownFieldsSize msg.willCompleteAsyncUnknownFields
+
+instance MessageDecode WillCompleteAsync where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop  []
+    where
+      loop acc_unknown_ = withTagM
+        (pure (WillCompleteAsync {willCompleteAsyncUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop (uf : acc_unknown_))
+
+instance ProtoMessage WillCompleteAsync where
+  protoMessageName _ = "coresdk.activity_result.WillCompleteAsync"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultWillCompleteAsync
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    []
+
+instance IsMessage WillCompleteAsync
+
+instance Aeson.ToJSON WillCompleteAsync where
+  toJSON msg = jsonObject
+      []
+
+instance Aeson.FromJSON WillCompleteAsync where
+  parseJSON _ = pure defaultWillCompleteAsync
+
+instance Hashable WillCompleteAsync where
+  hashWithSalt salt _ = salt
+
+instance Proto.Extension.HasExtensions WillCompleteAsync where
+  messageUnknownFields msg = msg.willCompleteAsyncUnknownFields
+  setMessageUnknownFields !ufs msg = msg { willCompleteAsyncUnknownFields = ufs }
+
+instance Semigroup WillCompleteAsync where
+  a <> b = WillCompleteAsync
+    { willCompleteAsyncUnknownFields = a.willCompleteAsyncUnknownFields <> b.willCompleteAsyncUnknownFields
+    }
+
+instance Monoid WillCompleteAsync where
+  mempty = defaultWillCompleteAsync
+
+data DoBackoff = DoBackoff
+  { attempt :: !(Maybe Word32)
+  , backoffDuration :: !(Maybe PB_Duration.Duration)
+  , originalScheduleTime :: !(Maybe PB_Timestamp.Timestamp)
+  , doBackoffUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+
+defaultDoBackoff :: DoBackoff
+defaultDoBackoff = DoBackoff
+  { attempt = Nothing
+  , backoffDuration = Nothing
+  , originalScheduleTime = Nothing
+  , doBackoffUnknownFields = []
+  }
+
+instance MessageEncode DoBackoff where
+  buildMessage msg =
+    (maybe mempty (\v -> archVarint 8 (fromIntegral v)) msg.attempt)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 18 sz (buildMessage v)) msg.backoffDuration)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 26 sz (buildMessage v)) msg.originalScheduleTime)
+    <> encodeUnknownFields msg.doBackoffUnknownFields
+
+instance MessageSize DoBackoff where
+  messageSize msg =
+    (maybe 0 (\v -> archVarintSize (fromIntegral v)) msg.attempt)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.backoffDuration)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.originalScheduleTime)
+    + unknownFieldsSize msg.doBackoffUnknownFields
+
+instance MessageDecode DoBackoff where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_unknown_ = withTagM
+        (pure (DoBackoff {attempt = acc_0, backoffDuration = acc_1, originalScheduleTime = acc_2, doBackoffUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop (Just v) acc_1 acc_2 acc_unknown_
+          2 -> do
+            v <- decodeFieldMessage
+            loop acc_0 (Just v) acc_2 acc_unknown_
+          3 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 (uf : acc_unknown_))
+
+instance ProtoMessage DoBackoff where
+  protoMessageName _ = "coresdk.activity_result.DoBackoff"
+  protoPackageName _ = "coresdk.activity_result"
+  protoDefaultValue = defaultDoBackoff
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "attempt"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType UInt32Field
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DoBackoff) -> m.attempt
+        , fdSet = \v (m :: DoBackoff) -> (m { attempt = v } :: DoBackoff)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "backoff_duration"
+        , fdNumber = 2
+        , fdTypeDesc = MessageType "google.protobuf.Duration"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DoBackoff) -> m.backoffDuration
+        , fdSet = \v (m :: DoBackoff) -> (m { backoffDuration = v } :: DoBackoff)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "original_schedule_time"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "google.protobuf.Timestamp"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: DoBackoff) -> m.originalScheduleTime
+        , fdSet = \v (m :: DoBackoff) -> (m { originalScheduleTime = v } :: DoBackoff)
+        })
+    ]
+
+instance IsMessage DoBackoff
+
+instance Aeson.ToJSON DoBackoff where
+  toJSON msg = jsonObject
+      [ "attempt" .=: msg.attempt
+      , "backoffDuration" .=: msg.backoffDuration
+      , "originalScheduleTime" .=: msg.originalScheduleTime
+      ]
+
+instance Aeson.FromJSON DoBackoff where
+  parseJSON = Aeson.withObject "DoBackoff" $ \obj -> do
+    fld_attempt <- parseFieldMaybe obj "attempt"
+    fld_backoffDuration <- parseFieldMaybe obj "backoffDuration"
+    fld_originalScheduleTime <- parseFieldMaybe obj "originalScheduleTime"
+    pure (defaultDoBackoff
+      { attempt = maybe (defaultDoBackoff.attempt) Prelude.id fld_attempt
+      , backoffDuration = maybe (defaultDoBackoff.backoffDuration) Prelude.id fld_backoffDuration
+      , originalScheduleTime = maybe (defaultDoBackoff.originalScheduleTime) Prelude.id fld_originalScheduleTime
+      , doBackoffUnknownFields = []
+      } :: DoBackoff)
+
+instance Hashable DoBackoff where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.attempt) msg.backoffDuration) msg.originalScheduleTime
+
+instance Proto.Extension.HasExtensions DoBackoff where
+  messageUnknownFields msg = msg.doBackoffUnknownFields
+  setMessageUnknownFields !ufs msg = msg { doBackoffUnknownFields = ufs }
+
+instance Semigroup DoBackoff where
+  a <> b = DoBackoff
+    { attempt = case b.attempt of { Nothing -> a.attempt; x -> x }
+    , backoffDuration = case b.backoffDuration of { Nothing -> a.backoffDuration; x -> x }
+    , originalScheduleTime = case b.originalScheduleTime of { Nothing -> a.originalScheduleTime; x -> x }
+    , doBackoffUnknownFields = a.doBackoffUnknownFields <> b.doBackoffUnknownFields
+    }
+
+instance Monoid DoBackoff where
+  mempty = defaultDoBackoff

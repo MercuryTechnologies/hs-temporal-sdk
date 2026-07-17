@@ -10,7 +10,7 @@ dependencies:
 - bytestring
 - containers
 - text
-- proto-lens
+- wireform-proto
 - crypton
 - memory
 

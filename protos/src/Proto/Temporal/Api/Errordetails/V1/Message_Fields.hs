@@ -1,195 +1,82 @@
-{- This file was auto-generated from temporal/api/errordetails/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists -Wno-name-shadowing #-}
+
 module Proto.Temporal.Api.Errordetails.V1.Message_Fields where
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Any
-import qualified Proto.Temporal.Api.Common.V1.Message
-import qualified Proto.Temporal.Api.Enums.V1.FailedCause
-import qualified Proto.Temporal.Api.Enums.V1.Namespace
-import qualified Proto.Temporal.Api.Failure.V1.Message
-activeCluster ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "activeCluster" a) =>
-  Lens.Family2.LensLike' f s a
-activeCluster = Data.ProtoLens.Field.field @"activeCluster"
-allowedStates ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "allowedStates" a) =>
-  Lens.Family2.LensLike' f s a
-allowedStates = Data.ProtoLens.Field.field @"allowedStates"
-cause ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "cause" a) =>
-  Lens.Family2.LensLike' f s a
-cause = Data.ProtoLens.Field.field @"cause"
-clientName ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "clientName" a) =>
-  Lens.Family2.LensLike' f s a
-clientName = Data.ProtoLens.Field.field @"clientName"
-clientSupportedServerVersions ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "clientSupportedServerVersions" a) =>
-  Lens.Family2.LensLike' f s a
-clientSupportedServerVersions
-  = Data.ProtoLens.Field.field @"clientSupportedServerVersions"
-clientVersion ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "clientVersion" a) =>
-  Lens.Family2.LensLike' f s a
-clientVersion = Data.ProtoLens.Field.field @"clientVersion"
-code ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "code" a) =>
-  Lens.Family2.LensLike' f s a
-code = Data.ProtoLens.Field.field @"code"
-currentCluster ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "currentCluster" a) =>
-  Lens.Family2.LensLike' f s a
-currentCluster = Data.ProtoLens.Field.field @"currentCluster"
-defaultBuildId ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "defaultBuildId" a) =>
-  Lens.Family2.LensLike' f s a
-defaultBuildId = Data.ProtoLens.Field.field @"defaultBuildId"
-details ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "details" a) =>
-  Lens.Family2.LensLike' f s a
-details = Data.ProtoLens.Field.field @"details"
-failure ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
-  Lens.Family2.LensLike' f s a
-failure = Data.ProtoLens.Field.field @"failure"
-maybe'failure ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
-maybe'workflowExecution ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'workflowExecution" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'workflowExecution
-  = Data.ProtoLens.Field.field @"maybe'workflowExecution"
-message ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "message" a) =>
-  Lens.Family2.LensLike' f s a
-message = Data.ProtoLens.Field.field @"message"
-namespace ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "namespace" a) =>
-  Lens.Family2.LensLike' f s a
-namespace = Data.ProtoLens.Field.field @"namespace"
-reason ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "reason" a) =>
-  Lens.Family2.LensLike' f s a
-reason = Data.ProtoLens.Field.field @"reason"
-runId ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "runId" a) =>
-  Lens.Family2.LensLike' f s a
-runId = Data.ProtoLens.Field.field @"runId"
-scope ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "scope" a) =>
-  Lens.Family2.LensLike' f s a
-scope = Data.ProtoLens.Field.field @"scope"
-serverVersion ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "serverVersion" a) =>
-  Lens.Family2.LensLike' f s a
-serverVersion = Data.ProtoLens.Field.field @"serverVersion"
-startRequestId ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "startRequestId" a) =>
-  Lens.Family2.LensLike' f s a
-startRequestId = Data.ProtoLens.Field.field @"startRequestId"
-state ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "state" a) =>
-  Lens.Family2.LensLike' f s a
-state = Data.ProtoLens.Field.field @"state"
-statuses ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "statuses" a) =>
-  Lens.Family2.LensLike' f s a
-statuses = Data.ProtoLens.Field.field @"statuses"
-supportedVersions ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "supportedVersions" a) =>
-  Lens.Family2.LensLike' f s a
-supportedVersions = Data.ProtoLens.Field.field @"supportedVersions"
-vec'allowedStates ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'allowedStates" a) =>
-  Lens.Family2.LensLike' f s a
-vec'allowedStates = Data.ProtoLens.Field.field @"vec'allowedStates"
-vec'details ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'details" a) =>
-  Lens.Family2.LensLike' f s a
-vec'details = Data.ProtoLens.Field.field @"vec'details"
-vec'statuses ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'statuses" a) =>
-  Lens.Family2.LensLike' f s a
-vec'statuses = Data.ProtoLens.Field.field @"vec'statuses"
-workflowError ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "workflowError" a) =>
-  Lens.Family2.LensLike' f s a
-workflowError = Data.ProtoLens.Field.field @"workflowError"
-workflowExecution ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "workflowExecution" a) =>
-  Lens.Family2.LensLike' f s a
-workflowExecution = Data.ProtoLens.Field.field @"workflowExecution"
+
+import Proto.Compat.HasField ()
+import Proto.Lens qualified as Lens
+
+activeCluster = Lens.field @"activeCluster"
+maybe'activeCluster = Lens.field @"activeCluster"
+vec'activeCluster = Lens.field @"activeCluster"
+allowedStates = Lens.field @"allowedStates"
+maybe'allowedStates = Lens.field @"allowedStates"
+vec'allowedStates = Lens.field @"allowedStates"
+cause = Lens.field @"cause"
+maybe'cause = Lens.field @"cause"
+vec'cause = Lens.field @"cause"
+clientName = Lens.field @"clientName"
+maybe'clientName = Lens.field @"clientName"
+vec'clientName = Lens.field @"clientName"
+clientSupportedServerVersions = Lens.field @"clientSupportedServerVersions"
+maybe'clientSupportedServerVersions = Lens.field @"clientSupportedServerVersions"
+vec'clientSupportedServerVersions = Lens.field @"clientSupportedServerVersions"
+clientVersion = Lens.field @"clientVersion"
+maybe'clientVersion = Lens.field @"clientVersion"
+vec'clientVersion = Lens.field @"clientVersion"
+code = Lens.field @"code"
+maybe'code = Lens.field @"code"
+vec'code = Lens.field @"code"
+currentCluster = Lens.field @"currentCluster"
+maybe'currentCluster = Lens.field @"currentCluster"
+vec'currentCluster = Lens.field @"currentCluster"
+defaultBuildId = Lens.field @"defaultBuildId"
+maybe'defaultBuildId = Lens.field @"defaultBuildId"
+vec'defaultBuildId = Lens.field @"defaultBuildId"
+details = Lens.field @"details"
+maybe'details = Lens.field @"details"
+vec'details = Lens.field @"details"
+failure = Lens.field @"failure"
+maybe'failure = Lens.field @"failure"
+vec'failure = Lens.field @"failure"
+message = Lens.field @"message"
+maybe'message = Lens.field @"message"
+vec'message = Lens.field @"message"
+namespace = Lens.field @"namespace"
+maybe'namespace = Lens.field @"namespace"
+vec'namespace = Lens.field @"namespace"
+reason = Lens.field @"reason"
+maybe'reason = Lens.field @"reason"
+vec'reason = Lens.field @"reason"
+runId = Lens.field @"runId"
+maybe'runId = Lens.field @"runId"
+vec'runId = Lens.field @"runId"
+scope = Lens.field @"scope"
+maybe'scope = Lens.field @"scope"
+vec'scope = Lens.field @"scope"
+serverVersion = Lens.field @"serverVersion"
+maybe'serverVersion = Lens.field @"serverVersion"
+vec'serverVersion = Lens.field @"serverVersion"
+startRequestId = Lens.field @"startRequestId"
+maybe'startRequestId = Lens.field @"startRequestId"
+vec'startRequestId = Lens.field @"startRequestId"
+state = Lens.field @"state"
+maybe'state = Lens.field @"state"
+vec'state = Lens.field @"state"
+statuses = Lens.field @"statuses"
+maybe'statuses = Lens.field @"statuses"
+vec'statuses = Lens.field @"statuses"
+supportedVersions = Lens.field @"supportedVersions"
+maybe'supportedVersions = Lens.field @"supportedVersions"
+vec'supportedVersions = Lens.field @"supportedVersions"
+workflowError = Lens.field @"workflowError"
+maybe'workflowError = Lens.field @"workflowError"
+vec'workflowError = Lens.field @"workflowError"
+workflowExecution = Lens.field @"workflowExecution"
+maybe'workflowExecution = Lens.field @"workflowExecution"
+vec'workflowExecution = Lens.field @"workflowExecution"

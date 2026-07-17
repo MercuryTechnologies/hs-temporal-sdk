@@ -10,19 +10,17 @@ module Temporal.Client.TestService (
 
 import Control.Exception
 import Data.Int (Int32, Int64)
-import Data.ProtoLens.Message
+
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
-import Lens.Family2
 import qualified Proto.Google.Protobuf.Timestamp as TS
-import qualified Proto.Google.Protobuf.Timestamp_Fields as TS (nanos, seconds)
 import Proto.Temporal.Api.Testservice.V1.RequestResponse (
-  LockTimeSkippingRequest,
-  SleepRequest,
-  SleepUntilRequest,
-  UnlockTimeSkippingRequest,
+  GetCurrentTimeResponse (..),
+  LockTimeSkippingRequest (..),
+  SleepRequest (..),
+  SleepUntilRequest (..),
+  UnlockTimeSkippingRequest (..),
  )
-import qualified Proto.Temporal.Api.Testservice.V1.RequestResponse_Fields as Fields
 import Temporal.Core.Client (Client)
 import qualified Temporal.Core.Client
 import qualified Temporal.Core.Client.TestService
@@ -42,15 +40,14 @@ getCurrentTime client = do
   res <- Temporal.Core.Client.TestService.getCurrentTime client
   case res of
     Left err -> convertAndThrowError err
-    Right val ->
-      let time = val ^. Fields.time
-      in pure $ protoToUTCTime time
+    Right (GetCurrentTimeResponse mTime _) ->
+      pure $ protoToUTCTime (maybe (TS.Timestamp 0 0 []) id mTime)
 
 
 unlockTimeSkipping :: Client -> IO ()
 unlockTimeSkipping client = do
   let msg :: UnlockTimeSkippingRequest
-      msg = defMessage
+      msg = UnlockTimeSkippingRequest []
   res <- Temporal.Core.Client.TestService.unlockTimeSkipping client msg
   case res of
     Left err -> convertAndThrowError err
@@ -60,7 +57,7 @@ unlockTimeSkipping client = do
 lockTimeSkipping :: Client -> IO ()
 lockTimeSkipping client = do
   let msg :: LockTimeSkippingRequest
-      msg = defMessage
+      msg = LockTimeSkippingRequest []
   res <- Temporal.Core.Client.TestService.lockTimeSkipping client msg
   case res of
     Left err -> convertAndThrowError err
@@ -70,7 +67,7 @@ lockTimeSkipping client = do
 sleepUntil :: Client -> UTCTime -> IO ()
 sleepUntil client time = do
   let msg :: SleepUntilRequest
-      msg = defMessage & Fields.timestamp .~ utcTimeToProto time
+      msg = SleepUntilRequest (Just (utcTimeToProto time)) []
   res <- Temporal.Core.Client.TestService.sleepUntil client msg
   case res of
     Left err -> convertAndThrowError err
@@ -80,7 +77,7 @@ sleepUntil client time = do
 sleep :: Client -> Duration -> IO ()
 sleep client duration = do
   let msg :: SleepRequest
-      msg = defMessage & Fields.duration .~ durationToProto duration
+      msg = SleepRequest (Just (durationToProto duration)) []
   res <- Temporal.Core.Client.TestService.sleep client msg
   case res of
     Left err -> convertAndThrowError err
@@ -90,7 +87,7 @@ sleep client duration = do
 unlockTimeSkippingWithSleep :: Client -> Duration -> IO ()
 unlockTimeSkippingWithSleep client duration = do
   let msg :: SleepRequest
-      msg = defMessage & Fields.duration .~ durationToProto duration
+      msg = SleepRequest (Just (durationToProto duration)) []
   res <- Temporal.Core.Client.TestService.unlockTimeSkippingWithSleep client msg
   case res of
     Left err -> convertAndThrowError err
@@ -98,9 +95,9 @@ unlockTimeSkippingWithSleep client duration = do
 
 
 protoToUTCTime :: TS.Timestamp -> UTCTime
-protoToUTCTime ts =
-  let seconds = fromIntegral (ts ^. TS.seconds) :: Integer
-      nanos = fromIntegral (ts ^. TS.nanos) :: Integer
+protoToUTCTime (TS.Timestamp tsSeconds tsNanos _) =
+  let seconds = fromIntegral tsSeconds :: Integer
+      nanos = fromIntegral tsNanos :: Integer
       posixTime = fromRational $ toRational seconds + toRational nanos / 1_000_000_000
   in posixSecondsToUTCTime posixTime
 
@@ -110,9 +107,7 @@ utcTimeToProto time =
   let posix = toRational (utcTimeToPOSIXSeconds time)
       seconds = floor posix :: Int64
       nanos = floor ((posix - toRational seconds) * 1_000_000_000) :: Int32
-  in defMessage
-      & TS.seconds .~ seconds
-      & TS.nanos .~ nanos
+  in TS.Timestamp seconds nanos []
 
 
 convertAndThrowError :: Temporal.Core.Client.RpcError -> IO a

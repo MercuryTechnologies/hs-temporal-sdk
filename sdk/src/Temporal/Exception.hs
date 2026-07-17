@@ -76,25 +76,23 @@ import Data.Annotation
 import qualified Data.ByteString as BS
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int
-import Data.ProtoLens (Message (..), decodeMessage, decodeMessageOrDie)
-import Data.ProtoLens.Field (field)
+import Proto.Decode (MessageDecode, decodeMessage)
+import Proto.Encode (MessageEncode)
+import Proto.Schema (ProtoMessage (protoMessageName))
 import Data.Text (Text, breakOnEnd, pack)
 import Data.Typeable
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import GHC.Stack
 import Lens.Family2
-import Proto.Google.Protobuf.Any (Any)
-import Proto.Rpc.Status (Status)
-import qualified Proto.Rpc.Status_Fields as Status
+import Proto.Google.Protobuf.Any (Any (..))
+import Proto.Rpc.Status (Status (..))
 import qualified Proto.Temporal.Api.Common.V1.Message as Common
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Common
-import Proto.Temporal.Api.Errordetails.V1.Message
-import Proto.Temporal.Api.Failure.V1.Message
+import Proto.Temporal.Api.Errordetails.V1.Message hiding (cause)
+import Proto.Temporal.Api.Failure.V1.Message hiding (cause, details, message, nextRetryDelay, nonRetryable, source, stackTrace, type')
 import qualified Proto.Temporal.Api.Failure.V1.Message as F
 import qualified Proto.Temporal.Api.Failure.V1.Message as Proto
-import qualified Proto.Temporal.Api.Failure.V1.Message_Fields as F
-import Proto.Temporal.Api.History.V1.Message
+import Proto.Temporal.Api.History.V1.Message hiding (cause, failure)
 import Temporal.Common
 import Temporal.Core.Client (RpcError (..))
 import Temporal.Duration
@@ -130,19 +128,19 @@ if the type doesn't match or parsing the payload has failed.
 
 Ignores the type URL prefix.
 -}
-unpackAny :: forall a. Message a => Any -> Either UnpackError a
-unpackAny a
-  | expectedName /= snd (breakOnEnd "/" $ a ^. field @"typeUrl") =
+unpackAny :: forall a. (ProtoMessage a, MessageDecode a) => Any -> Either UnpackError a
+unpackAny a@(Any typeUrl value _)
+  | expectedName /= snd (breakOnEnd "/" typeUrl) =
       Left
         DifferentType
           { expectedMessageType = expectedName
-          , actualUrl = a ^. field @"typeUrl"
+          , actualUrl = typeUrl
           }
-  | otherwise = case decodeMessage (a ^. field @"value") of
-      Left e -> Left $ DecodingError $ pack e
+  | otherwise = case decodeMessage value of
+      Left e -> Left $ DecodingError $ pack (show e)
       Right x -> Right x
   where
-    expectedName = messageName (Proxy @a)
+    expectedName = protoMessageName (Proxy @a)
 
 
 ---------------------------------------------------------------------
@@ -446,17 +444,23 @@ data ApplicationFailure = ApplicationFailure
 
 applicationFailureToFailureProto :: ApplicationFailure -> F.Failure
 applicationFailureToFailureProto appFailure =
-  defMessage
-    & F.message .~ appFailure.message
-    & F.source .~ "hs-temporal-sdk"
-    & F.stackTrace .~ appFailure.stack
-    & F.applicationFailureInfo
-      .~ ( defMessage
-            & F.type' .~ appFailure.type'
-            & F.details .~ (defMessage @Common.Payloads & Common.payloads .~ fmap convertToProtoPayload appFailure.details)
-            & F.nonRetryable .~ appFailure.nonRetryable
-            & F.maybe'nextRetryDelay .~ fmap durationToProto appFailure.nextRetryDelay
-         )
+  F.Failure
+    (Just appFailure.message)
+    (Just "hs-temporal-sdk")
+    (Just appFailure.stack)
+    Nothing
+    Nothing
+    ( Just $
+        F.Failure'FailureInfo'ApplicationFailureInfo $
+          F.ApplicationFailureInfo
+            (Just appFailure.type')
+            (Just appFailure.nonRetryable)
+            (Just (Common.Payloads (V.fromList (fmap convertToProtoPayload appFailure.details)) []))
+            (fmap durationToProto appFailure.nextRetryDelay)
+            Nothing
+            []
+    )
+    []
 
 
 instance Exception ApplicationFailure where
@@ -905,15 +909,15 @@ errorRegistry =
     , register RpcErrorWorkflowNotReady
     ]
   where
-    register :: forall msg. Message msg => (msg -> RpcErrorDetails) -> (Text, Any -> Either UnpackError RpcErrorDetails)
+    register :: forall msg. (ProtoMessage msg, MessageDecode msg) => (msg -> RpcErrorDetails) -> (Text, Any -> Either UnpackError RpcErrorDetails)
     register f =
-      ( "type.googleapis.com/" <> messageName (Proxy @msg)
+      ( "type.googleapis.com/" <> protoMessageName (Proxy @msg)
       , fmap f . unpackAny
       )
 
 
 applyRegistry :: HashMap.HashMap Text (Any -> Either UnpackError RpcErrorDetails) -> Any -> RpcErrorDetails
-applyRegistry m x = case HashMap.lookup (x ^. field @"typeUrl") m of
+applyRegistry m x@(Any typeUrl _ _) = case HashMap.lookup typeUrl m of
   Nothing -> RpcErrorUnrecognized x
   Just f -> case f x of
     Left _ -> RpcErrorUnrecognized x
@@ -946,10 +950,19 @@ data RpcError = RpcError
 instance Exception Temporal.Exception.RpcError
 
 
+decodeMessageOrThrow :: MessageDecode msg => BS.ByteString -> msg
+decodeMessageOrThrow bs =
+  case decodeMessage bs of
+    Left err -> error (show err)
+    Right msg -> msg
+
+
 coreRpcErrorToRpcError :: Temporal.Core.Client.RpcError -> Temporal.Exception.RpcError
 coreRpcErrorToRpcError err =
   Temporal.Exception.RpcError
     { code = toEnum $ fromIntegral err.code
     , message = err.message
-    , details = fmap (applyRegistry errorRegistry) ((decodeMessageOrDie @Status err.details) ^. field @"details")
+    , details =
+        let Status _ _ detailAnys _ = decodeMessageOrThrow @Status err.details
+        in fmap (applyRegistry errorRegistry) (V.toList detailAnys)
     }

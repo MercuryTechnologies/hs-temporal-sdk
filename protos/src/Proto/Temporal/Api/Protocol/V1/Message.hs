@@ -1,496 +1,226 @@
-{- This file was auto-generated from temporal/api/protocol/v1/message.proto by the proto-lens-protoc program. -}
-{-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, DataKinds, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies#-}
-{-# OPTIONS_GHC -Wno-unused-imports#-}
-{-# OPTIONS_GHC -Wno-duplicate-exports#-}
-{-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.Temporal.Api.Protocol.V1.Message (
-        Message(), Message'SequencingId(..), _Message'EventId,
-        _Message'CommandIndex
-    ) where
-import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
-import qualified Data.ProtoLens.Runtime.Prelude as Prelude
-import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
-import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
-import qualified Data.ProtoLens.Runtime.Data.Word as Data.Word
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens as Data.ProtoLens
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Bytes as Data.ProtoLens.Encoding.Bytes
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Growing as Data.ProtoLens.Encoding.Growing
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Parser.Unsafe as Data.ProtoLens.Encoding.Parser.Unsafe
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Data.ProtoLens.Encoding.Wire
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Field as Data.ProtoLens.Field
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Message.Enum as Data.ProtoLens.Message.Enum
-import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Service.Types as Data.ProtoLens.Service.Types
-import qualified Data.ProtoLens.Runtime.Lens.Family2 as Lens.Family2
-import qualified Data.ProtoLens.Runtime.Lens.Family2.Unchecked as Lens.Family2.Unchecked
-import qualified Data.ProtoLens.Runtime.Data.Text as Data.Text
-import qualified Data.ProtoLens.Runtime.Data.Map as Data.Map
-import qualified Data.ProtoLens.Runtime.Data.ByteString as Data.ByteString
-import qualified Data.ProtoLens.Runtime.Data.ByteString.Char8 as Data.ByteString.Char8
-import qualified Data.ProtoLens.Runtime.Data.Text.Encoding as Data.Text.Encoding
-import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
-import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
-import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
-import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.Google.Protobuf.Any
-{- | Fields :
-     
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.id' @:: Lens' Message Data.Text.Text@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.protocolInstanceId' @:: Lens' Message Data.Text.Text@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.body' @:: Lens' Message Proto.Google.Protobuf.Any.Any@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'body' @:: Lens' Message (Prelude.Maybe Proto.Google.Protobuf.Any.Any)@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'sequencingId' @:: Lens' Message (Prelude.Maybe Message'SequencingId)@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'eventId' @:: Lens' Message (Prelude.Maybe Data.Int.Int64)@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.eventId' @:: Lens' Message Data.Int.Int64@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.maybe'commandIndex' @:: Lens' Message (Prelude.Maybe Data.Int.Int64)@
-         * 'Proto.Temporal.Api.Protocol.V1.Message_Fields.commandIndex' @:: Lens' Message Data.Int.Int64@ -}
-data Message
-  = Message'_constructor {_Message'id :: !Data.Text.Text,
-                          _Message'protocolInstanceId :: !Data.Text.Text,
-                          _Message'body :: !(Prelude.Maybe Proto.Google.Protobuf.Any.Any),
-                          _Message'sequencingId :: !(Prelude.Maybe Message'SequencingId),
-                          _Message'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord)
-instance Prelude.Show Message where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+{-# LANGUAGE StrictData #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
+{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-matches -Wno-unused-top-binds #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
+-- | Auto-generated protobuf types from package @temporal.api.protocol.v1@.
+--
+-- __THIS FILE IS AUTO-GENERATED BY wireform. DO NOT EDIT.__
+--
+-- Any manual changes will be overwritten the next time code
+-- generation is run.  To modify the types or instances, edit the
+-- @.proto@ source file and re-run the code generator.
+module Proto.Temporal.Api.Protocol.V1.Message where
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import qualified Wireform.Builder as B
+import Data.Int (Int32, Int64)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Word (Word32, Word64)
+import qualified Data.Map.Strict as Map
+import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
+import GHC.Generics (Generic)
+import Control.DeepSeq (NFData(..))
+import Data.Hashable (Hashable(..))
+import Proto.Encode
+import Proto.Decode
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Aeson.Key as AesonKey
+import qualified Data.Aeson.KeyMap as AesonKM
+import Proto.Internal.JSON (jsonObject, (.=:), parseFieldMaybe, bytesFieldToJSON, parseBytesFieldMaybe, bytesMapFieldToJSON, parseBytesMapFieldMaybe, protoBytesToJSON)
+import Data.Proxy (Proxy(..))
+import Data.Reflection (Given(..), given)
+import Proto.Internal.JSON.Extension qualified as PJExt
+import Proto.Schema (ProtoMessage(..), SomeFieldDescriptor(..), FieldDescriptor(..), FieldTypeDescriptor(..), ScalarFieldType(..), FieldLabel'(..))
+import Proto.Registry (IsMessage)
+import Proto.Registry qualified
+import qualified Proto.Extension
+import Proto.Internal.Wire (Tag(..), WireType(..))
+import Proto.Internal.Wire.Encode (putTag, putVarint, putFixed32, putFixed64,
+  putFloat, putDouble, putText, putByteString, putLengthDelimited,
+  putSVarint32, putSVarint64, putVarintSigned,
+  varintSize, tagSize, fieldMessageSize,
+  fieldVarintSize, fieldFixed32Size, fieldFixed64Size,
+  fieldBoolSize, fieldFloatSize, fieldDoubleSize,
+  fieldTextSize, fieldBytesSize,
+  fieldSVarint32Size, fieldSVarint64Size,
+  varintSize32, zigZag32, zigZag64)
+import Proto.Internal.Encode.Archetype (archVarint, archSVarint32, archSVarint64,
+  archFixed32, archFixed64, archFloat, archDouble, archBool,
+  archString, archBytes, archSubmessage,
+  archVarintSize, archStringSize, archBytesSize, archBoolSize,
+  archFixed32Size, archFixed64Size, archSubmessageSize)
+import qualified Proto.Google.Protobuf.Any as PB_Any
+
+-- | Serialized FileDescriptorProto for this .proto file.
+-- Decode with @Proto.Google.Protobuf.Descriptor.decodeMessage@.
+fileDescriptorProtoBytes :: ByteString
+fileDescriptorProtoBytes = "\x0a\x26\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2f\x61\x70\x69\x2f\x70\x72\x6f\x74\x6f\x63\x6f\x6c\x2f\x76\x31\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x70\x72\x6f\x74\x6f\x12\x18\x74\x65\x6d\x70\x6f\x72\x61\x6c\x2e\x61\x70\x69\x2e\x70\x72\x6f\x74\x6f\x63\x6f\x6c\x2e\x76\x31\x1a\x19\x67\x6f\x6f\x67\x6c\x65\x2f\x70\x72\x6f\x74\x6f\x62\x75\x66\x2f\x61\x6e\x79\x2e\x70\x72\x6f\x74\x6f\x22\x90\x01\x0a\x07\x4d\x65\x73\x73\x61\x67\x65\x12\x0a\x0a\x02\x69\x64\x18\x01\x20\x01\x28\x09\x12\x1c\x0a\x14\x70\x72\x6f\x74\x6f\x63\x6f\x6c\x5f\x69\x6e\x73\x74\x61\x6e\x63\x65\x5f\x69\x64\x18\x02\x20\x01\x28\x09\x12\x21\x0a\x04\x62\x6f\x64\x79\x18\x05\x20\x01\x28\x0b\x32\x13\x67\x6f\x6f\x67\x6c\x65\x2e\x70\x72\x6f\x74\x6f\x62\x75\x66\x2e\x41\x6e\x79\x12\x10\x0a\x08\x65\x76\x65\x6e\x74\x5f\x69\x64\x18\x03\x20\x01\x28\x03\x12\x15\x0a\x0d\x63\x6f\x6d\x6d\x61\x6e\x64\x5f\x69\x6e\x64\x65\x78\x18\x04\x20\x01\x28\x03\x42\x0f\x0a\x0d\x73\x65\x71\x75\x65\x6e\x63\x69\x6e\x67\x5f\x69\x64\x62\x06\x70\x72\x6f\x74\x6f\x33"
+
+
+data Message = Message
+  { id :: !(Maybe Text)
+  , protocolInstanceId :: !(Maybe Text)
+  , body :: !(Maybe PB_Any.Any)
+  , sequencingId :: !(Maybe Message'SequencingId)
+  , messageUnknownFields :: ![UnknownField]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
 data Message'SequencingId
-  = Message'EventId !Data.Int.Int64 |
-    Message'CommandIndex !Data.Int.Int64
-  deriving stock (Prelude.Show, Prelude.Eq, Prelude.Ord)
-instance Data.ProtoLens.Field.HasField Message "id" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'id (\ x__ y__ -> x__ {_Message'id = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Message "protocolInstanceId" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'protocolInstanceId
-           (\ x__ y__ -> x__ {_Message'protocolInstanceId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Message "body" Proto.Google.Protobuf.Any.Any where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'body (\ x__ y__ -> x__ {_Message'body = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Message "maybe'body" (Prelude.Maybe Proto.Google.Protobuf.Any.Any) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'body (\ x__ y__ -> x__ {_Message'body = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Message "maybe'sequencingId" (Prelude.Maybe Message'SequencingId) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'sequencingId
-           (\ x__ y__ -> x__ {_Message'sequencingId = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Message "maybe'eventId" (Prelude.Maybe Data.Int.Int64) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'sequencingId
-           (\ x__ y__ -> x__ {_Message'sequencingId = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Message'EventId x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Message'EventId y__))
-instance Data.ProtoLens.Field.HasField Message "eventId" Data.Int.Int64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'sequencingId
-           (\ x__ y__ -> x__ {_Message'sequencingId = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Message'EventId x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Message'EventId y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Field.HasField Message "maybe'commandIndex" (Prelude.Maybe Data.Int.Int64) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'sequencingId
-           (\ x__ y__ -> x__ {_Message'sequencingId = y__}))
-        (Lens.Family2.Unchecked.lens
-           (\ x__
-              -> case x__ of
-                   (Prelude.Just (Message'CommandIndex x__val)) -> Prelude.Just x__val
-                   _otherwise -> Prelude.Nothing)
-           (\ _ y__ -> Prelude.fmap Message'CommandIndex y__))
-instance Data.ProtoLens.Field.HasField Message "commandIndex" Data.Int.Int64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Message'sequencingId
-           (\ x__ y__ -> x__ {_Message'sequencingId = y__}))
-        ((Prelude..)
-           (Lens.Family2.Unchecked.lens
-              (\ x__
-                 -> case x__ of
-                      (Prelude.Just (Message'CommandIndex x__val)) -> Prelude.Just x__val
-                      _otherwise -> Prelude.Nothing)
-              (\ _ y__ -> Prelude.fmap Message'CommandIndex y__))
-           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
-instance Data.ProtoLens.Message Message where
-  messageName _ = Data.Text.pack "temporal.api.protocol.v1.Message"
-  packedMessageDescriptor _
-    = "\n\
-      \\aMessage\DC2\SO\n\
-      \\STXid\CAN\SOH \SOH(\tR\STXid\DC20\n\
-      \\DC4protocol_instance_id\CAN\STX \SOH(\tR\DC2protocolInstanceId\DC2\ESC\n\
-      \\bevent_id\CAN\ETX \SOH(\ETXH\NULR\aeventId\DC2%\n\
-      \\rcommand_index\CAN\EOT \SOH(\ETXH\NULR\fcommandIndex\DC2(\n\
-      \\EOTbody\CAN\ENQ \SOH(\v2\DC4.google.protobuf.AnyR\EOTbodyB\SI\n\
-      \\rsequencing_id"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        id__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"id")) ::
-              Data.ProtoLens.FieldDescriptor Message
-        protocolInstanceId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "protocol_instance_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional
-                 (Data.ProtoLens.Field.field @"protocolInstanceId")) ::
-              Data.ProtoLens.FieldDescriptor Message
-        body__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "body"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.Google.Protobuf.Any.Any)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'body")) ::
-              Data.ProtoLens.FieldDescriptor Message
-        eventId__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "event_id"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'eventId")) ::
-              Data.ProtoLens.FieldDescriptor Message
-        commandIndex__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "command_index"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.Int64Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Int.Int64)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'commandIndex")) ::
-              Data.ProtoLens.FieldDescriptor Message
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, id__field_descriptor),
-           (Data.ProtoLens.Tag 2, protocolInstanceId__field_descriptor),
-           (Data.ProtoLens.Tag 5, body__field_descriptor),
-           (Data.ProtoLens.Tag 3, eventId__field_descriptor),
-           (Data.ProtoLens.Tag 4, commandIndex__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Message'_unknownFields
-        (\ x__ y__ -> x__ {_Message'_unknownFields = y__})
-  defMessage
-    = Message'_constructor
-        {_Message'id = Data.ProtoLens.fieldDefault,
-         _Message'protocolInstanceId = Data.ProtoLens.fieldDefault,
-         _Message'body = Prelude.Nothing,
-         _Message'sequencingId = Prelude.Nothing,
-         _Message'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: Message -> Data.ProtoLens.Encoding.Bytes.Parser Message
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"id") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.getText
-                                             (Prelude.fromIntegral len))
-                                       "protocol_instance_id"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"protocolInstanceId") y x)
-                        42
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "body"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"body") y x)
-                        24
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "event_id"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"eventId") y x)
-                        32
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (Prelude.fmap
-                                          Prelude.fromIntegral
-                                          Data.ProtoLens.Encoding.Bytes.getVarInt)
-                                       "command_index"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"commandIndex") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Message"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"id") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8 _v))
-             ((Data.Monoid.<>)
-                (let
-                   _v
-                     = Lens.Family2.view
-                         (Data.ProtoLens.Field.field @"protocolInstanceId") _x
-                 in
-                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                       Data.Monoid.mempty
-                   else
-                       (Data.Monoid.<>)
-                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                         ((Prelude..)
-                            (\ bs
-                               -> (Data.Monoid.<>)
-                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                            Data.Text.Encoding.encodeUtf8 _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'body") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (case
-                           Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'sequencingId") _x
-                       of
-                         Prelude.Nothing -> Data.Monoid.mempty
-                         (Prelude.Just (Message'EventId v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 24)
-                                ((Prelude..)
-                                   Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral v)
-                         (Prelude.Just (Message'CommandIndex v))
-                           -> (Data.Monoid.<>)
-                                (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
-                                ((Prelude..)
-                                   Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
-instance Control.DeepSeq.NFData Message where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Message'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_Message'id x__)
-                (Control.DeepSeq.deepseq
-                   (_Message'protocolInstanceId x__)
-                   (Control.DeepSeq.deepseq
-                      (_Message'body x__)
-                      (Control.DeepSeq.deepseq (_Message'sequencingId x__) ()))))
-instance Control.DeepSeq.NFData Message'SequencingId where
-  rnf (Message'EventId x__) = Control.DeepSeq.rnf x__
-  rnf (Message'CommandIndex x__) = Control.DeepSeq.rnf x__
-_Message'EventId ::
-  Data.ProtoLens.Prism.Prism' Message'SequencingId Data.Int.Int64
-_Message'EventId
-  = Data.ProtoLens.Prism.prism'
-      Message'EventId
-      (\ p__
-         -> case p__ of
-              (Message'EventId p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-_Message'CommandIndex ::
-  Data.ProtoLens.Prism.Prism' Message'SequencingId Data.Int.Int64
-_Message'CommandIndex
-  = Data.ProtoLens.Prism.prism'
-      Message'CommandIndex
-      (\ p__
-         -> case p__ of
-              (Message'CommandIndex p__val) -> Prelude.Just p__val
-              _otherwise -> Prelude.Nothing)
-packedFileDescriptor :: Data.ByteString.ByteString
-packedFileDescriptor
-  = "\n\
-    \&temporal/api/protocol/v1/message.proto\DC2\CANtemporal.api.protocol.v1\SUB\EMgoogle/protobuf/any.proto\"\202\SOH\n\
-    \\aMessage\DC2\SO\n\
-    \\STXid\CAN\SOH \SOH(\tR\STXid\DC20\n\
-    \\DC4protocol_instance_id\CAN\STX \SOH(\tR\DC2protocolInstanceId\DC2\ESC\n\
-    \\bevent_id\CAN\ETX \SOH(\ETXH\NULR\aeventId\DC2%\n\
-    \\rcommand_index\CAN\EOT \SOH(\ETXH\NULR\fcommandIndex\DC2(\n\
-    \\EOTbody\CAN\ENQ \SOH(\v2\DC4.google.protobuf.AnyR\EOTbodyB\SI\n\
-    \\rsequencing_idB\147\SOH\n\
-    \\ESCio.temporal.api.protocol.v1B\fMessageProtoP\SOHZ'go.temporal.io/api/protocol/v1;protocol\170\STX\SUBTemporalio.Api.Protocol.V1\234\STX\GSTemporalio::Api::Protocol::V1J\205\b\n\
-    \\ACK\DC2\EOT\NUL\NUL\"\SOH\n\
-    \\b\n\
-    \\SOH\f\DC2\ETX\NUL\NUL\DC2\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL!\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\EOT\NUL>\n\
-    \\t\n\
-    \\STX\b\v\DC2\ETX\EOT\NUL>\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ENQ\NUL4\n\
-    \\t\n\
-    \\STX\b\SOH\DC2\ETX\ENQ\NUL4\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\ACK\NUL\"\n\
-    \\t\n\
-    \\STX\b\n\
-    \\DC2\ETX\ACK\NUL\"\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\a\NUL-\n\
-    \\t\n\
-    \\STX\b\b\DC2\ETX\a\NUL-\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\b\NUL6\n\
-    \\t\n\
-    \\STX\b-\DC2\ETX\b\NUL6\n\
-    \\b\n\
-    \\SOH\b\DC2\ETX\t\NUL7\n\
-    \\t\n\
-    \\STX\b%\DC2\ETX\t\NUL7\n\
-    \\t\n\
-    \\STX\ETX\NUL\DC2\ETX\v\NUL#\n\
-    \\135\SOH\n\
-    \\STX\EOT\NUL\DC2\EOT\SI\NUL\"\SOH\SUB{ (-- api-linter: core::0146::any=disabled\n\
-    \     aip.dev/not-precedent: We want runtime extensibility for the body field --)\n\
-    \\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\SI\b\SI\n\
-    \/\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\DC1\EOT\DC2\SUB\" An ID for this specific message.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\DC1\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\DC1\v\r\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\DC1\DLE\DC1\n\
-    \]\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\NAK\EOT$\SUBP Identifies the specific instance of a protocol to which this message\n\
-    \ belongs.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\NAK\EOT\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\NAK\v\US\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\NAK\"#\n\
-    \\233\SOH\n\
-    \\EOT\EOT\NUL\b\NUL\DC2\EOT\SUB\EOT\GS\ENQ\SUB\218\SOH The event ID or command ID after which this message can be delivered. The\n\
-    \ effects of history up to and including this event ID should be visible to\n\
-    \ the code that handles this message. Omit to opt out of sequencing.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\b\NUL\SOH\DC2\ETX\SUB\n\
-    \\ETB\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\ESC\b\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ENQ\DC2\ETX\ESC\b\r\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\ESC\SO\SYN\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\ESC\EM\SUB\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\FS\b \n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ENQ\DC2\ETX\FS\b\r\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\FS\SO\ESC\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\FS\RS\US\n\
-    \\153\SOH\n\
-    \\EOT\EOT\NUL\STX\EOT\DC2\ETX!\EOT!\SUB\139\SOH The opaque data carried by this message. The protocol type can be\n\
-    \ extracted from the package name of the message carried inside the Any.\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ACK\DC2\ETX!\EOT\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\SOH\DC2\ETX!\CAN\FS\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\EOT\ETX\DC2\ETX!\US b\ACKproto3"
+  = Message'SequencingId'EventId {-# UNPACK #-} !Int64
+  | Message'SequencingId'CommandIndex {-# UNPACK #-} !Int64
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass NFData
+instance Aeson.ToJSON Message'SequencingId where
+  toJSON _ = Aeson.Null
+instance Aeson.FromJSON Message'SequencingId where
+  parseJSON _ = fail "Cannot parse oneof from JSON"
+instance Hashable Message'SequencingId where
+  hashWithSalt salt (Message'SequencingId'EventId v) = salt `hashWithSalt` (0 :: Int) `hashWithSalt` v
+  hashWithSalt salt (Message'SequencingId'CommandIndex v) = salt `hashWithSalt` (1 :: Int) `hashWithSalt` v
+
+defaultMessage :: Message
+defaultMessage = Message
+  { id = Nothing
+  , protocolInstanceId = Nothing
+  , body = Nothing
+  , sequencingId = Nothing
+  , messageUnknownFields = []
+  }
+
+instance MessageEncode Message where
+  buildMessage msg =
+    (maybe mempty (\v -> archString 10 v) msg.id)
+    <> (maybe mempty (\v -> archString 18 v) msg.protocolInstanceId)
+    <> (maybe mempty (\v -> let sz = messageSize v in archSubmessage 42 sz (buildMessage v)) msg.body)
+    <> (case msg.sequencingId of
+      Nothing -> mempty
+      Just (Message'SequencingId'EventId v) -> archVarint 24 (fromIntegral v)
+      Just (Message'SequencingId'CommandIndex v) -> archVarint 32 (fromIntegral v))
+    <> encodeUnknownFields msg.messageUnknownFields
+
+instance MessageSize Message where
+  messageSize msg =
+    (maybe 0 (\v -> archStringSize v) msg.id)
+    + (maybe 0 (\v -> archStringSize v) msg.protocolInstanceId)
+    + (maybe 0 (\v -> archSubmessageSize (messageSize v)) msg.body)
+    + (case msg.sequencingId of { Nothing -> 0; Just (Message'SequencingId'EventId v) -> archVarintSize (fromIntegral v)
+    ; Just (Message'SequencingId'CommandIndex v) -> archVarintSize (fromIntegral v) })
+    + unknownFieldsSize msg.messageUnknownFields
+
+instance MessageDecode Message where
+  {-# INLINE messageDecoder #-}
+  messageDecoder = loop Nothing Nothing Nothing Nothing []
+    where
+      loop acc_0 acc_1 acc_2 acc_3 acc_unknown_ = withTagM
+        (pure (Message {id = acc_0, protocolInstanceId = acc_1, body = acc_2, sequencingId = acc_3, messageUnknownFields = reverse acc_unknown_}))
+        (\fn wt -> case fn of
+          1 -> do
+            v <- decodeFieldString
+            loop (Just v) acc_1 acc_2 acc_3 acc_unknown_
+          2 -> do
+            v <- decodeFieldString
+            loop acc_0 (Just v) acc_2 acc_3 acc_unknown_
+          5 -> do
+            v <- decodeFieldMessage
+            loop acc_0 acc_1 (Just v) acc_3 acc_unknown_
+          3 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 acc_1 acc_2 (Just (Message'SequencingId'EventId v)) acc_unknown_
+          4 -> do
+            v <- (fromIntegral <$> decodeFieldVarint)
+            loop acc_0 acc_1 acc_2 (Just (Message'SequencingId'CommandIndex v)) acc_unknown_
+          _ -> do
+            uf <- captureUnknownField fn (toEnum wt)
+            loop acc_0 acc_1 acc_2 acc_3 (uf : acc_unknown_))
+
+instance ProtoMessage Message where
+  protoMessageName _ = "temporal.api.protocol.v1.Message"
+  protoPackageName _ = "temporal.api.protocol.v1"
+  protoDefaultValue = defaultMessage
+  protoFileDescriptorBytes _ = fileDescriptorProtoBytes
+  protoFieldDescriptors _ = Map.fromList
+    [ (1, SomeField FieldDescriptor
+        { fdName = "id"
+        , fdNumber = 1
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Message) -> m.id
+        , fdSet = \v (m :: Message) -> (m { id = v } :: Message)
+        }), (2, SomeField FieldDescriptor
+        { fdName = "protocol_instance_id"
+        , fdNumber = 2
+        , fdTypeDesc = ScalarType StringField
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Message) -> m.protocolInstanceId
+        , fdSet = \v (m :: Message) -> (m { protocolInstanceId = v } :: Message)
+        })
+    , (5, SomeField FieldDescriptor
+        { fdName = "body"
+        , fdNumber = 5
+        , fdTypeDesc = MessageType "google.protobuf.Any"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Message) -> m.body
+        , fdSet = \v (m :: Message) -> (m { body = v } :: Message)
+        })
+    , (3, SomeField FieldDescriptor
+        { fdName = "sequencing_id"
+        , fdNumber = 3
+        , fdTypeDesc = MessageType "sequencing_id"
+        , fdLabel = LabelOptional
+        , fdGet = \(m :: Message) -> m.sequencingId
+        , fdSet = \v (m :: Message) -> (m { sequencingId = v } :: Message)
+        })
+    ]
+
+instance IsMessage Message
+
+instance Aeson.ToJSON Message where
+  toJSON msg = jsonObject
+      [ "id" .=: msg.id
+      , "protocolInstanceId" .=: msg.protocolInstanceId
+      , "body" .=: msg.body
+      , "sequencingId" .=: msg.sequencingId
+      ]
+
+instance Aeson.FromJSON Message where
+  parseJSON = Aeson.withObject "Message" $ \obj -> do
+    fld_id <- parseFieldMaybe obj "id"
+    fld_protocolInstanceId <- parseFieldMaybe obj "protocolInstanceId"
+    fld_body <- parseFieldMaybe obj "body"
+    fld_sequencingId <- parseFieldMaybe obj "sequencingId"
+    pure (defaultMessage
+      { id = maybe (defaultMessage.id) Prelude.id fld_id
+      , protocolInstanceId = maybe (defaultMessage.protocolInstanceId) Prelude.id fld_protocolInstanceId
+      , body = maybe (defaultMessage.body) Prelude.id fld_body
+      , sequencingId = maybe (defaultMessage.sequencingId) Prelude.id fld_sequencingId
+      , messageUnknownFields = []
+      } :: Message)
+
+instance Hashable Message where
+  hashWithSalt salt msg = hashWithSalt (hashWithSalt (hashWithSalt (hashWithSalt (salt) msg.id) msg.protocolInstanceId) msg.body) msg.sequencingId
+
+instance Proto.Extension.HasExtensions Message where
+  messageUnknownFields msg = msg.messageUnknownFields
+  setMessageUnknownFields !ufs msg = msg { messageUnknownFields = ufs }
+
+instance Semigroup Message where
+  a <> b = Message
+    { id = case b.id of { Nothing -> a.id; x -> x }
+    , protocolInstanceId = case b.protocolInstanceId of { Nothing -> a.protocolInstanceId; x -> x }
+    , body = case b.body of { Nothing -> a.body; x -> x }
+    , sequencingId = case b.sequencingId of { Nothing -> a.sequencingId; x -> x }
+    , messageUnknownFields = a.messageUnknownFields <> b.messageUnknownFields
+    }
+
+instance Monoid Message where
+  mempty = defaultMessage

@@ -7,11 +7,9 @@
 module NexusSpec where
 
 import qualified Data.HashMap.Strict as HashMap
-import Data.ProtoLens (defMessage)
 import qualified Data.Text as T
-import Lens.Family2
 import qualified Proto.Temporal.Api.Enums.V1.Nexus as NexusEnum
-import qualified Proto.Temporal.Api.Nexus.V1.Message_Fields as NexusMsg
+import qualified Proto.Temporal.Api.Nexus.V1.Message as NexusMsg
 import qualified Proto.Temporal.Sdk.Core.Nexus.Nexus as Nexus
 import qualified Temporal.Client as C
 import Temporal.Duration
@@ -32,40 +30,51 @@ endpointName = "test-nexus-endpoint"
 
 
 mkEchoHandler :: NexusOperationHandler
-mkEchoHandler = NexusOperationHandler
-  { handleStartOperation = \req -> do
-      let inputPayload = req ^. NexusMsg.maybe'payload
-          syncResp = maybe defMessage (\p -> defMessage & NexusMsg.payload .~ p) inputPayload
-          startOpResp = defMessage & NexusMsg.syncSuccess .~ syncResp
-          response = defMessage & NexusMsg.startOperation .~ startOpResp
-      pure $ Nexus.NexusTaskCompletion'Completed response
-  , handleCancelOperation = \_ ->
-      pure $ Nexus.NexusTaskCompletion'AckCancel True
-  }
+mkEchoHandler =
+  NexusOperationHandler
+    { handleStartOperation = \req -> do
+        let inputPayload = req.payload
+            syncResp = maybe mempty (\p -> NexusMsg.StartOperationResponse'Sync (Just p) mempty []) inputPayload
+            startOpResp =
+              NexusMsg.StartOperationResponse
+                (Just (NexusMsg.StartOperationResponse'Variant'SyncSuccess syncResp))
+                []
+            response =
+              NexusMsg.Response
+                (Just (NexusMsg.Response'Variant'StartOperation startOpResp))
+                []
+        pure $ Nexus.NexusTaskCompletion'Status'Completed response
+    , handleCancelOperation = \_ ->
+        pure $ Nexus.NexusTaskCompletion'Status'AckCancel True
+    }
 
 
 mkErrorHandler :: NexusOperationHandler
-mkErrorHandler = NexusOperationHandler
-  { handleStartOperation = \_ ->
-      pure $ Nexus.NexusTaskCompletion'Error
-        ( defMessage
-            & NexusMsg.errorType .~ "BAD_REQUEST"
-            & NexusMsg.retryBehavior .~ NexusEnum.NEXUS_HANDLER_ERROR_RETRY_BEHAVIOR_NON_RETRYABLE
-            & NexusMsg.failure .~ (defMessage & NexusMsg.message .~ "intentional test error")
-        )
-  , handleCancelOperation = \_ ->
-      pure $ Nexus.NexusTaskCompletion'AckCancel True
-  }
+mkErrorHandler =
+  NexusOperationHandler
+    { handleStartOperation = \_ ->
+        pure $
+          Nexus.NexusTaskCompletion'Status'Error $
+            NexusMsg.HandlerError
+              (Just "BAD_REQUEST")
+              (Just (NexusMsg.Failure (Just "intentional test error") mempty Nothing []))
+              (Just NexusEnum.NexusHandlerErrorRetryBehavior'NexusHandlerErrorRetryBehaviorNonRetryable)
+              []
+    , handleCancelOperation = \_ ->
+        pure $ Nexus.NexusTaskCompletion'Status'AckCancel True
+    }
 
 
 testService :: NexusServiceHandler
-testService = NexusServiceHandler
-  { serviceName = "test-service"
-  , operations = HashMap.fromList
-      [ ("echo", mkEchoHandler)
-      , ("fail", mkErrorHandler)
-      ]
-  }
+testService =
+  NexusServiceHandler
+    { serviceName = "test-service"
+    , operations =
+        HashMap.fromList
+          [ ("echo", mkEchoHandler)
+          , ("fail", mkErrorHandler)
+          ]
+    }
 
 
 echoCallerWorkflow :: MyWorkflow T.Text

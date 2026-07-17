@@ -25,7 +25,8 @@ module Temporal.Replay (
 import Control.Exception
 import Control.Monad.IO.Class
 import qualified Data.ByteString as BS
-import Data.ProtoLens
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import Proto.Temporal.Api.History.V1.Message
 
 
@@ -38,12 +39,13 @@ readHistoryProtobufFile :: MonadIO m => FilePath -> m History
 readHistoryProtobufFile fp = liftIO $ do
   res <- decodeMessage <$> BS.readFile fp
   case res of
-    Left err -> throwIO $ InvalidHistoryProtobufException err
+    Left err -> throwIO $ InvalidHistoryProtobufException (show err)
     Right ok -> pure ok
 
 
--- | Read raw protobuf bytes from a history file without decoding through proto-lens.
--- Pass the result to 'Temporal.Worker.runReplayHistoryProto' along with the workflow ID.
+{- | Read raw protobuf bytes from a history file without decoding them first.
+Pass the result to 'Temporal.Worker.runReplayHistoryProto' along with the workflow ID.
+-}
 readHistoryProtobufFileRaw :: MonadIO m => FilePath -> m BS.ByteString
 readHistoryProtobufFileRaw fp = liftIO $ BS.readFile fp
 
@@ -52,9 +54,10 @@ writeHistoryProtobufFile :: FilePath -> History -> IO ()
 writeHistoryProtobufFile fp hist = BS.writeFile fp (encodeMessage hist)
 
 
--- | Read a workflow history JSON file exported from the Temporal UI or CLI.
--- Returns the raw bytes to be passed to 'Temporal.Worker.runReplayHistoryJson'
--- or 'Temporal.Core.Worker.pushHistoryJson'. The JSON is deserialized on the
--- Rust side where protobuf canonical JSON is properly supported.
+{- | Read a workflow history JSON file exported from the Temporal UI or CLI.
+Returns the raw bytes to be passed to 'Temporal.Worker.runReplayHistoryJson'
+or 'Temporal.Core.Worker.pushHistoryJson'. The JSON is deserialized on the
+Rust side where protobuf canonical JSON is properly supported.
+-}
 readHistoryJsonFile :: MonadIO m => FilePath -> m BS.ByteString
 readHistoryJsonFile fp = liftIO $ BS.readFile fp

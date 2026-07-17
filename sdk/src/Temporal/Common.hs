@@ -14,7 +14,8 @@ import Data.Int (Int32)
 import Data.Kind
 import Data.Map (Map)
 import qualified Data.Map.Strict as Map
-import Data.ProtoLens
+import Proto.Decode (decodeMessage)
+import Proto.Encode (encodeMessage)
 import Data.String
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -25,11 +26,9 @@ import Data.Word (Word32)
 import GHC.Generics (Generic)
 import Instances.TH.Lift ()
 import Language.Haskell.TH.Syntax (Lift)
-import Lens.Family2
+import qualified Data.Vector as V
 import qualified Proto.Google.Protobuf.Timestamp as Timestamp
-import qualified Proto.Google.Protobuf.Timestamp_Fields as Timestamp
 import qualified Proto.Temporal.Api.Common.V1.Message as Message
-import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
 import qualified Proto.Temporal.Api.Enums.V1.Workflow as Workflow
 import Temporal.Duration
 import Temporal.Payload
@@ -161,18 +160,16 @@ newtype TaskToken = TaskToken
 
 
 timespecFromTimestamp :: Timestamp.Timestamp -> SystemTime
-timespecFromTimestamp ts =
+timespecFromTimestamp (Timestamp.Timestamp seconds nanos _) =
   MkSystemTime
-    { systemSeconds = ts ^. Timestamp.seconds
-    , systemNanoseconds = fromIntegral (ts ^. Timestamp.nanos)
+    { systemSeconds = seconds
+    , systemNanoseconds = fromIntegral nanos
     }
 
 
 timespecToTimestamp :: SystemTime -> Timestamp.Timestamp
 timespecToTimestamp ts =
-  defMessage
-    & Timestamp.seconds .~ systemSeconds ts
-    & Timestamp.nanos .~ fromIntegral (systemNanoseconds ts)
+  Timestamp.Timestamp (systemSeconds ts) (fromIntegral (systemNanoseconds ts)) []
 
 
 -- | A Retry Policy is a collection of attributes that instructs the Temporal Server how to retry a failure of a Workflow Execution or an Activity Task Execution.
@@ -235,22 +232,23 @@ errorType = T.pack . show . typeRep
 retryPolicyToProto :: RetryPolicy -> Message.RetryPolicy
 retryPolicyToProto (RetryPolicy initialInterval backoffCoefficient maximumInterval maximumAttempts nonRetryableErrorTypes) =
   -- Using a full destructure here to make sure we don't miss any new fields later. ^
-  defMessage
-    & Message.initialInterval .~ durationToProto initialInterval
-    & Message.backoffCoefficient .~ backoffCoefficient
-    & Message.maybe'maximumInterval .~ fmap durationToProto maximumInterval
-    & Message.maximumAttempts .~ maximumAttempts
-    & Message.vec'nonRetryableErrorTypes .~ nonRetryableErrorTypes
+  Message.RetryPolicy
+    (Just (durationToProto initialInterval))
+    (Just backoffCoefficient)
+    (fmap durationToProto maximumInterval)
+    (Just maximumAttempts)
+    nonRetryableErrorTypes
+    []
 
 
 retryPolicyFromProto :: Message.RetryPolicy -> RetryPolicy
-retryPolicyFromProto p =
+retryPolicyFromProto (Message.RetryPolicy pInitialInterval pBackoffCoefficient pMaximumInterval pMaximumAttempts pNonRetryableErrorTypes _) =
   RetryPolicy
-    { initialInterval = durationFromProto (p ^. Message.initialInterval)
-    , backoffCoefficient = p ^. Message.backoffCoefficient
-    , maximumInterval = fmap durationFromProto (p ^. Message.maybe'maximumInterval)
-    , maximumAttempts = p ^. Message.maximumAttempts
-    , nonRetryableErrorTypes = p ^. Message.vec'nonRetryableErrorTypes
+    { initialInterval = maybe mempty durationFromProto pInitialInterval
+    , backoffCoefficient = maybe 0 id pBackoffCoefficient
+    , maximumInterval = fmap durationFromProto pMaximumInterval
+    , maximumAttempts = maybe 0 id pMaximumAttempts
+    , nonRetryableErrorTypes = pNonRetryableErrorTypes
     }
 
 
@@ -268,15 +266,14 @@ data RetryState
 
 retryStateFromProto :: Workflow.RetryState -> RetryState
 retryStateFromProto = \case
-  Workflow.RETRY_STATE_UNSPECIFIED -> RetryStateUnspecified
-  Workflow.RETRY_STATE_IN_PROGRESS -> RetryStateInProgress
-  Workflow.RETRY_STATE_NON_RETRYABLE_FAILURE -> RetryStateNonRetryableFailure
-  Workflow.RETRY_STATE_TIMEOUT -> RetryStateTimeout
-  Workflow.RETRY_STATE_MAXIMUM_ATTEMPTS_REACHED -> RetryStateMaximumAttemptsReached
-  Workflow.RETRY_STATE_RETRY_POLICY_NOT_SET -> RetryStateRetryPolicyNotSet
-  Workflow.RETRY_STATE_INTERNAL_SERVER_ERROR -> RetryStateInternalServerError
-  Workflow.RETRY_STATE_CANCEL_REQUESTED -> RetryStateCancelRequested
-  (Workflow.RetryState'Unrecognized _) -> error "retryStateFromProto: invalid retry state"
+  Workflow.RetryState'RetryStateUnspecified -> RetryStateUnspecified
+  Workflow.RetryState'RetryStateInProgress -> RetryStateInProgress
+  Workflow.RetryState'RetryStateNonRetryableFailure -> RetryStateNonRetryableFailure
+  Workflow.RetryState'RetryStateTimeout -> RetryStateTimeout
+  Workflow.RetryState'RetryStateMaximumAttemptsReached -> RetryStateMaximumAttemptsReached
+  Workflow.RetryState'RetryStateRetryPolicyNotSet -> RetryStateRetryPolicyNotSet
+  Workflow.RetryState'RetryStateInternalServerError -> RetryStateInternalServerError
+  Workflow.RetryState'RetryStateCancelRequested -> RetryStateCancelRequested
 
 
 {- | A Workflow Id Reuse Policy determines whether a Workflow Execution is allowed to spawn with a particular Workflow Id,
@@ -342,46 +339,78 @@ instance FromJSON WorkflowIdReusePolicy
 -- | Convert a 'WorkflowIdConflictPolicy' to its protobuf representation.
 workflowIdConflictPolicyToProto :: WorkflowIdConflictPolicy -> Workflow.WorkflowIdConflictPolicy
 workflowIdConflictPolicyToProto = \case
-  WorkflowIdConflictPolicyUnspecified -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED
-  WorkflowIdConflictPolicyFail -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_FAIL
-  WorkflowIdConflictPolicyUseExisting -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING
-  WorkflowIdConflictPolicyTerminateExisting -> Workflow.WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING
+  WorkflowIdConflictPolicyUnspecified -> Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyUnspecified
+  WorkflowIdConflictPolicyFail -> Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyFail
+  WorkflowIdConflictPolicyUseExisting -> Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyUseExisting
+  WorkflowIdConflictPolicyTerminateExisting -> Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyTerminateExisting
 
 
 -- | Convert a protobuf 'Workflow.WorkflowIdConflictPolicy' to its Haskell representation.
 workflowIdConflictPolicyFromProto :: Workflow.WorkflowIdConflictPolicy -> WorkflowIdConflictPolicy
 workflowIdConflictPolicyFromProto = \case
-  Workflow.WORKFLOW_ID_CONFLICT_POLICY_UNSPECIFIED -> WorkflowIdConflictPolicyUnspecified
-  Workflow.WORKFLOW_ID_CONFLICT_POLICY_FAIL -> WorkflowIdConflictPolicyFail
-  Workflow.WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING -> WorkflowIdConflictPolicyUseExisting
-  Workflow.WORKFLOW_ID_CONFLICT_POLICY_TERMINATE_EXISTING -> WorkflowIdConflictPolicyTerminateExisting
-  (Workflow.WorkflowIdConflictPolicy'Unrecognized _) -> WorkflowIdConflictPolicyUnspecified
+  Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyUnspecified -> WorkflowIdConflictPolicyUnspecified
+  Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyFail -> WorkflowIdConflictPolicyFail
+  Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyUseExisting -> WorkflowIdConflictPolicyUseExisting
+  Workflow.WorkflowIdConflictPolicy'WorkflowIdConflictPolicyTerminateExisting -> WorkflowIdConflictPolicyTerminateExisting
 
 
 -- | Convert a 'WorkflowIdReusePolicy' to its protobuf representation.
 workflowIdReusePolicyToProto :: WorkflowIdReusePolicy -> Workflow.WorkflowIdReusePolicy
 workflowIdReusePolicyToProto = \case
-  WorkflowIdReusePolicyUnspecified -> Workflow.WORKFLOW_ID_REUSE_POLICY_UNSPECIFIED
-  WorkflowIdReusePolicyAllowDuplicate -> Workflow.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE
-  WorkflowIdReusePolicyAllowDuplicateFailedOnly -> Workflow.WORKFLOW_ID_REUSE_POLICY_ALLOW_DUPLICATE_FAILED_ONLY
-  WorkflowIdReusePolicyRejectDuplicate -> Workflow.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE
-  WorkflowIdReusePolicyTerminateIfRunning -> Workflow.WORKFLOW_ID_REUSE_POLICY_TERMINATE_IF_RUNNING
+  WorkflowIdReusePolicyUnspecified -> Workflow.WorkflowIdReusePolicy'WorkflowIdReusePolicyUnspecified
+  WorkflowIdReusePolicyAllowDuplicate -> Workflow.WorkflowIdReusePolicy'WorkflowIdReusePolicyAllowDuplicate
+  WorkflowIdReusePolicyAllowDuplicateFailedOnly -> Workflow.WorkflowIdReusePolicy'WorkflowIdReusePolicyAllowDuplicateFailedOnly
+  WorkflowIdReusePolicyRejectDuplicate -> Workflow.WorkflowIdReusePolicy'WorkflowIdReusePolicyRejectDuplicate
+  WorkflowIdReusePolicyTerminateIfRunning -> Workflow.WorkflowIdReusePolicy'WorkflowIdReusePolicyTerminateIfRunning
 
 
 memoAttributesToProto :: Map.Map Text Message.Payload -> Message.Memo
-memoAttributesToProto memoAttrs = defMessage & Message.fields .~ memoAttrs
+memoAttributesToProto memoAttrs =
+  Message.Memo (memoFieldsToProto memoAttrs) []
 
 
 memoAttributesFromProto :: Message.Memo -> Map.Map Text Message.Payload
-memoAttributesFromProto = view Message.fields
+memoAttributesFromProto (Message.Memo fields _) = memoFieldsFromProto fields
 
 
 headerToProto :: Map.Map Text Message.Payload -> Message.Header
-headerToProto header = defMessage & Message.fields .~ header
+headerToProto header =
+  Message.Header (headerFieldsToProto header) []
 
 
 headerFromProto :: Message.Header -> Map.Map Text Message.Payload
-headerFromProto = view Message.fields
+headerFromProto (Message.Header fields _) = headerFieldsFromProto fields
+
+memoFieldsToProto :: Map.Map Text Message.Payload -> Vector Message.Memo'FieldsEntry
+memoFieldsToProto =
+  V.fromList . fmap (\(k, v) -> Message.Memo'FieldsEntry (Just k) (Just v) []) . Map.toList
+
+
+memoFieldsFromProto :: Vector Message.Memo'FieldsEntry -> Map.Map Text Message.Payload
+memoFieldsFromProto =
+  V.foldr
+    ( \(Message.Memo'FieldsEntry mKey mValue _) acc ->
+        case (mKey, mValue) of
+          (Just k, Just v) -> Map.insert k v acc
+          _ -> acc
+    )
+    Map.empty
+
+
+headerFieldsToProto :: Map.Map Text Message.Payload -> Vector Message.Header'FieldsEntry
+headerFieldsToProto =
+  V.fromList . fmap (\(k, v) -> Message.Header'FieldsEntry (Just k) (Just v) []) . Map.toList
+
+
+headerFieldsFromProto :: Vector Message.Header'FieldsEntry -> Map.Map Text Message.Payload
+headerFieldsFromProto =
+  V.foldr
+    ( \(Message.Header'FieldsEntry mKey mValue _) acc ->
+        case (mKey, mValue) of
+          (Just k, Just v) -> Map.insert k v acc
+          _ -> acc
+    )
+    Map.empty
 
 
 data ParentInfo = ParentInfo
@@ -424,11 +453,11 @@ nonEmptyString t = if T.null t then Nothing else Just t
 
 
 convertToProtoMemo :: Map Text Payload -> Message.Memo
-convertToProtoMemo m = defMessage & Message.fields .~ fmap convertToProtoPayload m
+convertToProtoMemo m = Message.Memo (memoFieldsToProto (fmap convertToProtoPayload m)) []
 
 
 convertFromProtoMemo :: Message.Memo -> Map Text Payload
-convertFromProtoMemo m = fmap convertFromProtoPayload (m ^. Message.fields)
+convertFromProtoMemo (Message.Memo fields _) = fmap convertFromProtoPayload (memoFieldsFromProto fields)
 
 
 data TimeoutOptions = TimeoutOptions

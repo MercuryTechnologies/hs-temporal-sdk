@@ -1,0 +1,57 @@
+cabal-version: 3.0
+
+-- This file has been generated from package.yaml by hpack version 0.36.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           temporal-protogen-wireform
+version:        2025.10.1.0
+description:    protoc plugin wrapper for hs-temporal-sdk's wireform protobuf generation.
+category:       Concurrency
+author:         Ian Duncan
+maintainer:     temporal@mercury.com
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+
+executable temporal-protogen-wireform
+  main-is: Main.hs
+  other-modules:
+      Paths_temporal_protogen_wireform
+  autogen-modules:
+      Paths_temporal_protogen_wireform
+  hs-source-dirs:
+      src
+  default-extensions:
+      BangPatterns
+      BlockArguments
+      DataKinds
+      DerivingStrategies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      NumericUnderscores
+      RankNTypes
+      OverloadedRecordDot
+      OverloadedStrings
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      UndecidableInstances
+      ViewPatterns
+  ghc-options: -Wall
+  build-depends:
+      base >=4.18 && <5
+    , containers
+    , text
+    , vector
+    , wireform-proto
+  default-language: Haskell2010
