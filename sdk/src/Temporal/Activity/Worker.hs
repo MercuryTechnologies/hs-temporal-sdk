@@ -10,6 +10,7 @@ import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Data.Bifunctor
+import Data.Foldable (fold)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Map.Strict as Map
@@ -111,15 +112,15 @@ activityInfoFromProto tt tq msg = do
   hdrs <- processorTryDecodePayloads w.payloadProcessor rawHdrs
   heartbeats <- processorDecodePayloads w.payloadProcessor (fmap convertFromProtoPayload msg.heartbeatDetails)
   heartbeatsRef <- newIORef heartbeats
-  let workflowExecution = fromMaybe (P.WorkflowExecution Nothing Nothing []) msg.workflowExecution
+  let workflowExecution = fold msg.workflowExecution
   pure $
     ActivityInfo
-      { workflowNamespace = Namespace $ fromMaybe "" msg.workflowNamespace
-      , workflowType = WorkflowType $ fromMaybe "" msg.workflowType
-      , workflowId = WorkflowId $ fromMaybe "" workflowExecution.workflowId
-      , runId = RunId $ fromMaybe "" workflowExecution.runId
-      , activityId = ActivityId $ fromMaybe "" msg.activityId
-      , activityType = fromMaybe "" msg.activityType
+      { workflowNamespace = Namespace $ fold msg.workflowNamespace
+      , workflowType = WorkflowType $ fold msg.workflowType
+      , workflowId = WorkflowId $ fold workflowExecution.workflowId
+      , runId = RunId $ fold workflowExecution.runId
+      , activityId = ActivityId $ fold msg.activityId
+      , activityType = fold msg.activityType
       , headerFields = hdrs
       , rawHeartbeatDetails = heartbeatsRef
       , scheduledTime = maybe (MkSystemTime 0 0) timespecFromTimestamp msg.scheduledTime
