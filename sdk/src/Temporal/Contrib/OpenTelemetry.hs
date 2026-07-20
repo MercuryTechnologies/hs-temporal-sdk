@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -48,6 +49,15 @@ import Temporal.Workflow.Unsafe
 import Prelude hiding (span)
 
 
+-- The 'Propagator' record field @propagatorNames@ was renamed to
+-- @propagatorFields@ in hs-opentelemetry-api 1.0.
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
+#define PROPAGATOR_FIELDS propagatorFields
+#else
+#define PROPAGATOR_FIELDS propagatorNames
+#endif
+
+
 -- | "_tracer-data"
 defaultHeaderKey :: Text
 defaultHeaderKey = "_tracer-data"
@@ -70,7 +80,7 @@ defaultOpenTelemetryInterceptorOptions =
 headersPropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersPropagator =
   Propagator
-    { propagatorNames = ["tracecontext"]
+    { PROPAGATOR_FIELDS = ["tracecontext"]
     , extractor = \hs c -> do
         let traceParentHeader = payloadData <$> Map.lookup "traceparent" hs
             traceStateHeader = payloadData <$> Map.lookup "tracestate" hs
@@ -91,7 +101,7 @@ headersPropagator =
 headersBaggagePropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersBaggagePropagator =
   Propagator
-    { propagatorNames = ["baggage"]
+    { PROPAGATOR_FIELDS = ["baggage"]
     , extractor = \headers ctxt ->
         let payload = payloadData <$> Map.lookup "baggage" headers
         in pure $! case payload >>= decodeBaggage of
@@ -147,7 +157,7 @@ makeOpenTelemetryInterceptor = do
         makeTracer
           tracerProvider
           "temporal-sdk"
-          (TracerOptions Nothing)
+          tracerOptions
   pure $
     Interceptors
       { workflowInboundInterceptors =

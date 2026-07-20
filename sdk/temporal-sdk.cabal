@@ -209,7 +209,7 @@ test-suite temporal-sdk-tests
     , hedgehog
     , hs-opentelemetry-api
     , hs-opentelemetry-propagator-w3c
-    , hs-opentelemetry-sdk
+    , hs-opentelemetry-sdk <1.1
     , hspec
     , hspec-api
     , hspec-hedgehog

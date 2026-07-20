@@ -145,7 +145,7 @@ tests:
       - proto-lens
       - containers
       - require-callstack
-      - hs-opentelemetry-sdk
+      - hs-opentelemetry-sdk < 1.1
       - resourcet
     main: Main.hs
     source-dirs: test
