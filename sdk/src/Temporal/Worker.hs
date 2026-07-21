@@ -104,6 +104,7 @@ module Temporal.Worker (
   Core.TunerConfig (..),
   Core.SlotSupplierConfig (..),
   Core.ResourceBasedTunerConfig (..),
+
   -- ** Custom slot supplier
   Core.CustomSlotSupplier (..),
   Core.SlotReservationContext (..),
@@ -122,6 +123,7 @@ import Control.Monad.Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import Control.Monad.State
+import qualified Data.ByteString as BS
 import Data.Either (lefts)
 import Data.Foldable
 import Data.HashMap.Strict (HashMap)
@@ -146,21 +148,20 @@ import qualified StmContainers.Map as StmMap
 import System.IO.Unsafe
 import Temporal.Activity.Definition
 import qualified Temporal.Activity.Worker as Activity
-import qualified Temporal.Nexus.Worker as Nexus
 import Temporal.Common
 import Temporal.Common.Async
-import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Common.Logging as Logging
 import Temporal.Core.Client
-import qualified Data.ByteString as BS
 import Temporal.Core.Worker (InactiveForReplay)
 import qualified Temporal.Core.Worker as Core
 import Temporal.Exception
 import Temporal.Interceptor
+import qualified Temporal.Nexus.Worker as Nexus
 import Temporal.Payload (PayloadProcessor (..))
 import Temporal.Runtime
 import Temporal.Worker.Types
 import Temporal.Workflow.Definition
+import Temporal.Workflow.Types (NexusClient (..), makeNexusClient)
 import qualified Temporal.Workflow.Worker as Workflow
 import UnliftIO
 
@@ -377,11 +378,13 @@ setMaxOutstandingNexusTasks n = modifyCore $ \conf ->
     { Core.maxOutstandingNexusTasks = Just n
     }
 
+
 unsetMaxOutstandingNexusTasks :: ConfigM actEnv ()
 unsetMaxOutstandingNexusTasks = modifyCore $ \conf ->
   conf
     { Core.maxOutstandingNexusTasks = Nothing
     }
+
 
 setMaxConcurrentWorkflowTaskPolls :: Word64 -> ConfigM actEnv ()
 setMaxConcurrentWorkflowTaskPolls n = modifyCore $ \conf ->
@@ -434,10 +437,11 @@ setMaxHeartbeatThrottleIntervalMillis n = modifyCore $ \conf ->
     }
 
 
--- | Default interval for throttling activity heartbeats in case
--- ActivityOptions.heartbeat_timeout is unset.
--- When the timeout is set in the ActivityOptions,
--- throttling is set to @heartbeat_timeout * 0.8@.
+{- | Default interval for throttling activity heartbeats in case
+ActivityOptions.heartbeat_timeout is unset.
+When the timeout is set in the ActivityOptions,
+throttling is set to @heartbeat_timeout * 0.8@.
+-}
 setDefaultHeartbeatThrottleIntervalMillis :: Word64 -> ConfigM actEnv ()
 setDefaultHeartbeatThrottleIntervalMillis n = modifyCore $ \conf ->
   conf
@@ -829,10 +833,11 @@ startWorker client conf = provideCallStack $ runWorkerContext conf $ inSpan "sta
       then Logging.logDebug "No nexus services registered, skipping nexus worker loop"
       else do
         Logging.logDebug "Starting nexus worker loop"
-        let nexusWorker = Nexus.NexusWorker
-              { Nexus.workerCore = workerCore
-              , Nexus.nexusServices = services
-              }
+        let nexusWorker =
+              Nexus.NexusWorker
+                { Nexus.workerCore = workerCore
+                , Nexus.nexusServices = services
+                }
         res <- UnliftIO.try $ Nexus.execute nexusWorker
         case res of
           Left (e :: SomeException) ->
@@ -937,31 +942,49 @@ waitWorkerSTM Temporal.Worker.Worker {workerType, workerWorkflowLoop, workerActi
     Core.SReplay -> waitSTM workerWorkflowLoop
 
 
-{- | Shut down a worker. This will initiate a graceful shutdown of the worker, waiting for all
-in-flight tasks to complete before finalizing the shutdown.
+{- | Shut down a worker.
+
+The shutdown flow is as follows:
+
+* this function calls 'Core.initiateShutdown' to issue a shutdown command from
+  the Rust SDK
+* the Rust SDK sends a cancelation request to the Temporal server, which marks
+  the activity as canceled & issues a cancelation task to the worker process
+* 'Temporal.Activity.Worker.execute' receives the cancelation request and
+  sends an asynchronous 'Temporal.Exception.ActivityCancelReason' exception to
+  the running activity
+
+__NOTE__: It is /very important/ that the Temporal server is notified of task
+cancelation before this function completes; if we were to exit before the
+server is informed that a task has been canceled, it won't "notice" that the
+activity has ended until the next hearbeat interval.
 -}
 shutdown :: (MonadUnliftIO m) => Temporal.Worker.Worker actEnv -> m ()
-shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer, workerType, workerActivityWorker} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
+shutdown worker@Temporal.Worker.Worker {workerCore, workerTracer} = OT.inSpan workerTracer "shutdown" defaultSpanArguments $ UnliftIO.mask $ \restore -> do
   OT.inSpan workerTracer "initiateShutdown" defaultSpanArguments $ liftIO $ Core.initiateShutdown workerCore
 
-  -- Worker shutdown will wait on all activities to complete, so if a long-running activity does not respect cancellation,
-  -- the shutdown may never complete. However, we do issue a shutdown notification to the activities in the form of an
-  -- async exception, so they would have to be actively ignoring the shutdown notification to prevent the shutdown from completing.
-  () <- case workerType of
-    Core.SReal -> Activity.notifyShutdown workerActivityWorker
-    Core.SReplay -> pure ()
+  -- Add 1s of buffer time to the graceful shutdown timeout so the Rust SDK
+  -- has time to return when/if it hits the graceful shutdown period; without
+  -- the buffer, our timeout fires a bit earlier than Rust's does and we can
+  -- end up killing the process too soon.
+  let gracefulShutdownMicros = 1_000_000 + 1000 * fromIntegral (Core.gracefulShutdownPeriodMillis $ Core.getWorkerConfig workerCore)
 
-  OT.inSpan workerTracer "waitWorker" defaultSpanArguments $ restore $ waitWorker worker
+  _ <-
+    OT.inSpan workerTracer "waitWorker" defaultSpanArguments . restore $
+      timeout gracefulShutdownMicros (waitWorker worker)
 
-  err' <- OT.inSpan workerTracer "finalizeShutdown" defaultSpanArguments $ liftIO $ Core.finalizeShutdown workerCore
-  case err' of
-    Left err -> throwIO err
-    Right () -> pure ()
+  -- Throw a 'RuntimeError' exception if we don't finalize after a few seconds;
+  -- this should never happen in practice but it's worth keeping to ensure
+  -- that 'shutdown' finishes promptly if it's used as a finalizer.
+  let finalizeTimeoutMicros = 5_000_000
+  finalized <-
+    OT.inSpan workerTracer "finalizeShutdown" defaultSpanArguments . restore $
+      timeout finalizeTimeoutMicros (liftIO $ Core.finalizeShutdown workerCore)
+  case finalized of
+    Nothing -> throwIO $ RuntimeError "Worker.shutdown: finalizeShutdown timed out"
+    Just (Left err) -> throwIO err
+    Just (Right ()) -> pure ()
 
-
--- logs <- liftIO $ fetchLogs globalRuntime
--- forM_ logs $ \l -> do
---   Logging.logInfo $ Text.pack $ show l
 
 -- | Subscribe to evictions from the worker. This is not generally needed, but can be useful for debugging.
 subscribeToEvictions :: MonadIO m => Temporal.Worker.Worker actEnv -> m (TChan Workflow.EvictionWithRunID)
