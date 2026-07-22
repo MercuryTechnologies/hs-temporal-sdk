@@ -165,7 +165,6 @@ requireActivityNotRunning tt m = do
     Nothing -> m
 
 
--- TODO, where should async exception masking happen?
 applyActivityTaskStart :: (MonadUnliftIO m, MonadLogger m) => AT.ActivityTask -> TaskToken -> AT.Start -> ActivityWorkerM actEnv m ()
 applyActivityTaskStart _tsk tt msg = do
   w <- ask
@@ -214,15 +213,18 @@ applyActivityTaskStart _tsk tt msg = do
     -- before we start running it. This is important because we need to be able to cancel
     -- it later if the orchestrator requests it.
     mask_ $ do
-      syncPoint <- newEmptyMVar
-      runningActivity <- asyncLabelled (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ do
-        (ef :: Either SomeException (Either String Payload)) <- liftIO $ UnliftIO.trySyncOrAsync $ do
-          w.activityInboundInterceptors.executeActivity env input $ \env' input' -> do
-            case HashMap.lookup info.activityType w.definitions of
-              Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
-              Just ActivityDefinition {..} ->
-                runReaderT (unActivity $ activityRun input') (actEnv env')
-                  `finally` (takeMVar syncPoint *> atomically (StmMap.delete tt w.runningActivities))
+      finished <- newTVarIO False
+      runningActivity <- asyncLabelledWithUnmask (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ \unmask -> do
+        -- The activity /must/ be run in an unmasked context, so it can receive
+        -- exceptions and run finalizers during worker shutdown.
+        (ef :: Either SomeException (Either String Payload)) <- unmask . liftIO . UnliftIO.trySyncOrAsync $
+          w.activityInboundInterceptors.executeActivity env input $ \env' input' ->
+            ( case HashMap.lookup info.activityType w.definitions of
+                Nothing -> throwIO $ RuntimeError ("Activity type not found: " <> T.unpack info.activityType)
+                Just ActivityDefinition {..} ->
+                  runReaderT (unActivity $ activityRun input') (actEnv env')
+            )
+              `finally` atomically (writeTVar finished True *> StmMap.delete tt w.runningActivities)
         completionMsg <- case ef >>= first (toException . ValueError) of
           Left err@(SomeException _wrappedErr) -> do
             Logging.logDebug (T.pack (show err))
@@ -291,14 +293,17 @@ applyActivityTaskStart _tsk tt msg = do
           Left err -> throwIO err
           Right _ -> pure ()
 
-      atomically $ StmMap.insert runningActivity tt w.runningActivities
+      -- Register the running activity /unless/ it finished asynchronously &
+      -- deregistered itself before we even got here.
+      atomically $ do
+        alreadyFinished <- readTVar finished
+        unless alreadyFinished $ StmMap.insert runningActivity tt w.runningActivities
       -- We should only be throwing this exception if the activity has a logical error
       -- that is an internal error to the Temporal worker. If the activity throws an
       -- exception, that should be caught and fed to completeActivityTask.
       --
       -- We use link here to kill the worker thread if the activity throws an exception.
       link runningActivity
-      putMVar syncPoint ()
   where
     statusFromCompletion :: Core.ActivityTaskCompletion -> Text
     statusFromCompletion completionMsg = case completionMsg ^. C.maybe'result of
