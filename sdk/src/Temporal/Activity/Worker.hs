@@ -36,7 +36,6 @@ import Temporal.Exception
 import Temporal.Interceptor
 import Temporal.Payload
 import UnliftIO
-import UnliftIO.Concurrent (threadDelay)
 
 
 data ActivityWorker env = ActivityWorker
@@ -50,16 +49,6 @@ data ActivityWorker env = ActivityWorker
   , activityErrorConverters :: {-# UNPACK #-} ![ApplicationFailureHandler]
   , payloadProcessor :: {-# UNPACK #-} !PayloadProcessor
   }
-
-
-notifyShutdown :: MonadUnliftIO m => ActivityWorker env -> m ()
-notifyShutdown worker = do
-  let shutdownGracePeriod = fromIntegral (Core.gracefulShutdownPeriodMillis $ Core.getWorkerConfig worker.workerCore)
-  -- TODO logging here
-  when (shutdownGracePeriod > 0) $ do
-    threadDelay (shutdownGracePeriod * 1000)
-  running <- liftIO $ ListT.toList $ StmMap.listTNonAtomic $ worker.runningActivities
-  forConcurrently_ running $ \thread -> cancelWith (snd thread) WorkerShutdown
 
 
 newtype ActivityWorkerM env m a = ActivityWorkerM {unActivityWorkerM :: ReaderT (ActivityWorker env) m a}
