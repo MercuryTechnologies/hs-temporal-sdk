@@ -174,9 +174,12 @@ tests = describe "Cancellation" $ do
     specify "Activity cancellation on heartbeat" $ \TestEnv {..} -> do
       let testActivity :: Activity () Int
           testActivity = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
-            liftIO $ threadDelay 2_000_000
-            heartbeat ()
-            pure 0
+            let loop :: Activity () Int
+                loop = do
+                  heartbeat ()
+                  liftIO $ threadDelay 200_000
+                  loop
+            loop
           testActivityAct = provideActivity defaultCodec "heartbeatCancelActivity" testActivity
           workflow :: MyWorkflow Int
           workflow = do
