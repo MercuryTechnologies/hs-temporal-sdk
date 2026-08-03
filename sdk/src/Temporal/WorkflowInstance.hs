@@ -27,7 +27,9 @@ import qualified Data.Aeson as Aeson
 
 
 #if __GLASGOW_HASKELL__ < 910
-import Data.Foldable (foldl')
+import Data.Foldable (foldl', traverse_)
+#else
+import Data.Foldable (traverse_)
 #endif
 import Data.Functor.Identity
 import qualified Data.HashMap.Strict as HashMap
@@ -110,6 +112,9 @@ create
   -> PayloadProcessor
   -> Info
   -> InitializeWorkflow
+  -> [SignalWorkflow]
+  -- ^ Signals delivered in the same activation as the start job (e.g. via
+  -- @signalWithStart@). Buffered before the workflow body runs; see 'applyStartWorkflow'.
   -> m WorkflowInstance
 create
   workflowCompleteActivation
@@ -121,7 +126,8 @@ create
   workflowVault
   payloadProcessor
   info
-  start = do
+  start
+  initialSignals = do
     Logging.logDebug "Instantiating workflow instance"
     workflowInstanceLogger <- askLoggerIO
     workflowRandomnessSeed <- WorkflowGenM <$> newIORef (mkStdGen 0)
@@ -165,7 +171,7 @@ create
       exec <- setUpWorkflowExecution start
       res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
         Logging.logDebug "Executing workflow"
-        wf <- applyStartWorkflow exec' workflowFn
+        wf <- applyStartWorkflow initialSignals exec' workflowFn
         runWorkflowToCompletion wf
       Logging.logDebug "Workflow execution completed"
       addCommand =<< convertExitVariantToCommand res
@@ -397,8 +403,8 @@ setUpWorkflowExecution initializeWorkflow = do
       }
 
 
-applyStartWorkflow :: ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (SuspendableWorkflowExecution Payload)
-applyStartWorkflow execInput workflowFn = do
+applyStartWorkflow :: [SignalWorkflow] -> ExecuteWorkflowInput -> (Vector Payload -> IO (Either String (Workflow Payload))) -> InstanceM (SuspendableWorkflowExecution Payload)
+applyStartWorkflow initialSignals execInput workflowFn = do
   inst <- ask
   let executeWorkflowBase input = runInstanceM inst $ do
         Logging.logInfo $
@@ -423,7 +429,15 @@ applyStartWorkflow execInput workflowFn = do
             throwIO (ValueError msg)
           Right act -> do
             Logging.logDebug "Calling runWorkflow"
-            pure (runWorkflow act)
+            -- Apply any signals that arrived with the start job before running the
+            -- workflow body.
+            --
+            -- No handler is registered yet, so they land in the signal buffer,
+            -- which setSignalHandler drains when the body installs its handler.
+            --
+            -- Safe on replay: the first activation carries the same signals,
+            -- and buffering emits no commands.
+            pure . runWorkflow $ traverse_ applySignalWorkflow initialSignals *> act
 
   liftIO $ executeWorkflowBase execInput
 

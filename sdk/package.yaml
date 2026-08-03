@@ -167,6 +167,7 @@ tests:
       ReplaySpec,
       ScheduleSpec,
       SignalSpec,
+      SignalWithStartDropSpec,
       TestHelpers,
       THCompiles,
       WorkerTunerSpec

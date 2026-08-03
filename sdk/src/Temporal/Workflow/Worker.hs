@@ -51,7 +51,8 @@ data EvictionWithRunID = EvictionWithRunID
   deriving stock (Show)
 
 
-data WorkflowWorker = forall ty.
+data WorkflowWorker
+  = forall ty.
   Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
@@ -156,7 +157,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
     then do
       mInst <- createOrFetchWorkflowInstance
       forM_ mInst $ \inst -> do
-        let withoutStart = filter (\job -> isNothing (job ^. Activation.maybe'initializeWorkflow)) (activation ^. Activation.jobs)
+        -- Signals in the initialization activation were already buffered into the
+        -- instance (see applyStartWorkflow), so drop them here rather than
+        -- delivering them a second time through the channel.
+        let isInitActivation = not $ V.null activationInitializeWorkflowJobs
+            keepJob job =
+              isNothing (job ^. Activation.maybe'initializeWorkflow)
+                && not (isInitActivation && isJust (job ^. Activation.maybe'signalWorkflow))
+            withoutStart = filter keepJob (activation ^. Activation.jobs)
         case withoutStart of
           [] -> pure ()
           otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
@@ -244,11 +252,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                       rootWf <- initializeWorkflow ^. Activation.maybe'rootWorkflow
                       let rWfId = rootWf ^. CommonProto.workflowId
                           rRunId = rootWf ^. CommonProto.runId
-                      if Text.null rWfId then Nothing
-                      else Just RootExecution
-                        { rootWorkflowId = WorkflowId rWfId
-                        , rootRunId = RunId rRunId
-                        }
+                      if Text.null rWfId
+                        then Nothing
+                        else
+                          Just
+                            RootExecution
+                              { rootWorkflowId = WorkflowId rWfId
+                              , rootRunId = RunId rRunId
+                              }
                     workflowInfo =
                       Temporal.WorkflowInstance.Info
                         { historyLength = activation ^. Activation.historyLength
@@ -301,6 +312,12 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     liftIO (Core.completeWorkflowActivation workerCore completionMessage >>= either throwIO pure)
                     pure Nothing
                   Just (WorkflowDefinition _ f) -> do
+                    -- Signals arriving with the start job (e.g. signalWithStart) get
+                    -- buffered before the workflow body runs; handleActivation drops
+                    -- them from the activation channel so they aren't delivered twice.
+                    let initialSignals =
+                          V.toList $
+                            V.mapMaybe (\j -> j ^. Activation.maybe'signalWorkflow) (activation ^. Activation.vec'jobs)
                     inst <-
                       create
                         ( \wf -> do
@@ -315,6 +332,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         worker.processor
                         workflowInfo
                         initializeWorkflow
+                        initialSignals
                     liftIO $ addBuiltinQueryHandlers inst
                     Just <$> upsertWorkflowInstance runId_ inst
           pure $ join (vExistingInstance V.!? 0)
