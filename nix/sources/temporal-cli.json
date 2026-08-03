@@ -1,0 +1,17 @@
+{
+  "systems": {
+    "aarch64-darwin": {
+      "hash": "sha256-2s3DWHaCwEzyfmfIh4yi11UjC2rWPAxuvd1zSK6Q7ZQ=",
+      "url": "https://github.com/temporalio/cli/releases/download/v1.8.2/temporal_cli_1.8.2_darwin_arm64.tar.gz"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-g2AKj6xuPaVAk+XaaRjTmfUBUyufEXIjVgP5YG9KxuQ=",
+      "url": "https://github.com/temporalio/cli/releases/download/v1.8.2/temporal_cli_1.8.2_linux_arm64.tar.gz"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-2EIb2pieZRS0vbTWOpASqKBagGiS6IGlqthRBJY0mpQ=",
+      "url": "https://github.com/temporalio/cli/releases/download/v1.8.2/temporal_cli_1.8.2_linux_amd64.tar.gz"
+    }
+  },
+  "version": "1.8.2"
+}
