@@ -1,0 +1,17 @@
+{
+  "version": "1.32.1",
+  "systems": {
+    "aarch64-darwin": {
+      "hash": "sha256-he3VMEWRC+w1DdDZr7/8Vnl/ozgQpaB3Y/OhSo6TAKM=",
+      "url": "https://github.com/temporalio/sdk-java/releases/download/v1.32.1/temporal-test-server_1.32.1_macOS_arm64.tar.gz"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-2NVu905FD5zbv+ZXDjS4FnZR39/zWQ1ZJhnatEYFWxc=",
+      "url": "https://github.com/temporalio/sdk-java/releases/download/v1.32.1/temporal-test-server_1.32.1_linux_arm64.tar.gz"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-mH83Wo1CkKg3ipmNzPq6azGzuZrTdXryg8aVWmr9gp8=",
+      "url": "https://github.com/temporalio/sdk-java/releases/download/v1.32.1/temporal-test-server_1.32.1_linux_amd64.tar.gz"
+    }
+  }
+}

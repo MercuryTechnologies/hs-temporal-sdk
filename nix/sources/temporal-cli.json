@@ -1,0 +1,17 @@
+{
+  "version": "1.6.1-server-1.31.0-151.0",
+  "systems": {
+    "aarch64-darwin": {
+      "hash": "sha256-OVFOjxe+x/grbgCx1O1coh1/zVfwG/AA4p9vzOy7hQ0=",
+      "url": "https://github.com/temporalio/cli/releases/download/v1.6.1-server-1.31.0-151.0/temporal_cli_1.6.1-server-1.31.0-151.0_darwin_arm64.tar.gz"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-V52toYpQPqoigMZ5e/3KFJXelM8OetAvlxEiNdKExk8=",
+      "url": "https://github.com/temporalio/cli/releases/download/v1.6.1-server-1.31.0-151.0/temporal_cli_1.6.1-server-1.31.0-151.0_linux_arm64.tar.gz"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-i0pbalGnkOPsVgw0MxN09HNtvpUIEAA1/q0fytmNaiI=",
+      "url": "https://github.com/temporalio/cli/releases/download/v1.6.1-server-1.31.0-151.0/temporal_cli_1.6.1-server-1.31.0-151.0_linux_amd64.tar.gz"
+    }
+  }
+}
