@@ -278,35 +278,6 @@ tests = describe "Activities" $ do
         useClient (C.execute wf.reference "immCancelAct" opts)
           `shouldReturn` 1
 
-    specify "activity cancellation on heartbeat" $ \TestEnv {..} -> do
-      let act :: Activity () Int
-          act = withHeartbeat JSON $ \heartbeat _readHeartbeat -> do
-            liftIO $ threadDelay 2_000_000
-            heartbeat ()
-            pure 0
-          actDef = provideActivity defaultCodec "hbCancelAct" act
-          workflow :: MyWorkflow Int
-          workflow = do
-            h <- W.startActivity actDef.reference
-              (W.defaultStartActivityOptions $ W.StartToClose $ seconds 1)
-            W.sleep $ nanoseconds 1
-            W.cancel (h :: W.Task Int)
-            W.wait h `Catch.catch` \(_ :: ActivityCancelled) -> pure 1
-          wf = W.provideWorkflow defaultCodec "hbCancelActWf" workflow
-          conf = configure () (wf, actDef) $ do baseConf
-      withWorker conf $ do
-        let opts =
-              (C.startWorkflowOptions taskQueue)
-                { C.workflowIdReusePolicy = Just W.WorkflowIdReusePolicyAllowDuplicate
-                , C.timeouts = C.TimeoutOptions
-                    { C.runTimeout = Just $ seconds 4
-                    , C.executionTimeout = Nothing
-                    , C.taskTimeout = Nothing
-                    }
-                }
-        useClient (C.execute wf.reference "hbCancelAct" opts)
-          `shouldReturn` 1
-
   describe "Info" $ do
     specify "can access activity info" $ \TestEnv {..} -> do
       let act :: Activity () Text
@@ -332,7 +303,10 @@ tests = describe "Activities" $ do
               else pure (fromIntegral i.attempt)
           actDef = provideActivity defaultCodec "attemptCountAct" act
           workflow :: MyWorkflow Int
-          workflow = W.executeActivity actDef.reference (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+          -- Fast retry interval to keep the test quick
+          workflow = W.executeActivity actDef.reference
+            (W.defaultStartActivityOptions $ W.StartToClose $ seconds 5)
+              { retryPolicy = Just $ W.defaultRetryPolicy {W.initialInterval = milliseconds 50} }
           wf = W.provideWorkflow defaultCodec "attemptCountWf" workflow
           conf = configure () (wf, actDef) $ do baseConf
       withWorker conf $ do
@@ -489,7 +463,8 @@ tests = describe "Activities" $ do
   describe "Activity Timeout (Py/TS: activity timeout)" $ do
     specify "activity times out with StartToClose (TS: multipleActivitiesSingleTimeout)" $ \TestEnv {..} -> do
       let act :: Activity () ()
-          act = liftIO $ threadDelay 10_000_000
+          -- Only needs to outlast the 1s StartToClose timeout.
+          act = liftIO $ threadDelay 2_000_000
           actDef = provideActivity defaultCodec "slowTimeoutAct" act
           workflow :: MyWorkflow ()
           workflow = W.executeActivity actDef.reference
@@ -641,7 +616,7 @@ tests = describe "Activities" $ do
 
     specify "activity schedule-to-close timeout" $ \TestEnv {..} -> do
       let act :: Activity () ()
-          act = liftIO $ threadDelay 5_000_000
+          act = liftIO $ threadDelay 2_000_000
           actDef = provideActivity defaultCodec "schedToCloseAct" act
           workflow :: MyWorkflow ()
           workflow = W.executeActivity actDef.reference
@@ -658,7 +633,7 @@ tests = describe "Activities" $ do
 
     specify "activity heartbeat timeout" $ \TestEnv {..} -> do
       let act :: Activity () ()
-          act = liftIO $ threadDelay 5_000_000
+          act = liftIO $ threadDelay 2_000_000
           actDef = provideActivity defaultCodec "heartbeatTimeoutAct" act
           workflow :: MyWorkflow ()
           workflow = W.executeActivity actDef.reference

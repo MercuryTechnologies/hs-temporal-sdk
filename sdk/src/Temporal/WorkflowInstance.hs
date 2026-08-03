@@ -474,6 +474,7 @@ applyQueryWorkflow queryWorkflow = do
       -- TODO, more useful error message
       pure $
         defMessage
+          & Command.queryId .~ rawQueryId baseInput.handleQueryId
           & Command.failed
             .~ ( defMessage
                   & F.message .~ Text.pack (show err)
