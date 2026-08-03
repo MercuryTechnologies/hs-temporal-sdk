@@ -37,9 +37,6 @@ stdenv.mkDerivation {
     runHook postInstall
   '';
 
-  # Verification target: `nix build .#temporal-test-server.sources.<system>`
-  # fetches and hash-checks that platform's tarball even when it's not the
-  # one you're building on, since 'fetchurl' is built by the local system.
   passthru.sources = lib.mapAttrs (name: _: srcFor name) sources.systems;
 
   meta = {
