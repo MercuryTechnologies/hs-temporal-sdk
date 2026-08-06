@@ -1,8 +1,8 @@
 module QuerySpec where
 
 import Control.Exception (SomeException)
+import Control.Monad (forM_)
 import qualified Control.Monad.Catch as Catch
-import qualified Data.Vector as V
 import Data.Text (Text)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
@@ -32,7 +32,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "basic-query-wf" opts)
+      h <- useClient (C.start wf . reference "basic-query-wf" opts)
       waitForWorkflowStart h
       result <- C.query h echoQuery C.defaultQueryOptions "hello"
       C.cancel h (C.CancellationOptions mempty)
@@ -49,11 +49,27 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "query-args-wf" opts)
+      h <- useClient (C.start wf . reference "query-args-wf" opts)
       result <- C.query h echoQuery C.defaultQueryOptions "echo-me-back"
       C.cancel h (C.CancellationOptions mempty)
       result `shouldBe` Right "echo-me-back"
-
+  specify "immediately serves newly started workflow query handlers" $ \TestEnv {..} -> do
+    let query :: W.KnownQuery '[Text] Text
+        query = W.KnownQuery "initializationQuery" defaultCodec
+        workflow :: MyWorkflow ()
+        workflow = do
+          W.setQueryHandler query pure
+          W.sleep $ seconds 5
+        wf = W.provideWorkflow defaultCodec "initializationQueryWorkflow" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOpts taskQueue
+      wfId <- W.WorkflowId <$> uuidText
+      h <- useClient (C.start wf . reference wfId opts)
+      forM_ [1 :: Int .. 100] $ \_ -> do
+        result <- useClient $ C.query h query C.defaultQueryOptions "ready"
+        result `shouldBe` Right "ready"
+      C.cancel h (C.CancellationOptions mempty)
   specify "query reflects current state" $ \TestEnv {..} -> do
     let incSignal :: W.KnownSignal '[]
         incSignal = W.KnownSignal "inc" defaultCodec
@@ -70,7 +86,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "query-state-wf" opts)
+      h <- useClient (C.start wf . reference "query-state-wf" opts)
       r0 <- C.query h stateQuery C.defaultQueryOptions "q"
       r0 `shouldBe` Right 0
       C.signal h incSignal C.defaultSignalOptions
@@ -93,7 +109,7 @@ tests = describe "Query" $ do
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
       wfId <- W.WorkflowId <$> uuidText
-      h <- useClient (C.start wf.reference wfId opts)
+      h <- useClient (C.start wf . reference wfId opts)
       _ <- C.waitWorkflowResult h
       result <- C.query h stateQuery C.defaultQueryOptions "q"
       result `shouldBe` Right "completed"
@@ -112,7 +128,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "multi-query-wf" opts)
+      h <- useClient (C.start wf . reference "multi-query-wf" opts)
       rA <- C.query h queryA C.defaultQueryOptions "q"
       rB <- C.query h queryB C.defaultQueryOptions "q"
       C.cancel h (C.CancellationOptions mempty)
@@ -130,7 +146,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "query-no-block-wf" opts)
+      h <- useClient (C.start wf . reference "query-no-block-wf" opts)
       result <- C.query h echoQuery C.defaultQueryOptions "quick"
       result `shouldBe` Right "quick"
       C.cancel h (C.CancellationOptions mempty)
@@ -151,7 +167,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "query-no-waitcond-wf" opts)
+      h <- useClient (C.start wf . reference "query-no-waitcond-wf" opts)
       result <- C.query h stateQuery C.defaultQueryOptions "q"
       result `shouldBe` Right False
       C.signal h unblockSig C.defaultSignalOptions
@@ -171,7 +187,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "query-not-found-wf" opts)
+      h <- useClient (C.start wf . reference "query-not-found-wf" opts)
       queryResult <- Catch.try @IO @SomeException $ C.query h stateQuery C.defaultQueryOptions "q"
       C.signal h sig C.defaultSignalOptions
       _ <- C.waitWorkflowResult h
@@ -195,7 +211,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference "query-coord-wf" opts)
+      h <- useClient (C.start wf . reference "query-coord-wf" opts)
       r0 <- C.query h q C.defaultQueryOptions ()
       r0 `shouldBe` Right 0
       C.signal h sig C.defaultSignalOptions 5
@@ -220,7 +236,7 @@ tests = describe "Query" $ do
       let opts = defaultStartOpts taskQueue
       wfId <- W.WorkflowId <$> uuidText
       result <- useClient $ do
-        h <- C.start wf.reference wfId opts
+        h <- C.start wf . reference wfId opts
         (r :: Either C.QueryRejected Text) <- C.query h stackTraceQuery C.defaultQueryOptions ()
         C.signal h unblockSig C.defaultSignalOptions
         _ <- C.waitWorkflowResult h
@@ -248,7 +264,7 @@ tests = describe "Query" $ do
         conf = configure () wf $ do baseConf
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
-      h <- useClient (C.start wf.reference (W.WorkflowId wfId) opts)
+      h <- useClient (C.start wf . reference (W.WorkflowId wfId) opts)
       r1 <- C.query h q1 C.defaultQueryOptions ()
       r1 `shouldBe` Right "answer"
       r2 <- C.query h q2 C.defaultQueryOptions ()
@@ -273,7 +289,7 @@ tests = describe "Query" $ do
     withWorker conf $ do
       let opts = defaultStartOpts taskQueue
       wfId <- W.WorkflowId <$> uuidText
-      h <- useClient (C.start wf.reference wfId opts)
+      h <- useClient (C.start wf . reference wfId opts)
       result <- C.query h unknownQuery C.defaultQueryOptions "anything"
       C.signal h sig C.defaultSignalOptions
       _ <- C.waitWorkflowResult h

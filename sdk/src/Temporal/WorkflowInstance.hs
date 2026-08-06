@@ -155,6 +155,7 @@ create
     workflowIVarCounter <- newIORef 1
     workflowBlockedStacks <- newIORef mempty
     workflowQueryHandlers <- newIORef mempty
+    workflowInitialHandlersReady <- newEmptyMVar
     workflowUpdateHandlers <- newIORef mempty
     workflowInstanceInfo <- newIORef info
     workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
@@ -172,6 +173,7 @@ create
       res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
         Logging.logDebug "Executing workflow"
         wf <- applyStartWorkflow initialSignals exec' workflowFn
+        liftIO $ putMVar workflowInitialHandlersReady ()
         runWorkflowToCompletion wf
       Logging.logDebug "Workflow execution completed"
       addCommand =<< convertExitVariantToCommand res
@@ -452,6 +454,9 @@ applyUpdateRandomSeed updateRandomSeed = do
 applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
 applyQueryWorkflow queryWorkflow = do
   inst <- ask
+  -- A start confirms persistence, not that the workflow body has installed its
+  -- synchronous query handlers. Wait only through that initial evaluation.
+  liftIO $ readMVar inst.workflowInitialHandlersReady
   instInfo <- readIORef inst.workflowInstanceInfo
   handles <- readIORef inst.workflowQueryHandlers
   Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))

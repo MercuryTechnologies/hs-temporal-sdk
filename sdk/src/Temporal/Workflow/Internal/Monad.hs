@@ -781,6 +781,9 @@ data WorkflowInstance = WorkflowInstance
     -- Uses Endo for O(1) append (diff-list style).
     workflowBufferedSignals :: {-# UNPACK #-} !(IORef (HashMap Text (Endo [Vector Payload])))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
+  , -- | Filled after the workflow body has run through its first evaluation,
+    -- so startup queries observe the handlers it registers before yielding.
+    workflowInitialHandlersReady :: {-# UNPACK #-} !(MVar ())
   , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowIVarCounter :: {-# UNPACK #-} !(IORef Word64)
