@@ -19,7 +19,9 @@ the interceptor to your Temporal client and worker configuration.
 module Temporal.Contrib.OpenTelemetry where
 
 import Control.Monad.Catch
+import Control.Monad (forM_)
 import Control.Monad.IO.Class
+import Data.IORef
 import qualified Data.HashMap.Strict as HashMap
 import Data.Int
 import Data.Map.Strict (Map)
@@ -149,22 +151,35 @@ tracerKey = unsafePerformIO Vault.newKey
 --    */
 -- CONTINUE_AS_NEW = 'ContinueAsNew',
 
+makeOpenTelemetryInterceptor :: IO (Interceptors env)
+
 -- TODO, we will need to account for replays when we support them
-makeOpenTelemetryInterceptor :: MonadIO m => m (Interceptors env)
 makeOpenTelemetryInterceptor = do
   tracerProvider <- getGlobalTracerProvider
+  workflowSpans <- liftIO $ newIORef mempty
   let tracer =
         makeTracer
           tracerProvider
           "temporal-sdk"
           tracerOptions
+      finalizeWorkflow runId result = do
+        mSpan <-
+          atomicModifyIORef' workflowSpans $ \spans ->
+            let found = HashMap.lookup (rawRunId runId) spans
+             in (HashMap.delete (rawRunId runId) spans, found)
+        forM_ mSpan $ \span -> do
+          forM_ result $ \case
+            WorkflowExitFailed err -> do
+              setStatus span (Error $ T.pack $ show err)
+              recordException span mempty Nothing err
+            _ -> pure ()
+          endSpan span Nothing
   pure $
     Interceptors
       { workflowInboundInterceptors =
           WorkflowInboundInterceptor
             { executeWorkflow = \input next -> do
                 ctxt <- extract headersPropagator input.executeWorkflowInputHeaders Ctxt.empty
-                _ <- attachContext ctxt
                 let spanArgs =
                       defaultSpanArguments
                         { kind = Server
@@ -220,8 +235,12 @@ makeOpenTelemetryInterceptor = do
                                     input.executeWorkflowInputInfo.retryPolicy
                                 ]
                         }
-                inSpan'' tracer ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs $ \_ ->
-                  next input
+                span <- createSpan tracer ctxt ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs
+                _ <- attachContext $ Ctxt.insertSpan span ctxt
+                atomicModifyIORef' workflowSpans $ \spans ->
+                  (HashMap.insert (rawRunId input.executeWorkflowInputInfo.runId) span spans, ())
+                next input
+            , finalizeWorkflow = finalizeWorkflow
             , handleQuery = \input next -> do
                 -- Only trace this if there is a header, and make that span the parent.
                 -- We do not put anything that happens in a query handler on the workflow

@@ -952,6 +952,10 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
        . ExecuteWorkflowInput
       -> (ExecuteWorkflowInput -> IO a)
       -> IO a
+  , finalizeWorkflow
+      :: RunId
+      -> Maybe (WorkflowExitVariant Payload)
+      -> IO ()
   , handleQuery
       :: HandleQueryInput
       -> (HandleQueryInput -> IO (Either SomeException Payload))
@@ -973,10 +977,15 @@ interceptWorkflow
 interceptWorkflow WorkflowInboundInterceptor {executeWorkflow = f} = f
 
 
+finalizeWorkflowExecution :: WorkflowInboundInterceptor -> RunId -> Maybe (WorkflowExitVariant Payload) -> IO ()
+finalizeWorkflowExecution WorkflowInboundInterceptor {finalizeWorkflow = f} = f
+
+
 instance Semigroup WorkflowInboundInterceptor where
   a <> b =
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> interceptWorkflow a input $ \input' -> interceptWorkflow b input' cont
+      , finalizeWorkflow = \runId result -> a.finalizeWorkflow runId result >> b.finalizeWorkflow runId result
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
       , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
       , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont
@@ -987,6 +996,7 @@ instance Monoid WorkflowInboundInterceptor where
   mempty =
     WorkflowInboundInterceptor
       { executeWorkflow = \input cont -> cont input
+      , finalizeWorkflow = \_ _ -> pure ()
       , handleQuery = \input cont -> cont input
       , handleUpdate = \input cont -> cont input
       , validateUpdate = \input cont -> cont input

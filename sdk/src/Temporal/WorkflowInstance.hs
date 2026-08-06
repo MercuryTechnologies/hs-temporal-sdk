@@ -195,11 +195,16 @@ resumeAfterFirstSuspension (Await next) = await >>= next
 
 finishWorkflow :: WorkflowExitVariant Payload -> InstanceM ()
 finishWorkflow res = do
-  Logging.logDebug "Workflow execution completed"
-  addCommand =<< convertExitVariantToCommand res
-  flushCommands
-  Logging.logDebug "Handling leftover queries"
-  handleQueriesAfterCompletion
+  inst <- ask
+  let finalize = liftIO $ do
+        info <- readIORef inst.workflowInstanceInfo
+        finalizeWorkflowExecution inst.inboundInterceptor info.runId (Just res)
+  (`Catch.finally` finalize) do
+    Logging.logDebug "Workflow execution completed"
+    addCommand =<< convertExitVariantToCommand res
+    flushCommands
+    Logging.logDebug "Handling leftover queries"
+    handleQueriesAfterCompletion
 
 
 runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM Payload

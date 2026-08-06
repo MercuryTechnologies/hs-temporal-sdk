@@ -360,6 +360,7 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     Logging.logDebug msg
                 Just wf -> do
                   pure $ do
+                    liftIO $ finalizeWorkflowExecution wf.inboundInterceptor runId_ Nothing
                     cancel =<< readIORef wf.executionThread
                     Logging.logDebug $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()
