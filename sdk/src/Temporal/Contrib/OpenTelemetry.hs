@@ -19,7 +19,7 @@ the interceptor to your Temporal client and worker configuration.
 module Temporal.Contrib.OpenTelemetry where
 
 import Control.Monad.Catch
-import Control.Monad (forM_)
+import Control.Monad (forM_, void)
 import Control.Monad.IO.Class
 import Data.IORef
 import qualified Data.HashMap.Strict as HashMap
@@ -34,7 +34,7 @@ import GHC.IO (unsafePerformIO)
 import OpenTelemetry.Propagator.W3CBaggage (decodeBaggage, encodeBaggage) 
 import OpenTelemetry.Context (Context)
 import qualified OpenTelemetry.Context as Ctxt
-import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
+import OpenTelemetry.Context.ThreadLocal (attachContext, detachContext, getContext)
 import OpenTelemetry.Propagator
 import OpenTelemetry.Propagator.W3CTraceContext (decodeSpanContext, encodeSpanContext)
 import OpenTelemetry.Trace.Core
@@ -236,10 +236,13 @@ makeOpenTelemetryInterceptor = do
                                 ]
                         }
                 span <- createSpan tracer ctxt ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs
-                _ <- attachContext $ Ctxt.insertSpan span ctxt
+                priorContext <- attachContext $ Ctxt.insertSpan span ctxt
                 atomicModifyIORef' workflowSpans $ \spans ->
                   (HashMap.insert (rawRunId input.executeWorkflowInputInfo.runId) span spans, ())
-                next input
+                let restoreContext = case priorContext of
+                      Nothing -> void detachContext
+                      Just prior -> void $ attachContext prior
+                next input `finally` restoreContext
             , finalizeWorkflow = finalizeWorkflow
             , handleQuery = \input next -> do
                 -- Only trace this if there is a header, and make that span the parent.
