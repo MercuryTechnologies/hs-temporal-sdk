@@ -21,6 +21,7 @@ module Temporal.WorkflowInstance (
 import Control.Applicative
 import qualified Control.Exception as E
 import Control.Monad
+import qualified Control.Monad.Catch as Catch
 import Control.Monad.Logger
 import Control.Monad.Reader
 import qualified Data.Aeson as Aeson
@@ -92,7 +93,7 @@ import Temporal.Exception
 import qualified Temporal.Exception as Err
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
-import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecution, injectWorkflowSignalOrUpdate, runWorkflow)
+import Temporal.Workflow.Eval (ActivationResult (..), SuspendableWorkflowExecution, injectWorkflowSignalOrUpdate, rethrowAsyncExceptions, runWorkflow)
 import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
@@ -151,11 +152,10 @@ create
     workflowCommands <- newTVarIO $ Reversed []
     workflowSignalHandlers <- newIORef mempty
     workflowBufferedSignals <- newIORef mempty
+    workflowQueryHandlers <- newIORef mempty
     workflowCallStack <- newIORef emptyCallStack
     workflowIVarCounter <- newIORef 1
     workflowBlockedStacks <- newIORef mempty
-    workflowQueryHandlers <- newIORef mempty
-    workflowInitialHandlersReady <- newEmptyMVar
     workflowUpdateHandlers <- newIORef mempty
     workflowInstanceInfo <- newIORef info
     workflowInstanceContinuationEnv <- ContinuationEnv <$> newIORef JobNil
@@ -167,24 +167,39 @@ create
     -- pretty innocuous since writing to the executionThread var happens before anything else
     -- is allowed to interact with the instance.
     let inst = WorkflowInstance {..}
+    exec <- liftIO $ runInstanceM inst $ setUpWorkflowExecution start
+    initialStep <-
+      liftIO . E.try @SomeException $
+        interceptWorkflow inboundInterceptor exec $ \exec' ->
+          runInstanceM inst $ do
+            Logging.logDebug "Executing workflow"
+            wf <- applyStartWorkflow initialSignals exec' workflowFn
+            resume wf
     workerThread <- liftIO $ async $ runInstanceM inst $ do
-      Logging.logDebug "Start workflow execution thread"
-      exec <- setUpWorkflowExecution start
-      res <- liftIO $ inboundInterceptor.executeWorkflow exec $ \exec' -> runInstanceM inst $ runTopLevel $ do
-        Logging.logDebug "Executing workflow"
-        wf <- applyStartWorkflow initialSignals exec' workflowFn
-        liftIO $ putMVar workflowInitialHandlersReady ()
-        runWorkflowToCompletion wf
-      Logging.logDebug "Workflow execution completed"
-      addCommand =<< convertExitVariantToCommand res
-      flushCommands
-      Logging.logDebug "Handling leftover queries"
-      handleQueriesAfterCompletion
-    -- If we have an exception crash the workflow thread, then we need to throw to the worker too,
-    -- otherwise it will just hang forever.
+      res <- case initialStep of
+        Left err -> rethrowAsyncExceptions err >> pure (workflowExitFromException err)
+        Right (Right result) -> pure $ WorkflowExitSuccess result
+        Right (Left firstSuspension) ->
+          runTopLevel $ runWorkflowToCompletion $ resumeAfterFirstSuspension firstSuspension
+      finishWorkflow res
     link workerThread
     writeIORef executionThread workerThread
     pure inst
+
+
+resumeAfterFirstSuspension
+  :: Await [ActivationResult] (SuspendableWorkflowExecution Payload)
+  -> SuspendableWorkflowExecution Payload
+resumeAfterFirstSuspension (Await next) = await >>= next
+
+
+finishWorkflow :: WorkflowExitVariant Payload -> InstanceM ()
+finishWorkflow res = do
+  Logging.logDebug "Workflow execution completed"
+  addCommand =<< convertExitVariantToCommand res
+  flushCommands
+  Logging.logDebug "Handling leftover queries"
+  handleQueriesAfterCompletion
 
 
 runWorkflowToCompletion :: HasCallStack => SuspendableWorkflowExecution Payload -> InstanceM Payload
@@ -440,7 +455,6 @@ applyStartWorkflow initialSignals execInput workflowFn = do
             -- Safe on replay: the first activation carries the same signals,
             -- and buffering emits no commands.
             pure . runWorkflow $ traverse_ applySignalWorkflow initialSignals *> act
-
   liftIO $ executeWorkflowBase execInput
 
 
@@ -454,9 +468,6 @@ applyUpdateRandomSeed updateRandomSeed = do
 applyQueryWorkflow :: HasCallStack => QueryWorkflow -> InstanceM ()
 applyQueryWorkflow queryWorkflow = do
   inst <- ask
-  -- A start confirms persistence, not that the workflow body has installed its
-  -- synchronous query handlers. Wait only through that initial evaluation.
-  liftIO $ readMVar inst.workflowInitialHandlersReady
   instInfo <- readIORef inst.workflowInstanceInfo
   handles <- readIORef inst.workflowQueryHandlers
   Logging.logDebug $ Text.pack ("Applying query: " <> show (queryWorkflow ^. Activation.queryType))
@@ -994,12 +1005,14 @@ convertExitVariantToCommand variant = do
 -- Note: this is intended to exclusively handle top-level workflow execution.
 --
 -- Don't use elsewhere.
+workflowExitFromException :: SomeException -> WorkflowExitVariant a
+workflowExitFromException err
+  | Just continueAsNew <- E.fromException err = WorkflowExitContinuedAsNew continueAsNew
+  | Just cancelled <- E.fromException err = WorkflowExitCancelled cancelled
+  | otherwise = WorkflowExitFailed err
+
+
 runTopLevel :: InstanceM Payload -> InstanceM (WorkflowExitVariant Payload)
-runTopLevel m = do
+runTopLevel m =
   (WorkflowExitSuccess <$> m)
-    `catches` [ Handler $ \e@(ContinueAsNewException {}) -> pure $ WorkflowExitContinuedAsNew e
-              , Handler $ \WorkflowCancelRequested -> do
-                  pure $ WorkflowExitCancelled WorkflowCancelRequested
-              , Handler $ \(e :: SomeException) -> do
-                  pure $ WorkflowExitFailed e
-              ]
+    `Catch.catches` [Catch.Handler $ \err -> rethrowAsyncExceptions err >> pure (workflowExitFromException err)]

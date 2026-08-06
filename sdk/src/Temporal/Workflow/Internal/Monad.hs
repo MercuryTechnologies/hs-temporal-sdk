@@ -781,9 +781,6 @@ data WorkflowInstance = WorkflowInstance
     -- Uses Endo for O(1) append (diff-list style).
     workflowBufferedSignals :: {-# UNPACK #-} !(IORef (HashMap Text (Endo [Vector Payload])))
   , workflowQueryHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) (QueryId -> Vector Payload -> Map Text Payload -> IO (Either SomeException Payload))))
-  , -- | Filled after the workflow body has run through its first evaluation,
-    -- so startup queries observe the handlers it registers before yielding.
-    workflowInitialHandlersReady :: {-# UNPACK #-} !(MVar ())
   , workflowUpdateHandlers :: {-# UNPACK #-} !(IORef (HashMap (Maybe Text) WorkflowUpdateImplementation))
   , workflowCallStack :: {-# UNPACK #-} !(IORef CallStack)
   , workflowIVarCounter :: {-# UNPACK #-} !(IORef Word64)
@@ -951,9 +948,10 @@ data HandleUpdateInput = HandleUpdateInput
 
 data WorkflowInboundInterceptor = WorkflowInboundInterceptor
   { executeWorkflow
-      :: ExecuteWorkflowInput
-      -> (ExecuteWorkflowInput -> IO (WorkflowExitVariant Payload))
-      -> IO (WorkflowExitVariant Payload)
+      :: forall a
+       . ExecuteWorkflowInput
+      -> (ExecuteWorkflowInput -> IO a)
+      -> IO a
   , handleQuery
       :: HandleQueryInput
       -> (HandleQueryInput -> IO (Either SomeException Payload))
@@ -967,12 +965,18 @@ data WorkflowInboundInterceptor = WorkflowInboundInterceptor
       -> (HandleUpdateInput -> IO (Either SomeException ()))
       -> IO (Either SomeException ())
   }
+interceptWorkflow
+  :: WorkflowInboundInterceptor
+  -> ExecuteWorkflowInput
+  -> (ExecuteWorkflowInput -> IO a)
+  -> IO a
+interceptWorkflow WorkflowInboundInterceptor {executeWorkflow = f} = f
 
 
 instance Semigroup WorkflowInboundInterceptor where
   a <> b =
     WorkflowInboundInterceptor
-      { executeWorkflow = \input cont -> a.executeWorkflow input $ \input' -> b.executeWorkflow input' cont
+      { executeWorkflow = \input cont -> interceptWorkflow a input $ \input' -> interceptWorkflow b input' cont
       , handleQuery = \input cont -> a.handleQuery input $ \input' -> b.handleQuery input' cont
       , handleUpdate = \input cont -> a.handleUpdate input $ \input' -> b.handleUpdate input' cont
       , validateUpdate = \input cont -> a.validateUpdate input $ \input' -> b.validateUpdate input' cont

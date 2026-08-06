@@ -220,15 +220,8 @@ makeOpenTelemetryInterceptor = do
                                     input.executeWorkflowInputInfo.retryPolicy
                                 ]
                         }
-                inSpan'' tracer ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs $ \span -> do
-                  execution <- next input
-                  case execution of
-                    WorkflowExitFailed e -> do
-                      -- TODO use our enrichment handlers here
-                      setStatus span (Error $ T.pack $ show e)
-                      recordException span mempty Nothing e
-                    _ -> pure ()
-                  pure execution
+                inSpan'' tracer ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs $ \_ ->
+                  next input
             , handleQuery = \input next -> do
                 -- Only trace this if there is a header, and make that span the parent.
                 -- We do not put anything that happens in a query handler on the workflow
