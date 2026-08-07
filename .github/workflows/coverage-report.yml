@@ -24,7 +24,7 @@ jobs:
           path: main
 
       - name: Install Nix
-        uses: cachix/install-nix-action@96951a368ba55167b55f1c916f7d416bac6505fe # v31.10.3
+        uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342 # v31.11.0
         with:
           extra_nix_config: |
             extra-substituters = https://cache.garnix.io
