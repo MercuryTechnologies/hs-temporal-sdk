@@ -51,8 +51,7 @@ data EvictionWithRunID = EvictionWithRunID
   deriving stock (Show)
 
 
-data WorkflowWorker
-  = forall ty.
+data WorkflowWorker = forall ty.
   Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
@@ -317,8 +316,8 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     -- them from the activation channel so they aren't delivered twice.
                     let initialSignals =
                           V.toList $
-                            V.mapMaybe (\j -> j ^. Activation.maybe'signalWorkflow) (activation ^. Activation.vec'jobs)
-                    inst <-
+                            V.mapMaybe (^. Activation.maybe'signalWorkflow) (activation ^. Activation.vec'jobs)
+                    (inst, startWorker) <-
                       create
                         ( \wf -> do
                             Core.completeWorkflowActivation workerCore wf
@@ -334,7 +333,9 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         initializeWorkflow
                         initialSignals
                     liftIO $ addBuiltinQueryHandlers inst
-                    Just <$> upsertWorkflowInstance runId_ inst
+                    published <- upsertWorkflowInstance runId_ inst
+                    liftIO startWorker
+                    pure $ Just published
           pure $ join (vExistingInstance V.!? 0)
 
     removeEvictedWorkflowInstances :: ReaderT WorkflowWorker m ()

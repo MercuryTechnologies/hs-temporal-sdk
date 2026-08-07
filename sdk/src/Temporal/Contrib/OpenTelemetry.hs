@@ -151,7 +151,7 @@ tracerKey = unsafePerformIO Vault.newKey
 --    */
 -- CONTINUE_AS_NEW = 'ContinueAsNew',
 
-makeOpenTelemetryInterceptor :: IO (Interceptors env)
+makeOpenTelemetryInterceptor :: MonadIO m => m (Interceptors env)
 
 -- TODO, we will need to account for replays when we support them
 makeOpenTelemetryInterceptor = do

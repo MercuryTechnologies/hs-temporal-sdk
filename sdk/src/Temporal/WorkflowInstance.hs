@@ -116,7 +116,7 @@ create
   -> [SignalWorkflow]
   -- ^ Signals delivered in the same activation as the start job (e.g. via
   -- @signalWithStart@). Buffered before the workflow body runs; see 'applyStartWorkflow'.
-  -> m WorkflowInstance
+  -> m (WorkflowInstance, IO ())
 create
   workflowCompleteActivation
   workflowFn
@@ -175,16 +175,19 @@ create
             Logging.logDebug "Executing workflow"
             wf <- applyStartWorkflow initialSignals exec' workflowFn
             resume wf
-    workerThread <- liftIO $ async $ runInstanceM inst $ do
-      res <- case initialStep of
-        Left err -> rethrowAsyncExceptions err >> pure (workflowExitFromException err)
-        Right (Right result) -> pure $ WorkflowExitSuccess result
-        Right (Left firstSuspension) ->
-          runTopLevel $ runWorkflowToCompletion $ resumeAfterFirstSuspension firstSuspension
-      finishWorkflow res
+    startWorker <- newEmptyMVar
+    workerThread <- liftIO $ async $ do
+      readMVar startWorker
+      runInstanceM inst $ do
+        res <- case initialStep of
+          Left err -> rethrowAsyncExceptions err >> pure (workflowExitFromException err)
+          Right (Right result) -> pure $ WorkflowExitSuccess result
+          Right (Left firstSuspension) ->
+            runTopLevel $ runWorkflowToCompletion $ resumeAfterFirstSuspension firstSuspension
+        finishWorkflow res
     link workerThread
     writeIORef executionThread workerThread
-    pure inst
+    pure (inst, putMVar startWorker ())
 
 
 resumeAfterFirstSuspension
