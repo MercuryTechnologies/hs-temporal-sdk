@@ -5,6 +5,8 @@ module Temporal.WorkflowInstance (
   WorkflowInstance,
   Info (..),
   RootExecution (..),
+  WorkflowExecutionContext (..),
+  workflowExecutionContextKey,
   create,
   advanceWorkflow,
   activate,
@@ -43,9 +45,11 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Time.Clock.System (SystemTime (..))
 import Data.Vault.Strict (Vault)
+import qualified Data.Vault.Strict as Vault
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Version (showVersion)
+import GHC.IO (unsafePerformIO)
 import GHC.Stack (HasCallStack, emptyCallStack, getCallStack)
 import qualified GHC.Stack
 import Lens.Family2
@@ -98,6 +102,21 @@ import Temporal.Workflow.Internal.Instance
 import Temporal.Workflow.Internal.Monad
 import Temporal.Workflow.Types
 import UnliftIO
+
+
+{- | Restores a workflow's ambient execution context for one activation.
+
+Interceptors install this in the per-instance vault.  The worker invokes it
+when it resumes a saved workflow continuation on a later activation.
+-}
+newtype WorkflowExecutionContext = WorkflowExecutionContext
+  { runWorkflowExecutionContext :: IO () -> IO ()
+  }
+
+
+workflowExecutionContextKey :: Vault.Key WorkflowExecutionContext
+workflowExecutionContextKey = unsafePerformIO Vault.newKey
+{-# NOINLINE workflowExecutionContextKey #-}
 
 
 create
@@ -209,6 +228,16 @@ initializeWorkflowContinuationWithoutFlush = \case
 
 advanceWorkflow :: WorkflowActivation -> InstanceM ()
 advanceWorkflow activation = do
+  inst <- ask
+  vault <- liftIO $ readIORef inst.workflowVault
+  case Vault.lookup workflowExecutionContextKey vault of
+    Nothing -> advanceWorkflowWithoutContext activation
+    Just WorkflowExecutionContext {runWorkflowExecutionContext} ->
+      liftIO $ runWorkflowExecutionContext $ runInstanceM inst $ advanceWorkflowWithoutContext activation
+
+
+advanceWorkflowWithoutContext :: WorkflowActivation -> InstanceM ()
+advanceWorkflowWithoutContext activation = do
   inst <- ask
   liftIO (readIORef inst.workflowAdvance) >>= ($ activation)
 

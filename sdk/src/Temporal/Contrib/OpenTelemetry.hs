@@ -49,6 +49,7 @@ import Temporal.Workflow ()
 import Temporal.Workflow.Internal.Monad (WorkflowInstance (..))
 import Temporal.Workflow.Types
 import Temporal.Workflow.Unsafe
+import Temporal.WorkflowInstance (WorkflowExecutionContext (..), workflowExecutionContextKey)
 import Prelude hiding (span)
 
 
@@ -202,7 +203,8 @@ makeOpenTelemetryInterceptor = do
         mSpan <-
           atomicModifyIORef' inst.workflowVault $ \vault ->
             let found = Vault.lookup workflowSpanKey vault
-            in (Vault.delete workflowSpanKey vault, found)
+                cleared = Vault.delete workflowExecutionContextKey $ Vault.delete workflowSpanKey vault
+            in (cleared, found)
         forM_ mSpan $ \span -> do
           forM_ result $ \case
             WorkflowExitFailed err -> do
@@ -272,13 +274,20 @@ makeOpenTelemetryInterceptor = do
                                 ]
                         }
                 span <- createSpan tracer ctxt ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs
-                priorContext <- attachContext $ Ctxt.insertSpan span ctxt
-                atomicModifyIORef' input.executeWorkflowInputVault $ \vault ->
-                  (Vault.insert workflowSpanKey span vault, ())
-                let restoreContext = case priorContext of
+                let workflowContext = Ctxt.insertSpan span ctxt
+                    restoreContext = \case
                       Nothing -> void detachContext
                       Just prior -> void $ attachContext prior
-                next input `finally` restoreContext
+                    withWorkflowContext :: IO a -> IO a
+                    withWorkflowContext action = do
+                      priorContext <- attachContext workflowContext
+                      action `finally` restoreContext priorContext
+                atomicModifyIORef' input.executeWorkflowInputVault $ \vault ->
+                  ( Vault.insert workflowExecutionContextKey (WorkflowExecutionContext withWorkflowContext) $
+                      Vault.insert workflowSpanKey span vault
+                  , ()
+                  )
+                withWorkflowContext $ next input
             , finalizeWorkflow = finalizeWorkflow
             , handleQuery = \input next -> do
                 -- Only trace this if there is a header, and make that span the parent.
