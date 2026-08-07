@@ -18,11 +18,11 @@ the interceptor to your Temporal client and worker configuration.
 -}
 module Temporal.Contrib.OpenTelemetry where
 
-import Control.Monad.Catch
 import Control.Monad (forM_, void)
+import Control.Monad.Catch
 import Control.Monad.IO.Class
-import Data.IORef
 import qualified Data.HashMap.Strict as HashMap
+import Data.IORef
 import Data.Int
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -31,11 +31,11 @@ import qualified Data.Text as T
 import qualified Data.Vault.Strict as Vault
 import Data.Word (Word32)
 import GHC.IO (unsafePerformIO)
-import OpenTelemetry.Propagator.W3CBaggage (decodeBaggage, encodeBaggage) 
 import OpenTelemetry.Context (Context)
 import qualified OpenTelemetry.Context as Ctxt
 import OpenTelemetry.Context.ThreadLocal (attachContext, detachContext, getContext)
 import OpenTelemetry.Propagator
+import OpenTelemetry.Propagator.W3CBaggage (decodeBaggage, encodeBaggage)
 import OpenTelemetry.Propagator.W3CTraceContext (decodeSpanContext, encodeSpanContext)
 import OpenTelemetry.Trace.Core
 import Temporal.Activity.Types
@@ -46,18 +46,10 @@ import Temporal.Duration
 import Temporal.Interceptor
 import Temporal.Payload (Payload (..))
 import Temporal.Workflow ()
+import Temporal.Workflow.Internal.Monad (WorkflowInstance (..))
 import Temporal.Workflow.Types
 import Temporal.Workflow.Unsafe
 import Prelude hiding (span)
-
-
--- The 'Propagator' record field @propagatorNames@ was renamed to
--- @propagatorFields@ in hs-opentelemetry-api 1.0.
-#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
-#define PROPAGATOR_FIELDS propagatorFields
-#else
-#define PROPAGATOR_FIELDS propagatorNames
-#endif
 
 
 -- | "_tracer-data"
@@ -78,11 +70,11 @@ defaultOpenTelemetryInterceptorOptions =
     , headerKey = defaultHeaderKey
     }
 
-
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
 headersPropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersPropagator =
   Propagator
-    { PROPAGATOR_FIELDS = ["tracecontext"]
+    { propagatorFields = ["tracecontext"]
     , extractor = \hs c -> do
         let traceParentHeader = payloadData <$> Map.lookup "traceparent" hs
             traceStateHeader = payloadData <$> Map.lookup "tracestate" hs
@@ -99,11 +91,34 @@ headersPropagator =
             . Map.insert "tracestate" (Payload traceStateHeader mempty)
             $ hs
     }
+#else
+headersPropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
+headersPropagator =
+  Propagator
+    { propagatorNames = ["tracecontext"]
+    , extractor = \hs c -> do
+        let traceParentHeader = payloadData <$> Map.lookup "traceparent" hs
+            traceStateHeader = payloadData <$> Map.lookup "tracestate" hs
+            mspanContext = decodeSpanContext traceParentHeader traceStateHeader
+        pure $! case mspanContext of
+          Nothing -> c
+          Just s -> Ctxt.insertSpan (wrapSpanContext (s {isRemote = True})) c
+    , injector = \c hs -> case Ctxt.lookupSpan c of
+        Nothing -> pure hs
+        Just s -> do
+          (traceParentHeader, traceStateHeader) <- encodeSpanContext s
+          pure
+            . Map.insert "traceparent" (Payload traceParentHeader mempty)
+            . Map.insert "tracestate" (Payload traceStateHeader mempty)
+            $ hs
+    }
+#endif
 
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
 headersBaggagePropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
 headersBaggagePropagator =
   Propagator
-    { PROPAGATOR_FIELDS = ["baggage"]
+    { propagatorFields = ["baggage"]
     , extractor = \headers ctxt ->
         let payload = payloadData <$> Map.lookup "baggage" headers
         in pure $! case payload >>= decodeBaggage of
@@ -115,10 +130,33 @@ headersBaggagePropagator =
           let payload = Payload (encodeBaggage baggage) mempty
           in Map.insert "baggage" payload headers
     }
+#else
+headersBaggagePropagator :: Propagator Context (Map Text Payload) (Map Text Payload)
+headersBaggagePropagator =
+  Propagator
+    { propagatorNames = ["baggage"]
+    , extractor = \headers ctxt ->
+        let payload = payloadData <$> Map.lookup "baggage" headers
+        in pure $! case payload >>= decodeBaggage of
+          Nothing -> ctxt
+          Just baggage -> Ctxt.insertBaggage baggage ctxt
+    , injector = \ctxt headers -> pure $! case Ctxt.lookupBaggage ctxt of
+        Nothing -> headers
+        Just baggage ->
+          let payload = Payload (encodeBaggage baggage) mempty
+          in Map.insert "baggage" payload headers
+    }
+#endif
+
 
 tracerKey :: Vault.Key Tracer
 tracerKey = unsafePerformIO Vault.newKey
 {-# NOINLINE tracerKey #-}
+
+
+workflowSpanKey :: Vault.Key Span
+workflowSpanKey = unsafePerformIO Vault.newKey
+{-# NOINLINE workflowSpanKey #-}
 
 
 --    * Workflow is scheduled by a client
@@ -152,21 +190,19 @@ tracerKey = unsafePerformIO Vault.newKey
 -- CONTINUE_AS_NEW = 'ContinueAsNew',
 
 makeOpenTelemetryInterceptor :: MonadIO m => m (Interceptors env)
-
 -- TODO, we will need to account for replays when we support them
 makeOpenTelemetryInterceptor = do
   tracerProvider <- getGlobalTracerProvider
-  workflowSpans <- liftIO $ newIORef mempty
   let tracer =
         makeTracer
           tracerProvider
           "temporal-sdk"
           tracerOptions
-      finalizeWorkflow runId result = do
+      finalizeWorkflow inst result = do
         mSpan <-
-          atomicModifyIORef' workflowSpans $ \spans ->
-            let found = HashMap.lookup (rawRunId runId) spans
-             in (HashMap.delete (rawRunId runId) spans, found)
+          atomicModifyIORef' inst.workflowVault $ \vault ->
+            let found = Vault.lookup workflowSpanKey vault
+            in (Vault.delete workflowSpanKey vault, found)
         forM_ mSpan $ \span -> do
           forM_ result $ \case
             WorkflowExitFailed err -> do
@@ -237,8 +273,8 @@ makeOpenTelemetryInterceptor = do
                         }
                 span <- createSpan tracer ctxt ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs
                 priorContext <- attachContext $ Ctxt.insertSpan span ctxt
-                atomicModifyIORef' workflowSpans $ \spans ->
-                  (HashMap.insert (rawRunId input.executeWorkflowInputInfo.runId) span spans, ())
+                atomicModifyIORef' input.executeWorkflowInputVault $ \vault ->
+                  (Vault.insert workflowSpanKey span vault, ())
                 let restoreContext = case priorContext of
                       Nothing -> void detachContext
                       Just prior -> void $ attachContext prior
