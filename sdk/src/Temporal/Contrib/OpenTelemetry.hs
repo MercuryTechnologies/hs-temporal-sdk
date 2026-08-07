@@ -149,6 +149,14 @@ headersBaggagePropagator =
     }
 #endif
 
+#if MIN_VERSION_hs_opentelemetry_api(1,0,0)
+restoreContext = void . detachContext
+#else
+restoreContext = \case
+  Nothing -> void detachContext
+  Just prior -> void $ attachContext prior
+#endif
+
 
 tracerKey :: Vault.Key Tracer
 tracerKey = unsafePerformIO Vault.newKey
@@ -275,9 +283,6 @@ makeOpenTelemetryInterceptor = do
                         }
                 span <- createSpan tracer ctxt ("RunWorkflow:" <> rawWorkflowType input.executeWorkflowInputType) spanArgs
                 let workflowContext = Ctxt.insertSpan span ctxt
-                    restoreContext = \case
-                      Nothing -> void detachContext
-                      Just prior -> void $ attachContext prior
                     withWorkflowContext :: IO a -> IO a
                     withWorkflowContext action = do
                       priorContext <- attachContext workflowContext
