@@ -1,8 +1,10 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module QuerySpec where
 
 import Control.Exception (SomeException)
+import Control.Monad (forM_)
 import qualified Control.Monad.Catch as Catch
-import qualified Data.Vector as V
 import Data.Text (Text)
 import qualified Data.Text as Text
 import RequireCallStack (provideCallStack)
@@ -53,7 +55,23 @@ tests = describe "Query" $ do
       result <- C.query h echoQuery C.defaultQueryOptions "echo-me-back"
       C.cancel h (C.CancellationOptions mempty)
       result `shouldBe` Right "echo-me-back"
-
+  specify "immediately serves newly started workflow query handlers" $ \TestEnv {..} -> do
+    let query :: W.KnownQuery '[Text] Text
+        query = W.KnownQuery "initializationQuery" defaultCodec
+        workflow :: MyWorkflow ()
+        workflow = do
+          W.setQueryHandler query pure
+          W.sleep $ seconds 5
+        wf = W.provideWorkflow defaultCodec "initializationQueryWorkflow" workflow
+        conf = configure () wf $ do baseConf
+    withWorker conf $ do
+      let opts = defaultStartOpts taskQueue
+      wfId <- W.WorkflowId <$> uuidText
+      h <- useClient (C.start wf.reference wfId opts)
+      forM_ [1 :: Int .. 100] $ \_ -> do
+        result <- useClient $ C.query h query C.defaultQueryOptions "ready"
+        result `shouldBe` Right "ready"
+      C.cancel h (C.CancellationOptions mempty)
   specify "query reflects current state" $ \TestEnv {..} -> do
     let incSignal :: W.KnownSignal '[]
         incSignal = W.KnownSignal "inc" defaultCodec

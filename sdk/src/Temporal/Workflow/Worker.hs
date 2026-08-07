@@ -15,8 +15,7 @@ import Data.Vault.Strict (Vault)
 import qualified Data.Vector as V
 import qualified Focus
 import Lens.Family2
-import qualified ListT
-import OpenTelemetry.Context.ThreadLocal
+import OpenTelemetry.Context.ThreadLocal ()
 import OpenTelemetry.Trace.Core hiding (inSpan, inSpan')
 import OpenTelemetry.Trace.Monad
 import qualified Proto.Temporal.Api.Common.V1.Message_Fields as Message
@@ -29,7 +28,6 @@ import qualified Proto.Temporal.Sdk.Core.WorkflowCompletion.WorkflowCompletion_F
 import RequireCallStack
 import qualified StmContainers.Map as StmMap
 import Temporal.Common
-import Temporal.Common.Async
 import qualified Temporal.Common.Logging as Logging
 import qualified Temporal.Core.Client as C
 import Temporal.Core.Worker (InactiveForReplay)
@@ -39,6 +37,7 @@ import qualified Temporal.Exception as Err
 import Temporal.Payload
 import Temporal.SearchAttributes.Internal
 import Temporal.Workflow.Definition
+import Temporal.Workflow.Internal.Instance (runInstanceM)
 import Temporal.Workflow.Internal.Monad hiding (try)
 import Temporal.WorkflowInstance
 import UnliftIO
@@ -51,8 +50,7 @@ data EvictionWithRunID = EvictionWithRunID
   deriving stock (Show)
 
 
-data WorkflowWorker
-  = forall ty.
+data WorkflowWorker = forall ty.
   Core.KnownWorkerType ty =>
   WorkflowWorker
   { workerWorkflowFunctions :: {-# UNPACK #-} !(HashMap Text WorkflowDefinition)
@@ -106,11 +104,10 @@ are drained.
 The Async handle only completes successfully on poller shutdown.
 -}
 execute :: (MonadLoggerIO m, MonadUnliftIO m, MonadCatch m, MonadTracer m, RequireCallStack) => WorkflowWorker -> m ()
-execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
+execute worker = flip runReaderT worker $ do
   Logging.logDebug "Starting workflow worker"
   whileM_ go
   where
-    c = Core.getWorkerConfig workerCore
     go = inSpan' "Workflow activation step" defaultSpanArguments $ \s -> do
       -- logs <- liftIO $ fetchLogs globalRuntime
       -- forM_ logs $ \l -> case l.level of
@@ -124,8 +121,6 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
         -- TODO should we do anything else on shutdown?
         (Left (Core.WorkerError Core.PollShutdown _)) -> do
           Logging.logDebug "Poller shutting down"
-          runningWorkflows <- liftIO $ ListT.toList $ StmMap.listTNonAtomic $ worker.runningWorkflows
-          mapConcurrently_ (cancel <=< readIORef . executionThread . snd) runningWorkflows
           pure False
         (Left err) -> do
           Logging.logError $ Text.pack $ show err
@@ -133,14 +128,7 @@ execute worker@WorkflowWorker {workerCore} = flip runReaderT worker $ do
           pure True
         (Right activation) -> do
           Logging.logDebug $ Text.pack ("Got activation " <> show activation)
-          -- We want to handle activations as fast as possible, so we don't want to block
-          -- on dispatching jobs. We link the activator thread to the run-loop so that any
-          -- unhandled exceptions in that logic aren't ignored.
-          activationCtxt <- getContext
-          activator <- asyncLabelled (Text.unpack $ Text.concat ["temporal/worker/workflow/activate", Core.namespace c, "/", Core.taskQueue c]) $ do
-            _ <- attachContext activationCtxt
-            handleActivation activation
-          link activator
+          handleActivation activation
           pure True
 
 
@@ -156,18 +144,20 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
   if shouldRun
     then do
       mInst <- createOrFetchWorkflowInstance
-      forM_ mInst $ \inst -> do
-        -- Signals in the initialization activation were already buffered into the
-        -- instance (see applyStartWorkflow), so drop them here rather than
-        -- delivering them a second time through the channel.
-        let isInitActivation = not $ V.null activationInitializeWorkflowJobs
-            keepJob job =
-              isNothing (job ^. Activation.maybe'initializeWorkflow)
-                && not (isInitActivation && isJust (job ^. Activation.maybe'signalWorkflow))
-            withoutStart = filter keepJob (activation ^. Activation.jobs)
-        case withoutStart of
-          [] -> pure ()
-          otherJobs -> atomically $ writeTQueue inst.activationChannel (activation & Activation.jobs .~ otherJobs)
+      forM_ mInst $ \(inst, handledInitialJobs) -> do
+        unless handledInitialJobs do
+          -- Signals in the initialization activation were already buffered into the
+          -- instance (see applyStartWorkflow), so drop them here rather than
+          -- delivering them a second time.
+          let isInitActivation = not $ V.null activationInitializeWorkflowJobs
+              keepJob job =
+                isNothing (job ^. Activation.maybe'initializeWorkflow)
+                  && not (isInitActivation && isJust (job ^. Activation.maybe'signalWorkflow))
+              withoutStart = filter keepJob (activation ^. Activation.jobs)
+          unless (null withoutStart) $
+            liftIO $
+              runInstanceM inst $
+                advanceWorkflow (activation & Activation.jobs .~ withoutStart)
     else do
       Logging.logDebug "Workflow does not need to run."
       let completionMessage =
@@ -195,14 +185,14 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
         )
         (activation ^. Activation.vec'jobs)
 
-    createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe WorkflowInstance)
+    createOrFetchWorkflowInstance :: ReaderT WorkflowWorker m (Maybe (WorkflowInstance, Bool))
     createOrFetchWorkflowInstance = inSpan' "createOrFetchWorkflowInstance" (defaultSpanArguments {attributes = HashMap.fromList [("temporal.activation.run_id", toAttribute $ activation ^. Activation.runId)]}) $ \s -> do
       worker@WorkflowWorker {workerCore} <- ask
       minst <- atomically $ StmMap.lookup (RunId $ activation ^. Activation.runId) worker.runningWorkflows
       case minst of
         Just inst -> do
           addAttribute s "temporal.workflow.worker.instance_state" ("existing" :: Text)
-          pure $ Just inst
+          pure $ Just (inst, False)
         Nothing -> do
           addAttribute s "temporal.workflow.worker.instance_state" ("new" :: Text)
           vExistingInstance <- forM activationInitializeWorkflowJobs $ \(_job, initializeWorkflow) -> do
@@ -317,8 +307,12 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     -- them from the activation channel so they aren't delivered twice.
                     let initialSignals =
                           V.toList $
-                            V.mapMaybe (\j -> j ^. Activation.maybe'signalWorkflow) (activation ^. Activation.vec'jobs)
-                    inst <-
+                            V.mapMaybe (^. Activation.maybe'signalWorkflow) (activation ^. Activation.vec'jobs)
+                        keepJob job =
+                          isNothing (job ^. Activation.maybe'initializeWorkflow)
+                            && isNothing (job ^. Activation.maybe'signalWorkflow)
+                        withoutStart = filter keepJob (activation ^. Activation.jobs)
+                    (inst, startWorkflow) <-
                       create
                         ( \wf -> do
                             Core.completeWorkflowActivation workerCore wf
@@ -334,7 +328,13 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                         initializeWorkflow
                         initialSignals
                     liftIO $ addBuiltinQueryHandlers inst
-                    Just <$> upsertWorkflowInstance runId_ inst
+                    published <- upsertWorkflowInstance runId_ inst
+                    liftIO $
+                      startWorkflow $
+                        if null withoutStart
+                          then Nothing
+                          else Just (activation & Activation.jobs .~ withoutStart)
+                    pure $ Just (published, True)
           pure $ join (vExistingInstance V.!? 0)
 
     removeEvictedWorkflowInstances :: ReaderT WorkflowWorker m ()
@@ -360,6 +360,6 @@ handleActivation activation = inSpan' "handleActivation" (defaultSpanArguments {
                     Logging.logDebug msg
                 Just wf -> do
                   pure $ do
-                    cancel =<< readIORef wf.executionThread
+                    liftIO $ finalizeWorkflowExecution wf.inboundInterceptor wf Nothing
                     Logging.logDebug $ Text.pack ("Evicting workflow instance with run ID " ++ show runId_ ++ ", message: " ++ show (removeFromCache ^. Activation.message))
         _ -> pure ()
