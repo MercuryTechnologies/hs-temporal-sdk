@@ -6,6 +6,7 @@
 module Temporal.Activity.Worker where
 
 import Control.Exception.Annotated
+import qualified Control.Exception.Annotated as Annotated
 import Control.Monad
 import Control.Monad.Logger
 import Control.Monad.Reader
@@ -203,7 +204,7 @@ applyActivityTaskStart _tsk tt msg = do
     -- it later if the orchestrator requests it.
     mask_ $ do
       finished <- newTVarIO False
-      runningActivity <- asyncLabelledWithUnmask (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ \unmask -> do
+      runningActivity <- asyncLabelledWithUnmask (T.unpack $ T.concat ["temporal/worker/activity/start/", Core.namespace c, "/", Core.taskQueue c]) $ \unmask -> handleLateActivityCancellation tt $ do
         -- The activity /must/ be run in an unmasked context, so it can receive
         -- exceptions and run finalizers during worker shutdown.
         (ef :: Either SomeException (Either String Payload)) <- unmask . liftIO . UnliftIO.trySyncOrAsync $
@@ -281,7 +282,6 @@ applyActivityTaskStart _tsk tt msg = do
         case completionResult of
           Left err -> throwIO err
           Right _ -> pure ()
-
       -- Register the running activity /unless/ it finished asynchronously &
       -- deregistered itself before we even got here.
       atomically $ do
@@ -304,6 +304,19 @@ applyActivityTaskStart _tsk tt msg = do
           AR.ActivityExecutionResult'WillCompleteAsync _ -> "will-complete-async"
         Nothing -> "unknown"
       Nothing -> "unknown"
+
+
+handleLateActivityCancellation :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> m () -> m ()
+handleLateActivityCancellation tt action = withRunInIO $ \runInIO ->
+  runInIO action `Annotated.catch` \(cancelReason :: ActivityCancelReason) ->
+    runInIO $
+      Logging.logDebug $
+        T.concat
+          [ "Activity cancelled after execution: taskToken="
+          , T.pack (show tt)
+          , " reason="
+          , T.pack (show cancelReason)
+          ]
 
 
 applyActivityTaskCancel :: (MonadUnliftIO m, MonadLogger m) => TaskToken -> AT.Cancel -> ActivityWorkerM actEnv m ()
