@@ -28,7 +28,7 @@ import Temporal.Runtime
 data CTestResource
 
 
-foreign import ccall "hs_temporal_test_delayed_resource" raw_delayedTestResource :: Ptr Runtime -> Word64 -> TokioCall (CArray Word8) CTestResource
+foreign import ccall "hs_temporal_test_delayed_resource" raw_delayedTestResource :: Ptr CRuntime -> Word64 -> TokioCall (CArray Word8) CTestResource
 
 
 foreign import ccall "hs_temporal_drop_test_resource" raw_dropTestResource :: Ptr CTestResource -> IO ()
@@ -43,9 +43,9 @@ given number of milliseconds, then wait for it like any other Tokio-backed
 FFI call.
 -}
 acquireDelayedTestResource :: Runtime -> Word64 -> IO (Either ByteString ())
-acquireDelayedTestResource r delayMillis = withRuntime r $ \rp ->
+acquireDelayedTestResource r delayMillis =
   withTokioAsyncCall
-    (raw_delayedTestResource rp delayMillis)
+    (withScopedTokioCall (withRuntime r) $ \rp -> raw_delayedTestResource rp delayMillis)
     rust_dropByteArray
     raw_dropTestResource
     (peek >=> cArrayToByteString)

@@ -28,7 +28,7 @@ import qualified Temporal.Core.Client.WorkflowService as Service
 import qualified Temporal.Core.Worker as Worker
 import qualified Temporal.EphemeralServer as Dev (TemporalDevServerConfig (..))
 import qualified Temporal.EphemeralServer as Server
-import Temporal.Runtime (TelemetryOptions (NoTelemetry), bracketRuntime, fetchLogs)
+import Temporal.Runtime (RuntimeClosedError (..), TelemetryOptions (NoTelemetry), bracketRuntime, fetchLogs)
 import Test.Hspec
 import TestHelpers (configWithRetry, globalRuntime, uuidText, withServer)
 
@@ -105,6 +105,7 @@ spec = describe "Client lifecycle" $ do
   it "releases callback scopes on exceptions and cancellation" $
     bounded $
       withQuietClient unreachable $ \client -> do
+        Core.withClientRuntime client (\_ -> throwIO RuntimeClosedError) `shouldThrow` (== RuntimeClosedError)
         Core.withClientRuntime client (\_ -> throwIO LoggerFailure) `shouldThrow` (== LoggerFailure)
         entered <- newEmptyMVar
         proceed <- newEmptyMVar
@@ -169,31 +170,46 @@ spec = describe "Client lifecycle" $ do
     , ("logger failure", throwIO LoggerFailure, (`shouldThrow` (== LoggerFailure)))
     ]
     $ \(name, logWarning, assertFailure) ->
-      it ("publishes " <> name <> " durably through readiness") $
-        bounded $
-          runLoggingT
-            ( Core.bracketClient globalRuntime unreachable $ \client -> liftIO $ do
-                assertFailure (Core.waitForConnection client)
-                assertFailure (Core.waitForConnection client)
-            )
-            (\_ _ _ _ -> logWarning)
+      it ("publishes " <> name <> " durably through readiness") $ bounded $ do
+        let logger _ _ _ _ = logWarning
+            acquire = runLoggingT (Core.connectClient globalRuntime unreachable) logger
+        bracket acquire Core.closeClient $ \client -> do
+          assertFailure (Core.waitForConnection client)
+          assertFailure (Core.waitForConnection client)
 
-  it "closes while initialization is paused in its logger" $ do
-    entered <- newEmptyMVar
-    proceed <- newEmptyMVar
-    let logger _ _ _ _ = putMVar entered () >> readMVar proceed
-    bounded
-      ( runLoggingT
-          ( Core.bracketClient globalRuntime unreachable $ \client -> liftIO $ do
-              takeMVar entered
-              Core.withClientRuntime client $ void . fetchLogs
+  forM_ [False, True] $ \masked ->
+    it ("closes while initialization is paused in its logger, masked=" <> show masked) $ do
+      entered <- newEmptyMVar
+      proceed <- newEmptyMVar
+      let logger _ _ _ _ = (if masked then uninterruptibleMask_ else id) $ putMVar entered () >> readMVar proceed
+          acquire = bracketRuntime NoTelemetry $ \runtime ->
+            runLoggingT (Core.connectClient runtime unreachable) logger
+          releaseLogger = void $ tryPutMVar proceed ()
+          closeWhileLoggerBlocked = bracket acquire Core.closeClient $ \client -> do
+            takeMVar entered
+            Core.withClientRuntime client $ void . fetchLogs
+            withAsync (Core.waitForConnection client) $ \caller -> do
               Core.closeClient client
+              wait caller `shouldThrow` isClosed
               Core.waitForConnection client `shouldThrow` isClosed
               Service.getSystemInfo client defMessage `shouldThrow` isClosed
-          )
-          logger
-      )
-      `finally` void (tryPutMVar proceed ())
+      bounded closeWhileLoggerBlocked `finally` releaseLogger
+
+  it "does not leave waitForConnection blocked when connection completion races with close" $
+    withServer $ \port -> bounded $
+      replicateM_ 30 $ do
+        gate <- newEmptyMVar
+        let acquire = bracketRuntime NoTelemetry $ \runtime ->
+              runNoLoggingT $ Core.connectClient runtime (configWithRetry port)
+        bracket acquire Core.closeClient $ \client ->
+          withAsync (readMVar gate >> Core.waitForConnection client) $ \caller ->
+            withAsync (readMVar gate >> Core.closeClient client) $ \closer -> do
+              putMVar gate ()
+              wait closer
+              waitCatch caller >>= \case
+                Right () -> pure ()
+                Left err -> fromException err `shouldSatisfy` maybe False isClosed
+              Core.waitForConnection client `shouldThrow` isClosed
 
   it "retains the runtime across an initialization retry" $ do
     entered <- newEmptyMVar
@@ -220,16 +236,15 @@ spec = describe "Client lifecycle" $ do
             (runLoggingT (Core.connectClient runtime config) logger)
             Core.closeClient
             (\client -> takeMVar entered >> pure client)
-    bounded
-      ( bracket acquire Core.closeClient $ \client -> do
+        releaseLogger = void $ tryPutMVar proceed ()
+        checkRetries = bracket acquire Core.closeClient $ \client -> do
           -- Both this operation and later recovery retain their own runtime.
           putMVar proceed ()
           Core.waitForConnection client `shouldThrow` isConnectionError
           readIORef warnings `shouldReturn` 2
           Core.waitForConnection client `shouldThrow` isConnectionError
           readIORef warnings `shouldReturn` 4
-      )
-      `finally` void (tryPutMVar proceed ())
+    bounded checkRetries `finally` releaseLogger
 
   it "uses an acquired pointer twice after close" $
     withServer $ \port -> do
@@ -241,20 +256,18 @@ spec = describe "Client lifecycle" $ do
         -- pointer from client, even after its original owner is destroyed.
         admitted <- newEmptyMVar
         proceed <- newEmptyMVar
-        withAsync
-          ( Core.withClient client $ \ptr -> do
+        let callTwiceAfterClose = Core.withClient client $ \ptr -> do
               putMVar admitted ()
               takeMVar proceed
               let rpc = Core.call @WorkflowService @"getSystemInfo" (\_ -> rawGetSystemInfo ptr) driver defMessage
               rpc >>= (`shouldSatisfy` isRight)
               rpc >>= (`shouldSatisfy` isRight)
-          )
-          $ \caller -> do
-            link caller
-            takeMVar admitted
-            Core.closeClient client
-            putMVar proceed ()
-            wait caller
+        withAsync callTwiceAfterClose $ \caller -> do
+          link caller
+          takeMVar admitted
+          Core.closeClient client
+          putMVar proceed ()
+          wait caller
 
   it "completes a second RPC while a long poll is pending and promptly cancels the thread awaiting its result" $
     withServer $ \port ->
